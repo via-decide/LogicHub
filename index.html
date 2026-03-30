@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <!-- PWA -->
+  <meta name="theme-color" content="#030508">
   <meta name="theme-color" content="#00e5ff">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -616,6 +617,12 @@
     // ============================================
     const app = {
       map: new LogicMap(),
+      isDragging: null,
+      dragOffset: { x: 0, y: 0 },
+      isDrawing: false,
+      sourceId: null,
+      apiKey: "",
+      deferredInstallPrompt: null,
       isDragging: null, dragOffset: { x: 0, y: 0 },
       isDrawing: false, sourceId: null, apiKey: "",
 
@@ -630,6 +637,7 @@
           this.map.id = data.id || this.map.id;
         }
         this.setupEvents();
+        this.initInstallPrompt();
         this.render();
         this.log("Vibecoder Engine Booted", "success");
       },
@@ -949,6 +957,39 @@
         last.textContent = `>>> ${msg}`; last.className = `log-line ${type}`;
       },
 
+      initInstallPrompt() {
+        const installBtn = document.getElementById("btn-install");
+        if (!installBtn) return;
+
+        window.addEventListener("beforeinstallprompt", (e) => {
+          e.preventDefault();
+          this.deferredInstallPrompt = e;
+          installBtn.style.display = "inline-flex";
+          this.log("Install available — tap [↓ Install]", "accent");
+        });
+
+        window.addEventListener("appinstalled", () => {
+          this.deferredInstallPrompt = null;
+          installBtn.style.display = "none";
+          this.log("LogicHub installed successfully", "success");
+        });
+      },
+
+      async installPWA() {
+        if (!this.deferredInstallPrompt) {
+          this.log("Install prompt is not ready yet", "warning");
+          return;
+        }
+
+        this.deferredInstallPrompt.prompt();
+        const choiceResult = await this.deferredInstallPrompt.userChoice;
+        this.log(`Install prompt: ${choiceResult.outcome}`, choiceResult.outcome === "accepted" ? "success" : "info");
+        this.deferredInstallPrompt = null;
+
+        const installBtn = document.getElementById("btn-install");
+        if (installBtn) installBtn.style.display = "none";
+      },
+
       save() {
         sessionStorage.setItem("LH_MAP_V2", JSON.stringify({
           id: this.map.id, blocks: this.map.blocks, connections: this.map.connections
@@ -966,10 +1007,12 @@
     window.addEventListener("DOMContentLoaded", () => app.init());
   </script>
 
+  <!-- SW Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
+          .then(() => console.log('[LogicHub SW] registered'))
           .then(r => console.log('[LogicHub SW] registered', r.scope))
           .catch(e => console.warn('[LogicHub SW] failed', e));
       });

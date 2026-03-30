@@ -1,6 +1,11 @@
 {
   "name": "LogicHub",
   "short_name": "LogicHub",
+  "description": "Visual logic-to-code builder \u2014 Vibecoder Architecture",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030508",
+  "theme_color": "#030508",
   "description": "Visual logic-to-code builder — Vibecoder Architecture",
   "start_url": "/",
   "display": "standalone",
