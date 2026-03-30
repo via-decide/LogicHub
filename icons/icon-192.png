@@ -1,0 +1,2 @@
+Placeholder PNG intentionally omitted per "DO NOT MAKE BINARY FILES" instruction.
+Run `node generate-icons.js` (with canvas installed) or Pillow fallback to generate this binary asset.
