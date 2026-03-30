@@ -13,8 +13,6 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <title>LOGICHUB v2 — Vibecoder Architecture</title>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <!-- JSZip for exporting actual codebases -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
@@ -33,7 +31,6 @@
       --font-serif: 'Crimson Text', serif;
       --font-sans: 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      
       --state-verified: #2ecc71;
       --state-pending: #444444;
       --state-generating: #00e5ff;
@@ -50,139 +47,124 @@
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100dvh; /* dynamic viewport height — fixes mobile browser chrome */
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
     }
 
-    /* === LAYOUT === */
+    /* === HEADER === */
     .header {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2rem; border-bottom: 1px solid var(--border-color);
-      background: var(--bg-secondary); z-index: 100; flex-wrap: wrap; gap: 1rem;
+      padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary); z-index: 100; gap: 0.75rem;
+      flex-shrink: 0;
     }
-
-    .header-left { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
-    .header-title { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 600; letter-spacing: 1px;}
-    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.8rem; vertical-align: top;}
-
-    .map-status { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); font-weight: 700;}
+    .header-left { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+    .header-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; white-space: nowrap;}
+    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top;}
+    .map-status { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; white-space: nowrap;}
     .map-status.confirmed { color: var(--success); text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);}
-
+    .info-badge {
+      font-family: var(--font-mono); font-size: 0.7rem; padding: 0.3rem 0.6rem;
+      background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent);
+      border-radius: 4px; color: var(--accent); font-weight: 700; white-space: nowrap; flex-shrink: 0;
+    }
+    .toolbar { display: flex; gap: 0.75rem; align-items: center; flex-shrink: 0; }
     .api-input {
-      padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px;
+      padding: 0.55rem 0.9rem; border: 1px solid var(--border-color); border-radius: 6px;
       background: var(--bg-primary); color: var(--accent); font-family: var(--font-mono);
-      font-size: 0.85rem; width: 340px; transition: all 0.2s; outline: none;
+      font-size: 0.8rem; width: 280px; transition: all 0.2s; outline: none;
     }
     .api-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); }
 
-    .toolbar { display: flex; gap: 1rem; align-items: center; }
-
-    .info-badge {
-      font-family: var(--font-mono); font-size: 0.75rem; padding: 0.4rem 0.8rem;
-      background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent);
-      border-radius: 4px; color: var(--accent); font-weight: 700; white-space: nowrap;
-    }
-
+    /* === LOGGER === */
     .logger {
-      padding: 0.5rem 2rem; background: var(--bg-primary); border-bottom: 1px solid var(--border-color);
-      font-family: var(--font-mono); font-size: 0.75rem; min-height: 50px; max-height: 70px;
-      overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; z-index: 99;
+      padding: 0.4rem 1.5rem; background: var(--bg-primary); border-bottom: 1px solid var(--border-color);
+      font-family: var(--font-mono); font-size: 0.72rem; height: 52px;
+      overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+      z-index: 99; flex-shrink: 0;
     }
-
-    .log-line { margin: 2px 0; min-height: 1.1rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;}
+    .log-line { margin: 1px 0; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; line-height: 1.4;}
     .log-line.success { color: var(--success); }
     .log-line.error { color: var(--error); }
     .log-line.accent { color: var(--accent); text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
     .log-line.info { color: var(--text-primary); }
 
-    .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+    /* === MAIN LAYOUT === */
+    .main-container { display: flex; flex: 1; overflow: hidden; position: relative; min-height: 0; }
 
+    /* === SIDEBAR === */
     .sidebar {
-      width: 220px; padding: 1rem; border-right: 1px solid var(--border-color);
+      width: 200px; padding: 1rem; border-right: 1px solid var(--border-color);
       background: var(--bg-secondary); overflow-y: auto; z-index: 50;
-      display: flex; flex-direction: column; gap: 1.5rem;
+      display: flex; flex-direction: column; gap: 1.2rem; flex-shrink: 0;
     }
-
     .sidebar-section h3 {
-      margin: 0 0 0.8rem 0; font-size: 0.75rem; font-weight: 700;
+      margin: 0 0 0.6rem 0; font-size: 0.68rem; font-weight: 700;
       text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1px;
     }
-    
-    .sidebar-grid { display: flex; flex-direction: column; gap: 0.5rem; }
-
+    .sidebar-grid { display: flex; flex-direction: column; gap: 0.4rem; }
     .palette-item {
-      padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 6px;
+      padding: 0.55rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;
       text-align: center; cursor: pointer; font-family: var(--font-mono); color: var(--text-primary);
-      background: var(--bg-primary); transition: all 0.2s; font-size: 0.75rem; font-weight: 500;
+      background: var(--bg-primary); transition: all 0.2s; font-size: 0.7rem; font-weight: 500;
       touch-action: manipulation; white-space: nowrap;
     }
-    .palette-item:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent); color: var(--accent);}
-    .palette-item:active { transform: scale(0.98); background: rgba(0, 229, 255, 0.1); }
+    .palette-item:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 1px var(--accent);}
+    .palette-item:active { transform: scale(0.97); background: rgba(0, 229, 255, 0.08); }
 
+    /* === CANVAS === */
     .canvas {
       flex: 1; position: relative; background-color: var(--bg-secondary);
       background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
       background-size: 24px 24px; background-position: -12px -12px;
-      overflow: hidden; border-left: 1px solid var(--border-color);
-      box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.5); touch-action: none;
+      overflow: hidden; touch-action: none; min-width: 0;
     }
-
     #arrows-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     #blocks-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; }
 
     /* === BLOCKS === */
     .block {
-      position: absolute; width: 180px; padding: 0.75rem;
+      position: absolute; width: 175px; padding: 0.7rem;
       background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border: 2px solid var(--text-secondary); border-radius: 12px;
       font-family: var(--font-sans); cursor: grab; touch-action: none;
-      display: flex; flex-direction: column; gap: 0.6rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); transition: box-shadow 0.2s, border-color 0.2s, transform 0.1s; font-size: 0.8rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); transition: box-shadow 0.2s, border-color 0.2s, transform 0.1s; font-size: 0.78rem;
     }
-
     .block:hover { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8); }
-
     .block.selected, .block:active {
       cursor: grabbing; box-shadow: 0 12px 40px rgba(0, 229, 255, 0.2), 0 0 0 1px var(--accent);
       border-color: var(--accent); transform: scale(1.02); z-index: 1000 !important;
     }
-
-    .block-header { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary); pointer-events: none;}
+    .block-header { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-secondary); pointer-events: none;}
     .block-type { color: var(--accent); font-weight: 700; }
-    .block-edit { cursor: pointer; pointer-events: auto; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); transition: background 0.2s;}
+    .block-edit { cursor: pointer; pointer-events: auto; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); transition: background 0.2s; min-height: 28px; display: flex; align-items: center;}
     .block-edit:hover { background: rgba(0, 229, 255, 0.2); color: var(--accent); }
-
     .block-label {
       background: transparent; border: none; color: var(--text-primary); font-weight: 700;
-      font-size: 0.95rem; text-align: center; width: 100%; outline: none;
+      font-size: 0.88rem; text-align: center; width: 100%; outline: none;
       border-bottom: 1px solid transparent; padding: 2px 0; font-family: var(--font-mono);
     }
     .block-label:focus { border-bottom-color: var(--accent); }
-
-    .block-file { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;}
-
+    .block-file { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-secondary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;}
     .block-status {
-      font-family: var(--font-mono); font-size: 0.65rem; text-align: center; padding: 6px 4px;
+      font-family: var(--font-mono); font-size: 0.62rem; text-align: center; padding: 5px 4px;
       border-radius: 4px; pointer-events: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
     }
-
-    /* Fat Touch Targets for Mobile */
     .port-wrapper {
       position: absolute; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
       cursor: crosshair; z-index: 10; touch-action: none;
     }
     .port-wrapper.in { left: -22px; top: calc(50% - 22px); }
     .port-wrapper.out { right: -22px; top: calc(50% - 22px); }
-    
     .port {
-      width: 14px; height: 14px; background: var(--bg-primary);
-      border: 2px solid var(--text-secondary); border-radius: 50%; 
+      width: 13px; height: 13px; background: var(--bg-primary);
+      border: 2px solid var(--text-secondary); border-radius: 50%;
       transition: all 0.2s; pointer-events: none;
     }
     .port-wrapper:hover .port, .port-wrapper.active .port { border-color: var(--accent); background: var(--accent); transform: scale(1.4); box-shadow: 0 0 12px rgba(0, 229, 255, 0.5); }
-
     .block-delete {
       position: absolute; top: -10px; right: -10px; background: var(--error); color: white;
       width: 26px; height: 26px; border-radius: 50%; display: none; justify-content: center; align-items: center;
@@ -194,23 +176,14 @@
     /* === BLOCK STATES === */
     .block.state-pending { border-color: var(--text-secondary); }
     .block.state-pending .block-status { background: var(--state-pending); color: var(--text-primary); }
-
     .block.state-locked { border-color: var(--border-color); opacity: 0.6; }
     .block.state-locked .block-status { background: var(--state-locked); color: var(--text-secondary); }
-
-    .block.state-generating {
-      border-color: var(--state-generating);
-      box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2);
-      animation: pulse-cyber 1.5s infinite;
-    }
+    .block.state-generating { border-color: var(--state-generating); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); animation: pulse-cyber 1.5s infinite; }
     .block.state-generating .block-status { background: var(--state-generating); color: var(--bg-primary); }
-
     .block.state-verified { border-color: var(--state-verified); box-shadow: 0 4px 12px rgba(46, 204, 113, 0.1); }
     .block.state-verified .block-status { background: var(--state-verified); color: var(--bg-primary); }
-
     .block.state-error { border-color: var(--state-error); box-shadow: 0 0 12px rgba(255, 68, 68, 0.2); }
     .block.state-error .block-status { background: var(--state-error); color: white; }
-
     .block.state-orphaned { border-color: var(--state-orphaned); border-style: dashed; }
     .block.state-orphaned .block-status { background: var(--state-orphaned); color: var(--bg-primary); }
 
@@ -227,92 +200,166 @@
     }
     .arrow-path:hover { stroke: var(--error); stroke-width: 6; stroke-dasharray: none; animation: none;}
     .arrow-path.verified { stroke: var(--state-verified); stroke-dasharray: none; animation: none;}
-
     @keyframes flow { to { stroke-dashoffset: -1000; } }
-
     .drawing-path { fill: none; stroke: var(--accent); stroke-width: 3.5; stroke-dasharray: 5 5; pointer-events: none; stroke-linecap: round; }
 
-    /* === FOOTER & BUTTONS === */
-    .footer { display: flex; gap: 0.8rem; padding: 1rem 2rem; border-top: 1px solid var(--border-color); background: var(--bg-secondary); z-index: 50; flex-wrap: wrap; }
+    /* === FOOTER === */
+    .footer {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      z-index: 50;
+      flex-shrink: 0;
+    }
 
+    /* === BUTTONS === */
     button {
-      padding: 0.8rem 1.6rem; font-family: var(--font-sans); font-weight: 700; font-size: 0.85rem;
+      padding: 0.75rem 0.75rem; font-family: var(--font-sans); font-weight: 700; font-size: 0.8rem;
       border: 1px solid var(--border-bright); background: var(--bg-primary); color: var(--text-primary);
-      cursor: pointer; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
-      touch-action: manipulation;
+      cursor: pointer; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
+      touch-action: manipulation; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
     button:active:not(:disabled) { transform: scale(0.96); }
     button:disabled { color: var(--text-secondary); border-color: var(--border-color); cursor: not-allowed; opacity: 0.5; }
-    
     button.success { background: rgba(46, 204, 113, 0.1); border-color: var(--success); color: var(--success); }
     button.success:hover:not(:disabled) { background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
-
     button.compile-btn { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); color: var(--accent); }
     button.compile-btn:hover { background: rgba(0, 229, 255, 0.2); }
+    button.prd-btn { background: rgba(255, 103, 31, 0.1); border-color: var(--saffron); color: var(--saffron); }
+    button.prd-btn:hover:not(:disabled) { background: rgba(255, 103, 31, 0.2); box-shadow: 0 0 15px rgba(255, 103, 31, 0.3); }
 
     /* === MODALS === */
     .modal {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 2000;
-      align-items: center; justify-content: center; padding: 1rem;
+      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 2000;
+      align-items: flex-end; justify-content: center; padding: 0;
     }
     .modal.active { display: flex; }
     .modal-content {
-      background: var(--bg-secondary); border: 1px solid var(--border-bright); border-radius: 16px;
-      padding: 1.5rem; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9); position: relative;
+      background: var(--bg-secondary); border: 1px solid var(--border-bright);
+      border-radius: 20px 20px 0 0; /* bottom sheet style */
+      padding: 1.5rem; width: 100%; max-width: 100%; max-height: 90dvh; overflow-y: auto;
+      box-shadow: 0 -20px 80px rgba(0, 0, 0, 0.9); position: relative;
     }
-    .modal-header { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; padding-right: 2rem;}
-    .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 1.2rem; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background 0.2s;}
+    /* Pull handle */
+    .modal-content::before {
+      content: ''; display: block; width: 40px; height: 4px;
+      background: var(--border-bright); border-radius: 2px;
+      margin: -0.5rem auto 1rem; 
+    }
+    .modal-header { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; padding-right: 2.5rem;}
+    .modal-close { position: absolute; top: 1.5rem; right: 1.2rem; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background 0.2s; min-height: unset;}
     .modal-close:hover { background: var(--error); color: white; box-shadow: none;}
 
-    .form-group { margin-bottom: 1.2rem; }
-    .form-label { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono);}
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono);}
     .form-label span { font-size: 0.65rem; color: var(--text-secondary); text-transform: none; font-weight: 400;}
-    .form-input { width: 100%; padding: 0.8rem; border: 1px solid var(--border-bright); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.85rem; outline: none; transition: all 0.2s; }
+    .form-input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-bright); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.82rem; outline: none; transition: all 0.2s; }
     .form-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 229, 255, 0.1); }
-    .form-textarea { resize: vertical; min-height: 100px; }
-    .code-textarea { min-height: 200px; color: var(--success); white-space: pre; overflow-wrap: normal; overflow-x: auto;}
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .code-textarea { min-height: 160px; color: var(--success); white-space: pre; overflow-wrap: normal; overflow-x: auto;}
 
-    /* ========================================================
-       ULTRA MOBILE CONGESTION FIXES
-       ======================================================== */
+    /* PRD output box */
+    .prd-output {
+      background: var(--bg-primary); border: 1px solid var(--border-bright); border-radius: 8px;
+      padding: 1rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);
+      white-space: pre-wrap; word-break: break-word; min-height: 200px; max-height: 50dvh;
+      overflow-y: auto; line-height: 1.6; user-select: text; -webkit-user-select: text;
+    }
+    .prd-node-block { border-left: 3px solid var(--accent); padding-left: 0.75rem; margin-bottom: 1.25rem; }
+    .prd-node-block.verified { border-left-color: var(--success); }
+    .prd-node-title { color: var(--accent); font-weight: 700; font-size: 0.8rem; margin-bottom: 0.3rem; }
+    .prd-node-block.verified .prd-node-title { color: var(--success); }
+    .prd-node-meta { color: var(--text-secondary); font-size: 0.68rem; margin-bottom: 0.5rem; }
+
+    /* Copy button */
+    .copy-btn {
+      width: 100%; margin-top: 0.75rem; background: rgba(255, 103, 31, 0.1);
+      border-color: var(--saffron); color: var(--saffron);
+    }
+    .copy-btn:hover { background: rgba(255, 103, 31, 0.2); }
+
+    /* ================================================================
+       MOBILE FIXES — The whole point of this revision
+       ================================================================ */
     @media (max-width: 768px) {
-      .header { padding: 0.75rem 1rem; flex-direction: column; align-items: stretch; gap: 0.75rem; }
-      .header-left { justify-content: space-between; gap: 0.5rem; }
-      .header-title { font-size: 1.2rem; }
-      .api-input { width: 100%; padding: 0.75rem; }
-      .toolbar { width: 100%; }
-      
-      .logger { padding: 0.5rem 1rem; font-size: 0.7rem; min-height: 40px; max-height: 60px; }
-      
-      .main-container { flex-direction: column; }
-      
-      /* Sidebar becomes a horizontal scrolling tray */
-      .sidebar { 
-        width: 100%; height: auto; flex-direction: row; overflow-x: auto; 
-        padding: 0.75rem 1rem; border-right: none; border-bottom: 1px solid var(--border-color); 
-        gap: 1rem; align-items: center; 
+
+      /* --- Header: single compact row --- */
+      .header {
+        padding: 0.5rem 0.75rem;
+        flex-wrap: nowrap;
+        align-items: center;
       }
-      .sidebar-section { display: flex; flex-direction: row; gap: 0.5rem; align-items: center; }
-      .sidebar-section h3 { display: none; /* Hide headers to save space */ }
-      .sidebar-grid { flex-direction: row; gap: 0.5rem; }
-      .palette-item { padding: 0.5rem 1rem; flex-shrink: 0; font-size: 0.7rem; }
-      
-      /* Footer becomes a 2x2 grid */
-      .footer { padding: 0.75rem 1rem; gap: 0.5rem; }
-      .footer button { flex: 1 1 calc(50% - 0.5rem); padding: 0.75rem 0.5rem; font-size: 0.75rem; white-space: nowrap; }
-      
-      /* Block UI fixes for touch */
-      .block { width: 160px; padding: 0.6rem; gap: 0.5rem;}
-      .block-delete { display: flex; /* Always show delete on mobile */ width: 28px; height: 28px; font-size: 14px; top: -12px; right: -12px;}
-      .block-label { font-size: 0.85rem; }
-      .block-edit { padding: 6px 10px; font-size: 0.7rem;} /* Bigger touch target */
-      
-      /* Modal fixes */
-      .modal-content { padding: 1.2rem; max-height: 95vh;}
-      .form-label { flex-direction: column; gap: 0.2rem;}
+      .header-left { gap: 0.5rem; overflow: hidden; }
+      .header-title { font-size: 1rem; }
+      .map-status { display: none; } /* shown in logger instead */
+      .api-input { width: 140px; padding: 0.5rem 0.6rem; font-size: 0.7rem; }
+      .info-badge { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
+
+      /* --- Logger: tighter --- */
+      .logger { height: 38px; padding: 0.25rem 0.75rem; font-size: 0.67rem; }
+
+      /* --- Sidebar: horizontal strip, scrollable --- */
+      .sidebar {
+        width: 100%;
+        height: 48px;
+        min-height: 48px;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 0.75rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        gap: 0.5rem;
+        align-items: center;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .sidebar::-webkit-scrollbar { display: none; }
+      .sidebar-section { display: contents; }
+      .sidebar-section h3 { display: none; }
+      .sidebar-grid { flex-direction: row; gap: 0.4rem; display: contents; }
+      .palette-item {
+        flex-shrink: 0;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.62rem;
+        border-radius: 4px;
+      }
+
+      /* --- Canvas: flex:1 min-height:0 fills remaining space --- */
+      .main-container { flex-direction: column; }
+      .canvas { min-height: 0; }
+
+      /* --- Footer: 2×3 grid so ALL buttons are always visible --- */
+      .footer {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, auto);
+        padding: 0.5rem 0.75rem;
+        gap: 0.4rem;
+      }
+      .footer button {
+        padding: 0.6rem 0.25rem;
+        font-size: 0.6rem;
+        letter-spacing: 0;
+        border-radius: 6px;
+      }
+
+      /* Block: always show delete on mobile */
+      .block-delete { display: flex !important; }
+      .block { width: 155px; }
+
+      /* Modal: already bottom-sheet, just tighten */
+      .modal-content { max-height: 88dvh; padding: 1rem 1rem 1.5rem; }
+      .prd-output { max-height: 40dvh; font-size: 0.7rem; }
+    }
+
+    @media (max-width: 380px) {
+      .footer { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, auto); }
+      .api-input { width: 110px; }
     }
   </style>
 </head>
@@ -325,7 +372,7 @@
       <div class="info-badge" id="block-count">0 nodes</div>
     </div>
     <div class="toolbar">
-      <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Required for Code Gen)">
+      <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key">
     </div>
   </div>
 
@@ -336,7 +383,6 @@
   </div>
 
   <div class="main-container">
-    <!-- Horizontal on Mobile, Vertical on Desktop -->
     <div class="sidebar">
       <div class="sidebar-section">
         <h3>Core Nodes</h3>
@@ -366,43 +412,53 @@
     </div>
   </div>
 
+  <!-- FOOTER: ALL 5 BUTTONS ALWAYS VISIBLE -->
   <div class="footer">
-    <button onclick="app.addBlockAtCenter('ui')">[+ Add Node]</button>
-    <button id="btn-validate" class="compile-btn" onclick="app.synthesizeArchitecture()">[⚡ Synthesize]</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export .ZIP]</button>
-    <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[Wipe Canvas]</button>
+    <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
+    <button id="btn-validate" class="compile-btn" onclick="app.synthesizeArchitecture()">[⚡ Synth]</button>
+    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
+    <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
   </div>
 
-  <!-- NODE EDITOR MODAL -->
+  <!-- NODE EDITOR MODAL (bottom sheet) -->
   <div class="modal" id="node-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
       <div class="modal-header" id="node-modal-header">Configure Node</div>
-      
       <input type="hidden" id="node-modal-id">
-      
       <div class="form-group">
         <label class="form-label">Target Filename</label>
-        <input type="text" class="form-input" id="node-modal-filename" placeholder="e.g., App.jsx, schema.sql, utils.js">
+        <input type="text" class="form-input" id="node-modal-filename" placeholder="e.g., App.jsx, schema.sql">
       </div>
-
       <div class="form-group">
-        <label class="form-label">AI Instructions (Prompt) <span>Context from connected inputs will be appended automatically.</span></label>
-        <textarea class="form-input form-textarea" id="node-modal-prompt" placeholder="Describe exactly what this file should do. e.g., 'Write a React component that renders a pricing table.'"></textarea>
+        <label class="form-label">AI Instructions <span>Context from connected inputs appended automatically.</span></label>
+        <textarea class="form-input form-textarea" id="node-modal-prompt" placeholder="Describe what this file should do..."></textarea>
       </div>
-
       <div class="form-group">
-        <label class="form-label">File Content (Code) <span>You can manually edit the AI's output here.</span></label>
-        <textarea class="form-input code-textarea" id="node-modal-code" placeholder="// Code will appear here after synthesis, or you can write it manually."></textarea>
+        <label class="form-label">File Content <span>Edit AI output here manually if needed.</span></label>
+        <textarea class="form-input code-textarea" id="node-modal-code" placeholder="// Code will appear after synthesis..."></textarea>
       </div>
+      <button style="width:100%;background:var(--accent);color:#000;border:none;padding:0.9rem;font-size:0.95rem;font-weight:700;border-radius:8px;" onclick="app.saveNodeConfig()">Save Configuration</button>
+    </div>
+  </div>
 
-      <button style="width: 100%; background: var(--accent); color: #000; border: none; padding: 1rem; font-size: 1rem;" onclick="app.saveNodeConfig()">Save Configuration</button>
+  <!-- PRD VIEWER MODAL (bottom sheet) -->
+  <div class="modal" id="prd-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('prd-modal')">✕</button>
+      <div class="modal-header">📋 Architecture PRD — Direct LLM Prompt</div>
+      <p style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;font-family:var(--font-mono);">
+        Copy this prompt → paste into Claude / GPT → first response builds your app.
+      </p>
+      <div id="prd-output" class="prd-output">Add nodes to generate PRD...</div>
+      <button class="copy-btn" onclick="app.copyPRD()">📋 Copy Full PRD to Clipboard</button>
     </div>
   </div>
 
   <script>
     // ============================================
-    // LOGICHUB VIBECODER ENGINE (MOBILE OPTIMIZED)
+    // LOGICHUB VIBECODER ENGINE — MOBILE OPTIMIZED
     // ============================================
 
     class LogicMap {
@@ -415,28 +471,18 @@
       addBlock(type, x, y) {
         const block = {
           id: "NODE_" + Math.random().toString(36).substring(2, 8).toUpperCase(),
-          type: type,
-          label: type.toUpperCase() + " NODE",
+          type, label: type.toUpperCase() + " NODE",
           filename: this.getDefaultFilename(type),
-          prompt: "",
-          code: "",
-          x: x,
-          y: y,
-          status: "PENDING",
-          dependsOn: [],
-          connectedTo: [],
-          errorMsg: ""
+          prompt: "", code: "", x, y,
+          status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: ""
         };
         this.blocks.push(block);
         return block;
       }
 
       getDefaultFilename(type) {
-        const map = {
-          ui: "Component.jsx", api: "route.js", database: "schema.sql",
-          auth: "authMiddleware.js", util: "helpers.js", style: "styles.css", config: "config.json"
-        };
-        return map[type] || `file_${Math.floor(Math.random()*100)}.js`;
+        return { ui: "Component.jsx", api: "route.js", database: "schema.sql",
+          auth: "authMiddleware.js", util: "helpers.js", style: "styles.css", config: "config.json" }[type] || `file_${Date.now()}.js`;
       }
 
       removeBlock(id) {
@@ -450,33 +496,31 @@
 
       connect(fromId, toId) {
         if (fromId === toId) return false;
-        if (this.hasPath(toId, fromId)) return false; // Prevent cycles
+        if (this.hasPath(toId, fromId)) return false;
         if (this.connections.some(c => c.from === fromId && c.to === toId)) return false;
-        
-        const fromBlock = this.blocks.find(b => b.id === fromId);
-        const toBlock = this.blocks.find(b => b.id === toId);
-        
+        const from = this.blocks.find(b => b.id === fromId);
+        const to = this.blocks.find(b => b.id === toId);
         this.connections.push({ from: fromId, to: toId });
-        fromBlock.connectedTo.push(toId);
-        toBlock.dependsOn.push(fromId);
+        from.connectedTo.push(toId);
+        to.dependsOn.push(fromId);
         return true;
       }
 
       disconnect(fromId, toId) {
         this.connections = this.connections.filter(c => !(c.from === fromId && c.to === toId));
-        const fromBlock = this.blocks.find(b => b.id === fromId);
-        const toBlock = this.blocks.find(b => b.id === toId);
-        if (fromBlock) fromBlock.connectedTo = fromBlock.connectedTo.filter(c => c !== toId);
-        if (toBlock) toBlock.dependsOn = toBlock.dependsOn.filter(d => d !== fromId);
+        const from = this.blocks.find(b => b.id === fromId);
+        const to = this.blocks.find(b => b.id === toId);
+        if (from) from.connectedTo = from.connectedTo.filter(c => c !== toId);
+        if (to) to.dependsOn = to.dependsOn.filter(d => d !== fromId);
       }
 
       hasPath(startId, targetId, visited = new Set()) {
         if (startId === targetId) return true;
         visited.add(startId);
-        const block = this.blocks.find(b => b.id === startId);
-        if (!block) return false;
-        for (let nextId of block.connectedTo) {
-          if (!visited.has(nextId) && this.hasPath(nextId, targetId, visited)) return true;
+        const b = this.blocks.find(b => b.id === startId);
+        if (!b) return false;
+        for (let nxt of b.connectedTo) {
+          if (!visited.has(nxt) && this.hasPath(nxt, targetId, visited)) return true;
         }
         return false;
       }
@@ -486,38 +530,48 @@
         const visit = (id) => {
           if (visited.has(id)) return;
           visited.add(id);
-          const block = this.blocks.find(b => b.id === id);
-          if (block) { block.dependsOn.forEach(visit); result.push(block); }
+          const b = this.blocks.find(b => b.id === id);
+          if (b) { b.dependsOn.forEach(visit); result.push(b); }
         };
         this.blocks.forEach(b => visit(b.id));
         return result;
       }
 
       isReadyForExport() {
-        const minBlocks = this.blocks.length > 0;
-        const allVerified = this.blocks.every(b => b.status === "VERIFIED");
-        return minBlocks && allVerified;
+        return this.blocks.length > 0 && this.blocks.every(b => b.status === "VERIFIED");
+      }
+
+      buildPRD() {
+        if (this.blocks.length === 0) return "No nodes in architecture yet. Add nodes and configure them first.";
+        const order = this.getTopologicalOrder();
+        let prd = `# LOGICHUB ARCHITECTURE PRD\n# Map ID: ${this.id}\n# Nodes: ${this.blocks.length}\n\n`;
+        prd += `## MASTER BUILD INSTRUCTION\nYou are a senior full-stack developer. Build the following multi-file application exactly as specified. Each section defines one file. Respect all dependency relationships. Output each file clearly labelled.\n\n---\n\n`;
+        order.forEach((b, i) => {
+          const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.filename).filter(Boolean);
+          prd += `## FILE ${i+1}: ${b.filename}\n`;
+          prd += `Type: ${b.type.toUpperCase()}\n`;
+          prd += `Status: ${b.status}\n`;
+          if (deps.length) prd += `Depends on: ${deps.join(', ')}\n`;
+          prd += `\n### Instructions:\n${b.prompt || '(No specific instructions — infer from type and filename)'}\n`;
+          if (b.code) prd += `\n### Current Code (already verified):\n\`\`\`\n${b.code}\n\`\`\`\n`;
+          prd += `\n---\n\n`;
+        });
+        prd += `## OUTPUT FORMAT\nFor each file above, respond with:\n### FILE: [filename]\n\`\`\`[language]\n[complete file content]\n\`\`\`\n\nDo not skip any file. Do not add unrequested files.`;
+        return prd;
       }
     }
 
     // ============================================
-    // APPLICATION CORE
+    // APP
     // ============================================
     const app = {
       map: new LogicMap(),
-      isDragging: null,
-      dragOffset: { x: 0, y: 0 },
-      isDrawing: false,
-      sourceId: null,
-      apiKey: "",
+      isDragging: null, dragOffset: { x: 0, y: 0 },
+      isDrawing: false, sourceId: null, apiKey: "",
 
       init() {
         const savedKey = sessionStorage.getItem("LH_GEMINI_KEY");
-        if (savedKey) {
-          this.apiKey = savedKey;
-          document.getElementById("api-key").value = savedKey;
-        }
-        
+        if (savedKey) { this.apiKey = savedKey; document.getElementById("api-key").value = savedKey; }
         const savedMap = sessionStorage.getItem("LH_MAP_V2");
         if (savedMap) {
           const data = JSON.parse(savedMap);
@@ -525,7 +579,6 @@
           this.map.connections = data.connections;
           this.map.id = data.id || this.map.id;
         }
-
         this.setupEvents();
         this.render();
         this.log("Vibecoder Engine Booted", "success");
@@ -533,57 +586,41 @@
 
       setupEvents() {
         const canvas = document.getElementById("canvas");
-
-        // Dragging & Wire Drawing Logic
         canvas.addEventListener("pointermove", (e) => {
           if (this.isDragging) {
             e.preventDefault();
             const rect = canvas.getBoundingClientRect();
-            let x = e.clientX - rect.left - this.dragOffset.x;
-            let y = e.clientY - rect.top - this.dragOffset.y;
-            
-            x = Math.round(x / 12) * 12; // Smoother snap
-            y = Math.round(y / 12) * 12;
-
-            this.isDragging.x = x;
-            this.isDragging.y = y;
-            document.getElementById(this.isDragging.id).style.transform = `translate(${x}px, ${y}px)`;
+            let x = Math.round((e.clientX - rect.left - this.dragOffset.x) / 12) * 12;
+            let y = Math.round((e.clientY - rect.top - this.dragOffset.y) / 12) * 12;
+            this.isDragging.x = x; this.isDragging.y = y;
+            document.getElementById(this.isDragging.id).style.transform = `translate(${x}px,${y}px)`;
             this.renderConnections();
           } else if (this.isDrawing) {
             e.preventDefault();
             const rect = canvas.getBoundingClientRect();
-            const endX = e.clientX - rect.left;
-            const endY = e.clientY - rect.top;
-            
+            const endX = e.clientX - rect.left, endY = e.clientY - rect.top;
             const srcPos = this.getPortCenter(this.sourceId, 'out');
-            if(!srcPos) return;
-            
-            document.getElementById("drawing-path").setAttribute("d", `M ${srcPos.x} ${srcPos.y} C ${srcPos.x + 60} ${srcPos.y}, ${endX - 60} ${endY}, ${endX} ${endY}`);
+            if (!srcPos) return;
+            document.getElementById("drawing-path").setAttribute("d", `M ${srcPos.x} ${srcPos.y} C ${srcPos.x+60} ${srcPos.y}, ${endX-60} ${endY}, ${endX} ${endY}`);
           }
         });
-
         canvas.addEventListener("pointerup", () => {
           if (this.isDragging) {
             document.getElementById(this.isDragging.id).classList.remove("selected");
-            this.isDragging = null;
-            this.save();
+            this.isDragging = null; this.save();
           }
           if (this.isDrawing) {
-            this.isDrawing = false;
-            this.sourceId = null;
+            this.isDrawing = false; this.sourceId = null;
             document.getElementById("drawing-path").setAttribute("d", "");
-            // Clear hover states on ports
             document.querySelectorAll('.port-wrapper').forEach(el => el.classList.remove('active'));
           }
         });
-
         document.getElementById("api-key").addEventListener("change", (e) => {
           this.apiKey = e.target.value.trim();
           sessionStorage.setItem("LH_GEMINI_KEY", this.apiKey);
         });
       },
 
-      // Helper to get exact DOM coordinates of a port for dynamic wire routing
       getPortCenter(blockId, portType) {
         const blockEl = document.getElementById(blockId);
         if (!blockEl) return null;
@@ -591,32 +628,26 @@
         if (!wrapper) return null;
         const canvasRect = document.getElementById('canvas').getBoundingClientRect();
         const r = wrapper.getBoundingClientRect();
-        return { 
-          x: r.left + r.width / 2 - canvasRect.left, 
-          y: r.top + r.height / 2 - canvasRect.top 
-        };
+        return { x: r.left + r.width/2 - canvasRect.left, y: r.top + r.height/2 - canvasRect.top };
       },
 
       addBlockAtCenter(type) {
         const canvas = document.getElementById("canvas");
-        const x = Math.max(20, (canvas.offsetWidth / 2) - 90 + (Math.random()*40-20));
-        const y = Math.max(20, (canvas.offsetHeight / 2) - 40 + (Math.random()*40-20));
+        const x = Math.max(30, canvas.offsetWidth/2 - 87 + (Math.random()*60-30));
+        const y = Math.max(30, canvas.offsetHeight/2 - 60 + (Math.random()*60-30));
         this.map.addBlock(type, x, y);
         this.render();
-        this.log(`Node deployed to canvas`, "info");
+        this.log(`[${type.toUpperCase()}] node deployed`, "info");
       },
 
       updateBlockStates() {
         this.map.blocks.forEach(b => {
-          if (b.status === "GENERATING") return; 
-          if (b.code && b.status === "VERIFIED") return; 
-          
+          if (b.status === "GENERATING" || (b.code && b.status === "VERIFIED")) return;
           const isOrphaned = !this.map.connections.some(c => c.from === b.id || c.to === b.id);
           const depsSatisfied = b.dependsOn.every(depId => {
             const dep = this.map.blocks.find(x => x.id === depId);
             return dep && dep.status === "VERIFIED";
           });
-
           if (b.dependsOn.length > 0 && !depsSatisfied) b.status = "LOCKED";
           else if (isOrphaned && !b.code) b.status = "ORPHANED";
           else b.status = "PENDING";
@@ -627,53 +658,37 @@
         this.updateBlockStates();
         const container = document.getElementById("blocks-container");
         container.innerHTML = "";
-
         this.map.blocks.forEach(b => {
           const el = document.createElement("div");
-          el.className = `block state-${b.status}`;
+          el.className = `block state-${b.status.toLowerCase()}`;
           el.id = b.id;
-          el.style.transform = `translate(${b.x}px, ${b.y}px)`;
+          el.style.transform = `translate(${b.x}px,${b.y}px)`;
           el.style.top = "0"; el.style.left = "0";
-
-          const icon = { PENDING: "◯", LOCKED: "🔒", GENERATING: "⚡", VERIFIED: "✓", ERROR: "✗", ORPHANED: "⚠" }[b.status] || "◯";
-
-          // Fat Port Wrappers for Touch
+          const icon = { PENDING:"◯", LOCKED:"🔒", GENERATING:"⚡", VERIFIED:"✓", ERROR:"✗", ORPHANED:"⚠" }[b.status] || "◯";
           el.innerHTML = `
             <div class="block-delete" onclick="app.removeBlock('${b.id}')">✕</div>
             <div class="block-header">
               <span class="block-type">[${b.type.toUpperCase()}]</span>
-              <span class="block-edit" onclick="app.openNodeEditor('${b.id}')">⚙️ Config</span>
+              <span class="block-edit" onclick="app.openNodeEditor('${b.id}')">⚙ Config</span>
             </div>
-            <input type="text" class="block-label" value="${b.label}" onchange="app.updateLabel('${b.id}', this.value)">
+            <input type="text" class="block-label" value="${b.label}" onchange="app.updateLabel('${b.id}',this.value)">
             <div class="block-file">${b.filename}</div>
             <div class="block-status">${icon} ${b.status}</div>
-            
-            <div class="port-wrapper in" onpointerdown="app.startWire(event, '${b.id}', 'in')" onpointerup="app.endWire(event, '${b.id}', 'in')">
-              <div class="port"></div>
-            </div>
-            <div class="port-wrapper out" onpointerdown="app.startWire(event, '${b.id}', 'out')" onpointerup="app.endWire(event, '${b.id}', 'out')">
-              <div class="port"></div>
-            </div>
+            <div class="port-wrapper in" onpointerdown="app.startWire(event,'${b.id}','in')" onpointerup="app.endWire(event,'${b.id}','in')"><div class="port"></div></div>
+            <div class="port-wrapper out" onpointerdown="app.startWire(event,'${b.id}','out')" onpointerup="app.endWire(event,'${b.id}','out')"><div class="port"></div></div>
           `;
-
           el.addEventListener("pointerdown", (e) => {
-            if (e.target.tagName === "INPUT" || e.target.classList.contains('block-edit') || e.target.closest('.port-wrapper')) return;
-            const canvasRect = document.getElementById("canvas").getBoundingClientRect();
-            const mouseX = e.clientX - canvasRect.left;
-            const mouseY = e.clientY - canvasRect.top;
+            if (e.target.tagName==="INPUT" || e.target.classList.contains('block-edit') || e.target.closest('.port-wrapper')) return;
+            const rect = document.getElementById("canvas").getBoundingClientRect();
             this.isDragging = b;
-            this.dragOffset = { x: mouseX - b.x, y: mouseY - b.y };
+            this.dragOffset = { x: e.clientX - rect.left - b.x, y: e.clientY - rect.top - b.y };
             el.classList.add("selected");
           });
-          
           el.addEventListener("dblclick", (e) => {
             if (e.target.tagName !== "INPUT" && !e.target.closest('.port-wrapper')) this.openNodeEditor(b.id);
           });
-
           container.appendChild(el);
         });
-
-        // Use requestAnimationFrame to ensure DOM is painted before we measure port centers for wires
         requestAnimationFrame(() => this.renderConnections());
         this.updateHeader();
         this.save();
@@ -686,15 +701,12 @@
           const from = this.map.blocks.find(b => b.id === c.from);
           const to = this.map.blocks.find(b => b.id === c.to);
           if (!from || !to) return;
-          
           const srcPos = this.getPortCenter(c.from, 'out');
           const tgtPos = this.getPortCenter(c.to, 'in');
           if (!srcPos || !tgtPos) return;
-
-          const cls = (from.status === "VERIFIED" && to.status === "VERIFIED") ? "arrow-path verified" : "arrow-path";
+          const cls = (from.status==="VERIFIED" && to.status==="VERIFIED") ? "arrow-path verified" : "arrow-path";
           const cx = Math.abs(tgtPos.x - srcPos.x) * 0.5;
-          
-          svg += `<path class="${cls}" d="M ${srcPos.x} ${srcPos.y} C ${srcPos.x+cx} ${srcPos.y}, ${tgtPos.x-cx} ${tgtPos.y}, ${tgtPos.x} ${tgtPos.y}" onclick="app.map.disconnect('${c.from}','${c.to}'); app.render(); app.log('Wire cut', 'info');"></path>`;
+          svg += `<path class="${cls}" d="M ${srcPos.x} ${srcPos.y} C ${srcPos.x+cx} ${srcPos.y}, ${tgtPos.x-cx} ${tgtPos.y}, ${tgtPos.x} ${tgtPos.y}" onclick="app.map.disconnect('${c.from}','${c.to}');app.render();app.log('Wire removed','info');"></path>`;
         });
         group.innerHTML = svg;
       },
@@ -703,6 +715,7 @@
         document.getElementById("block-count").textContent = `${this.map.blocks.length} nodes`;
         const st = document.getElementById("map-status");
         const exp = document.getElementById("btn-export");
+        const prd = document.getElementById("btn-prd");
         if (this.map.isReadyForExport()) {
           st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed";
           exp.disabled = false; exp.className = "success";
@@ -710,42 +723,38 @@
           st.textContent = "● ARCHITECTURE DRAFT"; st.className = "map-status";
           exp.disabled = true; exp.className = "";
         }
+        prd.disabled = this.map.blocks.length === 0;
       },
 
       startWire(e, id, type) {
         e.stopPropagation(); e.preventDefault();
-        if (type === "out") { 
-          // Release pointer capture so we can drag over the canvas freely
+        if (type==="out") {
           e.target.releasePointerCapture(e.pointerId);
-          this.isDrawing = true; 
-          this.sourceId = id; 
+          this.isDrawing = true; this.sourceId = id;
           e.target.closest('.port-wrapper').classList.add('active');
         }
       },
-      
+
       endWire(e, id, type) {
         e.stopPropagation(); e.preventDefault();
-        if (this.isDrawing && type === "in" && this.sourceId && this.sourceId !== id) {
+        if (this.isDrawing && type==="in" && this.sourceId && this.sourceId !== id) {
           if (this.map.connect(this.sourceId, id)) {
-            this.log("Nodes wired successfully", "success");
-            this.render();
+            this.log("Nodes wired", "success"); this.render();
           } else {
             this.log("Invalid connection or cycle detected", "error");
           }
         }
-        this.isDrawing = false; 
-        this.sourceId = null;
-        document.getElementById("drawing-path").setAttribute("d", "");
+        this.isDrawing = false; this.sourceId = null;
+        document.getElementById("drawing-path").setAttribute("d","");
         document.querySelectorAll('.port-wrapper').forEach(el => el.classList.remove('active'));
       },
 
       removeBlock(id) { this.map.removeBlock(id); this.render(); },
-      updateLabel(id, val) { const b = this.map.blocks.find(x=>x.id===id); if(b) b.label = val; this.save(); },
+      updateLabel(id, val) { const b = this.map.blocks.find(x=>x.id===id); if(b) b.label=val; this.save(); },
 
-      // --- NODE EDITOR ---
       openNodeEditor(id) {
-        const b = this.map.blocks.find(x => x.id === id);
-        if(!b) return;
+        const b = this.map.blocks.find(x=>x.id===id);
+        if (!b) return;
         document.getElementById("node-modal-id").value = b.id;
         document.getElementById("node-modal-header").innerHTML = `Configure <span style="color:#fff">${b.label}</span>`;
         document.getElementById("node-modal-filename").value = b.filename;
@@ -756,124 +765,119 @@
 
       saveNodeConfig() {
         const id = document.getElementById("node-modal-id").value;
-        const b = this.map.blocks.find(x => x.id === id);
-        if(b) {
+        const b = this.map.blocks.find(x=>x.id===id);
+        if (b) {
           b.filename = document.getElementById("node-modal-filename").value.trim();
           b.prompt = document.getElementById("node-modal-prompt").value.trim();
           const newCode = document.getElementById("node-modal-code").value.trim();
-          if (newCode !== b.code) {
-            b.code = newCode;
-            b.status = b.code ? "VERIFIED" : "PENDING"; 
-          }
+          if (newCode !== b.code) { b.code = newCode; b.status = b.code ? "VERIFIED" : "PENDING"; }
         }
         closeModal("node-modal");
         this.render();
-        this.log("Node config saved", "info");
+        this.log("Node configured", "info");
       },
 
-      // --- AI SYNTHESIS (GEMINI) ---
-      async synthesizeArchitecture() {
-        if (!this.apiKey) return this.log("Gemini API Key required to synthesize.", "error");
-        
-        const order = this.map.getTopologicalOrder();
-        if(order.length === 0) return this.log("Architecture is empty.", "warning");
+      // === VIEW PRD ===
+      viewPRD() {
+        const prd = this.map.buildPRD();
+        // Render nicely in the modal
+        const container = document.getElementById("prd-output");
+        container.textContent = prd;
+        document.getElementById("prd-modal").classList.add("active");
+        this.log("PRD generated — copy and paste into your LLM", "accent");
+      },
 
+      copyPRD() {
+        const prd = this.map.buildPRD();
+        navigator.clipboard.writeText(prd).then(() => {
+          this.log("PRD copied to clipboard ✓", "success");
+          closeModal("prd-modal");
+        }).catch(() => {
+          // Fallback for non-HTTPS or denied
+          const ta = document.createElement("textarea");
+          ta.value = prd;
+          ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          this.log("PRD copied (fallback) ✓", "success");
+          closeModal("prd-modal");
+        });
+      },
+
+      // === AI SYNTHESIS (GEMINI) ===
+      async synthesizeArchitecture() {
+        if (!this.apiKey) return this.log("Gemini API Key required in header.", "error");
+        const order = this.map.getTopologicalOrder();
+        if (!order.length) return this.log("No nodes to synthesize.", "error");
         for (const block of order) {
           if (block.status === "VERIFIED" && block.code) continue;
-          
-          block.status = "GENERATING";
-          this.render();
-          this.log(`Synthesizing: ${block.filename}...`, "accent");
-
+          block.status = "GENERATING"; this.render();
+          this.log(`Synthesizing ${block.filename}...`, "accent");
           try {
             await this.generateNodeCode(block);
             block.status = "VERIFIED";
             this.log(`Verified: ${block.filename}`, "success");
-          } catch (err) {
-            block.status = "ERROR";
-            block.errorMsg = err.message;
-            this.log(`Fault in ${block.filename}: ${err.message}`, "error");
-            break; 
+          } catch(err) {
+            block.status = "ERROR"; block.errorMsg = err.message;
+            this.log(`Error in ${block.filename}: ${err.message}`, "error");
+            break;
           }
           this.render();
         }
-        this.log("Synthesis run finished.", "info");
+        this.log("Synthesis complete.", "info");
       },
 
       async generateNodeCode(block) {
-        const deps = block.dependsOn.map(id => this.map.blocks.find(b => b.id === id)).filter(Boolean);
-        const contextStr = deps.map(d => `--- ${d.filename} ---\n${d.code}`).join("\n\n");
-
-        let prompt = `You are an expert software architect building a file named: ${block.filename}\n`;
-        prompt += `Role/Type: ${block.type}\n\n`;
-        if (block.prompt) prompt += `Specific Instructions:\n${block.prompt}\n\n`;
-        if (contextStr) prompt += `Context from connected files:\n${contextStr}\n\n`;
-        prompt += `Output ONLY the raw, valid code for ${block.filename}. Do not use markdown code blocks (\`\`\`). Do not add explanations. Output the pure text file content.`;
-
+        const deps = block.dependsOn.map(id => this.map.blocks.find(b=>b.id===id)).filter(Boolean);
+        const ctx = deps.map(d => `--- ${d.filename} ---\n${d.code}`).join("\n\n");
+        let prompt = `You are an expert software architect building: ${block.filename}\nRole: ${block.type}\n\n`;
+        if (block.prompt) prompt += `Instructions:\n${block.prompt}\n\n`;
+        if (ctx) prompt += `Context from connected files:\n${ctx}\n\n`;
+        prompt += `Output ONLY the raw code. No markdown blocks. No explanations.`;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.apiKey}`;
-        
         const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] })
         });
-
         const data = await res.json();
         if (data.error) throw new Error(data.error.message);
-        if (!data.candidates || !data.candidates[0]) throw new Error("No code generated by API.");
-
+        if (!data.candidates?.[0]) throw new Error("No response from Gemini.");
         let code = data.candidates[0].content.parts[0].text.trim();
-        
         if (code.startsWith("```")) {
-          const lines = code.split("\n");
-          lines.shift();
-          if (lines[lines.length - 1].startsWith("```")) lines.pop();
+          const lines = code.split("\n"); lines.shift();
+          if (lines[lines.length-1].startsWith("```")) lines.pop();
           code = lines.join("\n").trim();
         }
-
         block.code = code;
       },
 
-      // --- ZIP EXPORT ---
+      // === ZIP EXPORT ===
       exportZip() {
-        if (!this.map.isReadyForExport()) return this.log("Synthesis incomplete.", "error");
-        
-        this.log("Compiling .ZIP...", "accent");
-        try {
-          const zip = new JSZip();
-          this.map.blocks.forEach(b => {
-            if (b.code) zip.file(b.filename, b.code);
-          });
-          
-          zip.generateAsync({ type: "blob" }).then(content => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(content);
-            a.download = `VibeProject_${this.map.id}.zip`;
-            a.click();
-            this.log("Download initiated successfully", "success");
-          });
-        } catch(e) {
-          this.log("Export failed: " + e.message, "error");
-        }
+        if (!this.map.isReadyForExport()) return this.log("Complete synthesis first.", "error");
+        this.log("Compiling ZIP...", "accent");
+        const zip = new JSZip();
+        this.map.blocks.forEach(b => { if(b.code) zip.file(b.filename, b.code); });
+        zip.generateAsync({type:"blob"}).then(content => {
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(content);
+          a.download = `VibeProject_${this.map.id}.zip`;
+          a.click();
+          this.log("Download started", "success");
+        });
       },
 
-      clearMap() {
-        this.map = new LogicMap();
-        this.render();
-        this.log("Canvas wiped clean", "warning");
-      },
+      clearMap() { this.map = new LogicMap(); this.render(); this.log("Canvas wiped", "info"); },
 
-      log(msg, type = "info") {
-        const ids = ["log-1", "log-2", "log-3"];
-        for(let i=0; i<2; i++) {
+      log(msg, type="info") {
+        const ids = ["log-1","log-2","log-3"];
+        for (let i=0;i<2;i++) {
           const el = document.getElementById(ids[i]);
           const nxt = document.getElementById(ids[i+1]);
-          el.textContent = nxt.textContent;
-          el.className = nxt.className;
+          el.textContent = nxt.textContent; el.className = nxt.className;
         }
         const last = document.getElementById("log-3");
-        last.textContent = `>>> ${msg}`;
-        last.className = `log-line ${type}`;
+        last.textContent = `>>> ${msg}`; last.className = `log-line ${type}`;
       },
 
       save() {
@@ -885,10 +889,14 @@
 
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
 
+    // Close modal on backdrop tap
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('pointerdown', e => { if(e.target === m) closeModal(m.id); });
+    });
+
     window.addEventListener("DOMContentLoaded", () => app.init());
   </script>
 
-  <!-- SW Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -900,4 +908,3 @@
   </script>
 </body>
 </html>
-
