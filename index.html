@@ -26,6 +26,7 @@
       --success: #2ecc71;
       --error: #ff4444;
       --warning: #ffcc00;
+      --install: #9b59b6;
       --text-primary: #ffffff;
       --text-secondary: #888899;
       --font-serif: 'Crimson Text', serif;
@@ -85,7 +86,7 @@
       overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
       z-index: 99; flex-shrink: 0;
     }
-    .log-line { margin: 1px 0; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; line-height: 1.4;}
+    .log-line { margin: 1px 0; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; line-height: 1.4; flex-shrink: 0; }
     .log-line.success { color: var(--success); }
     .log-line.error { color: var(--error); }
     .log-line.accent { color: var(--accent); text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
@@ -206,7 +207,7 @@
     /* === FOOTER === */
     .footer {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
       border-top: 1px solid var(--border-color);
@@ -225,12 +226,18 @@
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
     button:active:not(:disabled) { transform: scale(0.96); }
     button:disabled { color: var(--text-secondary); border-color: var(--border-color); cursor: not-allowed; opacity: 0.5; }
+    
     button.success { background: rgba(46, 204, 113, 0.1); border-color: var(--success); color: var(--success); }
     button.success:hover:not(:disabled) { background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
+    
     button.compile-btn { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); color: var(--accent); }
     button.compile-btn:hover { background: rgba(0, 229, 255, 0.2); }
+    
     button.prd-btn { background: rgba(255, 103, 31, 0.1); border-color: var(--saffron); color: var(--saffron); }
     button.prd-btn:hover:not(:disabled) { background: rgba(255, 103, 31, 0.2); box-shadow: 0 0 15px rgba(255, 103, 31, 0.3); }
+
+    button.install-btn { background: rgba(155, 89, 182, 0.1); border-color: var(--install); color: var(--install); }
+    button.install-btn:hover:not(:disabled) { background: rgba(155, 89, 182, 0.2); box-shadow: 0 0 15px rgba(155, 89, 182, 0.3); }
 
     /* === MODALS === */
     .modal {
@@ -284,24 +291,50 @@
     .copy-btn:hover { background: rgba(255, 103, 31, 0.2); }
 
     /* ================================================================
-       MOBILE FIXES — The whole point of this revision
+       MOBILE FIXES
        ================================================================ */
     @media (max-width: 768px) {
 
-      /* --- Header: single compact row --- */
+      /* --- Header: Clearer placement to avoid overlaps --- */
       .header {
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.5rem;
         flex-wrap: nowrap;
         align-items: center;
+        gap: 0.5rem;
       }
-      .header-left { gap: 0.5rem; overflow: hidden; }
-      .header-title { font-size: 1rem; }
+      .header-left { 
+        gap: 0.4rem; 
+        overflow: hidden; 
+        flex: 1;
+        min-width: 0;
+      }
+      .header-title { 
+        font-size: 0.9rem; 
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+      .header-title span {
+        font-size: 0.65rem;
+        margin-top: 2px;
+      }
       .map-status { display: none; } /* shown in logger instead */
-      .api-input { width: 140px; padding: 0.5rem 0.6rem; font-size: 0.7rem; }
-      .info-badge { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
+      
+      .toolbar { flex-shrink: 0; }
+      .api-input { 
+        width: 110px; 
+        padding: 0.4rem 0.5rem; 
+        font-size: 0.7rem; 
+      }
+      .info-badge { 
+        font-size: 0.65rem; 
+        padding: 0.25rem 0.4rem; 
+        flex-shrink: 0;
+      }
 
       /* --- Logger: tighter --- */
-      .logger { height: 38px; padding: 0.25rem 0.75rem; font-size: 0.67rem; }
+      .logger { height: auto; min-height: 52px; padding: 0.35rem 0.75rem; font-size: 0.65rem; }
 
       /* --- Sidebar: horizontal strip, scrollable --- */
       .sidebar {
@@ -334,7 +367,7 @@
       .main-container { flex-direction: column; }
       .canvas { min-height: 0; }
 
-      /* --- Footer: 2×3 grid so ALL buttons are always visible --- */
+      /* --- Footer: 3x2 grid accommodating 6 buttons total --- */
       .footer {
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: repeat(2, auto);
@@ -358,8 +391,9 @@
     }
 
     @media (max-width: 380px) {
-      .footer { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, auto); }
-      .api-input { width: 110px; }
+      .header-title { font-size: 0.8rem; }
+      .header-title span { font-size: 0.55rem; }
+      .api-input { width: 85px; }
     }
   </style>
 </head>
@@ -367,7 +401,7 @@
 
   <div class="header">
     <div class="header-left">
-      <div class="header-title">LOGICHUB <span>VIBECODER</span></div>
+      <div class="header-title">LOGICHUB<span>VIBECODER</span></div>
       <div class="map-status" id="map-status">● AWAITING SYNTHESIS</div>
       <div class="info-badge" id="block-count">0 nodes</div>
     </div>
@@ -412,13 +446,14 @@
     </div>
   </div>
 
-  <!-- FOOTER: ALL 5 BUTTONS ALWAYS VISIBLE -->
+  <!-- FOOTER: 6 SLOTS PERFECTLY FILLING THE 3X2 MOBILE GRID -->
   <div class="footer">
     <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
     <button id="btn-validate" class="compile-btn" onclick="app.synthesizeArchitecture()">[⚡ Synth]</button>
     <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
     <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
     <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
+    <button id="btn-install" class="install-btn" style="display: none;" onclick="app.installPWA()">[↓ Install]</button>
   </div>
 
   <!-- NODE EDITOR MODAL (bottom sheet) -->
@@ -457,6 +492,21 @@
   </div>
 
   <script>
+    // ============================================
+    // PWA INSTALL LOGIC
+    // ============================================
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+      // Update UI notify the user they can install the PWA
+      const installBtn = document.getElementById('btn-install');
+      if (installBtn) installBtn.style.display = 'inline-block';
+    });
+
+
     // ============================================
     // LOGICHUB VIBECODER ENGINE — MOBILE OPTIMIZED
     // ============================================
@@ -869,6 +919,25 @@
 
       clearMap() { this.map = new LogicMap(); this.render(); this.log("Canvas wiped", "info"); },
 
+      installPWA() {
+        if (!deferredPrompt) {
+          this.log("PWA install prompt not available.", "error");
+          return;
+        }
+        // Show the install prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            this.log('User accepted the install prompt', 'success');
+            document.getElementById('btn-install').style.display = 'none';
+          } else {
+            this.log('User dismissed the install prompt', 'info');
+          }
+          deferredPrompt = null;
+        });
+      },
+
       log(msg, type="info") {
         const ids = ["log-1","log-2","log-3"];
         for (let i=0;i<2;i++) {
@@ -908,3 +977,5 @@
   </script>
 </body>
 </html>
+
+
