@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LogicHub</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>LogicHub</h1>
+    <div class="controls">
+      <button id="newMapBtn">New Map</button>
+      <button id="addInputBtn">Add Input Node</button>
+      <button id="addComputeBtn">Add Compute Node</button>
+      <button id="addOutputBtn">Add Output Node</button>
+      <button id="connectModeBtn">Connect Mode: Off</button>
+      <button id="runSimBtn">Run Simulation</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="editor-wrap">
+      <div id="editorViewport" class="viewport">
+        <svg id="edgeLayer"></svg>
+        <div id="nodeLayer"></div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h2>Node Properties</h2>
+      <div id="nodePropsEmpty">Select a node</div>
+      <form id="nodePropsForm" class="hidden">
+        <label>Label <input name="label" /></label>
+        <label>Type
+          <select name="type">
+            <option value="input">input</option>
+            <option value="compute">compute</option>
+            <option value="output">output</option>
+          </select>
+        </label>
+        <label>Expression (compute only)
+          <select name="expression">
+            <option value="sum">sum</option>
+            <option value="multiply">multiply</option>
+          </select>
+        </label>
+        <label>Value (input/output)
+          <input name="value" type="number" step="any" />
+        </label>
+        <button type="submit">Save Node</button>
+      </form>
+
+      <h2>Simulation Results</h2>
+      <pre id="simOutput">No run yet.</pre>
+    </aside>
+  </main>
+
+  <section class="feed">
+    <h2>Map Feed</h2>
+    <ul id="feedList"></ul>
+  </section>
+
+  <template id="feedItemTemplate">
+    <li>
+      <strong class="title"></strong>
+      <span class="meta"></span>
+      <div class="actions">
+        <button data-action="view">View</button>
+        <button data-action="fork">Fork</button>
+        <button data-action="comment">Comment</button>
+        <button data-action="simulate">Run Simulation</button>
+      </div>
+      <ul class="comments"></ul>
+    </li>
+  </template>
+
+  <script src="./logic-hub.js"></script>
+</body>
+</html>
