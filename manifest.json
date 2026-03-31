@@ -1,29 +1,20 @@
 {
-  "name": "LogicHub",
+  "name": "LogicHub Vibecoder",
   "short_name": "LogicHub",
-  "description": "Visual logic-to-code builder \u2014 Vibecoder Architecture",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#030508",
-  "theme_color": "#030508",
-  "description": "Visual logic-to-code builder — Vibecoder Architecture",
-  "start_url": "/",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#030508",
   "theme_color": "#00e5ff",
-  "orientation": "any",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "https://via-decide.github.io/VIA/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "https://via-decide.github.io/VIA/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
