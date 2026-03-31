@@ -506,390 +506,81 @@
       isReadyForExport() { return this.blocks.length > 0 && this.blocks.every(b => b.status === "VERIFIED"); }
       buildPRD() {
         if (this.blocks.length === 0) return "No nodes added.";
+        let prd = "# LOGICHUB SENIOR ARCHITECTURE: " + this.id + "\n";
+        prd += "## Build Timestamp: " + new Date().toISOString() + "\n\n";
+        prd += "---\n\n## SYSTEM CONSTRAINTS\n";
+        prd += "- Bundle size: 4.5 MB max (gzip)\n";
+        prd += "- First paint: <1.5s on mid-range Android\n";
+        prd += "- Test coverage: >70% critical paths\n";
+        prd += "- Security: OWASP Top 10 compliant\n";
+        prd += "- Error handling: Try-catch on all async\n";
+        prd += "- Code style: ESLint Airbnb preset\n\n";
         
-        // SENIOR-LEVEL PRD GENERATION
-        let prd = `# LOGICHUB SENIOR ARCHITECTURE: ${this.id}
-## Build Timestamp: ${new Date().toISOString()}
-## Target Platform: React Native + Node.js 18+ (Android 8+)
-
----
-
-## SECTION 1: SYSTEM CONSTRAINTS & GUARDRAILS
-
-### Performance Targets
-- Bundle size limit: 4.5 MB (gzip)
-- First paint: <1.5s on Snapdragon 660
-- Token budget: 12,000 tokens max per file
-- API response time: <500ms p95
-- Memory: <120MB on 2GB devices
-
-### Security Level: OWASP Top 10 Compliant
-- Input validation: sanitize all user inputs
-- Authentication: JWT with 24hr expiry + refresh tokens
-- Passwords: bcrypt with salt rounds=12
-- HTTPS: required for all API calls
-- Secrets: never hardcode, use .env only
-- CORS: whitelist specific origins only
-
-### Code Quality Standards
-- ESLint: Airbnb preset enforced
-- Test coverage: >70% critical paths
-- Type checking: TypeScript strict mode
-- Naming: camelCase functions, PascalCase classes
-- Max function length: 50 lines
-- Max file size: 300 lines
-
-### Build & Deployment
-- Package manager: npm (lock file required)
-- Node version: 18.16+ (nvm support)
-- CI/CD: GitHub Actions or GitLab CI
-- Env files: .env, .env.staging, .env.prod (never commit secrets)
-
----
-
-## SECTION 2: DEPENDENCY GRAPH & ARCHITECTURE
-
-### Topological Build Order
-\`\`\`
-${this.getTopologicalOrder().map((b, i) => {
-  const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.filename).filter(Boolean);
-  const depStr = deps.length ? \` ← \${deps.join(', ')}\` : '';
-  return \`\${i+1}. \${b.filename}\${depStr}\`;
-}).join('\n')}
-\`\`\`
-
-### Node-to-Node Integration Contracts
-${this.blocks.map(b => {
-  const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)).filter(Boolean);
-  const outgoing = b.connectedTo.map(id => this.blocks.find(x => x.id === id)).filter(Boolean);
-  
-  return \`#### \${b.filename} [\${b.type.toUpperCase()}]
-**Incoming Dependencies:**
-\${deps.length ? deps.map(d => \`- \\\`import { ... } from './\${d.filename.split('.')[0]}'\\\`\`).join('\n') : '- (none - entry point)'}
-
-**Outgoing Exports:**
-\${outgoing.length ? outgoing.map(d => \`- Used by: \${d.filename}\`).join('\n') : '- (leaf node)'}
-
-**Interface Contract:**
-\${this.generateInterfaceSpec(b)}
-\`;
-}).join('\n')}
-
----
-
-## SECTION 3: ERROR HANDLING & RESILIENCE
-
-### Required Error Boundaries
-\`\`\`javascript
-// Each React component MUST be wrapped:
-<ErrorBoundary fallback={<ErrorUI error={error} />}>
-  <YourComponent />
-</ErrorBoundary>
-
-// Each API call MUST have try-catch:
-try {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(\\\`HTTP \\\${response.status}\\\`);
-  return await response.json();
-} catch (error) {
-  logger.error('API Error', { url, error });
-  throw new AppError('Failed to fetch data', { original: error });
-}
-
-// Each Promise MUST have catch:
-asyncFunction()
-  .catch(error => {
-    logger.error('Async failed', error);
-    notifyUser('Something went wrong. Retry?');
-  });
-\`\`\`
-
-### Logging Strategy
-- Framework: winston (structured JSON logs)
-- Levels: debug, info, warn, error, fatal
-- Format: \`{ timestamp, level, message, context, stackTrace }\`
-- Destination: console (dev), CloudWatch/Datadog (prod)
-- Sensitive data: NEVER log passwords, tokens, PII
-
-### Network Resilience
-- Retry logic: exponential backoff (1s, 2s, 4s max)
-- Timeout: 10s default, configurable per endpoint
-- Fallback UI: show cached data or "offline mode"
-- Health checks: /api/health endpoint required
-
----
-
-## SECTION 4: DATA CONTRACTS & SCHEMAS
-
-### Database Schema (if DB node exists)
-${this.blocks.filter(b => b.type === 'database').length > 0 ? 
-\`\`\`sql
--- Define primary keys, foreign keys, indexes, constraints
--- Use migrations for schema changes (no direct ALTER in prod)
--- Timestamps: created_at, updated_at on all tables
-\`\`\`
-\` : '(No database node in architecture)'}
-
-### API Contract (if API node exists)
-${this.blocks.filter(b => b.type === 'api').length > 0 ? 
-\`\`\`json
-{
-  "GET /api/resource/:id": {
-    "auth": "JWT Bearer token required",
-    "response": { "id": "string", "name": "string", "createdAt": "ISO8601" },
-    "errors": { "401": "Unauthorized", "404": "Not found", "500": "Server error" }
-  },
-  "POST /api/resource": {
-    "auth": "JWT Bearer token required",
-    "request": { "name": "string (required, min 3 chars)" },
-    "response": { "id": "string", "name": "string", "createdAt": "ISO8601" },
-    "errors": { "400": "Validation failed", "401": "Unauthorized" }
-  }
-}
-\`\`\`
-\` : '(No API node in architecture)'}
-
----
-
-## SECTION 5: FILE SPECIFICATIONS
-
-${this.getTopologicalOrder().map((b, i) => \`### FILE \${i+1}: \${b.filename}
-**Type:** \${b.type.toUpperCase()}
-**Status:** Requires code generation
-
-#### Specification
-\${b.prompt || '- Auto-infer from filename and type'}
-
-#### Dependencies
-\${b.dependsOn.map(id => {
-  const depBlock = this.blocks.find(x => x.id === id);
-  return \`- Import from: \\\`\${depBlock.filename}\\\`\\n  Exports required: [to be specified]\`;
-}).join('\n') || '(none)'}
-
-#### Integration Checklist
-- [ ] All imports resolve
-- [ ] No circular dependencies
-- [ ] Error handling implemented
-- [ ] Types defined (TypeScript or JSDoc)
-- [ ] Unit tests written (min 3 test cases)
-- [ ] Props/params validated on entry
-- [ ] Logs added at key decision points
-- [ ] Performance optimized (no N+1 queries)
-
-#### Code Quality Rules
-- Max function length: 50 lines (refactor if longer)
-- Max complexity: cyclomatic complexity < 8
-- Use \\\`const\\\` by default (never \\\`var\\\`)
-- Import destructuring: \\\`import { foo } from 'module'\\\`
-- Error messages: human-readable, with context
-- Comments: WHY not WHAT (code is WHAT)
-\`).join('\n')}
-
----
-
-## SECTION 6: TESTING REQUIREMENTS
-
-### Unit Testing Strategy
-\`\`\`javascript
-// Jest + React Testing Library (if UI components)
-describe('\${this.blocks[0]?.filename || 'YourComponent'}', () => {
-  test('renders without crashing', () => { /* test */ });
-  test('handles error state gracefully', () => { /* test */ });
-  test('validates user input correctly', () => { /* test */ });
-});
-
-// Mock external API calls:
-jest.mock('./api', () => ({
-  fetchData: jest.fn().mockResolvedValue({ id: 1, name: 'test' })
-}));
-\`\`\`
-
-### Test Coverage Targets
-- Critical paths: 100% (auth, payments, data mutations)
-- Common paths: 80% (normal user flows)
-- Edge cases: 60% (validation, edge scenarios)
-- Overall minimum: 70%
-
-### Manual Testing Checklist
-- [ ] App starts without errors on Android 8, 12, 14
-- [ ] Network requests work on 3G (slow connection test)
-- [ ] App recovers gracefully when connection drops
-- [ ] Forms reject invalid input without crashing
-- [ ] Large lists (100+ items) render smoothly
-- [ ] Memory usage doesn't grow unbounded
-
----
-
-## SECTION 7: BUILD & DEPLOYMENT
-
-### package.json Requirements
-\`\`\`json
-{
-  "name": "logichub-\${this.id.toLowerCase()}",
-  "version": "1.0.0",
-  "description": "Generated by LogicHub Vibecoder",
-  "engines": { "node": ">=18.16.0", "npm": ">=9.0.0" },
-  "scripts": {
-    "start": "node index.js",
-    "build": "tsc && webpack",
-    "test": "jest --coverage",
-    "lint": "eslint src/",
-    "dev": "nodemon src/index.js"
-  },
-  "dependencies": {},
-  "devDependencies": {},
-  "engines": { "node": "18.16+" }
-}
-\`\`\`
-
-### Environment Variables (.env template)
-\`\`\`
-NODE_ENV=development
-PORT=3000
-LOG_LEVEL=debug
-DB_HOST=localhost
-DB_PORT=5432
-JWT_SECRET=[NEVER HARDCODE - USE SECRETS MANAGER]
-API_TIMEOUT=10000
-\`\`\`
-
-### Deployment Pipeline
-1. **Lint & Format:** \`npm run lint\`
-2. **Build:** \`npm run build\`
-3. **Test:** \`npm test -- --coverage\`
-4. **Build APK:** React Native CLI or Expo
-5. **Sign:** Use keystore (prod only)
-6. **Upload:** Play Store or direct installation
-
----
-
-## SECTION 8: COMMON PITFALLS TO AVOID
-
-❌ **DO NOT:**
-- Hardcode API URLs, secrets, or tokens
-- Ignore error boundaries in React components
-- Make synchronous API calls in loops (causes janky UI)
-- Use \`any\` type in TypeScript (defeats purpose)
-- Commit node_modules or .env files
-- Log sensitive data (passwords, SSNs, tokens)
-- Leave console.log() in production code
-- Use setState callback instead of useEffect
-
-✅ **DO:**
-- Validate all user input (frontend AND backend)
-- Use environment variables for configuration
-- Implement retry logic for API calls
-- Write tests before features ("test-driven")
-- Use TypeScript strict mode
-- Keep functions under 50 lines
-- Add JSDoc comments for public functions
-- Separate business logic from UI logic
-
----
-
-## SECTION 9: DELIVERY CHECKLIST
-
-Before submitting code:
-- [ ] All files compile without errors
-- [ ] No TypeScript \`any\` types
-- [ ] Tests pass (\`npm test\`)
-- [ ] Linter passes (\`npm run lint\`)
-- [ ] No hardcoded secrets in code
-- [ ] Error handling on all async calls
-- [ ] Performance metrics meet targets
-- [ ] Code follows naming conventions
-- [ ] JSDoc comments on public APIs
-- [ ] README.md updated with setup instructions
-
----
-
-## OUTPUT FORMAT
-
-For each file, respond with EXACTLY this format:
-
-\`\`\`
-### FILE: [filename]
-\`\`\`javascript
-[COMPLETE, PRODUCTION-READY CODE]
-\`\`\`
-
-// Include:
-// - Error handling (try-catch for async)
-// - Input validation
-// - Logging statements
-// - JSDoc comments
-// - No console.log in production
-\`\`\`
-
----
-
-**Generated by LogicHub Vibecoder on ${new Date().toLocaleString()}**
-**This is a SENIOR-LEVEL PRD. Follow all specifications exactly.**\`;
+        prd += "## DEPENDENCY GRAPH\n";
+        const order = this.getTopologicalOrder();
+        order.forEach((b, i) => {
+          const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.filename).filter(Boolean);
+          prd += (i+1) + ". " + b.filename;
+          if (deps.length) prd += " (depends on: " + deps.join(", ") + ")";
+          prd += "\n";
+        });
+        
+        prd += "\n## FILE SPECIFICATIONS\n\n";
+        order.forEach((b, i) => {
+          prd += "### FILE " + (i+1) + ": " + b.filename + "\n";
+          prd += "**Type:** " + b.type.toUpperCase() + "\n";
+          prd += "**Specification:** " + (b.prompt || "Infer from filename") + "\n";
+          const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.filename).filter(Boolean);
+          if (deps.length) prd += "**Dependencies:** " + deps.join(", ") + "\n";
+          prd += "**Checklist:**\n";
+          prd += "- [ ] All imports resolve\n";
+          prd += "- [ ] Error handling implemented\n";
+          prd += "- [ ] Unit tests (70% coverage)\n";
+          prd += "- [ ] Input validation\n";
+          prd += "- [ ] Logging added\n";
+          prd += "- [ ] TypeScript/JSDoc types\n\n";
+        });
+        
+        prd += "## SECURITY REQUIREMENTS\n";
+        prd += "- Input validation: sanitize all user inputs\n";
+        prd += "- Auth: JWT with 24hr expiry\n";
+        prd += "- Passwords: bcrypt salt=12\n";
+        prd += "- Secrets: NEVER hardcode\n";
+        prd += "- HTTPS: required for all API calls\n";
+        prd += "- CORS: whitelist specific origins\n\n";
+        
+        prd += "## ERROR HANDLING\n";
+        prd += "- Wrap all async in try-catch\n";
+        prd += "- Add error boundaries to React components\n";
+        prd += "- Implement retry logic (exponential backoff)\n";
+        prd += "- Log errors with context (JSON format)\n";
+        prd += "- Never log passwords, tokens, PII\n\n";
+        
+        prd += "## CODE QUALITY\n";
+        prd += "- Max function length: 50 lines\n";
+        prd += "- No console.log in production\n";
+        prd += "- const by default (never var)\n";
+        prd += "- Cyclomatic complexity <8\n";
+        prd += "- JSDoc comments on public APIs\n\n";
+        
+        prd += "## TESTING\n";
+        prd += "- Unit tests: Jest + React Testing Library\n";
+        prd += "- Coverage targets: Critical 100%, Common 80%, Edge 60%\n";
+        prd += "- Manual testing: Android 8, 12, 14\n";
+        prd += "- Test slow networks (3G simulation)\n\n";
+        
+        prd += "## DELIVERY CHECKLIST\n";
+        prd += "- [ ] No TypeScript 'any' types\n";
+        prd += "- [ ] Tests pass with >70% coverage\n";
+        prd += "- [ ] Linter passes (npm run lint)\n";
+        prd += "- [ ] No hardcoded secrets\n";
+        prd += "- [ ] Error handling on all async\n";
+        prd += "- [ ] Performance metrics met\n\n";
+        
+        prd += "## OUTPUT FORMAT\nFor each file:\n### FILE: [filename]\n```javascript\n[PRODUCTION-READY CODE]\n```\n";
+        prd += "\nInclude: error handling, validation, logging, JSDoc, no console.log";
         
         return prd;
-      }
-
-      generateInterfaceSpec(block) {
-        const specs = {
-          ui: \`**Props Interface:**
-\\\`\\\`\\\`typescript
-interface Props {
-  [key: string]: any;  // Define exact props needed
-}
-export default function \${block.label}(props: Props) {
-  // Component code
-}
-\\\`\\\`\\\`\`,
-          api: \`**Route Interface:**
-\\\`\\\`\\\`
-POST /api/[endpoint]
-Headers: { "Authorization": "Bearer {jwt_token}" }
-Request Body: { ... }
-Response 200: { success: true, data: {...} }
-Response 400: { error: "Validation failed", details: [...] }
-Response 401: { error: "Unauthorized" }
-Response 500: { error: "Server error" }
-\\\`\\\`\\\`\`,
-          database: \`**Schema Interface:**
-\\\`\\\`\\\`sql
-CREATE TABLE [table_name] (
-  id UUID PRIMARY KEY,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW(),
-  -- Add columns based on business logic
-);
-\\\`\\\`\\\`\`,
-          auth: \`**Auth Flow:**
-\\\`\\\`\\\`
-1. POST /auth/login → { token, refreshToken, expiresIn }
-2. Store tokens in secure storage (NOT localStorage)
-3. Add "Authorization: Bearer {token}" to all requests
-4. On expiry, POST /auth/refresh → { token, expiresIn }
-5. On 401, redirect to login
-\\\`\\\`\\\`\`,
-          util: \`**Utility Exports:**
-\\\`\\\`\\\`typescript
-export function validateEmail(email: string): boolean { ... }
-export function formatDate(date: Date): string { ... }
-export class AppError extends Error { ... }
-\\\`\\\`\\\`\`,
-          style: \`**CSS/Styling:**
-\\\`\\\`\\\`css
-/* Use CSS Modules or Tailwind */
-/* Mobile-first approach */
-/* Dark mode support */
-\\\`\\\`\\\`\`,
-          config: \`**Configuration:**
-\\\`\\\`\\\`json
-{
-  "apiEndpoint": "process.env.API_URL",
-  "timeout": 10000,
-  "retryAttempts": 3,
-  "logLevel": "process.env.LOG_LEVEL"
-}
-\\\`\\\`\\\`\`
-        };
-        return specs[block.type] || '(Custom interface - define in prompt)';
       }
     }
 
