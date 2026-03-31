@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <!-- PWA -->
   <meta name="theme-color" content="#030508">
-  <meta name="theme-color" content="#00e5ff">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -49,7 +48,7 @@
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
-      height: 100dvh; /* dynamic viewport height — fixes mobile browser chrome */
+      height: 100dvh;
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
@@ -72,13 +71,19 @@
       background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent);
       border-radius: 4px; color: var(--accent); font-weight: 700; white-space: nowrap; flex-shrink: 0;
     }
-    .toolbar { display: flex; gap: 0.75rem; align-items: center; flex-shrink: 0; }
+    .toolbar { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
     .api-input {
       padding: 0.55rem 0.9rem; border: 1px solid var(--border-color); border-radius: 6px;
       background: var(--bg-primary); color: var(--accent); font-family: var(--font-mono);
       font-size: 0.8rem; width: 280px; transition: all 0.2s; outline: none;
     }
     .api-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); }
+    .btn-help {
+      background: transparent; border: 1px solid var(--border-bright); color: var(--text-secondary);
+      border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-family: var(--font-mono); font-weight: bold; transition: all 0.2s;
+    }
+    .btn-help:hover { border-color: var(--accent); color: var(--accent); }
 
     /* === LOGGER === */
     .logger {
@@ -135,7 +140,6 @@
       display: flex; flex-direction: column; gap: 0.5rem;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); transition: box-shadow 0.2s, border-color 0.2s, transform 0.1s; font-size: 0.78rem;
     }
-    .block:hover { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8); }
     .block.selected, .block:active {
       cursor: grabbing; box-shadow: 0 12px 40px rgba(0, 229, 255, 0.2), 0 0 0 1px var(--accent);
       border-color: var(--accent); transform: scale(1.02); z-index: 1000 !important;
@@ -163,8 +167,7 @@
     .port-wrapper.out { right: -22px; top: calc(50% - 22px); }
     .port {
       width: 13px; height: 13px; background: var(--bg-primary);
-      border: 2px solid var(--text-secondary); border-radius: 50%;
-      transition: all 0.2s; pointer-events: none;
+      border: 2px solid var(--text-secondary); border-radius: 50%; transition: all 0.2s; pointer-events: none;
     }
     .port-wrapper:hover .port, .port-wrapper.active .port { border-color: var(--accent); background: var(--accent); transform: scale(1.4); box-shadow: 0 0 12px rgba(0, 229, 255, 0.5); }
     .block-delete {
@@ -173,8 +176,7 @@
       font-size: 12px; font-weight: bold; cursor: pointer; z-index: 20; transition: all 0.2s; border: 2px solid var(--bg-secondary);
     }
     .block:hover .block-delete, .block.selected .block-delete { display: flex; }
-    .block-delete:hover { background: #ff6666; transform: scale(1.15); }
-
+    
     /* === BLOCK STATES === */
     .block.state-pending { border-color: var(--text-secondary); }
     .block.state-pending .block-status { background: var(--state-pending); color: var(--text-primary); }
@@ -189,56 +191,36 @@
     .block.state-orphaned { border-color: var(--state-orphaned); border-style: dashed; }
     .block.state-orphaned .block-status { background: var(--state-orphaned); color: var(--bg-primary); }
 
-    @keyframes pulse-cyber {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
-      50% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
-    }
+    @keyframes pulse-cyber { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); } }
 
     /* === CONNECTIONS === */
     .arrow-path {
-      fill: none; stroke: var(--state-pending); stroke-width: 3;
-      pointer-events: visibleStroke; cursor: pointer; transition: stroke 0.2s, stroke-width 0.2s;
+      fill: none; stroke: var(--state-pending); stroke-width: 3; pointer-events: visibleStroke; cursor: pointer;
       stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 4; animation: flow 20s linear infinite;
     }
-    .arrow-path:hover { stroke: var(--error); stroke-width: 6; stroke-dasharray: none; animation: none;}
     .arrow-path.verified { stroke: var(--state-verified); stroke-dasharray: none; animation: none;}
     @keyframes flow { to { stroke-dashoffset: -1000; } }
     .drawing-path { fill: none; stroke: var(--accent); stroke-width: 3.5; stroke-dasharray: 5 5; pointer-events: none; stroke-linecap: round; }
 
     /* === FOOTER === */
     .footer {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      border-top: 1px solid var(--border-color);
-      background: var(--bg-secondary);
-      z-index: 50;
-      flex-shrink: 0;
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;
+      padding: 0.75rem 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-secondary); z-index: 50; flex-shrink: 0;
     }
 
     /* === BUTTONS === */
     button {
-      padding: 0.75rem 0.75rem; font-family: var(--font-sans); font-weight: 700; font-size: 0.8rem;
+      padding: 0.75rem; font-family: var(--font-sans); font-weight: 700; font-size: 0.8rem;
       border: 1px solid var(--border-bright); background: var(--bg-primary); color: var(--text-primary);
       cursor: pointer; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
       touch-action: manipulation; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
-    button:active:not(:disabled) { transform: scale(0.96); }
     button:disabled { color: var(--text-secondary); border-color: var(--border-color); cursor: not-allowed; opacity: 0.5; }
     
-    button.success { background: rgba(46, 204, 113, 0.1); border-color: var(--success); color: var(--success); }
-    button.success:hover:not(:disabled) { background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
-    
     button.compile-btn { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); color: var(--accent); }
-    button.compile-btn:hover { background: rgba(0, 229, 255, 0.2); }
-    
     button.prd-btn { background: rgba(255, 103, 31, 0.1); border-color: var(--saffron); color: var(--saffron); }
-    button.prd-btn:hover:not(:disabled) { background: rgba(255, 103, 31, 0.2); box-shadow: 0 0 15px rgba(255, 103, 31, 0.3); }
-
     button.install-btn { background: rgba(155, 89, 182, 0.1); border-color: var(--install); color: var(--install); }
-    button.install-btn:hover:not(:disabled) { background: rgba(155, 89, 182, 0.2); box-shadow: 0 0 15px rgba(155, 89, 182, 0.3); }
 
     /* === MODALS === */
     .modal {
@@ -248,153 +230,88 @@
     }
     .modal.active { display: flex; }
     .modal-content {
-      background: var(--bg-secondary); border: 1px solid var(--border-bright);
-      border-radius: 20px 20px 0 0; /* bottom sheet style */
-      padding: 1.5rem; width: 100%; max-width: 100%; max-height: 90dvh; overflow-y: auto;
-      box-shadow: 0 -20px 80px rgba(0, 0, 0, 0.9); position: relative;
+      background: var(--bg-secondary); border: 1px solid var(--border-bright); border-radius: 20px 20px 0 0; 
+      padding: 1.5rem; width: 100%; max-height: 90dvh; overflow-y: auto; position: relative;
     }
-    /* Pull handle */
-    .modal-content::before {
-      content: ''; display: block; width: 40px; height: 4px;
-      background: var(--border-bright); border-radius: 2px;
-      margin: -0.5rem auto 1rem; 
-    }
-    .modal-header { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; padding-right: 2.5rem;}
-    .modal-close { position: absolute; top: 1.5rem; right: 1.2rem; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background 0.2s; min-height: unset;}
-    .modal-close:hover { background: var(--error); color: white; box-shadow: none;}
+    .modal-content::before { content: ''; display: block; width: 40px; height: 4px; background: var(--border-bright); border-radius: 2px; margin: -0.5rem auto 1rem; }
+    .modal-header { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;}
+    .modal-close { position: absolute; top: 1.5rem; right: 1.2rem; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; min-height: unset;}
 
     .form-group { margin-bottom: 1.1rem; }
     .form-label { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono);}
     .form-label span { font-size: 0.65rem; color: var(--text-secondary); text-transform: none; font-weight: 400;}
-    .form-input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-bright); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.82rem; outline: none; transition: all 0.2s; }
-    .form-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 229, 255, 0.1); }
+    .form-input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-bright); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.82rem; outline: none; }
+    .form-input:focus { border-color: var(--accent); }
     .form-textarea { resize: vertical; min-height: 90px; }
     .code-textarea { min-height: 160px; color: var(--success); white-space: pre; overflow-wrap: normal; overflow-x: auto;}
 
-    /* PRD output box */
-    .prd-output {
-      background: var(--bg-primary); border: 1px solid var(--border-bright); border-radius: 8px;
-      padding: 1rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);
-      white-space: pre-wrap; word-break: break-word; min-height: 200px; max-height: 50dvh;
-      overflow-y: auto; line-height: 1.6; user-select: text; -webkit-user-select: text;
-    }
-    .prd-node-block { border-left: 3px solid var(--accent); padding-left: 0.75rem; margin-bottom: 1.25rem; }
-    .prd-node-block.verified { border-left-color: var(--success); }
-    .prd-node-title { color: var(--accent); font-weight: 700; font-size: 0.8rem; margin-bottom: 0.3rem; }
-    .prd-node-block.verified .prd-node-title { color: var(--success); }
-    .prd-node-meta { color: var(--text-secondary); font-size: 0.68rem; margin-bottom: 0.5rem; }
+    .prd-output { background: var(--bg-primary); border: 1px solid var(--border-bright); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; min-height: 200px; max-height: 50dvh; overflow-y: auto; line-height: 1.6; user-select: text; -webkit-user-select: text; }
+    .copy-btn { width: 100%; margin-top: 0.75rem; background: rgba(255, 103, 31, 0.1); border-color: var(--saffron); color: var(--saffron); }
 
-    /* Copy button */
-    .copy-btn {
-      width: 100%; margin-top: 0.75rem; background: rgba(255, 103, 31, 0.1);
-      border-color: var(--saffron); color: var(--saffron);
+    /* === ONBOARDING SYSTEM === */
+    #ob-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999;
+      display: none; transition: opacity 0.3s ease; backdrop-filter: blur(2px);
     }
-    .copy-btn:hover { background: rgba(255, 103, 31, 0.2); }
+    #ob-overlay.active { display: block; }
+    
+    /* The glowing cutout ring */
+    #ob-highlight {
+      position: absolute; border: 2px solid var(--accent); border-radius: 8px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.5), 0 0 15px rgba(0,229,255,0.5), inset 0 0 15px rgba(0,229,255,0.3);
+      pointer-events: none; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      opacity: 0;
+    }
+
+    #ob-card {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: var(--bg-secondary); border: 1px solid var(--accent); border-radius: 12px;
+      padding: 1.5rem; width: 90%; max-width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      display: flex; flex-direction: column; gap: 0.8rem; transition: transform 0.4s;
+    }
+    #ob-title { color: var(--accent); font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
+    #ob-text { color: var(--text-primary); font-size: 0.85rem; line-height: 1.5; margin: 0; }
+    .ob-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+    .ob-nav { display: flex; gap: 0.5rem; }
+    .ob-dots { display: flex; gap: 4px; }
+    .ob-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-color); }
+    .ob-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
 
     /* ================================================================
        MOBILE FIXES
        ================================================================ */
     @media (max-width: 768px) {
-
-      /* --- Header: Clearer placement to avoid overlaps --- */
-      .header {
-        padding: 0.5rem 0.5rem;
-        flex-wrap: nowrap;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .header-left { 
-        gap: 0.4rem; 
-        overflow: hidden; 
-        flex: 1;
-        min-width: 0;
-      }
-      .header-title { 
-        font-size: 0.9rem; 
-        display: flex;
-        flex-direction: column;
-        line-height: 1.1;
-        white-space: nowrap;
-      }
-      .header-title span {
-        font-size: 0.65rem;
-        margin-top: 2px;
-      }
-      .map-status { display: none; } /* shown in logger instead */
-      
+      .header { padding: 0.5rem 0.5rem; flex-wrap: nowrap; align-items: center; gap: 0.5rem; }
+      .header-left { gap: 0.4rem; overflow: hidden; flex: 1; min-width: 0; }
+      .header-title { font-size: 0.9rem; display: flex; flex-direction: column; line-height: 1.1; }
+      .header-title span { font-size: 0.65rem; margin-top: 2px; }
+      .map-status { display: none; } 
       .toolbar { flex-shrink: 0; }
-      .api-input { 
-        width: 110px; 
-        padding: 0.4rem 0.5rem; 
-        font-size: 0.7rem; 
-      }
-      .info-badge { 
-        font-size: 0.65rem; 
-        padding: 0.25rem 0.4rem; 
-        flex-shrink: 0;
-      }
-
-      /* --- Logger: tighter --- */
+      .api-input { width: 110px; padding: 0.4rem 0.5rem; font-size: 0.7rem; }
+      .info-badge { font-size: 0.65rem; padding: 0.25rem 0.4rem; flex-shrink: 0; }
       .logger { height: auto; min-height: 52px; padding: 0.35rem 0.75rem; font-size: 0.65rem; }
-
-      /* --- Sidebar: horizontal strip, scrollable --- */
+      
       .sidebar {
-        width: 100%;
-        height: 48px;
-        min-height: 48px;
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 0 0.75rem;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        gap: 0.5rem;
-        align-items: center;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
+        width: 100%; height: 48px; min-height: 48px; flex-direction: row; overflow-x: auto;
+        overflow-y: hidden; padding: 0 0.75rem; border-right: none; border-bottom: 1px solid var(--border-color);
+        gap: 0.5rem; align-items: center; scrollbar-width: none;
       }
       .sidebar::-webkit-scrollbar { display: none; }
       .sidebar-section { display: contents; }
       .sidebar-section h3 { display: none; }
       .sidebar-grid { flex-direction: row; gap: 0.4rem; display: contents; }
-      .palette-item {
-        flex-shrink: 0;
-        padding: 0.35rem 0.65rem;
-        font-size: 0.62rem;
-        border-radius: 4px;
-      }
-
-      /* --- Canvas: flex:1 min-height:0 fills remaining space --- */
+      .palette-item { flex-shrink: 0; padding: 0.35rem 0.65rem; font-size: 0.62rem; border-radius: 4px; }
+      
       .main-container { flex-direction: column; }
       .canvas { min-height: 0; }
+      
+      .footer { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); padding: 0.5rem 0.75rem; gap: 0.4rem; }
+      .footer button { padding: 0.6rem 0.25rem; font-size: 0.6rem; letter-spacing: 0; border-radius: 6px; }
 
-      /* --- Footer: 3x2 grid accommodating 6 buttons total --- */
-      .footer {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, auto);
-        padding: 0.5rem 0.75rem;
-        gap: 0.4rem;
-      }
-      .footer button {
-        padding: 0.6rem 0.25rem;
-        font-size: 0.6rem;
-        letter-spacing: 0;
-        border-radius: 6px;
-      }
-
-      /* Block: always show delete on mobile */
       .block-delete { display: flex !important; }
       .block { width: 155px; }
-
-      /* Modal: already bottom-sheet, just tighten */
       .modal-content { max-height: 88dvh; padding: 1rem 1rem 1.5rem; }
       .prd-output { max-height: 40dvh; font-size: 0.7rem; }
-    }
-
-    @media (max-width: 380px) {
-      .header-title { font-size: 0.8rem; }
-      .header-title span { font-size: 0.55rem; }
-      .api-input { width: 85px; }
     }
   </style>
 </head>
@@ -408,6 +325,7 @@
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key">
+      <button class="btn-help" onclick="app.startOnboarding()">?</button>
     </div>
   </div>
 
@@ -418,7 +336,7 @@
   </div>
 
   <div class="main-container">
-    <div class="sidebar">
+    <div class="sidebar" id="step-sidebar">
       <div class="sidebar-section">
         <h3>Core Nodes</h3>
         <div class="sidebar-grid">
@@ -447,17 +365,16 @@
     </div>
   </div>
 
-  <!-- FOOTER: 6 SLOTS PERFECTLY FILLING THE 3X2 MOBILE GRID -->
-  <div class="footer">
+  <div class="footer" id="step-footer">
     <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
     <button id="btn-validate" class="compile-btn" onclick="app.synthesizeArchitecture()">[⚡ Synth]</button>
     <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
     <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
     <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
-    <button id="btn-install" class="install-btn" style="display: inline-flex;" onclick="app.installPWA()">[↓ Install]</button>
+    <button id="btn-install" class="install-btn" style="display: none;" onclick="app.installPWA()">[↓ Install]</button>
   </div>
 
-  <!-- NODE EDITOR MODAL (bottom sheet) -->
+  <!-- NODE MODAL -->
   <div class="modal" id="node-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
@@ -465,151 +382,130 @@
       <input type="hidden" id="node-modal-id">
       <div class="form-group">
         <label class="form-label">Target Filename</label>
-        <input type="text" class="form-input" id="node-modal-filename" placeholder="e.g., App.jsx, schema.sql">
+        <input type="text" class="form-input" id="node-modal-filename">
       </div>
       <div class="form-group">
         <label class="form-label">AI Instructions <span>Context from connected inputs appended automatically.</span></label>
-        <textarea class="form-input form-textarea" id="node-modal-prompt" placeholder="Describe what this file should do..."></textarea>
+        <textarea class="form-input form-textarea" id="node-modal-prompt"></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">File Content <span>Edit AI output here manually if needed.</span></label>
-        <textarea class="form-input code-textarea" id="node-modal-code" placeholder="// Code will appear after synthesis..."></textarea>
+        <textarea class="form-input code-textarea" id="node-modal-code"></textarea>
       </div>
-      <button style="width:100%;background:var(--accent);color:#000;border:none;padding:0.9rem;font-size:0.95rem;font-weight:700;border-radius:8px;" onclick="app.saveNodeConfig()">Save Configuration</button>
+      <button style="width:100%;background:var(--accent);color:#000;border:none;padding:0.9rem;font-weight:700;border-radius:8px;" onclick="app.saveNodeConfig()">Save Configuration</button>
     </div>
   </div>
 
-  <!-- PRD VIEWER MODAL (bottom sheet) -->
+  <!-- PRD MODAL -->
   <div class="modal" id="prd-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('prd-modal')">✕</button>
-      <div class="modal-header">📋 Architecture PRD — Direct LLM Prompt</div>
-      <p style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;font-family:var(--font-mono);">
-        Copy this prompt → paste into Claude / GPT → first response builds your app.
-      </p>
-      <div id="prd-output" class="prd-output">Add nodes to generate PRD...</div>
+      <div class="modal-header">📋 Architecture PRD</div>
+      <p style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;">Copy this prompt → paste into Claude / GPT.</p>
+      <div id="prd-output" class="prd-output"></div>
       <button class="copy-btn" onclick="app.copyPRD()">📋 Copy Full PRD to Clipboard</button>
     </div>
   </div>
 
+  <!-- ONBOARDING OVERLAY -->
+  <div id="ob-overlay">
+    <div id="ob-highlight"></div>
+    <div id="ob-card">
+      <h3 id="ob-title">Title</h3>
+      <p id="ob-text">Description</p>
+      <div class="ob-controls">
+        <button onclick="app.endOnboarding()" style="background:transparent; border:none; color:var(--text-secondary); padding:0; text-transform:none;">Skip Tour</button>
+        <div class="ob-dots" id="ob-dots"></div>
+        <div class="ob-nav">
+          <button id="ob-prev" onclick="app.prevStep()" style="padding:0.4rem 0.8rem;"><</button>
+          <button id="ob-next" class="compile-btn" onclick="app.nextStep()" style="padding:0.4rem 0.8rem;">Next ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // ============================================
-    // LOGICHUB VIBECODER ENGINE — MOBILE OPTIMIZED
-    // ============================================
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); deferredPrompt = e;
+      const installBtn = document.getElementById('btn-install');
+      if (installBtn) installBtn.style.display = 'inline-block';
+    });
 
     class LogicMap {
       constructor() {
         this.id = "VIBE_" + Math.random().toString(36).substring(2, 8).toUpperCase();
-        this.blocks = [];
-        this.connections = [];
+        this.blocks = []; this.connections = [];
       }
-
       addBlock(type, x, y) {
         const block = {
           id: "NODE_" + Math.random().toString(36).substring(2, 8).toUpperCase(),
           type, label: type.toUpperCase() + " NODE",
-          filename: this.getDefaultFilename(type),
-          prompt: "", code: "", x, y,
-          status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: ""
+          filename: { ui: "Component.jsx", api: "route.js", database: "schema.sql", auth: "authMiddleware.js", util: "helpers.js", style: "styles.css", config: "config.json" }[type] || `file_${Date.now()}.js`,
+          prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: ""
         };
-        this.blocks.push(block);
-        return block;
+        this.blocks.push(block); return block;
       }
-
-      getDefaultFilename(type) {
-        return { ui: "Component.jsx", api: "route.js", database: "schema.sql",
-          auth: "authMiddleware.js", util: "helpers.js", style: "styles.css", config: "config.json" }[type] || `file_${Date.now()}.js`;
-      }
-
       removeBlock(id) {
         this.blocks = this.blocks.filter(b => b.id !== id);
         this.connections = this.connections.filter(c => c.from !== id && c.to !== id);
-        this.blocks.forEach(b => {
-          b.dependsOn = b.dependsOn.filter(d => d !== id);
-          b.connectedTo = b.connectedTo.filter(c => c !== id);
-        });
+        this.blocks.forEach(b => { b.dependsOn = b.dependsOn.filter(d => d !== id); b.connectedTo = b.connectedTo.filter(c => c !== id); });
       }
-
       connect(fromId, toId) {
-        if (fromId === toId) return false;
-        if (this.hasPath(toId, fromId)) return false;
-        if (this.connections.some(c => c.from === fromId && c.to === toId)) return false;
-        const from = this.blocks.find(b => b.id === fromId);
-        const to = this.blocks.find(b => b.id === toId);
+        if (fromId === toId || this.hasPath(toId, fromId) || this.connections.some(c => c.from === fromId && c.to === toId)) return false;
+        const from = this.blocks.find(b => b.id === fromId), to = this.blocks.find(b => b.id === toId);
         this.connections.push({ from: fromId, to: toId });
-        from.connectedTo.push(toId);
-        to.dependsOn.push(fromId);
-        return true;
+        from.connectedTo.push(toId); to.dependsOn.push(fromId); return true;
       }
-
       disconnect(fromId, toId) {
         this.connections = this.connections.filter(c => !(c.from === fromId && c.to === toId));
-        const from = this.blocks.find(b => b.id === fromId);
-        const to = this.blocks.find(b => b.id === toId);
+        const from = this.blocks.find(b => b.id === fromId), to = this.blocks.find(b => b.id === toId);
         if (from) from.connectedTo = from.connectedTo.filter(c => c !== toId);
         if (to) to.dependsOn = to.dependsOn.filter(d => d !== fromId);
       }
-
       hasPath(startId, targetId, visited = new Set()) {
-        if (startId === targetId) return true;
-        visited.add(startId);
-        const b = this.blocks.find(b => b.id === startId);
-        if (!b) return false;
-        for (let nxt of b.connectedTo) {
-          if (!visited.has(nxt) && this.hasPath(nxt, targetId, visited)) return true;
-        }
+        if (startId === targetId) return true; visited.add(startId);
+        const b = this.blocks.find(b => b.id === startId); if (!b) return false;
+        for (let nxt of b.connectedTo) if (!visited.has(nxt) && this.hasPath(nxt, targetId, visited)) return true;
         return false;
       }
-
       getTopologicalOrder() {
         const visited = new Set(), result = [];
         const visit = (id) => {
-          if (visited.has(id)) return;
-          visited.add(id);
+          if (visited.has(id)) return; visited.add(id);
           const b = this.blocks.find(b => b.id === id);
           if (b) { b.dependsOn.forEach(visit); result.push(b); }
         };
-        this.blocks.forEach(b => visit(b.id));
-        return result;
+        this.blocks.forEach(b => visit(b.id)); return result;
       }
-
-      isReadyForExport() {
-        return this.blocks.length > 0 && this.blocks.every(b => b.status === "VERIFIED");
-      }
-
+      isReadyForExport() { return this.blocks.length > 0 && this.blocks.every(b => b.status === "VERIFIED"); }
       buildPRD() {
-        if (this.blocks.length === 0) return "No nodes in architecture yet. Add nodes and configure them first.";
-        const order = this.getTopologicalOrder();
-        let prd = `# LOGICHUB ARCHITECTURE PRD\n# Map ID: ${this.id}\n# Nodes: ${this.blocks.length}\n\n`;
-        prd += `## MASTER BUILD INSTRUCTION\nYou are a senior full-stack developer. Build the following multi-file application exactly as specified. Each section defines one file. Respect all dependency relationships. Output each file clearly labelled.\n\n---\n\n`;
-        order.forEach((b, i) => {
+        if (this.blocks.length === 0) return "No nodes added.";
+        let prd = `# LOGICHUB MAP: ${this.id}\n## MASTER INSTRUCTION\nBuild the following multi-file app exactly as specified.\n\n---\n\n`;
+        this.getTopologicalOrder().forEach((b, i) => {
           const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.filename).filter(Boolean);
-          prd += `## FILE ${i+1}: ${b.filename}\n`;
-          prd += `Type: ${b.type.toUpperCase()}\n`;
-          prd += `Status: ${b.status}\n`;
+          prd += `## FILE ${i+1}: ${b.filename}\nType: ${b.type.toUpperCase()}\n`;
           if (deps.length) prd += `Depends on: ${deps.join(', ')}\n`;
-          prd += `\n### Instructions:\n${b.prompt || '(No specific instructions — infer from type and filename)'}\n`;
-          if (b.code) prd += `\n### Current Code (already verified):\n\`\`\`\n${b.code}\n\`\`\`\n`;
-          prd += `\n---\n\n`;
+          prd += `\n### Instructions:\n${b.prompt || '(Infer from filename)'}\n\n---\n\n`;
         });
-        prd += `## OUTPUT FORMAT\nFor each file above, respond with:\n### FILE: [filename]\n\`\`\`[language]\n[complete file content]\n\`\`\`\n\nDo not skip any file. Do not add unrequested files.`;
+        prd += `## OUTPUT FORMAT\nFor each file respond with:\n### FILE: [filename]\n\`\`\`\n[code]\n\`\`\`\n`;
         return prd;
       }
     }
 
-    // ============================================
-    // APP
-    // ============================================
     const app = {
       map: new LogicMap(),
-      isDragging: null,
-      dragOffset: { x: 0, y: 0 },
-      isDrawing: false,
-      sourceId: null,
-      apiKey: "",
-      deferredInstallPrompt: null,
-      isDragging: null, dragOffset: { x: 0, y: 0 },
-      isDrawing: false, sourceId: null, apiKey: "",
+      isDragging: null, dragOffset: { x: 0, y: 0 }, isDrawing: false, sourceId: null, apiKey: "",
+      
+      // Onboarding State
+      obSteps: [
+        { target: null, title: "Welcome to LogicHub", text: "Let's take a quick 5-step tour to learn how to architect and generate entire apps visually in the browser." },
+        { target: ".toolbar", title: "1. The AI Engine", text: "Paste your Gemini API Key here. LogicHub uses it to synthesize native code automatically based on your graph." },
+        { target: "#step-sidebar", title: "2. The Palette", text: "Tap or drag these blocks onto the canvas. They represent the different layers of your app (UI, Database, API, etc)." },
+        { target: "#canvas", title: "3. The Matrix Canvas", text: "Drag wires from the OUT port of one node to the IN port of another. Data flows left to right. Double-tap a node to configure its prompt." },
+        { target: "#step-footer", title: "4. Control Deck", text: "Once wired, hit [⚡ Synth] to auto-generate the code, [📋 PRD] to copy the prompts for an external LLM, or [📦 Export] to download a .ZIP." }
+      ],
+      currentStep: 0,
 
       init() {
         const savedKey = sessionStorage.getItem("LH_GEMINI_KEY");
@@ -617,30 +513,30 @@
         const savedMap = sessionStorage.getItem("LH_MAP_V2");
         if (savedMap) {
           const data = JSON.parse(savedMap);
-          this.map.blocks = data.blocks;
-          this.map.connections = data.connections;
-          this.map.id = data.id || this.map.id;
+          this.map.blocks = data.blocks; this.map.connections = data.connections; this.map.id = data.id || this.map.id;
         }
         this.setupEvents();
-        this.initInstallPrompt();
         this.render();
         this.log("Vibecoder Engine Booted", "success");
+
+        // Run Onboarding if first time
+        if (!localStorage.getItem('lh_onboarding_done')) {
+          setTimeout(() => this.startOnboarding(), 500);
+        }
       },
 
       setupEvents() {
         const canvas = document.getElementById("canvas");
         canvas.addEventListener("pointermove", (e) => {
           if (this.isDragging) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
+            e.preventDefault(); const rect = canvas.getBoundingClientRect();
             let x = Math.round((e.clientX - rect.left - this.dragOffset.x) / 12) * 12;
             let y = Math.round((e.clientY - rect.top - this.dragOffset.y) / 12) * 12;
             this.isDragging.x = x; this.isDragging.y = y;
             document.getElementById(this.isDragging.id).style.transform = `translate(${x}px,${y}px)`;
             this.renderConnections();
           } else if (this.isDrawing) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
+            e.preventDefault(); const rect = canvas.getBoundingClientRect();
             const endX = e.clientX - rect.left, endY = e.clientY - rect.top;
             const srcPos = this.getPortCenter(this.sourceId, 'out');
             if (!srcPos) return;
@@ -659,16 +555,13 @@
           }
         });
         document.getElementById("api-key").addEventListener("change", (e) => {
-          this.apiKey = e.target.value.trim();
-          sessionStorage.setItem("LH_GEMINI_KEY", this.apiKey);
+          this.apiKey = e.target.value.trim(); sessionStorage.setItem("LH_GEMINI_KEY", this.apiKey);
         });
       },
 
       getPortCenter(blockId, portType) {
-        const blockEl = document.getElementById(blockId);
-        if (!blockEl) return null;
-        const wrapper = blockEl.querySelector(`.port-wrapper.${portType}`);
-        if (!wrapper) return null;
+        const blockEl = document.getElementById(blockId); if (!blockEl) return null;
+        const wrapper = blockEl.querySelector(`.port-wrapper.${portType}`); if (!wrapper) return null;
         const canvasRect = document.getElementById('canvas').getBoundingClientRect();
         const r = wrapper.getBoundingClientRect();
         return { x: r.left + r.width/2 - canvasRect.left, y: r.top + r.height/2 - canvasRect.top };
@@ -678,19 +571,14 @@
         const canvas = document.getElementById("canvas");
         const x = Math.max(30, canvas.offsetWidth/2 - 87 + (Math.random()*60-30));
         const y = Math.max(30, canvas.offsetHeight/2 - 60 + (Math.random()*60-30));
-        this.map.addBlock(type, x, y);
-        this.render();
-        this.log(`[${type.toUpperCase()}] node deployed`, "info");
+        this.map.addBlock(type, x, y); this.render(); this.log(`[${type.toUpperCase()}] node deployed`, "info");
       },
 
       updateBlockStates() {
         this.map.blocks.forEach(b => {
           if (b.status === "GENERATING" || (b.code && b.status === "VERIFIED")) return;
           const isOrphaned = !this.map.connections.some(c => c.from === b.id || c.to === b.id);
-          const depsSatisfied = b.dependsOn.every(depId => {
-            const dep = this.map.blocks.find(x => x.id === depId);
-            return dep && dep.status === "VERIFIED";
-          });
+          const depsSatisfied = b.dependsOn.every(depId => this.map.blocks.find(x => x.id === depId)?.status === "VERIFIED");
           if (b.dependsOn.length > 0 && !depsSatisfied) b.status = "LOCKED";
           else if (isOrphaned && !b.code) b.status = "ORPHANED";
           else b.status = "PENDING";
@@ -699,21 +587,14 @@
 
       render() {
         this.updateBlockStates();
-        const container = document.getElementById("blocks-container");
-        container.innerHTML = "";
+        const container = document.getElementById("blocks-container"); container.innerHTML = "";
         this.map.blocks.forEach(b => {
-          const el = document.createElement("div");
-          el.className = `block state-${b.status.toLowerCase()}`;
-          el.id = b.id;
-          el.style.transform = `translate(${b.x}px,${b.y}px)`;
-          el.style.top = "0"; el.style.left = "0";
+          const el = document.createElement("div"); el.className = `block state-${b.status.toLowerCase()}`; el.id = b.id;
+          el.style.transform = `translate(${b.x}px,${b.y}px)`; el.style.top = "0"; el.style.left = "0";
           const icon = { PENDING:"◯", LOCKED:"🔒", GENERATING:"⚡", VERIFIED:"✓", ERROR:"✗", ORPHANED:"⚠" }[b.status] || "◯";
           el.innerHTML = `
             <div class="block-delete" onclick="app.removeBlock('${b.id}')">✕</div>
-            <div class="block-header">
-              <span class="block-type">[${b.type.toUpperCase()}]</span>
-              <span class="block-edit" onclick="app.openNodeEditor('${b.id}')">⚙ Config</span>
-            </div>
+            <div class="block-header"><span class="block-type">[${b.type.toUpperCase()}]</span><span class="block-edit" onclick="app.openNodeEditor('${b.id}')">⚙ Config</span></div>
             <input type="text" class="block-label" value="${b.label}" onchange="app.updateLabel('${b.id}',this.value)">
             <div class="block-file">${b.filename}</div>
             <div class="block-status">${icon} ${b.status}</div>
@@ -723,152 +604,85 @@
           el.addEventListener("pointerdown", (e) => {
             if (e.target.tagName==="INPUT" || e.target.classList.contains('block-edit') || e.target.closest('.port-wrapper')) return;
             const rect = document.getElementById("canvas").getBoundingClientRect();
-            this.isDragging = b;
-            this.dragOffset = { x: e.clientX - rect.left - b.x, y: e.clientY - rect.top - b.y };
+            this.isDragging = b; this.dragOffset = { x: e.clientX - rect.left - b.x, y: e.clientY - rect.top - b.y };
             el.classList.add("selected");
           });
-          el.addEventListener("dblclick", (e) => {
-            if (e.target.tagName !== "INPUT" && !e.target.closest('.port-wrapper')) this.openNodeEditor(b.id);
-          });
+          el.addEventListener("dblclick", (e) => { if (e.target.tagName !== "INPUT" && !e.target.closest('.port-wrapper')) this.openNodeEditor(b.id); });
           container.appendChild(el);
         });
-        requestAnimationFrame(() => this.renderConnections());
-        this.updateHeader();
-        this.save();
+        requestAnimationFrame(() => this.renderConnections()); this.updateHeader(); this.save();
       },
 
       renderConnections() {
-        const group = document.getElementById("connections-group");
-        let svg = "";
+        const group = document.getElementById("connections-group"); let svg = "";
         this.map.connections.forEach(c => {
-          const from = this.map.blocks.find(b => b.id === c.from);
-          const to = this.map.blocks.find(b => b.id === c.to);
+          const from = this.map.blocks.find(b => b.id === c.from), to = this.map.blocks.find(b => b.id === c.to);
           if (!from || !to) return;
-          const srcPos = this.getPortCenter(c.from, 'out');
-          const tgtPos = this.getPortCenter(c.to, 'in');
+          const srcPos = this.getPortCenter(c.from, 'out'), tgtPos = this.getPortCenter(c.to, 'in');
           if (!srcPos || !tgtPos) return;
           const cls = (from.status==="VERIFIED" && to.status==="VERIFIED") ? "arrow-path verified" : "arrow-path";
           const cx = Math.abs(tgtPos.x - srcPos.x) * 0.5;
-          svg += `<path class="${cls}" d="M ${srcPos.x} ${srcPos.y} C ${srcPos.x+cx} ${srcPos.y}, ${tgtPos.x-cx} ${tgtPos.y}, ${tgtPos.x} ${tgtPos.y}" onclick="app.map.disconnect('${c.from}','${c.to}');app.render();app.log('Wire removed','info');"></path>`;
+          svg += `<path class="${cls}" d="M ${srcPos.x} ${srcPos.y} C ${srcPos.x+cx} ${srcPos.y}, ${tgtPos.x-cx} ${tgtPos.y}, ${tgtPos.x} ${tgtPos.y}" onclick="app.map.disconnect('${c.from}','${c.to}');app.render();"></path>`;
         });
         group.innerHTML = svg;
       },
 
       updateHeader() {
         document.getElementById("block-count").textContent = `${this.map.blocks.length} nodes`;
-        const st = document.getElementById("map-status");
-        const exp = document.getElementById("btn-export");
-        const prd = document.getElementById("btn-prd");
-        if (this.map.isReadyForExport()) {
-          st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed";
-          exp.disabled = false; exp.className = "success";
-        } else {
-          st.textContent = "● ARCHITECTURE DRAFT"; st.className = "map-status";
-          exp.disabled = true; exp.className = "";
-        }
+        const st = document.getElementById("map-status"), exp = document.getElementById("btn-export"), prd = document.getElementById("btn-prd");
+        if (this.map.isReadyForExport()) { st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed"; exp.disabled = false; exp.className = "success"; }
+        else { st.textContent = "● ARCHITECTURE DRAFT"; st.className = "map-status"; exp.disabled = true; exp.className = ""; }
         prd.disabled = this.map.blocks.length === 0;
       },
 
-      startWire(e, id, type) {
-        e.stopPropagation(); e.preventDefault();
-        if (type==="out") {
-          e.target.releasePointerCapture(e.pointerId);
-          this.isDrawing = true; this.sourceId = id;
-          e.target.closest('.port-wrapper').classList.add('active');
-        }
-      },
-
+      startWire(e, id, type) { e.stopPropagation(); e.preventDefault(); if (type==="out") { e.target.releasePointerCapture(e.pointerId); this.isDrawing = true; this.sourceId = id; e.target.closest('.port-wrapper').classList.add('active'); } },
       endWire(e, id, type) {
         e.stopPropagation(); e.preventDefault();
         if (this.isDrawing && type==="in" && this.sourceId && this.sourceId !== id) {
-          if (this.map.connect(this.sourceId, id)) {
-            this.log("Nodes wired", "success"); this.render();
-          } else {
-            this.log("Invalid connection or cycle detected", "error");
-          }
+          if (this.map.connect(this.sourceId, id)) { this.log("Nodes wired", "success"); this.render(); }
+          else this.log("Cycle detected", "error");
         }
-        this.isDrawing = false; this.sourceId = null;
-        document.getElementById("drawing-path").setAttribute("d","");
-        document.querySelectorAll('.port-wrapper').forEach(el => el.classList.remove('active'));
+        this.isDrawing = false; this.sourceId = null; document.getElementById("drawing-path").setAttribute("d",""); document.querySelectorAll('.port-wrapper').forEach(el => el.classList.remove('active'));
       },
 
       removeBlock(id) { this.map.removeBlock(id); this.render(); },
       updateLabel(id, val) { const b = this.map.blocks.find(x=>x.id===id); if(b) b.label=val; this.save(); },
 
       openNodeEditor(id) {
-        const b = this.map.blocks.find(x=>x.id===id);
-        if (!b) return;
-        document.getElementById("node-modal-id").value = b.id;
-        document.getElementById("node-modal-header").innerHTML = `Configure <span style="color:#fff">${b.label}</span>`;
-        document.getElementById("node-modal-filename").value = b.filename;
-        document.getElementById("node-modal-prompt").value = b.prompt || "";
-        document.getElementById("node-modal-code").value = b.code || "";
+        const b = this.map.blocks.find(x=>x.id===id); if (!b) return;
+        document.getElementById("node-modal-id").value = b.id; document.getElementById("node-modal-header").innerHTML = `Configure <span style="color:#fff">${b.label}</span>`;
+        document.getElementById("node-modal-filename").value = b.filename; document.getElementById("node-modal-prompt").value = b.prompt || ""; document.getElementById("node-modal-code").value = b.code || "";
         document.getElementById("node-modal").classList.add("active");
       },
 
       saveNodeConfig() {
-        const id = document.getElementById("node-modal-id").value;
-        const b = this.map.blocks.find(x=>x.id===id);
+        const id = document.getElementById("node-modal-id").value, b = this.map.blocks.find(x=>x.id===id);
         if (b) {
-          b.filename = document.getElementById("node-modal-filename").value.trim();
-          b.prompt = document.getElementById("node-modal-prompt").value.trim();
+          b.filename = document.getElementById("node-modal-filename").value.trim(); b.prompt = document.getElementById("node-modal-prompt").value.trim();
           const newCode = document.getElementById("node-modal-code").value.trim();
           if (newCode !== b.code) { b.code = newCode; b.status = b.code ? "VERIFIED" : "PENDING"; }
         }
-        closeModal("node-modal");
-        this.render();
-        this.log("Node configured", "info");
+        closeModal("node-modal"); this.render();
       },
 
-      // === VIEW PRD ===
-      viewPRD() {
-        const prd = this.map.buildPRD();
-        // Render nicely in the modal
-        const container = document.getElementById("prd-output");
-        container.textContent = prd;
-        document.getElementById("prd-modal").classList.add("active");
-        this.log("PRD generated — copy and paste into your LLM", "accent");
-      },
-
+      viewPRD() { document.getElementById("prd-output").textContent = this.map.buildPRD(); document.getElementById("prd-modal").classList.add("active"); },
       copyPRD() {
         const prd = this.map.buildPRD();
-        navigator.clipboard.writeText(prd).then(() => {
-          this.log("PRD copied to clipboard ✓", "success");
-          closeModal("prd-modal");
-        }).catch(() => {
-          // Fallback for non-HTTPS or denied
-          const ta = document.createElement("textarea");
-          ta.value = prd;
-          ta.style.position = "fixed"; ta.style.opacity = "0";
-          document.body.appendChild(ta); ta.select();
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-          this.log("PRD copied (fallback) ✓", "success");
-          closeModal("prd-modal");
-        });
+        navigator.clipboard.writeText(prd).then(() => { this.log("PRD copied ✓", "success"); closeModal("prd-modal"); })
+        .catch(() => { const ta = document.createElement("textarea"); ta.value = prd; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); this.log("PRD copied ✓", "success"); closeModal("prd-modal"); });
       },
 
-      // === AI SYNTHESIS (GEMINI) ===
       async synthesizeArchitecture() {
         if (!this.apiKey) return this.log("Gemini API Key required in header.", "error");
-        const order = this.map.getTopologicalOrder();
-        if (!order.length) return this.log("No nodes to synthesize.", "error");
+        const order = this.map.getTopologicalOrder(); if (!order.length) return this.log("No nodes.", "error");
         for (const block of order) {
           if (block.status === "VERIFIED" && block.code) continue;
-          block.status = "GENERATING"; this.render();
-          this.log(`Synthesizing ${block.filename}...`, "accent");
+          block.status = "GENERATING"; this.render(); this.log(`Synthesizing ${block.filename}...`, "accent");
           try {
-            await this.generateNodeCode(block);
-            block.status = "VERIFIED";
-            this.log(`Verified: ${block.filename}`, "success");
-          } catch(err) {
-            block.status = "ERROR"; block.errorMsg = err.message;
-            this.log(`Error in ${block.filename}: ${err.message}`, "error");
-            break;
-          }
+            await this.generateNodeCode(block); block.status = "VERIFIED"; this.log(`Verified: ${block.filename}`, "success");
+          } catch(err) { block.status = "ERROR"; block.errorMsg = err.message; this.log(`Error: ${err.message}`, "error"); break; }
           this.render();
         }
-        this.log("Synthesis complete.", "info");
       },
 
       async generateNodeCode(block) {
@@ -877,112 +691,102 @@
         let prompt = `You are an expert software architect building: ${block.filename}\nRole: ${block.type}\n\n`;
         if (block.prompt) prompt += `Instructions:\n${block.prompt}\n\n`;
         if (ctx) prompt += `Context from connected files:\n${ctx}\n\n`;
-        prompt += `Output ONLY the raw code. No markdown blocks. No explanations.`;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.apiKey}`;
-        const res = await fetch(url, {
-          method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] })
-        });
+        prompt += `Output ONLY the raw code. No markdown blocks.`;
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.apiKey}`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
         const data = await res.json();
-        if (data.error) throw new Error(data.error.message);
-        if (!data.candidates?.[0]) throw new Error("No response from Gemini.");
+        if (data.error) throw new Error(data.error.message); if (!data.candidates?.[0]) throw new Error("No response.");
         let code = data.candidates[0].content.parts[0].text.trim();
-        if (code.startsWith("```")) {
-          const lines = code.split("\n"); lines.shift();
-          if (lines[lines.length-1].startsWith("```")) lines.pop();
-          code = lines.join("\n").trim();
-        }
+        if (code.startsWith("```")) { const lines = code.split("\n"); lines.shift(); if (lines[lines.length-1].startsWith("```")) lines.pop(); code = lines.join("\n").trim(); }
         block.code = code;
       },
 
-      // === ZIP EXPORT ===
       exportZip() {
-        if (!this.map.isReadyForExport()) return this.log("Complete synthesis first.", "error");
-        this.log("Compiling ZIP...", "accent");
-        const zip = new JSZip();
-        this.map.blocks.forEach(b => { if(b.code) zip.file(b.filename, b.code); });
-        zip.generateAsync({type:"blob"}).then(content => {
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(content);
-          a.download = `VibeProject_${this.map.id}.zip`;
-          a.click();
-          this.log("Download started", "success");
-        });
+        if (!this.map.isReadyForExport()) return;
+        const zip = new JSZip(); this.map.blocks.forEach(b => { if(b.code) zip.file(b.filename, b.code); });
+        zip.generateAsync({type:"blob"}).then(content => { const a = document.createElement("a"); a.href = URL.createObjectURL(content); a.download = `VibeProject_${this.map.id}.zip`; a.click(); });
       },
 
-      clearMap() { this.map = new LogicMap(); this.render(); this.log("Canvas wiped", "info"); },
-
+      clearMap() { this.map = new LogicMap(); this.render(); },
+      installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => deferredPrompt = null); } },
       log(msg, type="info") {
         const ids = ["log-1","log-2","log-3"];
-        for (let i=0;i<2;i++) {
-          const el = document.getElementById(ids[i]);
-          const nxt = document.getElementById(ids[i+1]);
-          el.textContent = nxt.textContent; el.className = nxt.className;
-        }
-        const last = document.getElementById("log-3");
-        last.textContent = `>>> ${msg}`; last.className = `log-line ${type}`;
+        for (let i=0;i<2;i++) { const el = document.getElementById(ids[i]); const nxt = document.getElementById(ids[i+1]); el.textContent = nxt.textContent; el.className = nxt.className; }
+        const last = document.getElementById("log-3"); last.textContent = `>>> ${msg}`; last.className = `log-line ${type}`;
       },
+      save() { sessionStorage.setItem("LH_MAP_V2", JSON.stringify({ id: this.map.id, blocks: this.map.blocks, connections: this.map.connections })); },
 
-      initInstallPrompt() {
-        const installBtn = document.getElementById("btn-install");
-        if (!installBtn) return;
-
-        window.addEventListener("beforeinstallprompt", (e) => {
-          e.preventDefault();
-          this.deferredInstallPrompt = e;
-          installBtn.style.display = "inline-flex";
-          this.log("Install available — tap [↓ Install]", "accent");
+      // === ONBOARDING ===
+      startOnboarding() {
+        this.currentStep = 0;
+        document.getElementById('ob-overlay').classList.add('active');
+        this.renderOnboardingStep();
+      },
+      endOnboarding() {
+        document.getElementById('ob-overlay').classList.remove('active');
+        localStorage.setItem('lh_onboarding_done', 'true');
+      },
+      nextStep() {
+        if (this.currentStep < this.obSteps.length - 1) { this.currentStep++; this.renderOnboardingStep(); } 
+        else this.endOnboarding();
+      },
+      prevStep() {
+        if (this.currentStep > 0) { this.currentStep--; this.renderOnboardingStep(); }
+      },
+      renderOnboardingStep() {
+        const step = this.obSteps[this.currentStep];
+        document.getElementById('ob-title').innerText = step.title;
+        document.getElementById('ob-text').innerText = step.text;
+        
+        // Dots logic
+        const dotsContainer = document.getElementById('ob-dots');
+        dotsContainer.innerHTML = '';
+        this.obSteps.forEach((_, i) => {
+          const dot = document.createElement('div');
+          dot.className = `ob-dot ${i === this.currentStep ? 'active' : ''}`;
+          dotsContainer.appendChild(dot);
         });
 
-        window.addEventListener("appinstalled", () => {
-          this.deferredInstallPrompt = null;
-          installBtn.style.display = "none";
-          this.log("LogicHub installed successfully", "success");
-        });
-      },
+        // Navigation text
+        document.getElementById('ob-prev').style.visibility = this.currentStep === 0 ? 'hidden' : 'visible';
+        document.getElementById('ob-next').innerText = this.currentStep === this.obSteps.length - 1 ? 'Finish' : 'Next >';
 
-      async installPWA() {
-        if (!this.deferredInstallPrompt) {
-          this.log("Install prompt is not ready yet", "warning");
-          return;
+        // Highlight logic
+        const highlight = document.getElementById('ob-highlight');
+        if (step.target) {
+          const targetEl = document.querySelector(step.target);
+          if (targetEl) {
+            const rect = targetEl.getBoundingClientRect();
+            highlight.style.opacity = 1;
+            // Pad the highlight slightly
+            highlight.style.top = (rect.top - 5) + 'px';
+            highlight.style.left = (rect.left - 5) + 'px';
+            highlight.style.width = (rect.width + 10) + 'px';
+            highlight.style.height = (rect.height + 10) + 'px';
+          } else {
+            highlight.style.opacity = 0;
+          }
+        } else {
+          highlight.style.opacity = 0;
         }
-
-        this.deferredInstallPrompt.prompt();
-        const choiceResult = await this.deferredInstallPrompt.userChoice;
-        this.log(`Install prompt: ${choiceResult.outcome}`, choiceResult.outcome === "accepted" ? "success" : "info");
-        this.deferredInstallPrompt = null;
-
-        const installBtn = document.getElementById("btn-install");
-        if (installBtn) installBtn.style.display = "none";
-      },
-
-      save() {
-        sessionStorage.setItem("LH_MAP_V2", JSON.stringify({
-          id: this.map.id, blocks: this.map.blocks, connections: this.map.connections
-        }));
       }
     };
 
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
-
-    // Close modal on backdrop tap
-    document.querySelectorAll('.modal').forEach(m => {
-      m.addEventListener('pointerdown', e => { if(e.target === m) closeModal(m.id); });
-    });
-
+    document.querySelectorAll('.modal').forEach(m => { m.addEventListener('pointerdown', e => { if(e.target === m) closeModal(m.id); }); });
     window.addEventListener("DOMContentLoaded", () => app.init());
+    window.addEventListener("resize", () => { if(document.getElementById('ob-overlay').classList.contains('active')) app.renderOnboardingStep(); });
+
   </script>
 
   <!-- SW Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => console.log('[LogicHub SW] registered', registration.scope))
-          .catch(e => console.warn('[LogicHub SW] failed', e));
+        navigator.serviceWorker.register('/sw.js').catch(e => console.warn('[LogicHub SW] failed', e));
       });
     }
   </script>
 </body>
 </html>
+
 
