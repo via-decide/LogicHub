@@ -351,6 +351,60 @@
     .forge-section h4 { margin: 0 0 0.35rem; font-size: 0.88rem; font-family: var(--font-mono); }
     .forge-section p { margin: 0 0 0.65rem; color: var(--text-secondary); font-size: 0.72rem; }
     .forge-pro-btn { border-color: var(--saffron); color: var(--saffron); }
+    .engine-sandbox-wrap {
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: 12px;
+      padding: 0.85rem;
+      margin-top: 0.8rem;
+      background: linear-gradient(155deg, rgba(0, 229, 255, 0.05), rgba(255, 255, 255, 0.02));
+    }
+    .engine-sandbox-title {
+      margin: 0 0 0.25rem;
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .engine-sandbox-subtitle {
+      margin: 0 0 0.65rem;
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+    }
+    .engine-sandbox-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+    .engine-tool-btn {
+      width: 100%;
+      min-height: 50px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(3, 5, 8, 0.88);
+      color: var(--text-primary);
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.68rem;
+      line-height: 1.25;
+      font-weight: 600;
+      padding: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .engine-tool-btn:hover {
+      transform: translateY(-1px);
+    }
+    .engine-tool-btn.active {
+      border-color: #00e5ff;
+      background: linear-gradient(145deg, rgba(0, 229, 255, 0.22), rgba(255, 255, 255, 0.12));
+      color: #cfffff;
+      box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.6), 0 8px 22px rgba(0, 229, 255, 0.28), inset 0 0 20px rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
 
     /* ================================================================
        MOBILE FIXES
@@ -1044,6 +1098,50 @@
     const FORGE_LIMIT_KEY = "LH_FORGE_COMMUNITY_USAGE";
     const FORGE_LIMIT_MAX = 3;
     const FORGE_RESET_MS = 5 * 60 * 60 * 1000;
+    const ENGINE_TOOL_CONFIG = [
+      { key: "tokenSqueeze", label: "🗜️ TokenSqueeze", systemInstruction: "CRITICAL: Compress language aggressively. Remove filler and verbosity while preserving exact intent and constraints." },
+      { key: "macroForge", label: "📊 MacroForge", systemInstruction: "CRITICAL: Prioritize macro-level architecture first. Start with modules, data flow, and interfaces before implementation details." },
+      { key: "jsonCore", label: "🏗️ JSONCore", systemInstruction: "CRITICAL: Output ONLY valid minified JSON. No markdown wrappers." },
+      { key: "contextWeaver", label: "🕸️ ContextWeaver", systemInstruction: "CRITICAL: Merge upstream node context into coherent shared assumptions. Resolve contradictions explicitly before output." },
+      { key: "payloadPruner", label: "✂️ PayloadPruner", systemInstruction: "CRITICAL: Strip non-essential examples, commentary, and repetition. Keep only actionable implementation payload." },
+      { key: "traceTrimmer", label: "🐛 TraceTrimmer", systemInstruction: "CRITICAL: Do not expose chain-of-thought or internal reasoning traces. Return conclusions and executable artifacts only." },
+      { key: "toolForge", label: "⚙️ ToolForge", systemInstruction: "CRITICAL: Shape output for tool invocation reliability. Prefer deterministic schemas, explicit fields, and predictable naming." },
+      { key: "dataMasker", label: "🛡️ DataMasker", systemInstruction: "CRITICAL: Redact secrets, credentials, tokens, and personal data. Replace sensitive values with clear placeholders." },
+      { key: "domScrubber", label: "🧹 DOMScrubber", systemInstruction: "CRITICAL: Return only the semantic HTML skeleton. Do not include styling, classes, or SVGs." }
+    ];
+    const engineSandboxState = {};
+
+    function toggleEngineTool(toolKey) {
+      if (!(toolKey in engineSandboxState)) return;
+      engineSandboxState[toolKey] = !engineSandboxState[toolKey];
+      const btn = document.querySelector(`[data-engine-tool="${toolKey}"]`);
+      if (btn) btn.classList.toggle("active", engineSandboxState[toolKey]);
+    }
+
+    function renderEngineSandboxGrid() {
+      const grid = document.getElementById("engine-sandbox-grid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      ENGINE_TOOL_CONFIG.forEach((tool) => {
+        if (!(tool.key in engineSandboxState)) engineSandboxState[tool.key] = false;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "engine-tool-btn";
+        button.dataset.engineTool = tool.key;
+        button.textContent = tool.label;
+        button.addEventListener("click", () => toggleEngineTool(tool.key));
+        grid.appendChild(button);
+      });
+    }
+
+    function buildInternalPRD() {
+      const selected = ENGINE_TOOL_CONFIG.filter((tool) => engineSandboxState[tool.key]);
+      const internalPRD = selected.map((tool) => tool.systemInstruction).join("\n");
+      return {
+        selectedTools: selected.map((tool) => tool.key),
+        internalPRD
+      };
+    }
 
     function getForgeUsageState() {
       const now = Date.now();
@@ -1080,6 +1178,7 @@
       if (modal) {
         modal.classList.add("active");
         updateForgeLimitUI();
+        renderEngineSandboxGrid();
       }
     }
 
@@ -1104,6 +1203,7 @@
       if (!prdContext || prdContext.startsWith("No nodes")) {
         return app.log("Add and configure nodes before publishing", "error");
       }
+      const engineSandbox = buildInternalPRD();
 
       const originalLabel = button ? button.textContent : "";
       if (button) { button.disabled = true; button.textContent = "SYNTHESIZING..."; }
@@ -1112,7 +1212,12 @@
         const res = await fetch("/api/publish", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ appName, prdContext })
+          body: JSON.stringify({
+            appName,
+            prdContext,
+            internalPRD: engineSandbox.internalPRD,
+            selectedEngineTools: engineSandbox.selectedTools
+          })
         });
         const data = await res.json();
         if (!res.ok || !data?.url) throw new Error(data?.error || "Publish failed");
@@ -1153,6 +1258,11 @@
         <label class="form-label" for="forge-app-name">App Name</label>
         <input type="text" id="forge-app-name" class="form-input" placeholder="Enter app name for your Daxini Space">
       </div>
+      <div class="engine-sandbox-wrap">
+        <h4 class="engine-sandbox-title">Engine Sandbox</h4>
+        <p class="engine-sandbox-subtitle">Arm preprocessing modules to assemble an internal PRD before synthesis.</p>
+        <div class="engine-sandbox-grid" id="engine-sandbox-grid"></div>
+      </div>
 
       <div class="forge-section">
         <h4>Community Forge — Free</h4>
@@ -1177,5 +1287,4 @@
   </script>
 </body>
 </html>
-
 
