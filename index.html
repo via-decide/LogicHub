@@ -1225,7 +1225,8 @@
       if (!gate.allowed) {
         const nextResetTime = getNextResetTime();
         updateForgeLimitUI();
-        return app.log(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`, "error");
+        alert(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`);
+        return;
       }
 
       const prdContext = app.map.buildPRD();
