@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
 
-  const { appName, prdContext } = req.body;
+  const { appName, prdContext, internalPRD = '' } = req.body;
 
   if (!appName || !prdContext) {
     return res.status(400).json({ error: 'Missing appName or prdContext' });
@@ -20,6 +20,12 @@ export default async function handler(req, res) {
     // -----------------------------------------------------------------
     const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
+    const baseSystemInstruction = "You are the Daxini LogicHub engine. The user will provide a Product Requirements Document (PRD). You must output a completely functional, single-file HTML application using Vanilla JS and CSS. DO NOT wrap the output in markdown code blocks like ```html. Output ONLY the raw HTML code, nothing else. It must have a dark mode aesthetic (#030508).";
+    const dynamicInstruction = typeof internalPRD === 'string' ? internalPRD.trim() : '';
+    const assembledSystemInstruction = dynamicInstruction
+      ? `${baseSystemInstruction}\n\n# INTERNAL PRD MODIFIERS\n${dynamicInstruction}`
+      : baseSystemInstruction;
+
     const geminiRes = await fetch(geminiEndpoint, {
       method: 'POST',
       headers: {
@@ -27,7 +33,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         systemInstruction: {
-          parts: [{ text: "You are the Daxini LogicHub engine. The user will provide a Product Requirements Document (PRD). You must output a completely functional, single-file HTML application using Vanilla JS and CSS. DO NOT wrap the output in markdown code blocks like ```html. Output ONLY the raw HTML code, nothing else. It must have a dark mode aesthetic (#030508)." }]
+          parts: [{ text: assembledSystemInstruction }]
         },
         contents: [{
           parts: [{ text: prdContext }]
