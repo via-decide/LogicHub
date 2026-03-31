@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="LogicHub">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <title>LOGICHUB v2 — Vibecoder Architecture</title>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -425,13 +425,6 @@
   </div>
 
   <script>
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault(); deferredPrompt = e;
-      const installBtn = document.getElementById('btn-install');
-      if (installBtn) installBtn.style.display = 'inline-block';
-    });
-
     class LogicMap {
       constructor() {
         this.id = "VIBE_" + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -506,6 +499,7 @@
         { target: "#step-footer", title: "4. Control Deck", text: "Once wired, hit [⚡ Synth] to auto-generate the code, [📋 PRD] to copy the prompts for an external LLM, or [📦 Export] to download a .ZIP." }
       ],
       currentStep: 0,
+      deferredInstallPrompt: null,
 
       init() {
         const savedKey = sessionStorage.getItem("LH_GEMINI_KEY");
@@ -556,6 +550,12 @@
         });
         document.getElementById("api-key").addEventListener("change", (e) => {
           this.apiKey = e.target.value.trim(); sessionStorage.setItem("LH_GEMINI_KEY", this.apiKey);
+        });
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          this.deferredInstallPrompt = e;
+          const installBtn = document.getElementById('btn-install');
+          if (installBtn) installBtn.style.display = 'inline-block';
         });
       },
 
@@ -707,7 +707,12 @@
       },
 
       clearMap() { this.map = new LogicMap(); this.render(); },
-      installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => deferredPrompt = null); } },
+      installPWA() {
+        if (this.deferredInstallPrompt) {
+          this.deferredInstallPrompt.prompt();
+          this.deferredInstallPrompt.userChoice.then(() => { this.deferredInstallPrompt = null; });
+        }
+      },
       log(msg, type="info") {
         const ids = ["log-1","log-2","log-3"];
         for (let i=0;i<2;i++) { const el = document.getElementById(ids[i]); const nxt = document.getElementById(ids[i+1]); el.textContent = nxt.textContent; el.className = nxt.className; }
@@ -782,11 +787,10 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(e => console.warn('[LogicHub SW] failed', e));
+        navigator.serviceWorker.register('./sw.js').catch(e => console.warn('[LogicHub SW] failed', e));
       });
     }
   </script>
 </body>
 </html>
-
 
