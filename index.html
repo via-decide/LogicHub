@@ -398,7 +398,7 @@
 
   <div class="footer" id="step-footer">
     <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
-    <button id="btn-validate" class="compile-btn" onclick="app.synthesizeArchitecture()">[⚡ Synth]</button>
+    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">[⚡ Synth]</button>
     <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
     <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
     <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
@@ -985,6 +985,17 @@
       }
     };
 
+
+
+    function openForgeModal() {
+      const modal = document.getElementById("forge-modal");
+      if (modal) modal.classList.add("active");
+    }
+
+    function executeCommunitySynthesis() {
+      closeModal("forge-modal");
+      app.synthesizeArchitecture();
+    }
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
     document.querySelectorAll('.modal').forEach(m => { m.addEventListener('pointerdown', e => { if(e.target === m) closeModal(m.id); }); });
     window.addEventListener("DOMContentLoaded", () => app.init());
@@ -992,6 +1003,20 @@
 
   </script>
 
+
+
+  <!-- DAXINI FORGE MODAL -->
+  <div class="modal" id="forge-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('forge-modal')">✕</button>
+      <div class="modal-header">⚒️ Daxini Forge</div>
+      <p style="font-size:0.75rem;color:var(--text-secondary);margin:0 0 1rem;">Choose your synthesis path.</p>
+      <div style="display:grid;gap:0.75rem;">
+        <button class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Architect (Free)</button>
+        <button style="width:100%;border-color:var(--saffron);color:var(--saffron);" onclick="alert('Private Architect is coming soon.')">Private Architect (Pro)</button>
+      </div>
+    </div>
+  </div>
   <!-- SW Registration -->
   <script>
     if ('serviceWorker' in navigator) {
