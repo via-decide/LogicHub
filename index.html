@@ -99,11 +99,15 @@
     .btn-help:hover { border-color: var(--accent); color: var(--accent); }
 
     /* === LOGGER === */
-    .logger {
+    .logger-row {
       padding: 0.4rem 1.5rem; background: var(--bg-primary); border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem;
+      z-index: 99; flex-shrink: 0;
+    }
+    .logger {
       font-family: var(--font-mono); font-size: 0.72rem; height: 52px;
       overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
-      z-index: 99; flex-shrink: 0;
+      min-width: 0; flex: 1;
     }
     .log-line { margin: 1px 0; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; line-height: 1.4; flex-shrink: 0; }
     .log-line.success { color: var(--success); }
@@ -312,17 +316,19 @@
 
     /* === DAXINI FORGE === */
     .forge-fab {
-      position: fixed;
-      right: 30px;
-      bottom: 30px;
-      z-index: 2600;
-      padding: 0.9rem 1.15rem;
-      border-radius: 999px;
+      position: static;
+      z-index: 1;
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
       border: 1px solid rgba(0, 229, 255, 0.65);
       background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(3, 5, 8, 0.95));
       color: var(--accent);
       box-shadow: 0 0 24px rgba(0, 229, 255, 0.45), 0 0 44px rgba(0, 229, 255, 0.2);
       letter-spacing: 0.8px;
+      font-size: 0.72rem;
+      line-height: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .forge-modal-shell {
       width: min(520px, 94vw);
@@ -358,7 +364,14 @@
       .toolbar { flex-shrink: 0; }
       .api-input { width: 110px; padding: 0.4rem 0.5rem; font-size: 0.7rem; }
       .info-badge { font-size: 0.65rem; padding: 0.25rem 0.4rem; flex-shrink: 0; }
-      .logger { height: auto; min-height: 52px; padding: 0.35rem 0.75rem; font-size: 0.65rem; }
+      .logger-row {
+        padding: 0.35rem 0.75rem;
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+      .logger { height: auto; min-height: 52px; font-size: 0.65rem; }
+      .forge-fab { width: 100%; padding: 0.55rem 0.8rem; text-align: center; }
       
       .sidebar {
         width: 100%; height: 48px; min-height: 48px; flex-direction: row; overflow-x: auto;
@@ -393,15 +406,18 @@
       <div class="info-badge" id="block-count">0 nodes</div>
     </div>
     <div class="toolbar">
-      <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key">
+      <input type="password" id="api-key" class="api-input" placeholder="BYOK: Gemini API (Optional)">
       <button class="btn-help" onclick="app.startOnboarding()">?</button>
     </div>
   </div>
 
-  <div class="logger">
-    <div class="log-line info" id="log-1">>> SYSTEM BOOTING...</div>
-    <div class="log-line info" id="log-2">>> READY TO VIBECODE</div>
-    <div class="log-line success" id="log-3">>> AWAITING ARCHITECTURE</div>
+  <div class="logger-row">
+    <div class="logger">
+      <div class="log-line info" id="log-1">>> SYSTEM BOOTING...</div>
+      <div class="log-line info" id="log-2">>> READY TO VIBECODE</div>
+      <div class="log-line success" id="log-3">>> AWAITING ARCHITECTURE</div>
+    </div>
+    <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE &amp; SHARE</button>
   </div>
 
   <div class="main-container">
@@ -1128,10 +1144,6 @@
 
   </script>
 
-
-
-  <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE &amp; SHARE</button>
-
   <!-- DAXINI FORGE MODAL -->
   <div class="modal" id="forge-modal">
     <div class="forge-modal-shell">
@@ -1165,6 +1177,5 @@
   </script>
 </body>
 </html>
-
 
 
