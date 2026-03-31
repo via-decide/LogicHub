@@ -308,6 +308,44 @@
     .ob-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-color); }
     .ob-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
 
+
+
+    /* === DAXINI FORGE === */
+    .forge-fab {
+      position: fixed;
+      right: 30px;
+      bottom: 30px;
+      z-index: 2600;
+      padding: 0.9rem 1.15rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 229, 255, 0.65);
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(3, 5, 8, 0.95));
+      color: var(--accent);
+      box-shadow: 0 0 24px rgba(0, 229, 255, 0.45), 0 0 44px rgba(0, 229, 255, 0.2);
+      letter-spacing: 0.8px;
+    }
+    .forge-modal-shell {
+      width: min(520px, 94vw);
+      margin: auto;
+      border-radius: 18px;
+      padding: 1.25rem;
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      background: linear-gradient(165deg, rgba(7, 10, 18, 0.95), rgba(2, 3, 8, 0.92));
+      box-shadow: 0 10px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(0, 229, 255, 0.17);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .forge-section {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.85rem;
+      margin-top: 0.8rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .forge-section h4 { margin: 0 0 0.35rem; font-size: 0.88rem; font-family: var(--font-mono); }
+    .forge-section p { margin: 0 0 0.65rem; color: var(--text-secondary); font-size: 0.72rem; }
+    .forge-pro-btn { border-color: var(--saffron); color: var(--saffron); }
+
     /* ================================================================
        MOBILE FIXES
        ================================================================ */
@@ -987,15 +1025,102 @@
 
 
 
-    function openForgeModal() {
-      const modal = document.getElementById("forge-modal");
-      if (modal) modal.classList.add("active");
+    const FORGE_LIMIT_KEY = "LH_FORGE_COMMUNITY_USAGE";
+    const FORGE_LIMIT_MAX = 3;
+    const FORGE_RESET_MS = 5 * 60 * 60 * 1000;
+
+    function getForgeUsageState() {
+      const now = Date.now();
+      let state = { count: 0, windowStart: now };
+      try {
+        const raw = localStorage.getItem(FORGE_LIMIT_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Number.isFinite(parsed.count) && Number.isFinite(parsed.windowStart)) state = parsed;
+        }
+      } catch (_) {}
+      if (now - state.windowStart >= FORGE_RESET_MS) state = { count: 0, windowStart: now };
+      localStorage.setItem(FORGE_LIMIT_KEY, JSON.stringify(state));
+      return state;
     }
 
-    function executeCommunitySynthesis() {
-      closeModal("forge-modal");
-      app.synthesizeArchitecture();
+    function consumeForgeUsage() {
+      const state = getForgeUsageState();
+      if (state.count >= FORGE_LIMIT_MAX) return { allowed: false, remaining: 0 };
+      state.count += 1;
+      localStorage.setItem(FORGE_LIMIT_KEY, JSON.stringify(state));
+      return { allowed: true, remaining: Math.max(0, FORGE_LIMIT_MAX - state.count) };
     }
+
+    function updateForgeLimitUI() {
+      const state = getForgeUsageState();
+      const remaining = Math.max(0, FORGE_LIMIT_MAX - state.count);
+      const limitEl = document.getElementById("forge-limit");
+      if (limitEl) limitEl.textContent = `${remaining} / ${FORGE_LIMIT_MAX} remaining this 5-hour session`;
+    }
+
+    function openForgeModal() {
+      const modal = document.getElementById("forge-modal");
+      if (modal) {
+        modal.classList.add("active");
+        updateForgeLimitUI();
+      }
+    }
+
+    function closeForgeModal() {
+      const modal = document.getElementById("forge-modal");
+      if (modal) modal.classList.remove("active");
+    }
+
+    async function executeCommunitySynthesis() {
+      const appNameInput = document.getElementById("forge-app-name");
+      const button = document.getElementById("forge-community-btn");
+      const appName = (appNameInput?.value || "").trim();
+      if (!appName) return app.log("App name is required for publishing", "error");
+
+      const gate = consumeForgeUsage();
+      if (!gate.allowed) {
+        updateForgeLimitUI();
+        return app.log("Community Forge limit reached. Wait 5 hours to reset.", "error");
+      }
+
+      const prdContext = app.map.buildPRD();
+      if (!prdContext || prdContext.startsWith("No nodes")) {
+        return app.log("Add and configure nodes before publishing", "error");
+      }
+
+      const originalLabel = button ? button.textContent : "";
+      if (button) { button.disabled = true; button.textContent = "SYNTHESIZING..."; }
+
+      try {
+        const res = await fetch("/api/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appName, prdContext })
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.url) throw new Error(data?.error || "Publish failed");
+
+        closeForgeModal();
+        app.log("Forge publish complete", "success");
+
+        if (navigator.share) {
+          await navigator.share({ title: appName, text: "Check out my Daxini Space", url: data.url });
+        } else {
+          window.open(data.url, "_blank", "noopener,noreferrer");
+        }
+      } catch (err) {
+        app.log(`Forge publish failed: ${err.message}`, "error");
+      } finally {
+        if (button) { button.disabled = false; button.textContent = originalLabel || "Community Forge"; }
+        updateForgeLimitUI();
+      }
+    }
+
+    function executeProSynthesis() {
+      alert("$49 Upgrade required");
+    }
+
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
     document.querySelectorAll('.modal').forEach(m => { m.addEventListener('pointerdown', e => { if(e.target === m) closeModal(m.id); }); });
     window.addEventListener("DOMContentLoaded", () => app.init());
@@ -1005,15 +1130,28 @@
 
 
 
+  <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE &amp; SHARE</button>
+
   <!-- DAXINI FORGE MODAL -->
   <div class="modal" id="forge-modal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal('forge-modal')">✕</button>
-      <div class="modal-header">⚒️ Daxini Forge</div>
-      <p style="font-size:0.75rem;color:var(--text-secondary);margin:0 0 1rem;">Choose your synthesis path.</p>
-      <div style="display:grid;gap:0.75rem;">
-        <button class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Architect (Free)</button>
-        <button style="width:100%;border-color:var(--saffron);color:var(--saffron);" onclick="alert('Private Architect is coming soon.')">Private Architect (Pro)</button>
+    <div class="forge-modal-shell">
+      <button class="modal-close" onclick="closeForgeModal()">✕</button>
+      <div class="modal-header">⚒️ Daxini Forge Modal</div>
+      <div class="form-group">
+        <label class="form-label" for="forge-app-name">App Name</label>
+        <input type="text" id="forge-app-name" class="form-input" placeholder="Enter app name for your Daxini Space">
+      </div>
+
+      <div class="forge-section">
+        <h4>Community Forge — Free</h4>
+        <p id="forge-limit">3 / 3 remaining this 5-hour session</p>
+        <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Forge</button>
+      </div>
+
+      <div class="forge-section">
+        <h4>Private Architect — Pro</h4>
+        <p>Reserved for private synthesis workflows.</p>
+        <button class="forge-pro-btn" style="width:100%;" onclick="executeProSynthesis()">Private Architect</button>
       </div>
     </div>
   </div>
