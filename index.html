@@ -1095,9 +1095,10 @@
 
 
 
-    const FORGE_LIMIT_KEY = "LH_FORGE_COMMUNITY_USAGE";
+    const FORGE_LIMIT_KEY = "dh_gen_count";
     const FORGE_LIMIT_MAX = 3;
-    const FORGE_RESET_MS = 5 * 60 * 60 * 1000;
+    const FORGE_RESET_HOURS = [0, 5, 10, 15, 20];
+    const FORGE_LAST_BLOCK_KEY = "dh_gen_reset_block";
     const ENGINE_TOOL_CONFIG = [
       { key: "tokenSqueeze", label: "🗜️ TokenSqueeze", systemInstruction: "CRITICAL: Compress language aggressively. Remove filler and verbosity while preserving exact intent and constraints." },
       { key: "macroForge", label: "📊 MacroForge", systemInstruction: "CRITICAL: Prioritize macro-level architecture first. Start with modules, data flow, and interfaces before implementation details." },
@@ -1143,37 +1144,64 @@
       };
     }
 
+    function padTwo(num) {
+      return String(num).padStart(2, "0");
+    }
+
+    function getCurrentResetBlock() {
+      const now = new Date();
+      const currentHour = now.getHours();
+      let blockHour = FORGE_RESET_HOURS[0];
+      for (const hour of FORGE_RESET_HOURS) {
+        if (currentHour >= hour) blockHour = hour;
+      }
+      return `${now.getFullYear()}-${padTwo(now.getMonth() + 1)}-${padTwo(now.getDate())}-${padTwo(blockHour)}`;
+    }
+
+    function formatHourLabel(hour24) {
+      const period = hour24 >= 12 ? "PM" : "AM";
+      const hour12 = hour24 % 12 || 12;
+      return `${padTwo(hour12)}:00 ${period}`;
+    }
+
+    function getNextResetTime() {
+      const currentHour = new Date().getHours();
+      for (const hour of FORGE_RESET_HOURS) {
+        if (hour > currentHour) return formatHourLabel(hour);
+      }
+      return formatHourLabel(FORGE_RESET_HOURS[0]);
+    }
+
+    function syncForgeCounterToResetBlock() {
+      const currentBlock = getCurrentResetBlock();
+      const lastBlock = localStorage.getItem(FORGE_LAST_BLOCK_KEY);
+      if (lastBlock !== currentBlock) {
+        localStorage.setItem(FORGE_LIMIT_KEY, "0");
+        localStorage.setItem(FORGE_LAST_BLOCK_KEY, currentBlock);
+      }
+    }
+
     function getForgeUsageState() {
-      const now = Date.now();
-      let state = { count: 0, windowStart: now };
-      try {
-        const raw = localStorage.getItem(FORGE_LIMIT_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Number.isFinite(parsed.count) && Number.isFinite(parsed.windowStart)) state = parsed;
-        }
-      } catch (_) {}
-      if (now - state.windowStart >= FORGE_RESET_MS) state = { count: 0, windowStart: now };
-      localStorage.setItem(FORGE_LIMIT_KEY, JSON.stringify(state));
-      return state;
+      syncForgeCounterToResetBlock();
+      const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+      return { count: Number.isFinite(count) && count > 0 ? count : 0 };
     }
 
     function consumeForgeUsage() {
       const state = getForgeUsageState();
       if (state.count >= FORGE_LIMIT_MAX) return { allowed: false, remaining: 0 };
-      state.count += 1;
-      localStorage.setItem(FORGE_LIMIT_KEY, JSON.stringify(state));
       return { allowed: true, remaining: Math.max(0, FORGE_LIMIT_MAX - state.count) };
     }
 
     function updateForgeLimitUI() {
       const state = getForgeUsageState();
-      const remaining = Math.max(0, FORGE_LIMIT_MAX - state.count);
-      const limitEl = document.getElementById("forge-limit");
-      if (limitEl) limitEl.textContent = `${remaining} / ${FORGE_LIMIT_MAX} remaining this 5-hour session`;
+      const nextResetTime = getNextResetTime();
+      const limitEl = document.getElementById("forge-limits-text");
+      if (limitEl) limitEl.textContent = `Limit: ${state.count}/${FORGE_LIMIT_MAX}. Resets at ${nextResetTime}`;
     }
 
     function openForgeModal() {
+      syncForgeCounterToResetBlock();
       const modal = document.getElementById("forge-modal");
       if (modal) {
         modal.classList.add("active");
@@ -1195,8 +1223,9 @@
 
       const gate = consumeForgeUsage();
       if (!gate.allowed) {
+        const nextResetTime = getNextResetTime();
         updateForgeLimitUI();
-        return app.log("Community Forge limit reached. Wait 5 hours to reset.", "error");
+        return app.log(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`, "error");
       }
 
       const prdContext = app.map.buildPRD();
@@ -1219,8 +1248,20 @@
             selectedEngineTools: engineSandbox.selectedTools
           })
         });
-        const data = await res.json();
-        if (!res.ok || !data?.url) throw new Error(data?.error || "Publish failed");
+        let data;
+        try {
+          data = await res.json();
+        } catch (_) {
+          throw new Error("Publish failed: invalid server response");
+        }
+        if (!res.ok) throw new Error(data?.error || "Publish failed");
+        if (data?.success) {
+          if (!data.url) throw new Error("Publish failed: missing share URL");
+          const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+          localStorage.setItem(FORGE_LIMIT_KEY, String((Number.isFinite(count) ? count : 0) + 1));
+        } else {
+          throw new Error(data?.error || "Publish failed");
+        }
 
         closeForgeModal();
         app.log("Forge publish complete", "success");
@@ -1266,7 +1307,7 @@
 
       <div class="forge-section">
         <h4>Community Forge — Free</h4>
-        <p id="forge-limit">3 / 3 remaining this 5-hour session</p>
+        <p id="forge-limits-text">Limit: 0/3. Resets at 05:00 AM</p>
         <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Forge</button>
       </div>
 
@@ -1287,4 +1328,3 @@
   </script>
 </body>
 </html>
-
