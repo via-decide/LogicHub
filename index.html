@@ -708,11 +708,10 @@
       
       // Onboarding Guide
       obSteps: [
-        { target: null, title: "Welcome to LogicHub", text: "The world's first instant architecture engine. Visually map out apps, synthesize native code via AI, and export instantly." },
-        { target: ".toolbar", title: "1. The AI Engine", text: "Paste your Gemini API Key here. LogicHub uses it to synthesize your code automatically based on your graph architecture." },
-        { target: "#step-sidebar", title: "2. The Palette", text: "Drag blocks onto the canvas: UI components, API routes, databases, auth layers, helpers. Each becomes a file." },
-        { target: "#canvas", title: "3. The Matrix Canvas", text: "Wire nodes together: drag from OUT (right) to IN (left). Data flows left-to-right. Double-tap to configure each node." },
-        { target: "#step-footer", title: "4. Control Deck", text: "[⚡ Synth] → generates code. [📋 PRD] → generates LLM prompts. [📦 Export] → ZIP of files. [📱 APK] → Build Android App." }
+        { target: "#step-sidebar", title: "Add Your First Node", text: "Pick a Core Node from the left panel — UI, API, DB, or AUTH — and drop it on the canvas." },
+        { target: "#canvas", title: "Wire Your Logic", text: "Connect nodes by dragging from one output to the next input. Your architecture builds visually." },
+        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit 📋 PRD to get a structured prompt ready to paste into Claude or GPT." },
+        { target: "#btn-apk", title: "Export Your APK", text: "Hit 📱 APK to compile a native Android app from your architecture in under 60 seconds." }
       ],
       currentStep: 0,
       deferredInstallPrompt: null,
