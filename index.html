@@ -949,6 +949,7 @@
           ].join("\n");
         }).join("\n");
 
+        const modeDirectives = mode === "minimal"
         const directives = mode === "minimal"
           ? [
               "- implement each node in strict execution order.",
@@ -963,6 +964,29 @@
               "- return code that compiles or runs without additional scaffolding or TODO placeholders.",
               "- enforce strict separation of concerns between UI, API, data, auth, util, and config layers."
             ];
+
+        const decisionUxMandates = [
+          "- implement onboarding hook with one 5-second clarity line.",
+          "- implement visible progress indicator with step counter and depth counter.",
+          "- return a maximum of 2 options at every decision state.",
+          "- implement a WHY THIS WON block in the final recommendation.",
+          "- implement a YOU CHOSE THIS confirmation line in the final recommendation.",
+          "- implement price anchoring with MRP and current price in all purchase comparisons.",
+          "- implement loss framing that highlights how the user avoids a bad choice.",
+          "- implement a visual winner highlight with higher contrast and larger size.",
+          "- implement micro-feedback on every swipe interaction.",
+          "- implement explicit skip and select actions with distinct labels and handling.",
+          "- implement uncertainty removal line in the final result screen.",
+          "- implement trust signals with source tags and logic tags per recommendation.",
+          "- implement bias alignment line that states based on your priorities.",
+          "- implement progressive narrowing UI that reduces choices at each step.",
+          "- implement pattern interrupt via scene variation during multi-step flow.",
+          "- implement variable reveal that keeps the next item unknown until reveal.",
+          "- implement an effort loop with multiple steps before final result.",
+          "- implement cognitive chunking using short blocks only.",
+          "- implement attention anchors with color-coded signals.",
+          "- implement immediate action CTA after result delivery."
+        ];
 
         return [
           "# LOGICHUB INTERNAL PRD ENGINE",
@@ -979,6 +1003,8 @@
           contracts || "- no nodes defined.",
           "",
           "## 4) IMPLEMENTATION DIRECTIVES",
+          ...modeDirectives,
+          ...decisionUxMandates,
           ...directives,
           "",
           "## 5) EDGE CASES + FAILSAFE CONDITIONS",
