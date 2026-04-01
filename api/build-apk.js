@@ -61,9 +61,6 @@ export default async function handler(req, res) {
     if (apkSize < 500 * 1024) {
       return res.status(500).json({ error: "APK build output is under 500KB and considered invalid." });
     }
-    if (apkSize < 1024 * 1024) {
-      return res.status(500).json({ error: "APK build output is under 1MB and considered incomplete." });
-    }
 
     return res.status(200).json({
       success: true,

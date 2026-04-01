@@ -75,10 +75,14 @@
       flex-shrink: 0;
     }
     .header-left { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
-    .header-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; white-space: nowrap;}
-    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top; margin-left: 0.45rem; display: inline-block; }
-    .map-status { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; white-space: nowrap;}
-    .map-status.confirmed { color: var(--success); text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);}
+    .header-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; white-space: nowrap; display: flex; align-items: baseline; gap: 0.45rem;}
+    .header-title .wordmark-separator { color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; }
+    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top; display: inline-block; }
+    .map-status { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; white-space: nowrap;}
+    .map-status.state-idle { color: #444; }
+    .map-status.state-ready { color: #f59e0b; animation: pulse-ready 1.6s ease-in-out infinite; }
+    .map-status.state-active { color: var(--accent); animation: pulse-active 0.8s ease-in-out infinite; }
+    .map-status.state-complete { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
     .info-badge {
       font-family: var(--font-mono); font-size: 0.7rem; padding: 0.3rem 0.6rem;
       background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent);
@@ -97,6 +101,33 @@
       cursor: pointer; font-family: var(--font-mono); font-weight: bold; transition: all 0.2s;
     }
     .btn-help:hover { border-color: var(--accent); color: var(--accent); }
+    .toolbar-help-wrap { position: relative; display: flex; align-items: center; }
+    .header-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      padding: 0.55rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-bright);
+      background: rgba(3, 5, 8, 0.96);
+      color: var(--text-primary);
+      font-size: 0.68rem;
+      line-height: 1.4;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 120;
+    }
+    .toolbar-help-wrap:hover .header-tooltip,
+    .toolbar-help-wrap:focus-within .header-tooltip,
+    .header-tooltip.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
 
     /* === LOGGER === */
     .logger-row {
@@ -210,6 +241,8 @@
     .block.state-orphaned .block-status { background: var(--state-orphaned); color: var(--bg-primary); }
 
     @keyframes pulse-cyber { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); } }
+    @keyframes pulse-ready { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+    @keyframes pulse-active { 0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(0, 229, 255, 0.45); } 50% { opacity: 0.5; text-shadow: 0 0 2px rgba(0, 229, 255, 0.15); } }
 
     /* === CONNECTIONS === */
     .arrow-path {
@@ -429,7 +462,8 @@
     @media (max-width: 768px) {
       .header { padding: 0.5rem 0.5rem; flex-wrap: nowrap; align-items: center; gap: 0.5rem; }
       .header-left { gap: 0.4rem; overflow: hidden; flex: 1; min-width: 0; }
-      .header-title { font-size: 0.9rem; display: flex; flex-direction: column; line-height: 1.1; }
+      .header-title { font-size: 0.9rem; display: flex; flex-direction: column; line-height: 1.1; gap: 0.1rem; }
+      .header-title .wordmark-separator { display: none; }
       .header-title span { font-size: 0.65rem; margin-top: 2px; }
       .map-status { display: none; } 
       .toolbar { flex-shrink: 0; }
@@ -472,18 +506,21 @@
 
   <div class="header">
     <div class="header-left">
-      <div class="header-title">LOGICHUB<span>VIBECODER</span></div>
-      <div class="map-status" id="map-status">● AWAITING SYNTHESIS</div>
+      <div class="header-title">LOGICHUB<span class="wordmark-separator">//</span><span>VIBECODER</span></div>
+      <div class="map-status state-idle" id="map-status">AWAITING ARCHITECTURE</div>
       <div class="info-badge" id="block-count">0 nodes</div>
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="BYOK: Gemini API (Optional)">
-      <button
-        class="btn-help"
-        onclick="app.startOnboarding()"
-        title="Add nodes from the panel to begin architecting your app."
-        aria-label="Add nodes from the panel to begin architecting your app."
-      >ⓘ</button>
+      <div class="toolbar-help-wrap">
+        <button
+          class="btn-help"
+          onclick="toggleHeaderTooltip()"
+          aria-label="Architecture help"
+          type="button"
+        >ⓘ</button>
+        <div id="header-help-tooltip" class="header-tooltip" role="tooltip">Add nodes from the left panel to begin architecting your app.</div>
+      </div>
     </div>
   </div>
 
@@ -551,7 +588,7 @@
         <textarea class="form-input form-textarea" id="node-modal-prompt"></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">File Content <span>Edit AI output here manually if needed.</span></label>
+        <label class="form-label" id="node-modal-code-label">File Content <span id="node-modal-code-hint">Define expected output structure (optional).</span></label>
         <textarea class="form-input code-textarea" id="node-modal-code"></textarea>
       </div>
       <button style="width:100%;background:var(--accent);color:#000;border:none;padding:0.9rem;font-weight:700;border-radius:8px;" onclick="app.saveNodeConfig()">Save Configuration</button>
@@ -575,10 +612,6 @@
       <button class="modal-close" onclick="closeModal('apk-modal')">✕</button>
       <div class="modal-header">📱 Building Executable APK</div>
       <p style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;">Build pipeline status appears below with step-by-step progress.</p>
-      <div class="progress-bar"><div class="progress-fill" id="apk-progress"></div></div>
-      <div class="apk-status-output" id="apk-output"></div>
-      <button class="apk-btn" id="apk-download-btn" style="display:none; width:100%;" onclick="app.downloadAPK()">⬇ Download APK (v1.0.0)</button>
-      <button id="apk-zip-fallback-btn" style="display:none; width:100%; margin-top: 8px;" onclick="app.downloadZIPFallback()">⬇ Download ZIP Fallback</button>
       <p id="apk-status-intro" style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;">Preparing deterministic build pipeline...</p>
       <div class="progress-bar"><div class="progress-fill" id="apk-progress"></div></div>
       <div class="apk-status-output" id="apk-output"></div>
@@ -617,7 +650,7 @@
           id: "NODE_" + Math.random().toString(36).substring(2, 8).toUpperCase(),
           type, label: type.toUpperCase() + " NODE",
           filename: { ui: "Component.jsx", api: "route.js", database: "schema.sql", auth: "authMiddleware.js", util: "helpers.js", style: "styles.css", config: "config.json" }[type] || `file_${Date.now()}.js`,
-          prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: ""
+          prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: "", synthesized: false
         };
         this.blocks.push(block); return block;
       }
@@ -729,15 +762,14 @@
     const app = {
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 }, isDrawing: false, sourceId: null, apiKey: "",
-      apkBuildInProgress: false, apkBlob: null, zipFallbackBlob: null,
-      apkBuildInProgress: false, apkBlob: null, apkZipBlob: null,
+      apkBuildInProgress: false, apkBlob: null, zipFallbackBlob: null, apkZipBlob: null,
       
       // Onboarding Guide
       obSteps: [
         { target: "#step-sidebar", title: "Add Your First Node", text: "Pick a Core Node from the left panel — UI, API, DB, or AUTH — and drop it on the canvas." },
         { target: "#canvas", title: "Wire Your Logic", text: "Connect nodes by dragging from one output to the next input. Your architecture builds visually." },
-        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit 📋 PRD to get a structured prompt ready to paste into Claude or GPT." },
-        { target: "#btn-apk", title: "Export Your APK", text: "Hit 📱 APK to compile a native Android app from your architecture in under 60 seconds." }
+        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit PRD to get a structured prompt ready to paste into Claude or GPT." },
+        { target: "#btn-apk", title: "Export Your APK", text: "Hit APK to compile a native Android app from your architecture in under 60 seconds." }
       ],
       currentStep: 0,
       deferredInstallPrompt: null,
@@ -865,11 +897,17 @@
       updateHeader() {
         document.getElementById("block-count").textContent = `${this.map.blocks.length} nodes`;
         const st = document.getElementById("map-status"), exp = document.getElementById("btn-export"), apk = document.getElementById("btn-apk"), prd = document.getElementById("btn-prd");
-        if (this.map.isReadyForExport()) { 
-          st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed"; 
+        if (window.synthesisComplete) {
+          st.textContent = "SYNTHESIS COMPLETE"; st.className = "map-status state-complete";
           exp.disabled = false; exp.className = "";
-        } else { 
-          st.textContent = "● ARCHITECTURE DRAFT"; st.className = "map-status"; 
+        } else if (this.map.blocks.some((b) => b.status === "GENERATING")) {
+          st.textContent = "SYNTHESISING..."; st.className = "map-status state-active";
+          exp.disabled = true; exp.className = "";
+        } else if (this.map.connections.length > 0) {
+          st.textContent = "READY TO SYNTHESISE"; st.className = "map-status state-ready";
+          exp.disabled = true; exp.className = "";
+        } else {
+          st.textContent = "AWAITING ARCHITECTURE"; st.className = "map-status state-idle";
           exp.disabled = true; exp.className = "";
         }
         apk.style.display = 'inline-block';
@@ -894,6 +932,8 @@
         const b = this.map.blocks.find(x=>x.id===id); if (!b) return;
         document.getElementById("node-modal-id").value = b.id; document.getElementById("node-modal-header").innerHTML = `Configure <span style="color:#fff">${b.label}</span>`;
         document.getElementById("node-modal-filename").value = b.filename; document.getElementById("node-modal-prompt").value = b.prompt || ""; document.getElementById("node-modal-code").value = b.code || "";
+        const codeHint = document.getElementById("node-modal-code-hint");
+        if (codeHint) codeHint.textContent = b.synthesized ? "Review and edit AI output." : "Define expected output structure (optional).";
         document.getElementById("node-modal").classList.add("active");
       },
 
@@ -919,12 +959,13 @@
         if (!this.apiKey) return this.log("Gemini API Key required in header.", "error");
         const order = this.map.getTopologicalOrder(); if (!order.length) return this.log("No nodes.", "error");
         window.synthesisComplete = false;
+        this.updateHeader();
         let synthesisFailed = false;
         for (const block of order) {
           if (block.status === "VERIFIED" && block.code) continue;
           block.status = "GENERATING"; this.render(); this.log(`Synthesizing ${block.filename}...`, "accent");
           try {
-            await this.generateNodeCode(block); block.status = "VERIFIED"; this.log(`Verified: ${block.filename}`, "success");
+            await this.generateNodeCode(block); block.status = "VERIFIED"; block.synthesized = true; this.log(`Verified: ${block.filename}`, "success");
           } catch(err) { block.status = "ERROR"; block.errorMsg = err.message; this.log(`Error: ${err.message}`, "error"); synthesisFailed = true; break; }
           this.render();
         }
@@ -983,7 +1024,10 @@
       },
 
       async buildAPK() {
-        if (!window.synthesisComplete) return this.log("Run synthesis first to generate your APK.", "warning");
+        if (!window.synthesisComplete) {
+          this.showToast("Run synthesis first to generate your APK.");
+          return;
+        }
         if (!this.map.isReadyForExport()) return this.log("Synthesis required before APK build", "error");
         if (this.apkBuildInProgress) return this.log("APK build already in progress", "error");
         
@@ -997,6 +1041,10 @@
         
         dlBtn.style.display = "none";
         zipFallbackBtn.style.display = "none";
+        if (!window.synthesisComplete) {
+          dlBtn.style.display = "none";
+          zipFallbackBtn.style.display = "none";
+        }
         output.innerHTML = "";
         progress.style.width = "0%";
         if (statusIntro) statusIntro.textContent = "Following build pipeline with deterministic steps:";
@@ -1008,41 +1056,55 @@
         };
 
         const stages = [
-          { key: "assets", label: "Assembling web assets", status: "pending" },
-          { key: "inject", label: "Injecting into Capacitor shell", status: "pending" },
-          { key: "gradle", label: "Running Gradle build", status: "pending" },
-          { key: "package", label: "Packaging APK", status: "pending" }
+          { label: "Assembling web assets", status: "pending" },
+          { label: "Injecting into Capacitor shell", status: "pending" },
+          { label: "Running Gradle build", status: "pending" },
+          { label: "Packaging APK", status: "pending" }
         ];
-
+        const stageLines = [];
         const renderStageList = () => {
-          stages.forEach(s => addLog(`[${s.status === "done" ? "x" : " "}] ${s.label}`, "info"));
+          output.innerHTML = "";
+          stages.forEach((stage, index) => {
+            const marker = stage.status === "done" ? "[x]" : "[ ]";
+            const type = stage.status === "done" ? "success" : "info";
+            const line = document.createElement("div");
+            line.className = `apk-line ${type}`;
+            line.textContent = `${marker} ${stage.label}`;
+            output.appendChild(line);
+            stageLines[index] = line;
+          });
+        };
+        const completeStage = (index) => {
+          stages[index].status = "done";
+          if (stageLines[index]) {
+            stageLines[index].className = "apk-line success";
+            stageLines[index].textContent = `[x] ${stages[index].label}`;
+          }
         };
 
         try {
           renderStageList();
-          stages[0].status = "done";
           addLog("→ Assembling web assets...", "progress");
           this.zipFallbackBlob = await this.createZipBlob();
+          completeStage(0);
           progress.style.width = "25%";
-          addLog("✓ Assembled web assets", "success");
 
-          stages[1].status = "done";
           addLog("→ Injecting into Capacitor shell (android/app/src/main/assets/public)...", "progress");
           const apkData = await this.generateRealAPK(this.zipFallbackBlob);
+          completeStage(1);
           progress.style.width = "60%";
-          addLog("✓ Assets copied before capacitor copy android", "success");
 
-          stages[2].status = "done";
           addLog("→ Running Gradle build (assembleDebug)...", "progress");
+          completeStage(2);
           progress.style.width = "85%";
           addLog("✓ Gradle output path: app/build/outputs/apk/debug/app-debug.apk", "success");
 
-          stages[3].status = "done";
           addLog("→ Packaging APK...", "progress");
 
           if (apkData.size < 500 * 1024) {
             throw new Error("Generated APK is under 500KB and treated as failed.");
           }
+          completeStage(3);
           if (apkData.size < 1024 * 1024) {
             addLog("⚠ APK is smaller than 1MB; build may be incomplete.", "error");
           }
@@ -1056,6 +1118,7 @@
           dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${apkSizeMB}MB)`;
           dlBtn.style.display = "inline-block";
           zipFallbackBtn.style.display = "inline-block";
+          this.updateInstallButtonVisibility();
           this.log("APK Ready! Download from modal.", "apk");
         } catch (error) {
           this.apkBlob = null;
@@ -1063,6 +1126,7 @@
           addLog("APK build failed. Your ZIP is still available as a fallback.", "error");
           addLog(error.message, "error");
           zipFallbackBtn.style.display = "inline-block";
+          this.updateInstallButtonVisibility();
           this.log("APK build failed. ZIP fallback remains available.", "error");
         } finally {
           this.apkBuildInProgress = false;
@@ -1126,7 +1190,26 @@
         return this.downloadZIPFallback();
       },
 
-      clearMap() { this.map = new LogicMap(); window.synthesisComplete = false; this.render(); },
+      clearMap() { this.map = new LogicMap(); window.synthesisComplete = false; this.apkBlob = null; this.updateInstallButtonVisibility(); this.render(); },
+
+      showToast(message) {
+        const toast = document.createElement("div");
+        toast.textContent = message;
+        toast.style.position = "fixed";
+        toast.style.bottom = "88px";
+        toast.style.left = "50%";
+        toast.style.transform = "translateX(-50%)";
+        toast.style.background = "rgba(3,5,8,0.96)";
+        toast.style.color = "#fff";
+        toast.style.padding = "0.6rem 0.9rem";
+        toast.style.border = "1px solid rgba(255,255,255,0.2)";
+        toast.style.borderRadius = "8px";
+        toast.style.fontSize = "0.72rem";
+        toast.style.zIndex = "3000";
+        toast.style.boxShadow = "0 10px 22px rgba(0,0,0,0.45)";
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1800);
+      },
       
       log(msg, type="info") {
         const ids = ["log-1","log-2","log-3"];
@@ -1140,15 +1223,26 @@
       initInstallPrompt() {
         const installBtn = document.getElementById("btn-install");
         if (!installBtn) return;
+        installBtn.style.display = "none";
+        installBtn.disabled = true;
+        installBtn.title = "Install becomes available after APK export.";
         window.addEventListener("beforeinstallprompt", (e) => {
           e.preventDefault(); this.deferredInstallPrompt = e;
-          installBtn.style.display = "inline-block";
-          this.log("Install available — tap [↓ Install]", "accent");
+          this.updateInstallButtonVisibility();
         });
         window.addEventListener("appinstalled", () => {
           this.deferredInstallPrompt = null; installBtn.style.display = "none";
           this.log("LogicHub installed successfully", "success");
         });
+      },
+
+      updateInstallButtonVisibility() {
+        const installBtn = document.getElementById("btn-install");
+        if (!installBtn) return;
+        const canInstall = Boolean(window.synthesisComplete && this.apkBlob && this.deferredInstallPrompt);
+        installBtn.style.display = canInstall ? "inline-block" : "none";
+        installBtn.disabled = !canInstall;
+        installBtn.title = canInstall ? "" : "Install becomes available after APK export.";
       },
 
       async installPWA() {
@@ -1179,8 +1273,15 @@
       },
       renderOnboardingStep() {
         const step = this.obSteps[this.currentStep];
-        document.getElementById('ob-title').innerText = step.title;
-        document.getElementById('ob-text').innerText = step.text;
+        const fallbackSteps = [
+          { target: "#step-sidebar", title: "Add Your First Node", text: "Pick a Core Node from the left panel — UI, API, DB, or AUTH — and drop it on the canvas." },
+          { target: "#canvas", title: "Wire Your Logic", text: "Connect nodes by dragging from one output to the next input. Your architecture builds visually." },
+          { target: "#btn-prd", title: "Generate Your PRD", text: "Hit PRD to get a structured prompt ready to paste into Claude or GPT." },
+          { target: "#btn-apk", title: "Export Your APK", text: "Hit APK to compile a native Android app from your architecture in under 60 seconds." }
+        ];
+        const safeStep = step && step.title && step.text ? step : fallbackSteps[this.currentStep];
+        document.getElementById('ob-title').innerText = safeStep.title;
+        document.getElementById('ob-text').innerText = safeStep.text;
         
         const dotsContainer = document.getElementById('ob-dots'); dotsContainer.innerHTML = '';
         this.obSteps.forEach((_, i) => {
@@ -1192,8 +1293,8 @@
         document.getElementById('ob-next').innerText = this.currentStep === this.obSteps.length - 1 ? 'Finish' : 'Next >';
 
         const highlight = document.getElementById('ob-highlight');
-        if (step.target) {
-          const targetEl = document.querySelector(step.target);
+        if (safeStep.target || step?.target) {
+          const targetEl = document.querySelector((safeStep && safeStep.target) || step.target);
           if (targetEl) {
             const rect = targetEl.getBoundingClientRect();
             highlight.style.opacity = 1;
@@ -1210,8 +1311,8 @@
 
     const FORGE_LIMIT_KEY = "dh_gen_count";
     const FORGE_LIMIT_MAX = 3;
-    const FORGE_RESET_HOURS = [0, 5, 10, 15, 20];
-    const FORGE_LAST_BLOCK_KEY = "dh_gen_reset_block";
+    const RESET_BLOCKS = [0, 5, 10, 15, 20];
+    const FORGE_LAST_BLOCK_KEY = "dh_last_reset_block";
     const ENGINE_TOOL_CONFIG = [
       { key: "tokenSqueeze", label: "🗜️ TokenSqueeze", systemInstruction: "CRITICAL: Compress language aggressively. Remove filler and verbosity while preserving exact intent and constraints." },
       { key: "macroForge", label: "📊 MacroForge", systemInstruction: "CRITICAL: Prioritize macro-level architecture first. Start with modules, data flow, and interfaces before implementation details." },
@@ -1261,36 +1362,24 @@
       return String(num).padStart(2, "0");
     }
 
-    function getCurrentResetBlock() {
-      const now = new Date();
-      const currentHour = now.getHours();
-      let blockHour = FORGE_RESET_HOURS[0];
-      for (const hour of FORGE_RESET_HOURS) {
-        if (currentHour >= hour) blockHour = hour;
-      }
-      return `${now.getFullYear()}-${padTwo(now.getMonth() + 1)}-${padTwo(now.getDate())}-${padTwo(blockHour)}`;
-    }
-
-    function formatHourLabel(hour24) {
-      const period = hour24 >= 12 ? "PM" : "AM";
-      const hour12 = hour24 % 12 || 12;
-      return `${padTwo(hour12)}:00 ${period}`;
-    }
-
     function getNextResetTime() {
-      const currentHour = new Date().getHours();
-      for (const hour of FORGE_RESET_HOURS) {
-        if (hour > currentHour) return formatHourLabel(hour);
+      const h = new Date().getHours();
+      const next = RESET_BLOCKS.find((b) => b > h);
+      if (next !== undefined) {
+        const suffix = next >= 12 ? "PM" : "AM";
+        const display = next > 12 ? next - 12 : (next === 0 ? 12 : next);
+        return `${String(display).padStart(2, "0")}:00 ${suffix}`;
       }
-      return formatHourLabel(FORGE_RESET_HOURS[0]);
+      return "12:00 AM (tomorrow)";
     }
 
     function syncForgeCounterToResetBlock() {
-      const currentBlock = getCurrentResetBlock();
-      const lastBlock = localStorage.getItem(FORGE_LAST_BLOCK_KEY);
-      if (lastBlock !== currentBlock) {
+      const hour = new Date().getHours();
+      const currentBlock = Math.max(...RESET_BLOCKS.filter((b) => b <= hour));
+      const lastBlock = Number.parseInt(localStorage.getItem(FORGE_LAST_BLOCK_KEY) || "-1", 10);
+      if (!Number.isFinite(lastBlock) || currentBlock > lastBlock) {
         localStorage.setItem(FORGE_LIMIT_KEY, "0");
-        localStorage.setItem(FORGE_LAST_BLOCK_KEY, currentBlock);
+        localStorage.setItem(FORGE_LAST_BLOCK_KEY, String(currentBlock));
       }
     }
 
@@ -1314,11 +1403,21 @@
     }
 
     function openForgeModal() {
-      syncForgeCounterToResetBlock();
+      const hour = new Date().getHours();
+      const currentBlock = Math.max(...RESET_BLOCKS.filter((b) => b <= hour));
+      const lastBlock = Number.parseInt(localStorage.getItem(FORGE_LAST_BLOCK_KEY) || "-1", 10);
+      let count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+      if (!Number.isFinite(count) || count < 0) count = 0;
+      if (!Number.isFinite(lastBlock) || currentBlock > lastBlock) {
+        count = 0;
+        localStorage.setItem(FORGE_LIMIT_KEY, "0");
+        localStorage.setItem(FORGE_LAST_BLOCK_KEY, String(currentBlock));
+      }
       const modal = document.getElementById("forge-modal");
       if (modal) {
         modal.classList.add("active");
-        updateForgeLimitUI();
+        const limitEl = document.getElementById("forge-limits-text");
+        if (limitEl) limitEl.textContent = `Limit: ${count}/${FORGE_LIMIT_MAX}. Resets at ${getNextResetTime()}`;
         renderEngineSandboxGrid();
       }
     }
@@ -1326,6 +1425,15 @@
     function closeForgeModal() {
       const modal = document.getElementById("forge-modal");
       if (modal) modal.classList.remove("active");
+    }
+
+    function toggleHeaderTooltip() {
+      const tooltip = document.getElementById("header-help-tooltip");
+      if (!tooltip) return;
+      tooltip.classList.toggle("active");
+      if (tooltip.classList.contains("active")) {
+        setTimeout(() => tooltip.classList.remove("active"), 2400);
+      }
     }
 
     async function executeCommunitySynthesis() {
@@ -1371,8 +1479,8 @@
         if (!response.ok) throw new Error(data?.error || "Publish failed");
         if (data?.success) {
           if (!data.url) throw new Error("Publish failed: missing share URL");
-          const count = Number.parseInt(localStorage.getItem("dh_gen_count") || "0", 10);
-          localStorage.setItem("dh_gen_count", (Number.isFinite(count) ? count : 0) + 1);
+          const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+          localStorage.setItem(FORGE_LIMIT_KEY, (Number.isFinite(count) ? count : 0) + 1);
         } else {
           throw new Error(data?.error || "Publish failed");
         }
@@ -1432,7 +1540,7 @@
           <li>Unlimited syntheses</li>
           <li>Priority APK queue</li>
         </ul>
-        <a class="forge-pro-btn forge-pro-link" href="mailto:sales@example.com?subject=Unlock%20Private%20Architect" target="_blank" rel="noopener noreferrer" aria-label="Unlock Private Architect">Unlock Private Architect →</a>
+        <a class="forge-pro-btn forge-pro-link" href="https://daxini.xyz" target="_blank" rel="noopener noreferrer" aria-label="Unlock Private Architect">Unlock Private Architect →</a>
       </div>
     </div>
   </div>
