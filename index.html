@@ -511,7 +511,7 @@
     <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
     <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
     <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
-    <button id="btn-install" class="install-btn" style="display: none;" onclick="app.installPWA()">[↓ Install]</button>
+    <button id="btn-install" class="install-btn" disabled title="Install becomes available after APK export." onclick="app.installPWA()">[↓ Install]</button>
   </div>
 
   <!-- NODE MODAL -->
@@ -699,7 +699,7 @@
     const app = {
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 }, isDrawing: false, sourceId: null, apiKey: "",
-      apkBuildInProgress: false, apkBlob: null,
+      apkBuildInProgress: false, apkBlob: null, apkBlobUrl: null, synthesisComplete: false,
       
       // Onboarding Guide
       obSteps: [
@@ -835,7 +835,8 @@
       updateHeader() {
         document.getElementById("block-count").textContent = `${this.map.blocks.length} nodes`;
         const st = document.getElementById("map-status"), exp = document.getElementById("btn-export"), apk = document.getElementById("btn-apk"), prd = document.getElementById("btn-prd");
-        if (this.map.isReadyForExport()) { 
+        this.synthesisComplete = this.map.isReadyForExport();
+        if (this.synthesisComplete) { 
           st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed"; 
           exp.disabled = false; exp.className = ""; 
           apk.style.display = 'inline-block';
@@ -845,6 +846,7 @@
           apk.style.display = 'none';
         }
         prd.disabled = this.map.blocks.length === 0;
+        this.updateInstallButtonState();
       },
 
       startWire(e, id, type) { e.stopPropagation(); e.preventDefault(); if (type==="out") { e.target.releasePointerCapture(e.pointerId); this.isDrawing = true; this.sourceId = id; e.target.closest('.port-wrapper').classList.add('active'); } },
@@ -964,6 +966,9 @@
 
         const apkData = await this.generateRealAPK();
         this.apkBlob = apkData;
+        if (this.apkBlobUrl) URL.revokeObjectURL(this.apkBlobUrl);
+        this.apkBlobUrl = URL.createObjectURL(apkData);
+        this.updateInstallButtonState();
         
         progress.style.width = "100%";
         addLog("✓ APK build complete!", "success");
@@ -1025,17 +1030,26 @@
 
       // === ONBOARDING SYSTEM ===
       initInstallPrompt() {
-        const installBtn = document.getElementById("btn-install");
-        if (!installBtn) return;
+        this.updateInstallButtonState();
         window.addEventListener("beforeinstallprompt", (e) => {
           e.preventDefault(); this.deferredInstallPrompt = e;
-          installBtn.style.display = "inline-block";
-          this.log("Install available — tap [↓ Install]", "accent");
+          this.updateInstallButtonState();
+          this.log("Install available after APK export", "info");
         });
         window.addEventListener("appinstalled", () => {
-          this.deferredInstallPrompt = null; installBtn.style.display = "none";
+          this.deferredInstallPrompt = null;
+          this.updateInstallButtonState();
           this.log("LogicHub installed successfully", "success");
         });
+      },
+
+      updateInstallButtonState() {
+        const installBtn = document.getElementById("btn-install");
+        if (!installBtn) return;
+        const canInstall = this.synthesisComplete && typeof this.apkBlobUrl === "string" && this.apkBlobUrl.startsWith("blob:");
+        installBtn.style.display = "inline-block";
+        installBtn.disabled = !canInstall;
+        installBtn.title = canInstall ? "Install LogicHub" : "Install becomes available after APK export.";
       },
 
       async installPWA() {
@@ -1044,8 +1058,7 @@
         const choiceResult = await this.deferredInstallPrompt.userChoice;
         this.log(`Install prompt: ${choiceResult.outcome}`, choiceResult.outcome === "accepted" ? "success" : "info");
         this.deferredInstallPrompt = null;
-        const installBtn = document.getElementById("btn-install");
-        if (installBtn) installBtn.style.display = "none";
+        this.updateInstallButtonState();
       },
 
       startOnboarding() {
@@ -1308,7 +1321,7 @@
 
       <div class="forge-section">
         <h4>Community Forge — Free</h4>
-        <p id="forge-limits-text">Limit: 0/3. Resets at 05:00 AM</p>
+        <p id="forge-limits-text">Limit: 0/3. Resets at --:--</p>
         <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Forge</button>
       </div>
 
