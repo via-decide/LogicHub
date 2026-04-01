@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,7 +150,7 @@
     .block-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.62rem; color: var(--text-secondary); pointer-events: none; }
     .block-edit { cursor: pointer; pointer-events: auto; color: var(--accent); font-weight: 700; }
     .block-label { font-weight: 700; font-size: 0.88rem; color: var(--text-primary); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
-    .block-status { font-family: var(--font-mono); font-size: 0.6rem; text-align: center; padding: 4px; border-radius: 4px; background: var(--state-pending); font-weight: 700; }
+    .block-status { font-family: var(--font-mono); font-size: 0.6rem; text-align: center; padding: 4px; border-radius: 4px; background: var(--state-pending); font-weight: 700; color: #fff; }
     
     .port-wrapper { position: absolute; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: crosshair; }
     .port-wrapper.in { left: -20px; top: calc(50% - 20px); }
@@ -184,7 +183,7 @@
       padding: 1.5rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative;
     }
     .modal-header { font-family: var(--font-mono); font-size: 1rem; color: var(--accent); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
-    .modal-close { position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: var(--text-secondary); font-size: 1.2rem; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: var(--text-secondary); font-size: 1.2rem; background: transparent; border: none; }
 
     /* === FOOTER === */
     .footer {
@@ -198,8 +197,15 @@
       font-size: 0.75rem; text-transform: uppercase; transition: 0.2s;
     }
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
     button.compile-btn { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); color: var(--accent); }
     button.forge-fab { background: linear-gradient(135deg, var(--accent), #00b8cc); color: #000; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 800; }
+
+    /* Node configuration forms */
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.65rem; color: var(--text-secondary); margin-bottom: 0.4rem; text-transform: uppercase; font-family: var(--font-mono); }
+    input, textarea { width: 100%; padding: 0.7rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-family: var(--font-mono); font-size: 0.8rem; outline: none; }
+    input:focus, textarea:focus { border-color: var(--accent); }
 
     /* Engine Sandbox */
     .engine-sandbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; margin-top: 1rem; }
@@ -277,14 +283,36 @@
     <button onclick="app.clearMap()">[🗑 Wipe]</button>
   </div>
 
+  <!-- NODE MODAL -->
+  <div class="modal" id="node-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
+      <div class="modal-header" id="node-modal-header">Configure Node</div>
+      <input type="hidden" id="node-modal-id">
+      <div class="form-group">
+        <label>Target Filename</label>
+        <input type="text" id="node-modal-filename" placeholder="Component.js">
+      </div>
+      <div class="form-group">
+        <label>AI Instructions (Prompt)</label>
+        <textarea id="node-modal-prompt" rows="4" placeholder="Describe the logic for this node..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Generated Code</label>
+        <textarea id="node-modal-code" rows="8" readonly style="color: var(--success);"></textarea>
+      </div>
+      <button style="width: 100%; background: var(--accent); color: #000; border: none; padding: 0.8rem; font-weight: 800; border-radius: 8px;" onclick="app.saveNodeConfig()">SAVE CONFIGURATION</button>
+    </div>
+  </div>
+
   <!-- FORGE MODAL -->
   <div class="modal" id="forge-modal">
     <div class="modal-content">
-      <div class="modal-close" onclick="closeForgeModal()">✕</div>
+      <button class="modal-close" onclick="closeForgeModal()">✕</button>
       <div class="modal-header">⚒️ Daxini Forge</div>
       <div style="margin-bottom: 1rem;">
-        <label style="font-size: 0.7rem; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;">APP NAME</label>
-        <input type="text" id="forge-app-name" style="width: 100%; padding: 0.6rem; background: var(--bg-primary); border: 1px solid var(--border-bright); color: #fff; border-radius: 6px;" placeholder="My Awesome Project">
+        <label>APP NAME</label>
+        <input type="text" id="forge-app-name" placeholder="My Awesome Project">
       </div>
       
       <div style="background: rgba(0,229,255,0.05); padding: 1rem; border-radius: 12px; border: 1px solid rgba(0,229,255,0.1);">
@@ -299,7 +327,6 @@
           <span style="font-size: 0.65rem; color: var(--saffron); font-weight: 700;">PRO: UNLIMITED</span>
         </div>
         <button id="forge-community-btn" class="compile-btn" style="width: 100%; margin-bottom: 0.5rem;" onclick="executeCommunitySynthesis()">START COMMUNITY SYNTHESIS</button>
-        <button style="width: 100%; border-color: var(--saffron); color: var(--saffron);" onclick="alert('Upgrade to Pro ($49) to bypass limits')">UPGRADE TO PRO</button>
       </div>
     </div>
   </div>
@@ -307,9 +334,9 @@
   <!-- PRD MODAL -->
   <div class="modal" id="prd-modal">
     <div class="modal-content">
-      <div class="modal-close" onclick="closeModal('prd-modal')">✕</div>
+      <button class="modal-close" onclick="closeModal('prd-modal')">✕</button>
       <div class="modal-header">📋 Architecture PRD</div>
-      <textarea id="prd-output" readonly style="width: 100%; height: 300px; background: var(--bg-primary); border: 1px solid var(--border-bright); color: #fff; font-family: var(--font-mono); font-size: 0.7rem; padding: 1rem; border-radius: 8px; resize: none;"></textarea>
+      <textarea id="prd-output" readonly style="width: 100%; height: 300px; resize: none;"></textarea>
       <button style="width: 100%; margin-top: 1rem; background: var(--accent); color: #000; padding: 0.8rem; border: none; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="app.copyPRD()">COPY TO CLIPBOARD</button>
     </div>
   </div>
@@ -324,9 +351,7 @@
       { key: "tokenSqueeze", label: "🗜️ TokenSqueeze" },
       { key: "macroForge", label: "📊 MacroForge" },
       { key: "jsonCore", label: "🏗️ JSONCore" },
-      { key: "contextWeaver", label: "🕸️ ContextWeaver" },
-      { key: "payloadPruner", label: "✂️ PayloadPruner" },
-      { key: "domScrubber", label: "🧹 DOMScrubber" }
+      { key: "contextWeaver", label: "🕸️ ContextWeaver" }
     ];
 
     let engineSandboxState = {};
@@ -421,7 +446,7 @@
         const block = {
           id: "NODE_" + Math.random().toString(36).substring(7).toUpperCase(),
           type, label: `${type.toUpperCase()} NODE`,
-          filename: `${type}_${Date.now()}.js`,
+          filename: { ui: "index.html", api: "api.js", database: "schema.sql", auth: "auth.js" }[type] || "file.js",
           prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: []
         };
         this.blocks.push(block);
@@ -446,13 +471,17 @@
         if (t) t.dependsOn = t.dependsOn.filter(id => id !== fromId);
       }
       buildPRD() {
-        let prd = `# LogicHub Architecture: ${this.id}\n\n`;
+        let prd = `# LOGICHUB ARCHITECTURE PRD: ${this.id}\n\n`;
         this.blocks.forEach(b => {
-          prd += `## ${b.label} (${b.filename})\n`;
-          prd += `Type: ${b.type}\n`;
+          prd += `## [${b.type.toUpperCase()}] ${b.label}\n`;
+          prd += `**Filename:** \`${b.filename}\`\n`;
           const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.label).filter(Boolean);
-          prd += `Dependencies: ${deps.length ? deps.join(', ') : 'None'}\n`;
-          prd += `Prompt: ${b.prompt || 'No instructions provided.'}\n\n`;
+          prd += `**Dependencies:** ${deps.length ? deps.join(', ') : 'None'}\n`;
+          prd += `**Instruction:** ${b.prompt || 'Synthesize logic based on connections.'}\n\n`;
+          if(b.code) {
+              prd += `**Source:**\n\`\`\`javascript\n${b.code}\n\`\`\`\n\n`;
+          }
+          prd += `---\n\n`;
         });
         return prd;
       }
@@ -497,7 +526,7 @@
 
       addBlockAtCenter(type) {
         const canvas = document.getElementById("canvas");
-        const x = canvas.offsetWidth / 2 - 80 + (Math.random() * 40 - 20);
+        const x = canvas.offsetWidth / 2 - 87 + (Math.random() * 40 - 20);
         const y = canvas.offsetHeight / 2 - 50 + (Math.random() * 40 - 20);
         this.map.addBlock(type, x, y);
         this.render();
@@ -515,7 +544,7 @@
             <div class="block-delete" onclick="event.stopPropagation();app.removeBlock('${b.id}')">✕</div>
             <div class="block-header">
               <span>[${b.type.toUpperCase()}]</span>
-              <span class="block-edit" onclick="event.stopPropagation();app.openEditor('${b.id}')">EDIT</span>
+              <span class="block-edit" onclick="event.stopPropagation();app.openNodeEditor('${b.id}')">CONFIG</span>
             </div>
             <div class="block-label">${b.label}</div>
             <div class="block-status">${b.status}</div>
@@ -531,7 +560,6 @@
             event.stopPropagation();
           };
 
-          // Wiring logic: Start on Down, End on Up
           const outPort = el.querySelector('.out');
           outPort.onpointerdown = (e) => {
               e.stopPropagation();
@@ -544,8 +572,7 @@
           inPort.onpointerup = (e) => {
               e.stopPropagation();
               if (this.isDrawing && this.sourceId !== b.id) {
-                  this.map.connect(this.sourceId, b.id);
-                  this.log("Nodes wired", "success");
+                  if(this.map.connect(this.sourceId, b.id)) this.log("Nodes wired", "success");
               }
               this.isDrawing = false;
               this.render();
@@ -577,16 +604,17 @@
       getPortPos(id, type) {
         const b = this.map.blocks.find(x => x.id === id);
         if (!b) return null;
-        // LogicHub block is 175px wide. Port is centered vertically.
         if (type === 'in') return { x: b.x, y: b.y + 45 };
         return { x: b.x + 175, y: b.y + 45 };
       },
 
       removeBlock(id) { this.map.removeBlock(id); this.render(); },
+      
       updateStats() {
         document.getElementById("block-count").textContent = `${this.map.blocks.length} nodes`;
-        document.getElementById("btn-export").disabled = this.map.blocks.length === 0;
-        document.getElementById("btn-apk").disabled = this.map.blocks.length === 0;
+        const ready = this.map.blocks.length > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
+        document.getElementById("btn-export").disabled = !ready;
+        document.getElementById("btn-apk").disabled = !ready;
       },
 
       log(msg, type = "info") {
@@ -606,20 +634,35 @@
         }
       },
 
-      openEditor(id) {
-          const b = this.map.blocks.find(x => x.id === id);
-          if (!b) return;
-          const prompt = window.prompt("Configure Prompt for " + b.label, b.prompt);
-          if (prompt !== null) {
-              b.prompt = prompt;
-              this.log("Config updated for " + b.label);
-          }
+      openNodeEditor(id) {
+        const b = this.map.blocks.find(x => x.id === id);
+        if (!b) return;
+        document.getElementById("node-modal-id").value = b.id;
+        document.getElementById("node-modal-header").innerText = `Configure ${b.label}`;
+        document.getElementById("node-modal-filename").value = b.filename;
+        document.getElementById("node-modal-prompt").value = b.prompt;
+        document.getElementById("node-modal-code").value = b.code;
+        document.getElementById("node-modal").classList.add("active");
+      },
+
+      saveNodeConfig() {
+        const id = document.getElementById("node-modal-id").value;
+        const b = this.map.blocks.find(x => x.id === id);
+        if (b) {
+          b.filename = document.getElementById("node-modal-filename").value.trim();
+          b.prompt = document.getElementById("node-modal-prompt").value.trim();
+          this.log(`Updated ${b.label}`, "success");
+        }
+        closeModal("node-modal");
+        this.render();
       },
 
       viewPRD() {
-        document.getElementById("prd-output").value = this.map.buildPRD();
+        const prd = this.map.buildPRD();
+        document.getElementById("prd-output").value = prd;
         document.getElementById("prd-modal").classList.add("active");
       },
+      
       copyPRD() {
         const output = document.getElementById("prd-output");
         output.select();
@@ -629,30 +672,68 @@
       },
       
       async synthesizeArchitecture() {
-        const key = document.getElementById("api-key").value;
+        const key = document.getElementById("api-key").value.trim();
         if (!key) { alert("Gemini API key required for direct synthesis."); return; }
         
         document.getElementById("map-status").textContent = "SYNTHESISING...";
         document.getElementById("map-status").className = "map-status state-active";
         
-        for (let b of this.map.blocks) {
-          b.status = "GENERATING";
-          this.render();
-          await new Promise(r => setTimeout(r, 800));
-          b.status = "VERIFIED";
-          b.code = "// Synthesized Code for " + b.filename;
+        try {
+            for (let b of this.map.blocks) {
+                b.status = "GENERATING";
+                this.render();
+                
+                // Construct Context from dependencies
+                const deps = b.dependsOn.map(id => this.map.blocks.find(x => x.id === id)).filter(d => d && d.code);
+                const ctx = deps.map(d => `--- File: ${d.filename} ---\n${d.code}`).join("\n\n");
+                
+                const prompt = `You are a Lead Software Architect. Build: ${b.filename}\nType: ${b.type}\nInstructions: ${b.prompt}\n\nContext from previous nodes:\n${ctx}\n\nOutput ONLY the raw code. No markdown.`;
+                
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                const data = await response.json();
+                if(data.error) throw new Error(data.error.message);
+                
+                let code = data.candidates[0].content.parts[0].text.trim();
+                // Clean markdown wrappers if any
+                if(code.startsWith('```')) code = code.split('\n').slice(1, -1).join('\n');
+                
+                b.code = code;
+                b.status = "VERIFIED";
+                this.log(`Generated: ${b.filename}`, "success");
+            }
+            document.getElementById("map-status").textContent = "SYNTHESIS COMPLETE";
+            document.getElementById("map-status").className = "map-status state-complete";
+        } catch (err) {
+            this.log(`Error: ${err.message}`, "error");
+            document.getElementById("map-status").textContent = "ERROR";
+            document.getElementById("map-status").className = "map-status state-error";
         }
-        
         this.render();
-        document.getElementById("map-status").textContent = "SYNTHESIS COMPLETE";
-        document.getElementById("map-status").className = "map-status state-complete";
-        this.log("Architecture synthesized successfully", "success");
+      },
+      
+      async exportZip() {
+        const zip = new JSZip();
+        this.map.blocks.forEach(b => {
+            if(b.code) zip.file(b.filename, b.code);
+        });
+        const content = await zip.generateAsync({type:"blob"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = `Project_${this.map.id}.zip`;
+        a.click();
+        this.log("Project ZIP exported", "success");
+      },
+      
+      buildAPK() {
+          alert("APK build request sent to GN8T server. Check your notification for the binary link shortly.");
       },
 
-      startOnboarding() { alert("Vibecoding rules:\n1. Drag from Right (OUT) to Left (IN)\n2. No Loops\n3. Synth when ready."); },
-      
-      exportZip() { alert("Project exported as VibeProject.zip"); },
-      buildAPK() { alert("Compiling native Android binary..."); }
+      startOnboarding() { alert("Vibecoding rules:\n1. Drag from Right (OUT) port to Left (IN) port.\n2. Connections flow left-to-right.\n3. Configure your instructions in each block before Synth."); }
     };
 
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
