@@ -461,7 +461,12 @@
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="BYOK: Gemini API (Optional)">
-      <button class="btn-help" onclick="app.startOnboarding()">?</button>
+      <button
+        class="btn-help"
+        onclick="app.startOnboarding()"
+        title="Add nodes from the panel to begin architecting your app."
+        aria-label="Add nodes from the panel to begin architecting your app."
+      >ⓘ</button>
     </div>
   </div>
 
@@ -1225,7 +1230,8 @@
       if (!gate.allowed) {
         const nextResetTime = getNextResetTime();
         updateForgeLimitUI();
-        return app.log(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`, "error");
+        alert(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`);
+        return;
       }
 
       const prdContext = app.map.buildPRD();
@@ -1238,7 +1244,7 @@
       if (button) { button.disabled = true; button.textContent = "SYNTHESIZING..."; }
 
       try {
-        const res = await fetch("/api/publish", {
+        const response = await fetch("/api/publish", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1250,15 +1256,15 @@
         });
         let data;
         try {
-          data = await res.json();
+          data = await response.json();
         } catch (_) {
           throw new Error("Publish failed: invalid server response");
         }
-        if (!res.ok) throw new Error(data?.error || "Publish failed");
+        if (!response.ok) throw new Error(data?.error || "Publish failed");
         if (data?.success) {
           if (!data.url) throw new Error("Publish failed: missing share URL");
-          const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
-          localStorage.setItem(FORGE_LIMIT_KEY, String((Number.isFinite(count) ? count : 0) + 1));
+          const count = Number.parseInt(localStorage.getItem("dh_gen_count") || "0", 10);
+          localStorage.setItem("dh_gen_count", (Number.isFinite(count) ? count : 0) + 1);
         } else {
           throw new Error(data?.error || "Publish failed");
         }
