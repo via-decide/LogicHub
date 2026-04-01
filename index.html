@@ -83,6 +83,8 @@
     .map-status.state-ready { color: #f59e0b; animation: pulse-ready 1.6s ease-in-out infinite; }
     .map-status.state-active { color: var(--accent); animation: pulse-active 0.8s ease-in-out infinite; }
     .map-status.state-complete { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
+    .map-status { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; white-space: nowrap;}
+    .map-status.confirmed { color: var(--success); text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);}
     .info-badge {
       font-family: var(--font-mono); font-size: 0.7rem; padding: 0.3rem 0.6rem;
       background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent);
@@ -508,6 +510,7 @@
     <div class="header-left">
       <div class="header-title">LOGICHUB<span class="wordmark-separator">//</span><span>VIBECODER</span></div>
       <div class="map-status state-idle" id="map-status">AWAITING ARCHITECTURE</div>
+      <div class="map-status" id="map-status">● AWAITING SYNTHESIS</div>
       <div class="info-badge" id="block-count">0 nodes</div>
     </div>
     <div class="toolbar">
@@ -521,6 +524,12 @@
         >ⓘ</button>
         <div id="header-help-tooltip" class="header-tooltip" role="tooltip">Add nodes from the left panel to begin architecting your app.</div>
       </div>
+      <button
+        class="btn-help"
+        onclick="app.startOnboarding()"
+        title="Add nodes from the panel to begin architecting your app."
+        aria-label="Add nodes from the panel to begin architecting your app."
+      >?</button>
     </div>
   </div>
 
@@ -1312,6 +1321,7 @@
     const FORGE_LIMIT_KEY = "dh_gen_count";
     const FORGE_LIMIT_MAX = 3;
     const RESET_BLOCKS = [0, 5, 10, 15, 20];
+    const FORGE_RESET_HOURS = [0, 5, 10, 15, 20];
     const FORGE_LAST_BLOCK_KEY = "dh_last_reset_block";
     const ENGINE_TOOL_CONFIG = [
       { key: "tokenSqueeze", label: "🗜️ TokenSqueeze", systemInstruction: "CRITICAL: Compress language aggressively. Remove filler and verbosity while preserving exact intent and constraints." },
@@ -1412,6 +1422,14 @@
         count = 0;
         localStorage.setItem(FORGE_LIMIT_KEY, "0");
         localStorage.setItem(FORGE_LAST_BLOCK_KEY, String(currentBlock));
+      const currentBlock = getCurrentResetBlock();
+      const lastBlock = localStorage.getItem(FORGE_LAST_BLOCK_KEY);
+      const storedCount = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+      if (!lastBlock || lastBlock !== currentBlock) {
+        localStorage.setItem(FORGE_LIMIT_KEY, "0");
+        localStorage.setItem(FORGE_LAST_BLOCK_KEY, currentBlock);
+      } else if (!Number.isFinite(storedCount) || storedCount < 0) {
+        localStorage.setItem(FORGE_LIMIT_KEY, "0");
       }
       const modal = document.getElementById("forge-modal");
       if (modal) {
