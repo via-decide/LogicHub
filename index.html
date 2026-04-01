@@ -75,8 +75,9 @@
       flex-shrink: 0;
     }
     .header-left { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
-    .header-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; white-space: nowrap;}
-    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top; margin-left: 0.45rem; display: inline-block; }
+    .header-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; white-space: nowrap; display: flex; align-items: baseline; gap: 0.45rem;}
+    .header-title .wordmark-separator { color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; }
+    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top; display: inline-block; }
     .map-status { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; white-space: nowrap;}
     .map-status.confirmed { color: var(--success); text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);}
     .info-badge {
@@ -429,7 +430,8 @@
     @media (max-width: 768px) {
       .header { padding: 0.5rem 0.5rem; flex-wrap: nowrap; align-items: center; gap: 0.5rem; }
       .header-left { gap: 0.4rem; overflow: hidden; flex: 1; min-width: 0; }
-      .header-title { font-size: 0.9rem; display: flex; flex-direction: column; line-height: 1.1; }
+      .header-title { font-size: 0.9rem; display: flex; flex-direction: column; line-height: 1.1; gap: 0.1rem; }
+      .header-title .wordmark-separator { display: none; }
       .header-title span { font-size: 0.65rem; margin-top: 2px; }
       .map-status { display: none; } 
       .toolbar { flex-shrink: 0; }
@@ -472,7 +474,7 @@
 
   <div class="header">
     <div class="header-left">
-      <div class="header-title">LOGICHUB<span>VIBECODER</span></div>
+      <div class="header-title">LOGICHUB<span class="wordmark-separator">//</span><span>VIBECODER</span></div>
       <div class="map-status" id="map-status">● AWAITING SYNTHESIS</div>
       <div class="info-badge" id="block-count">0 nodes</div>
     </div>
@@ -483,7 +485,7 @@
         onclick="app.startOnboarding()"
         title="Add nodes from the panel to begin architecting your app."
         aria-label="Add nodes from the panel to begin architecting your app."
-      >ⓘ</button>
+      >?</button>
     </div>
   </div>
 
@@ -551,7 +553,7 @@
         <textarea class="form-input form-textarea" id="node-modal-prompt"></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">File Content <span>Edit AI output here manually if needed.</span></label>
+        <label class="form-label" id="node-modal-code-label">File Content <span id="node-modal-code-hint">Define expected output structure (optional).</span></label>
         <textarea class="form-input code-textarea" id="node-modal-code"></textarea>
       </div>
       <button style="width:100%;background:var(--accent);color:#000;border:none;padding:0.9rem;font-weight:700;border-radius:8px;" onclick="app.saveNodeConfig()">Save Configuration</button>
@@ -575,10 +577,6 @@
       <button class="modal-close" onclick="closeModal('apk-modal')">✕</button>
       <div class="modal-header">📱 Building Executable APK</div>
       <p style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;">Build pipeline status appears below with step-by-step progress.</p>
-      <div class="progress-bar"><div class="progress-fill" id="apk-progress"></div></div>
-      <div class="apk-status-output" id="apk-output"></div>
-      <button class="apk-btn" id="apk-download-btn" style="display:none; width:100%;" onclick="app.downloadAPK()">⬇ Download APK (v1.0.0)</button>
-      <button id="apk-zip-fallback-btn" style="display:none; width:100%; margin-top: 8px;" onclick="app.downloadZIPFallback()">⬇ Download ZIP Fallback</button>
       <p id="apk-status-intro" style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;">Preparing deterministic build pipeline...</p>
       <div class="progress-bar"><div class="progress-fill" id="apk-progress"></div></div>
       <div class="apk-status-output" id="apk-output"></div>
@@ -617,7 +615,7 @@
           id: "NODE_" + Math.random().toString(36).substring(2, 8).toUpperCase(),
           type, label: type.toUpperCase() + " NODE",
           filename: { ui: "Component.jsx", api: "route.js", database: "schema.sql", auth: "authMiddleware.js", util: "helpers.js", style: "styles.css", config: "config.json" }[type] || `file_${Date.now()}.js`,
-          prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: ""
+          prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: [], errorMsg: "", synthesized: false
         };
         this.blocks.push(block); return block;
       }
@@ -729,15 +727,14 @@
     const app = {
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 }, isDrawing: false, sourceId: null, apiKey: "",
-      apkBuildInProgress: false, apkBlob: null, zipFallbackBlob: null,
-      apkBuildInProgress: false, apkBlob: null, apkZipBlob: null,
+      apkBuildInProgress: false, apkBlob: null, zipFallbackBlob: null, apkZipBlob: null,
       
       // Onboarding Guide
       obSteps: [
         { target: "#step-sidebar", title: "Add Your First Node", text: "Pick a Core Node from the left panel — UI, API, DB, or AUTH — and drop it on the canvas." },
         { target: "#canvas", title: "Wire Your Logic", text: "Connect nodes by dragging from one output to the next input. Your architecture builds visually." },
-        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit 📋 PRD to get a structured prompt ready to paste into Claude or GPT." },
-        { target: "#btn-apk", title: "Export Your APK", text: "Hit 📱 APK to compile a native Android app from your architecture in under 60 seconds." }
+        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit PRD to get a structured prompt ready to paste into Claude or GPT." },
+        { target: "#btn-apk", title: "Export Your APK", text: "Hit APK to compile a native Android app from your architecture in under 60 seconds." }
       ],
       currentStep: 0,
       deferredInstallPrompt: null,
@@ -894,6 +891,8 @@
         const b = this.map.blocks.find(x=>x.id===id); if (!b) return;
         document.getElementById("node-modal-id").value = b.id; document.getElementById("node-modal-header").innerHTML = `Configure <span style="color:#fff">${b.label}</span>`;
         document.getElementById("node-modal-filename").value = b.filename; document.getElementById("node-modal-prompt").value = b.prompt || ""; document.getElementById("node-modal-code").value = b.code || "";
+        const codeHint = document.getElementById("node-modal-code-hint");
+        if (codeHint) codeHint.textContent = b.synthesized ? "Review and edit AI output." : "Define expected output structure (optional).";
         document.getElementById("node-modal").classList.add("active");
       },
 
@@ -924,7 +923,7 @@
           if (block.status === "VERIFIED" && block.code) continue;
           block.status = "GENERATING"; this.render(); this.log(`Synthesizing ${block.filename}...`, "accent");
           try {
-            await this.generateNodeCode(block); block.status = "VERIFIED"; this.log(`Verified: ${block.filename}`, "success");
+            await this.generateNodeCode(block); block.status = "VERIFIED"; block.synthesized = true; this.log(`Verified: ${block.filename}`, "success");
           } catch(err) { block.status = "ERROR"; block.errorMsg = err.message; this.log(`Error: ${err.message}`, "error"); synthesisFailed = true; break; }
           this.render();
         }
@@ -1008,41 +1007,55 @@
         };
 
         const stages = [
-          { key: "assets", label: "Assembling web assets", status: "pending" },
-          { key: "inject", label: "Injecting into Capacitor shell", status: "pending" },
-          { key: "gradle", label: "Running Gradle build", status: "pending" },
-          { key: "package", label: "Packaging APK", status: "pending" }
+          { label: "Assembling web assets", status: "pending" },
+          { label: "Injecting into Capacitor shell", status: "pending" },
+          { label: "Running Gradle build", status: "pending" },
+          { label: "Packaging APK", status: "pending" }
         ];
-
+        const stageLines = [];
         const renderStageList = () => {
-          stages.forEach(s => addLog(`[${s.status === "done" ? "x" : " "}] ${s.label}`, "info"));
+          output.innerHTML = "";
+          stages.forEach((stage, index) => {
+            const marker = stage.status === "done" ? "[x]" : "[ ]";
+            const type = stage.status === "done" ? "success" : "info";
+            const line = document.createElement("div");
+            line.className = `apk-line ${type}`;
+            line.textContent = `${marker} ${stage.label}`;
+            output.appendChild(line);
+            stageLines[index] = line;
+          });
+        };
+        const completeStage = (index) => {
+          stages[index].status = "done";
+          if (stageLines[index]) {
+            stageLines[index].className = "apk-line success";
+            stageLines[index].textContent = `[x] ${stages[index].label}`;
+          }
         };
 
         try {
           renderStageList();
-          stages[0].status = "done";
           addLog("→ Assembling web assets...", "progress");
           this.zipFallbackBlob = await this.createZipBlob();
+          completeStage(0);
           progress.style.width = "25%";
-          addLog("✓ Assembled web assets", "success");
 
-          stages[1].status = "done";
           addLog("→ Injecting into Capacitor shell (android/app/src/main/assets/public)...", "progress");
           const apkData = await this.generateRealAPK(this.zipFallbackBlob);
+          completeStage(1);
           progress.style.width = "60%";
-          addLog("✓ Assets copied before capacitor copy android", "success");
 
-          stages[2].status = "done";
           addLog("→ Running Gradle build (assembleDebug)...", "progress");
+          completeStage(2);
           progress.style.width = "85%";
           addLog("✓ Gradle output path: app/build/outputs/apk/debug/app-debug.apk", "success");
 
-          stages[3].status = "done";
           addLog("→ Packaging APK...", "progress");
 
           if (apkData.size < 500 * 1024) {
             throw new Error("Generated APK is under 500KB and treated as failed.");
           }
+          completeStage(3);
           if (apkData.size < 1024 * 1024) {
             addLog("⚠ APK is smaller than 1MB; build may be incomplete.", "error");
           }
@@ -1056,6 +1069,7 @@
           dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${apkSizeMB}MB)`;
           dlBtn.style.display = "inline-block";
           zipFallbackBtn.style.display = "inline-block";
+          this.updateInstallButtonVisibility();
           this.log("APK Ready! Download from modal.", "apk");
         } catch (error) {
           this.apkBlob = null;
@@ -1063,6 +1077,7 @@
           addLog("APK build failed. Your ZIP is still available as a fallback.", "error");
           addLog(error.message, "error");
           zipFallbackBtn.style.display = "inline-block";
+          this.updateInstallButtonVisibility();
           this.log("APK build failed. ZIP fallback remains available.", "error");
         } finally {
           this.apkBuildInProgress = false;
@@ -1126,7 +1141,7 @@
         return this.downloadZIPFallback();
       },
 
-      clearMap() { this.map = new LogicMap(); window.synthesisComplete = false; this.render(); },
+      clearMap() { this.map = new LogicMap(); window.synthesisComplete = false; this.apkBlob = null; this.updateInstallButtonVisibility(); this.render(); },
       
       log(msg, type="info") {
         const ids = ["log-1","log-2","log-3"];
@@ -1140,15 +1155,26 @@
       initInstallPrompt() {
         const installBtn = document.getElementById("btn-install");
         if (!installBtn) return;
+        installBtn.style.display = "none";
+        installBtn.disabled = true;
+        installBtn.title = "Install becomes available after APK export.";
         window.addEventListener("beforeinstallprompt", (e) => {
           e.preventDefault(); this.deferredInstallPrompt = e;
-          installBtn.style.display = "inline-block";
-          this.log("Install available — tap [↓ Install]", "accent");
+          this.updateInstallButtonVisibility();
         });
         window.addEventListener("appinstalled", () => {
           this.deferredInstallPrompt = null; installBtn.style.display = "none";
           this.log("LogicHub installed successfully", "success");
         });
+      },
+
+      updateInstallButtonVisibility() {
+        const installBtn = document.getElementById("btn-install");
+        if (!installBtn) return;
+        const canInstall = Boolean(window.synthesisComplete && this.apkBlob && this.deferredInstallPrompt);
+        installBtn.style.display = canInstall ? "inline-block" : "none";
+        installBtn.disabled = !canInstall;
+        installBtn.title = canInstall ? "" : "Install becomes available after APK export.";
       },
 
       async installPWA() {
@@ -1211,7 +1237,7 @@
     const FORGE_LIMIT_KEY = "dh_gen_count";
     const FORGE_LIMIT_MAX = 3;
     const FORGE_RESET_HOURS = [0, 5, 10, 15, 20];
-    const FORGE_LAST_BLOCK_KEY = "dh_gen_reset_block";
+    const FORGE_LAST_BLOCK_KEY = "dh_last_reset_block";
     const ENGINE_TOOL_CONFIG = [
       { key: "tokenSqueeze", label: "🗜️ TokenSqueeze", systemInstruction: "CRITICAL: Compress language aggressively. Remove filler and verbosity while preserving exact intent and constraints." },
       { key: "macroForge", label: "📊 MacroForge", systemInstruction: "CRITICAL: Prioritize macro-level architecture first. Start with modules, data flow, and interfaces before implementation details." },
@@ -1314,7 +1340,15 @@
     }
 
     function openForgeModal() {
-      syncForgeCounterToResetBlock();
+      const currentBlock = getCurrentResetBlock();
+      const lastBlock = localStorage.getItem(FORGE_LAST_BLOCK_KEY);
+      const storedCount = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+      if (!lastBlock || lastBlock !== currentBlock) {
+        localStorage.setItem(FORGE_LIMIT_KEY, "0");
+        localStorage.setItem(FORGE_LAST_BLOCK_KEY, currentBlock);
+      } else if (!Number.isFinite(storedCount) || storedCount < 0) {
+        localStorage.setItem(FORGE_LIMIT_KEY, "0");
+      }
       const modal = document.getElementById("forge-modal");
       if (modal) {
         modal.classList.add("active");
@@ -1371,8 +1405,8 @@
         if (!response.ok) throw new Error(data?.error || "Publish failed");
         if (data?.success) {
           if (!data.url) throw new Error("Publish failed: missing share URL");
-          const count = Number.parseInt(localStorage.getItem("dh_gen_count") || "0", 10);
-          localStorage.setItem("dh_gen_count", (Number.isFinite(count) ? count : 0) + 1);
+          const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
+          localStorage.setItem(FORGE_LIMIT_KEY, (Number.isFinite(count) ? count : 0) + 1);
         } else {
           throw new Error(data?.error || "Publish failed");
         }
