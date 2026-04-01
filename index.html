@@ -988,6 +988,29 @@
           "- implement immediate action CTA after result delivery."
         ];
 
+        const decisionEngineMandates = [
+          "- separate UI layer from logic engine with explicit interface boundaries.",
+          "- normalize all inputs from filters and swipe actions into structured data.",
+          "- standardize one scoring model across all decision domains.",
+          "- implement no-match fallback output for edge-case handling.",
+          "- remove dead-end flows from all decision journeys.",
+          "- ensure continuous navigation paths across all intermediate states.",
+          "- optimize interaction latency for sub-1-second response feel.",
+          "- implement fail-safe states with fallback outputs for degraded conditions.",
+          "- limit visible state to essential decision signals only.",
+          "- implement decision trace output that explains how the result was calculated.",
+          "- structure data in hierarchy form and reject flat-list-only payloads.",
+          "- map and persist full decision path for every session.",
+          "- stack filters sequentially with layered logic evaluation.",
+          "- remove low-signal inputs before scoring.",
+          "- implement adaptive weighting updates from behavior signals.",
+          "- enable back navigation without resetting session progress.",
+          "- ensure every interaction updates state deterministically.",
+          "- implement system-wide consistency checks before final recommendation.",
+          "- implement explicit error-state UI with clear failure messaging.",
+          "- ensure every flow terminates in a concrete action."
+        ];
+
         return [
           "# LOGICHUB INTERNAL PRD ENGINE",
           `- execution mode: ${mode === "minimal" ? "Gemini (low token)" : "Claude (high reasoning)"}`,
@@ -1005,6 +1028,7 @@
           "## 4) IMPLEMENTATION DIRECTIVES",
           ...modeDirectives,
           ...decisionUxMandates,
+          ...decisionEngineMandates,
           ...directives,
           "",
           "## 5) EDGE CASES + FAILSAFE CONDITIONS",
