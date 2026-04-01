@@ -76,7 +76,7 @@
     }
     .header-left { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
     .header-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; white-space: nowrap;}
-    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top;}
+    .header-title span { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; vertical-align: top; margin-left: 0.45rem; display: inline-block; }
     .map-status { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; white-space: nowrap;}
     .map-status.confirmed { color: var(--success); text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);}
     .info-badge {
@@ -461,7 +461,12 @@
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="BYOK: Gemini API (Optional)">
-      <button class="btn-help" onclick="app.startOnboarding()">?</button>
+      <button
+        class="btn-help"
+        onclick="app.startOnboarding()"
+        title="Add nodes from the panel to begin architecting your app."
+        aria-label="Add nodes from the panel to begin architecting your app."
+      >ⓘ</button>
     </div>
   </div>
 
@@ -557,6 +562,11 @@
       <div class="apk-status-output" id="apk-output"></div>
       <button class="apk-btn" id="apk-download-btn" style="display:none; width:100%;" onclick="app.downloadAPK()">⬇ Download APK (v1.0.0)</button>
       <button id="apk-zip-fallback-btn" style="display:none; width:100%; margin-top: 8px;" onclick="app.downloadZIPFallback()">⬇ Download ZIP Fallback</button>
+      <p id="apk-status-intro" style="font-size:0.72rem;color:var(--text-secondary);margin:0 0 1rem;">Preparing deterministic build pipeline...</p>
+      <div class="progress-bar"><div class="progress-fill" id="apk-progress"></div></div>
+      <div class="apk-status-output" id="apk-output"></div>
+      <button class="apk-btn" id="apk-download-btn" style="display:none; width:100%;" onclick="app.downloadAPK()">⬇ Download APK (v1.0.0)</button>
+      <button class="compile-btn" id="apk-zip-fallback-btn" style="display:none; width:100%; margin-top:0.5rem;" onclick="app.downloadZipFallback()">⬇ Download ZIP Fallback</button>
     </div>
   </div>
 
@@ -701,14 +711,14 @@
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 }, isDrawing: false, sourceId: null, apiKey: "",
       apkBuildInProgress: false, apkBlob: null, zipFallbackBlob: null,
+      apkBuildInProgress: false, apkBlob: null, apkZipBlob: null,
       
       // Onboarding Guide
       obSteps: [
-        { target: null, title: "Welcome to LogicHub", text: "The world's first instant architecture engine. Visually map out apps, synthesize native code via AI, and export instantly." },
-        { target: ".toolbar", title: "1. The AI Engine", text: "Paste your Gemini API Key here. LogicHub uses it to synthesize your code automatically based on your graph architecture." },
-        { target: "#step-sidebar", title: "2. The Palette", text: "Drag blocks onto the canvas: UI components, API routes, databases, auth layers, helpers. Each becomes a file." },
-        { target: "#canvas", title: "3. The Matrix Canvas", text: "Wire nodes together: drag from OUT (right) to IN (left). Data flows left-to-right. Double-tap to configure each node." },
-        { target: "#step-footer", title: "4. Control Deck", text: "[⚡ Synth] → generates code. [📋 PRD] → generates LLM prompts. [📦 Export] → ZIP of files. [📱 APK] → Build Android App." }
+        { target: "#step-sidebar", title: "Add Your First Node", text: "Pick a Core Node from the left panel — UI, API, DB, or AUTH — and drop it on the canvas." },
+        { target: "#canvas", title: "Wire Your Logic", text: "Connect nodes by dragging from one output to the next input. Your architecture builds visually." },
+        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit 📋 PRD to get a structured prompt ready to paste into Claude or GPT." },
+        { target: "#btn-apk", title: "Export Your APK", text: "Hit 📱 APK to compile a native Android app from your architecture in under 60 seconds." }
       ],
       currentStep: 0,
       deferredInstallPrompt: null,
@@ -920,10 +930,25 @@
         block.code = code;
       },
 
+      async createProjectZipBlob() {
+        const zip = new JSZip();
+        this.map.blocks.forEach((b) => { if (b.code) zip.file(b.filename, b.code); });
+        return zip.generateAsync({ type: "blob" });
+      },
+
       exportZip() {
         if (!this.map.isReadyForExport()) return;
-        const zip = new JSZip(); this.map.blocks.forEach(b => { if(b.code) zip.file(b.filename, b.code); });
-        zip.generateAsync({type:"blob"}).then(content => { const a = document.createElement("a"); a.href = URL.createObjectURL(content); a.download = `VibeProject_${this.map.id}.zip`; a.click(); });
+        this.createProjectZipBlob().then((content) => {
+          this.apkZipBlob = content;
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(content);
+          a.download = `VibeProject_${this.map.id}.zip`;
+          a.click();
+        });
+      },
+
+      formatFileSize(bytes) {
+        return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
       },
 
       async createZipBlob() {
@@ -942,11 +967,13 @@
         const progress = document.getElementById("apk-progress");
         const dlBtn = document.getElementById("apk-download-btn");
         const zipFallbackBtn = document.getElementById("apk-zip-fallback-btn");
+        const statusIntro = document.getElementById("apk-status-intro");
         
         dlBtn.style.display = "none";
         zipFallbackBtn.style.display = "none";
         output.innerHTML = "";
         progress.style.width = "0%";
+        if (statusIntro) statusIntro.textContent = "Following build pipeline with deterministic steps:";
 
         const addLog = (msg, type = "info") => {
           const line = document.createElement("div");
@@ -1018,16 +1045,59 @@
 
       async generateRealAPK(zipFallbackBlob) {
         const zip = new JSZip();
+        const steps = [
+          "Assembling web assets",
+          "Injecting into Capacitor shell",
+          "Running Gradle build",
+          "Packaging APK"
+        ];
 
-        // 1. Core Android Manifest
-        const manifest = `<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.logichub.vibeproject">\n  <application android:label="VibeProject_${this.map.id}" android:allowBackup="true">\n    <activity android:name=".MainActivity" android:exported="true">\n      <intent-filter>\n        <action android:name="android.intent.action.MAIN"/>\n        <category android:name="android.intent.category.LAUNCHER"/>\n      </intent-filter>\n    </activity>\n  </application>\n</manifest>`;
-        zip.file("AndroidManifest.xml", manifest);
+        const stepState = steps.map((name) => ({ name, done: false }));
+        const renderStepChecklist = () => {
+          output.innerHTML = "";
+          stepState.forEach((step) => {
+            addLog(`[${step.done ? "✓" : " "}] ${step.name}`, step.done ? "success" : "progress");
+          });
+        };
+        const markStepDone = (idx) => {
+          stepState[idx].done = true;
+          progress.style.width = `${Math.round(((idx + 1) / stepState.length) * 100)}%`;
+          renderStepChecklist();
+        };
+        renderStepChecklist();
 
-        // 2. Standard APK Meta and Mock Binaries
-        zip.file("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\r\nCreated-By: LogicHub Vibecoder Engine 2.0\r\n");
-        zip.file("classes.dex", "DEX_MAGIC_MOCK_DATA_035\\0... Compiled JS to DEX bridge.");
-        zip.file("resources.arsc", "ARSC_MAGIC_MOCK_DATA... Resources table.");
-        zip.file("lib/armeabi-v7a/libv8.so", "ELF_MAGIC... V8 Engine Binding");
+        try {
+          this.apkZipBlob = await this.createProjectZipBlob();
+          markStepDone(0);
+
+          const apkData = await this.generateRealAPK(this.apkZipBlob);
+          markStepDone(1);
+          markStepDone(2);
+          markStepDone(3);
+
+          if (apkData.size < 500 * 1024) {
+            throw new Error("APK output is under 500KB and appears invalid.");
+          }
+          if (apkData.size < 1024 * 1024) {
+            throw new Error("APK output is unexpectedly small (<1MB).");
+          }
+
+          this.apkBlob = apkData;
+          const fileSizeLabel = this.formatFileSize(apkData.size);
+          dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${fileSizeLabel})`;
+          dlBtn.style.display = "inline-block";
+          addLog(`✓ APK ready (${fileSizeLabel})`, "success");
+          this.log("APK Ready! Download from modal.", "apk");
+        } catch (err) {
+          this.apkBlob = null;
+          addLog("APK build failed. Your ZIP is still available as a fallback.", "error");
+          addLog(`Error: ${err.message}`, "error");
+          this.log("APK build failed. ZIP fallback is available.", "error");
+        } finally {
+          zipFallbackBtn.style.display = "inline-block";
+          this.apkBuildInProgress = false;
+        }
+      },
 
         // 3. Inject generated files into Capacitor Android shell path BEFORE build
         const capacitorAssets = zip.folder("android/app/src/main/assets/public");
@@ -1040,14 +1110,40 @@
         }
         // Ensure non-trivial package size for install testing
         zip.file("padding.bin", "0".repeat(1024 * 1024));
-
-        // Generate as a true compressed ZIP blob with the correct Android MIME type
-        return await zip.generateAsync({ 
-          type: "blob", 
-          compression: "DEFLATE",
-          compressionOptions: { level: 9 },
-          mimeType: "application/vnd.android.package-archive" 
+      async generateRealAPK(projectZipBlob) {
+        const zipBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = String(reader.result || "");
+            const base64 = result.includes(",") ? result.split(",")[1] : "";
+            if (!base64) reject(new Error("Unable to encode ZIP payload"));
+            else resolve(base64);
+          };
+          reader.onerror = () => reject(new Error("Unable to read ZIP payload"));
+          reader.readAsDataURL(projectZipBlob);
         });
+
+        const response = await fetch("/api/build-apk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mapId: this.map.id,
+            zipBase64
+          })
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (_) {
+          throw new Error("Build server returned invalid response");
+        }
+        if (!response.ok || !data?.success || !data?.apkBase64) {
+          throw new Error(data?.error || "APK build pipeline failed");
+        }
+
+        const bytes = Uint8Array.from(atob(data.apkBase64), (ch) => ch.charCodeAt(0));
+        return new Blob([bytes], { type: "application/vnd.android.package-archive" });
       },
 
       downloadAPK() {
@@ -1060,6 +1156,9 @@
       downloadZIPFallback() {
         if (!this.zipFallbackBlob) return this.log("ZIP fallback not ready", "error");
         const url = URL.createObjectURL(this.zipFallbackBlob);
+      downloadZipFallback() {
+        if (!this.apkZipBlob) return this.log("ZIP fallback not ready", "error");
+        const url = URL.createObjectURL(this.apkZipBlob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `VibeProject_${this.map.id}.zip`;
@@ -1279,7 +1378,8 @@
       if (!gate.allowed) {
         const nextResetTime = getNextResetTime();
         updateForgeLimitUI();
-        return app.log(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`, "error");
+        alert(`Compute limit reached. Quota resets exactly at ${nextResetTime}.`);
+        return;
       }
 
       const prdContext = app.map.buildPRD();
@@ -1292,7 +1392,7 @@
       if (button) { button.disabled = true; button.textContent = "SYNTHESIZING..."; }
 
       try {
-        const res = await fetch("/api/publish", {
+        const response = await fetch("/api/publish", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1304,15 +1404,15 @@
         });
         let data;
         try {
-          data = await res.json();
+          data = await response.json();
         } catch (_) {
           throw new Error("Publish failed: invalid server response");
         }
-        if (!res.ok) throw new Error(data?.error || "Publish failed");
+        if (!response.ok) throw new Error(data?.error || "Publish failed");
         if (data?.success) {
           if (!data.url) throw new Error("Publish failed: missing share URL");
-          const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
-          localStorage.setItem(FORGE_LIMIT_KEY, String((Number.isFinite(count) ? count : 0) + 1));
+          const count = Number.parseInt(localStorage.getItem("dh_gen_count") || "0", 10);
+          localStorage.setItem("dh_gen_count", (Number.isFinite(count) ? count : 0) + 1);
         } else {
           throw new Error(data?.error || "Publish failed");
         }
