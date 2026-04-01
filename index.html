@@ -1239,7 +1239,7 @@
       if (button) { button.disabled = true; button.textContent = "SYNTHESIZING..."; }
 
       try {
-        const res = await fetch("/api/publish", {
+        const response = await fetch("/api/publish", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1251,15 +1251,15 @@
         });
         let data;
         try {
-          data = await res.json();
+          data = await response.json();
         } catch (_) {
           throw new Error("Publish failed: invalid server response");
         }
-        if (!res.ok) throw new Error(data?.error || "Publish failed");
+        if (!response.ok) throw new Error(data?.error || "Publish failed");
         if (data?.success) {
           if (!data.url) throw new Error("Publish failed: missing share URL");
-          const count = Number.parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0", 10);
-          localStorage.setItem(FORGE_LIMIT_KEY, String((Number.isFinite(count) ? count : 0) + 1));
+          const count = Number.parseInt(localStorage.getItem("dh_gen_count") || "0", 10);
+          localStorage.setItem("dh_gen_count", (Number.isFinite(count) ? count : 0) + 1);
         } else {
           throw new Error(data?.error || "Publish failed");
         }
