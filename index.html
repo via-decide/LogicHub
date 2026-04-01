@@ -635,6 +635,7 @@
     const FORGE_LIMIT_MAX   = 3;
     const FORGE_LIMIT_KEY   = "lh_gen_count";
     const FORGE_LAST_BLOCK_KEY = "lh_last_reset_block";
+    const FORGE_LAST_RESET_DAY_KEY = "lh_last_reset_day";
     const ENGINE_TOOLS = [
       { key: "tokenSqueeze",   label: "🗜️ TokenSqueeze"   },
       { key: "macroForge",     label: "📊 MacroForge"     },
@@ -682,11 +683,16 @@
     }
 
     function syncForgeCounter() {
+      const now = new Date();
+      const dayStamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
       const currentBlock = getCurrentResetBlock();
       const lastBlock    = parseInt(localStorage.getItem(FORGE_LAST_BLOCK_KEY) || "-1");
-      if (currentBlock > lastBlock) {
+      const lastDayStamp = localStorage.getItem(FORGE_LAST_RESET_DAY_KEY) || "";
+      const crossedDayBoundary = lastDayStamp !== dayStamp;
+      if (crossedDayBoundary || currentBlock > lastBlock) {
         localStorage.setItem(FORGE_LIMIT_KEY, "0");
         localStorage.setItem(FORGE_LAST_BLOCK_KEY, currentBlock.toString());
+        localStorage.setItem(FORGE_LAST_RESET_DAY_KEY, dayStamp);
         return 0;
       }
       return parseInt(localStorage.getItem(FORGE_LIMIT_KEY) || "0");
@@ -811,19 +817,238 @@
         if (dst) dst.dependsOn   = dst.dependsOn.filter(x => x !== fromId);
       }
 
-      buildPRD() {
-        let prd = `# LOGICHUB ARCHITECTURE PRD\n# Project: ${this.id}\n\n`;
-        prd += `## Overview\n${this.blocks.length} nodes, ${this.connections.length} connections.\n\n---\n\n`;
+      estimateTokenCount(text) {
+        return Math.ceil(text.length / 4);
+      }
+
+      runTokenSqueeze(text) {
+        return text
+          .split("\n")
+          .map(line => line.replace(/\s+/g, " ").trimEnd())
+          .filter((line, idx, arr) => line || arr[idx - 1] !== "")
+          .join("\n")
+          .trim();
+      }
+
+      resolveExecutionOrder() {
+        const byId = new Map(this.blocks.map(b => [b.id, b]));
+        const inboundCount = new Map();
+        const outbound = new Map();
         this.blocks.forEach(b => {
-          prd += `## [${b.type.toUpperCase()}] ${b.label}\n`;
-          prd += `**File:** \`${b.filename}\`\n`;
-          const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.label).filter(Boolean);
-          prd += `**Dependencies:** ${deps.length ? deps.join(', ') : 'None'}\n`;
-          prd += `**Instruction:** ${b.prompt || 'Synthesize logic based on connections and context.'}\n\n`;
-          if (b.code) prd += `**Source:**\n\`\`\`\n${b.code}\n\`\`\`\n\n`;
-          prd += `---\n\n`;
+          inboundCount.set(b.id, 0);
+          outbound.set(b.id, []);
         });
-        return prd;
+        this.connections.forEach(c => {
+          if (!byId.has(c.from) || !byId.has(c.to)) return;
+          inboundCount.set(c.to, (inboundCount.get(c.to) || 0) + 1);
+          outbound.get(c.from).push(c.to);
+        });
+
+        const queue = this.blocks
+          .filter(b => (inboundCount.get(b.id) || 0) === 0)
+          .sort((a, b) => (a.type + a.label + a.filename).localeCompare(b.type + b.label + b.filename))
+          .map(b => b.id);
+        const order = [];
+
+        while (queue.length) {
+          const id = queue.shift();
+          const node = byId.get(id);
+          if (!node) continue;
+          order.push(node);
+          const nextNodes = (outbound.get(id) || []).slice().sort();
+          nextNodes.forEach(nextId => {
+            const nextCount = (inboundCount.get(nextId) || 0) - 1;
+            inboundCount.set(nextId, nextCount);
+            if (nextCount === 0) queue.push(nextId);
+          });
+          queue.sort((a, b) => {
+            const left = byId.get(a);
+            const right = byId.get(b);
+            const lKey = `${left?.type || ""}${left?.label || ""}${left?.filename || ""}`;
+            const rKey = `${right?.type || ""}${right?.label || ""}${right?.filename || ""}`;
+            return lKey.localeCompare(rKey);
+          });
+        }
+
+        if (order.length !== this.blocks.length) {
+          return this.blocks
+            .slice()
+            .sort((a, b) => (a.type + a.label + a.filename).localeCompare(b.type + b.label + b.filename));
+        }
+        return order;
+      }
+
+      buildNodeContracts(orderedNodes) {
+        const byId = new Map(this.blocks.map(b => [b.id, b]));
+        return orderedNodes.map((node, idx) => {
+          const dependencies = node.dependsOn
+            .map(id => byId.get(id))
+            .filter(Boolean)
+            .sort((a, b) => (a.type + a.label + a.filename).localeCompare(b.type + b.label + b.filename));
+          return {
+            index: idx + 1,
+            node_type: node.type,
+            label: node.label,
+            filename: node.filename,
+            purpose: node.prompt || `Implement ${node.type} responsibilities for ${node.label}.`,
+            inputs: dependencies.map(dep => ({
+              from_filename: dep.filename,
+              from_label: dep.label,
+              contract: "Consume upstream outputs exactly as produced."
+            })),
+            outputs: [{ name: `${node.type}_${idx + 1}_output`, contract: "Return deterministic output for downstream consumption." }],
+            constraints: [
+              "Implement deterministic behavior for identical input values.",
+              "Return production-ready code with zero placeholder comments.",
+              "Respect dependency contracts without hidden side effects."
+            ],
+            code_expectations: [
+              "Implement explicit function boundaries and predictable return signatures.",
+              "Return raw runnable code with no markdown wrappers.",
+              "Implement strict error handling paths for invalid inputs."
+            ]
+          };
+        });
+      }
+
+      weaveDependencyContext(contract) {
+        return contract.inputs.map(input =>
+          `${input.from_filename}::${input.from_label} => ${input.contract}`
+        );
+      }
+
+      buildPRDRender(data, mode) {
+        const architectureFlow = data.architecture_graph
+          .map(edge => `- ${edge.step}. ${edge.from} -> ${edge.to} | relation: ${edge.relation}`)
+          .join("\n");
+        const contracts = data.file_contracts.map(contract => {
+          const inputs = contract.inputs.length
+            ? contract.inputs.map(i => `  - from ${i.from_filename}: ${i.contract}`).join("\n")
+            : "  - none";
+          const outputs = contract.outputs.map(o => `  - ${o.name}: ${o.contract}`).join("\n");
+          const constraints = contract.constraints.map(c => `  - ${c}`).join("\n");
+          const expectations = contract.code_expectations.map(c => `  - ${c}`).join("\n");
+          const context = this.weaveDependencyContext(contract);
+          const contextBlock = context.length
+            ? context.map(line => `  - ${line}`).join("\n")
+            : "  - none";
+          return [
+            `- Node ${contract.index}: ${contract.label} (${contract.node_type})`,
+            `  - filename: ${contract.filename}`,
+            `  - purpose: ${contract.purpose}`,
+            `  - inputs:`,
+            inputs,
+            `  - outputs:`,
+            outputs,
+            `  - constraints:`,
+            constraints,
+            `  - code expectations:`,
+            expectations,
+            `  - dependency context (ContextWeaver):`,
+            contextBlock
+          ].join("\n");
+        }).join("\n");
+
+        const directives = mode === "minimal"
+          ? [
+              "- implement each node in strict execution order.",
+              "- return only requested file outputs with deterministic logic.",
+              "- enforce contract schema for every input and output.",
+              "- reject ambiguous behavior and return explicit errors."
+            ]
+          : [
+              "- implement node code in topological order and validate each dependency contract before execution.",
+              "- implement typed interfaces per node boundary and return explicit function signatures.",
+              "- implement deterministic test hooks for every node output and validate edge-case handling.",
+              "- return code that compiles or runs without additional scaffolding or TODO placeholders.",
+              "- enforce strict separation of concerns between UI, API, data, auth, util, and config layers."
+            ];
+
+        return [
+          "# LOGICHUB INTERNAL PRD ENGINE",
+          `- execution mode: ${mode === "minimal" ? "Gemini (low token)" : "Claude (high reasoning)"}`,
+          `- deterministic graph fingerprint: ${data.graph_fingerprint}`,
+          "",
+          "## 1) SYSTEM INTENT",
+          ...data.system_intent.map(item => `- ${item}`),
+          "",
+          "## 2) ARCHITECTURE GRAPH",
+          architectureFlow || "- no edges defined.",
+          "",
+          "## 3) FILE CONTRACTS",
+          contracts || "- no nodes defined.",
+          "",
+          "## 4) IMPLEMENTATION DIRECTIVES",
+          ...directives,
+          "",
+          "## 5) EDGE CASES + FAILSAFE CONDITIONS",
+          ...data.edge_cases.map(item => `- ${item}`)
+        ].join("\n");
+      }
+
+      buildPRD() {
+        const orderedNodes = this.resolveExecutionOrder();
+        const nodeContracts = this.buildNodeContracts(orderedNodes);
+        const byId = new Map(this.blocks.map(b => [b.id, b]));
+        const graphEdges = this.connections
+          .map((edge) => {
+            const from = byId.get(edge.from);
+            const to = byId.get(edge.to);
+            if (!from || !to) return null;
+            return {
+              from: `${from.filename} (${from.label})`,
+              to: `${to.filename} (${to.label})`,
+              relation: "must execute before"
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to))
+          .map((edge, index) => ({ ...edge, step: index + 1 }));
+
+        const baseJson = {
+          system_intent: orderedNodes.map(node =>
+            `${node.type.toUpperCase()} node ${node.label} must implement ${node.prompt || `deterministic ${node.type} logic`} in ${node.filename}.`
+          ),
+          architecture_graph: graphEdges,
+          file_contracts: nodeContracts,
+          implementation_directives: [
+            "Implement deterministic contracts.",
+            "Return production-grade code.",
+            "Reject ambiguous behavior."
+          ],
+          edge_cases: [
+            "Handle missing dependency outputs with explicit error return values.",
+            "Handle cyclic or invalid graphs by falling back to deterministic node ordering.",
+            "Handle empty graphs by returning no-op architecture directives."
+          ],
+          graph_fingerprint: btoa(unescape(encodeURIComponent(JSON.stringify({
+            nodes: orderedNodes.map(n => ({ type: n.type, label: n.label, filename: n.filename, prompt: n.prompt || "" })),
+            edges: graphEdges
+          })))).slice(0, 24)
+        };
+
+        const minimalPRD = this.runTokenSqueeze(this.buildPRDRender(baseJson, "minimal"));
+        const expandedPRD = this.buildPRDRender(baseJson, "expanded");
+        const tokenBudget = 1800;
+        const selectedMode = this.estimateTokenCount(expandedPRD) > tokenBudget ? "minimal" : "expanded";
+        const selectedPRD = selectedMode === "minimal" ? minimalPRD : expandedPRD;
+
+        return [
+          `# PRD PACKAGE (${selectedMode.toUpperCase()} SELECTED)`,
+          `- selected execution target: ${selectedMode === "minimal" ? "Gemini (low token)" : "Claude (high reasoning)"}`,
+          `- token budget: ${tokenBudget}`,
+          `- minimal estimated tokens: ${this.estimateTokenCount(minimalPRD)}`,
+          `- expanded estimated tokens: ${this.estimateTokenCount(expandedPRD)}`,
+          "",
+          "## ACTIVE PRD",
+          selectedPRD,
+          "",
+          "## MINIMAL PRD (Gemini low token)",
+          minimalPRD,
+          "",
+          "## EXPANDED PRD (Claude high reasoning)",
+          expandedPRD
+        ].join("\n");
       }
     }
 
