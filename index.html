@@ -950,6 +950,7 @@
         }).join("\n");
 
         const modeDirectives = mode === "minimal"
+        const directives = mode === "minimal"
           ? [
               "- implement each node in strict execution order.",
               "- return only requested file outputs with deterministic logic.",
@@ -1004,6 +1005,7 @@
           "## 4) IMPLEMENTATION DIRECTIVES",
           ...modeDirectives,
           ...decisionUxMandates,
+          ...directives,
           "",
           "## 5) EDGE CASES + FAILSAFE CONDITIONS",
           ...data.edge_cases.map(item => `- ${item}`)
