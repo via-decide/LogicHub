@@ -351,6 +351,23 @@
     .forge-section h4 { margin: 0 0 0.35rem; font-size: 0.88rem; font-family: var(--font-mono); }
     .forge-section p { margin: 0 0 0.65rem; color: var(--text-secondary); font-size: 0.72rem; }
     .forge-pro-btn { border-color: var(--saffron); color: var(--saffron); }
+    .forge-pro-benefits { margin: 0 0 0.75rem 1rem; padding: 0; color: var(--text-secondary); font-size: 0.72rem; }
+    .forge-pro-benefits li { margin: 0 0 0.25rem; }
+    .forge-pro-link {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      padding: 0.75rem;
+      border: 1px solid var(--saffron);
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-sizing: border-box;
+    }
     .engine-sandbox-wrap {
       border: 1px solid rgba(0, 229, 255, 0.2);
       border-radius: 12px;
@@ -514,7 +531,7 @@
     <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">[⚡ Synth]</button>
     <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
     <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
-    <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
+    <button id="btn-apk" class="apk-btn" style="display: inline-block;" onclick="app.buildAPK()" id="step-apk" disabled>[📱 APK]</button>
     <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
     <button id="btn-install" class="install-btn" style="display: none;" onclick="app.installPWA()">[↓ Install]</button>
   </div>
@@ -588,6 +605,8 @@
   </div>
 
   <script>
+    window.synthesisComplete = false;
+
     class LogicMap {
       constructor() {
         this.id = "VIBE_" + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -848,13 +867,13 @@
         const st = document.getElementById("map-status"), exp = document.getElementById("btn-export"), apk = document.getElementById("btn-apk"), prd = document.getElementById("btn-prd");
         if (this.map.isReadyForExport()) { 
           st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed"; 
-          exp.disabled = false; exp.className = ""; 
-          apk.style.display = 'inline-block';
+          exp.disabled = false; exp.className = "";
         } else { 
           st.textContent = "● ARCHITECTURE DRAFT"; st.className = "map-status"; 
-          exp.disabled = true; exp.className = ""; 
-          apk.style.display = 'none';
+          exp.disabled = true; exp.className = "";
         }
+        apk.style.display = 'inline-block';
+        apk.disabled = !window.synthesisComplete;
         prd.disabled = this.map.blocks.length === 0;
       },
 
@@ -899,15 +918,21 @@
       async synthesizeArchitecture() {
         if (!this.apiKey) return this.log("Gemini API Key required in header.", "error");
         const order = this.map.getTopologicalOrder(); if (!order.length) return this.log("No nodes.", "error");
+        window.synthesisComplete = false;
+        let synthesisFailed = false;
         for (const block of order) {
           if (block.status === "VERIFIED" && block.code) continue;
           block.status = "GENERATING"; this.render(); this.log(`Synthesizing ${block.filename}...`, "accent");
           try {
             await this.generateNodeCode(block); block.status = "VERIFIED"; this.log(`Verified: ${block.filename}`, "success");
-          } catch(err) { block.status = "ERROR"; block.errorMsg = err.message; this.log(`Error: ${err.message}`, "error"); break; }
+          } catch(err) { block.status = "ERROR"; block.errorMsg = err.message; this.log(`Error: ${err.message}`, "error"); synthesisFailed = true; break; }
           this.render();
         }
-        this.log("Architecture synthesis complete ⚡", "success");
+        if (!synthesisFailed) {
+          window.synthesisComplete = true;
+          this.log("Architecture synthesis complete ⚡", "success");
+        }
+        this.updateHeader();
       },
 
       async generateNodeCode(block) {
@@ -958,6 +983,7 @@
       },
 
       async buildAPK() {
+        if (!window.synthesisComplete) return this.log("Run synthesis first to generate your APK.", "warning");
         if (!this.map.isReadyForExport()) return this.log("Synthesis required before APK build", "error");
         if (this.apkBuildInProgress) return this.log("APK build already in progress", "error");
         
@@ -1043,73 +1069,6 @@
         }
       },
 
-      async generateRealAPK(zipFallbackBlob) {
-        const zip = new JSZip();
-        const steps = [
-          "Assembling web assets",
-          "Injecting into Capacitor shell",
-          "Running Gradle build",
-          "Packaging APK"
-        ];
-
-        const stepState = steps.map((name) => ({ name, done: false }));
-        const renderStepChecklist = () => {
-          output.innerHTML = "";
-          stepState.forEach((step) => {
-            addLog(`[${step.done ? "✓" : " "}] ${step.name}`, step.done ? "success" : "progress");
-          });
-        };
-        const markStepDone = (idx) => {
-          stepState[idx].done = true;
-          progress.style.width = `${Math.round(((idx + 1) / stepState.length) * 100)}%`;
-          renderStepChecklist();
-        };
-        renderStepChecklist();
-
-        try {
-          this.apkZipBlob = await this.createProjectZipBlob();
-          markStepDone(0);
-
-          const apkData = await this.generateRealAPK(this.apkZipBlob);
-          markStepDone(1);
-          markStepDone(2);
-          markStepDone(3);
-
-          if (apkData.size < 500 * 1024) {
-            throw new Error("APK output is under 500KB and appears invalid.");
-          }
-          if (apkData.size < 1024 * 1024) {
-            throw new Error("APK output is unexpectedly small (<1MB).");
-          }
-
-          this.apkBlob = apkData;
-          const fileSizeLabel = this.formatFileSize(apkData.size);
-          dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${fileSizeLabel})`;
-          dlBtn.style.display = "inline-block";
-          addLog(`✓ APK ready (${fileSizeLabel})`, "success");
-          this.log("APK Ready! Download from modal.", "apk");
-        } catch (err) {
-          this.apkBlob = null;
-          addLog("APK build failed. Your ZIP is still available as a fallback.", "error");
-          addLog(`Error: ${err.message}`, "error");
-          this.log("APK build failed. ZIP fallback is available.", "error");
-        } finally {
-          zipFallbackBtn.style.display = "inline-block";
-          this.apkBuildInProgress = false;
-        }
-      },
-
-        // 3. Inject generated files into Capacitor Android shell path BEFORE build
-        const capacitorAssets = zip.folder("android/app/src/main/assets/public");
-        this.map.blocks.forEach(b => { if (b.code) capacitorAssets.file(b.filename, b.code); });
-        // Keep compatibility for existing wrappers
-        const legacyAssets = zip.folder("assets/www");
-        this.map.blocks.forEach(b => { if (b.code) legacyAssets.file(b.filename, b.code); });
-        if (zipFallbackBlob) {
-          zip.file("build-input/VibeProject.zip", zipFallbackBlob);
-        }
-        // Ensure non-trivial package size for install testing
-        zip.file("padding.bin", "0".repeat(1024 * 1024));
       async generateRealAPK(projectZipBlob) {
         const zipBase64 = await new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -1156,9 +1115,6 @@
       downloadZIPFallback() {
         if (!this.zipFallbackBlob) return this.log("ZIP fallback not ready", "error");
         const url = URL.createObjectURL(this.zipFallbackBlob);
-      downloadZipFallback() {
-        if (!this.apkZipBlob) return this.log("ZIP fallback not ready", "error");
-        const url = URL.createObjectURL(this.apkZipBlob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `VibeProject_${this.map.id}.zip`;
@@ -1166,7 +1122,11 @@
         this.log("ZIP fallback downloaded ✓", "success");
       },
 
-      clearMap() { this.map = new LogicMap(); this.render(); },
+      downloadZipFallback() {
+        return this.downloadZIPFallback();
+      },
+
+      clearMap() { this.map = new LogicMap(); window.synthesisComplete = false; this.render(); },
       
       log(msg, type="info") {
         const ids = ["log-1","log-2","log-3"];
@@ -1467,8 +1427,12 @@
 
       <div class="forge-section">
         <h4>Private Architect — Pro</h4>
-        <p>Reserved for private synthesis workflows.</p>
-        <button class="forge-pro-btn" style="width:100%;" onclick="executeProSynthesis()">Private Architect</button>
+        <p>₹499/month</p>
+        <ul class="forge-pro-benefits">
+          <li>Unlimited syntheses</li>
+          <li>Priority APK queue</li>
+        </ul>
+        <a class="forge-pro-btn forge-pro-link" href="mailto:sales@example.com?subject=Unlock%20Private%20Architect" target="_blank" rel="noopener noreferrer" aria-label="Unlock Private Architect">Unlock Private Architect →</a>
       </div>
     </div>
   </div>
