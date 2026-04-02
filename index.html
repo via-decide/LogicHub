@@ -8,6 +8,8 @@
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <style>
     :root {
@@ -101,6 +103,45 @@
     .api-panel.open { display: block; }
     .api-panel input { width: 100%; font-size: 0.8rem; user-select: auto; -webkit-user-select: auto;}
 
+    .auth-strip {
+      padding: 0.45rem 1.25rem;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+    }
+    .auth-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+      font-size: 0.64rem;
+      font-weight: 700;
+    }
+    .auth-chip strong { color: var(--text-primary); }
+    .auth-chip.accent {
+      border-color: rgba(0,229,255,0.22);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+    }
+    .auth-chip.success {
+      border-color: rgba(46,204,113,0.24);
+      background: rgba(46,204,113,0.1);
+      color: var(--success);
+    }
+    .auth-chip.warn {
+      border-color: rgba(255,153,0,0.24);
+      background: rgba(255,153,0,0.1);
+      color: var(--saffron);
+    }
+
     /* ── LOGGER ── */
     .logger-row {
       padding: 0.35rem 1.25rem; background: var(--bg-primary);
@@ -155,10 +196,422 @@
 
     /* ── FOOTER & BUTTONS ── */
     .footer {
-      display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 0.4rem;
       padding: 0.6rem 1.25rem; border-top: 1px solid var(--border-color);
       background: var(--bg-secondary); flex-shrink: 0;
     }
+    .helper-strip {
+      padding: 0.45rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(0,229,255,0.04);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      line-height: 1.5;
+    }
+    .helper-strip strong { color: var(--accent); }
+    .onboarding-shell {
+      padding: 0.85rem 1.25rem 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .onboarding-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(18,22,30,0.92), rgba(8,11,16,0.98));
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      display: grid;
+      gap: 0.9rem;
+    }
+    .onboarding-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.24rem 0.62rem;
+      width: fit-content;
+      border-radius: 999px;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.18);
+      color: var(--accent);
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .onboarding-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .onboarding-header h3 {
+      margin: 0.12rem 0 0.35rem;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    .onboarding-header p {
+      margin: 0;
+      font-size: 0.74rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 640px;
+    }
+    .onboarding-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.28rem 0.56rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    .onboarding-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .onboarding-step {
+      border-radius: 14px;
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      gap: 0.45rem;
+    }
+    .onboarding-step-number {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: #031118;
+      background: linear-gradient(135deg, var(--accent), var(--saffron));
+    }
+    .onboarding-step h4 {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+    }
+    .onboarding-step p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      line-height: 1.55;
+    }
+    .payment-strip {
+      padding: 0.8rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(135deg, rgba(255,153,0,0.08), rgba(0,229,255,0.08));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+    .payment-strip-copy {
+      display: grid;
+      gap: 0.34rem;
+    }
+    .payment-strip button {
+      border: none;
+      border-radius: 10px;
+      padding: 0.72rem 0.95rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--saffron), var(--accent));
+      color: #031118;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .payment-strip button:hover { filter: brightness(1.05); }
+    .price-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.12rem 0.42rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-weight: 700;
+    }
+    .limited-note {
+      color: var(--saffron);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .payment-card {
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      gap: 0.55rem;
+      margin-bottom: 0.8rem;
+    }
+    .payment-card h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+    .founder-hero {
+      background: linear-gradient(135deg, rgba(255,153,0,0.12), rgba(0,229,255,0.08));
+      border-color: rgba(255,153,0,0.18);
+    }
+    .founder-hero-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .founder-hero-title h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    .founder-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.18);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .founder-tier-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+    .pass-card-premium {
+      position: relative;
+      overflow: hidden;
+    }
+    .pass-card-premium::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 42%);
+      pointer-events: none;
+    }
+    .founder-plan-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .founder-plan-badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.24rem 0.56rem;
+      border-radius: 999px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+    }
+    .tier-badge.value {
+      background: rgba(255,153,0,0.14);
+      border-color: rgba(255,153,0,0.28);
+      color: var(--saffron);
+    }
+    .tier-badge.founder {
+      background: rgba(0,229,255,0.1);
+      border-color: rgba(0,229,255,0.22);
+      color: var(--accent);
+    }
+    .mini-trust-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0.7rem 0.8rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      margin-top: 0.1rem;
+    }
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.34rem;
+      padding: 0.24rem 0.52rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      font-size: 0.63rem;
+      font-weight: 700;
+    }
+    .founder-success-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(0,230,118,0.12);
+      border: 1px solid rgba(0,230,118,0.24);
+      color: var(--success);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .premium-thankyou {
+      display: grid;
+      gap: 0.7rem;
+      padding: 1rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(0,230,118,0.1), rgba(0,229,255,0.08));
+      border: 1px solid rgba(0,230,118,0.22);
+      color: var(--text-primary);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    .premium-thankyou h4 {
+      margin: 0;
+      font-size: 0.96rem;
+      color: var(--text-primary);
+    }
+    .premium-thankyou p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      line-height: 1.6;
+    }
+    .thankyou-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+    .thankyou-stat {
+      padding: 0.72rem 0.78rem;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .thankyou-stat-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 0.2rem;
+    }
+    .thankyou-stat-value {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+    .faq-list,
+    .next-steps-list {
+      display: grid;
+      gap: 0.6rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .faq-item,
+    .next-step-item {
+      padding: 0.72rem 0.8rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .faq-item strong,
+    .next-step-item strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: var(--text-primary);
+      font-size: 0.74rem;
+    }
+    .payment-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.73rem;
+      line-height: 1.5;
+    }
+    .payment-amount {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .payment-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+    .payment-actions button,
+    .payment-wide-btn {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-primary);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .payment-wide-btn.primary {
+      background: var(--accent);
+      color: #031118;
+      border: none;
+    }
+    .payment-wide-btn.secondary {
+      background: rgba(255,153,0,0.15);
+      border-color: rgba(255,153,0,0.25);
+      color: var(--saffron);
+    }
+    .payment-actions button:hover,
+    .payment-wide-btn:hover { filter: brightness(1.05); }
+    .payment-note {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .payment-status-box {
+      padding: 0.8rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    .payment-status-box strong { color: var(--text-primary); }
+    .payment-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 0.9rem 0;
+    }
+    .payment-muted { color: var(--text-secondary); font-size: 0.7rem; }
     button {
       padding: 0.65rem 0.4rem; border: 1px solid var(--border-bright);
       background: var(--bg-primary); color: var(--text-primary); cursor: pointer;
@@ -167,7 +620,7 @@
       overflow: hidden; text-overflow: ellipsis;
     }
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    button:disabled { opacity: 0.58; cursor: not-allowed; }
     button.compile-btn { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
     button.forge-fab {
       background: linear-gradient(135deg, var(--accent), #00b8cc); color: #000;
@@ -211,6 +664,15 @@
       .api-input { display: none; }
       .api-mobile-btn { display: flex !important; }
 
+      .auth-strip {
+        padding: 0.4rem 0.6rem;
+        gap: 0.4rem;
+      }
+      .auth-chip {
+        font-size: 0.58rem;
+        padding: 0.25rem 0.48rem;
+      }
+
       /* Sidebar: horizontal scrollable strip */
       .sidebar {
         width: 100%;
@@ -247,11 +709,39 @@
       /* Main: stack vertically */
       .main-container { flex-direction: column; }
 
-      /* Footer: 3-col × 2-row grid */
+      /* Footer: 3-col responsive grid */
       .footer {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
         padding: 0.45rem 0.6rem;
         gap: 0.35rem;
+      }
+      .helper-strip {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.6rem;
+      }
+      .onboarding-shell {
+        padding: 0.65rem 0.6rem 0;
+      }
+      .onboarding-card {
+        padding: 0.85rem;
+      }
+      .onboarding-grid,
+      .thankyou-meta {
+        grid-template-columns: 1fr;
+      }
+      .payment-strip {
+        display:flex; flex-direction:column; align-items:flex-start; gap:0.5rem;
+        padding:0.65rem 0.6rem;
+        font-size:0.64rem;
+      }
+      .payment-strip button {
+        width:100%;
+      }
+      .payment-actions {
+        grid-template-columns: 1fr;
+      }
+      .founder-tier-grid {
+        grid-template-columns: 1fr;
       }
       .footer button {
         padding: 0.55rem 0.25rem;
@@ -270,13 +760,13 @@
   <div class="header">
     <div class="header-left">
       <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">VIBECODER</span></div>
-      <div class="map-status state-idle" id="map-status">AWAITING ARCHITECTURE</div>
-      <div class="info-badge" id="block-count">0 nodes</div>
+      <div class="map-status state-idle" id="map-status">ADD PARTS TO START</div>
+      <div class="info-badge" id="block-count">0 parts</div>
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="btn-icon" onclick="alert('Rules:\n1. Add Node\n2. Drag right port to left port\n3. Synth!')">?</button>
+      <button class="btn-icon" onclick="alert('Quick help:\n1. Add the main parts you understand, like a screen or sign-in flow.\n2. You do not need separate JS or CSS parts unless you want custom files.\n3. Press Make App to generate the files.\n4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
 
@@ -284,31 +774,81 @@
     <input type="password" id="api-key-mobile" placeholder="Paste Gemini API Key here…">
   </div>
 
+  <div class="auth-strip" id="auth-strip">
+    <div class="auth-chip accent" id="auth-state-chip">Auth: connecting…</div>
+    <div class="auth-chip" id="plan-state-chip">Plan: free</div>
+    <div class="auth-chip" id="session-state-chip">Apps this session: 0/10</div>
+  </div>
+
   <!-- LOGGER -->
   <div class="logger-row">
     <div class="logger">
       <div class="log-line" id="log-1">>> SYSTEM BOOTING...</div>
-      <div class="log-line" id="log-2">>> READY TO VIBECODE</div>
-      <div class="log-line success" id="log-3">>> AWAITING ARCHITECTURE</div>
+      <div class="log-line" id="log-2">>> READY TO BUILD</div>
+      <div class="log-line success" id="log-3">>> ADD PARTS TO START</div>
     </div>
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
+  </div>
+
+  <div class="helper-strip"><strong>New here?</strong> Add the main parts you understand. You do not need separate code files for everything—LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
+
+  <div class="onboarding-shell">
+    <div class="onboarding-card">
+      <div class="onboarding-kicker">✨ Premium onboarding</div>
+      <div class="onboarding-header">
+        <div>
+          <h3>Start fast without losing the existing guide</h3>
+          <p>This adds a cleaner, StudyOS-inspired quick-start layer while keeping the current guide and every existing action exactly where users already expect them.</p>
+        </div>
+        <div class="onboarding-meta">
+          <span class="meta-chip">1. Add parts</span>
+          <span class="meta-chip">2. Make App</span>
+          <span class="meta-chip">3. Publish or export</span>
+        </div>
+      </div>
+      <div class="onboarding-grid">
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">01</span>
+          <h4>Pick the parts you understand</h4>
+          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">02</span>
+          <h4>Press Make App</h4>
+          <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">03</span>
+          <h4>Choose your next step</h4>
+          <p>Review the plan, download a ZIP, build the Android app, or publish to the connected community flow when your app is ready.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="payment-strip">
+    <div class="payment-strip-copy">
+      <div><strong>Founder Launch:</strong> Choose <span class="price-chip">India Founder Pass — ₹1717</span> or keep <span class="price-chip">Global Founder Pass — $99</span> visible for international buyers.</div>
+      <div class="limited-note">Founder deal • limited early-access pricing while manual confirmation is active.</div>
+    </div>
+    <button onclick="app.openFounderCheckout()">💳 View Founder Passes</button>
   </div>
 
   <!-- MAIN -->
   <div class="main-container">
     <div class="sidebar" id="sidebar">
-      <h3>Core Nodes</h3>
+      <h3>Main Parts</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('ui')">[UI] COMPONENT</div>
-        <div class="palette-item" onclick="app.addBlock('api')">[API] ROUTE</div>
-        <div class="palette-item" onclick="app.addBlock('database')">[DB] SCHEMA</div>
-        <div class="palette-item" onclick="app.addBlock('auth')">[AUTH] LAYER</div>
+        <div class="palette-item" onclick="app.addBlock('ui')">SCREEN</div>
+        <div class="palette-item" onclick="app.addBlock('api')">LIVE DATA</div>
+        <div class="palette-item" onclick="app.addBlock('database')">SAVED DATA</div>
+        <div class="palette-item" onclick="app.addBlock('auth')">LOGIN</div>
       </div>
-      <h3>Utility</h3>
+      <h3>Extra Parts</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('util')">[UTIL] HELPER</div>
-        <div class="palette-item" onclick="app.addBlock('styles')">[CSS] STYLES</div>
-        <div class="palette-item" onclick="app.addBlock('config')">[CFG] CONFIG</div>
+        <div class="palette-item" onclick="app.addBlock('util')">APP LOGIC</div>
+        <div class="palette-item" onclick="app.addBlock('styles')">STYLE</div>
+        <div class="palette-item" onclick="app.addBlock('config')">SETTINGS</div>
       </div>
     </div>
 
@@ -320,31 +860,32 @@
       </svg>
       <div id="blocks-container"></div>
       <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.25;">
-        <div style="font-size:2rem">⬡</div><div style="font-family:var(--font-mono);font-size:0.7rem;">Add nodes to begin</div>
+        <div style="font-size:2rem">⬡</div><div style="font-family:var(--font-mono);font-size:0.7rem;">Add parts to begin</div>
       </div>
     </div>
   </div>
 
   <!-- FOOTER -->
   <div class="footer">
-    <button onclick="app.addBlock('ui')">+ Node</button>
-    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Synth</button>
-    <button onclick="app.viewPRD()">📋 PRD</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
-    <button id="btn-apk" disabled onclick="app.buildApk()">📱 APK</button>
-    <button onclick="app.clearMap()">🗑 Wipe</button>
+    <button onclick="app.addBlock('ui')">+ Part</button>
+    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
+    <button onclick="app.viewPRD()">📋 Plan</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">📦 Download ZIP</button>
+    <button id="btn-apk" disabled onclick="app.buildApk()">📱 Android App</button>
+    <button id="btn-publish" disabled onclick="app.publishApp()">🌐 Publish</button>
+    <button onclick="app.clearMap()">🗑 Reset</button>
   </div>
 
   <!-- NODE MODAL -->
   <div class="modal" id="node-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
-      <div class="modal-header" id="node-modal-header">Configure Node</div>
+      <div class="modal-header" id="node-modal-header">Edit Part</div>
       <input type="hidden" id="node-modal-id">
-      <div class="form-group"><label>Target Filename</label><input type="text" id="node-modal-filename"></div>
-      <div class="form-group"><label>AI Instructions</label><textarea id="node-modal-prompt" rows="3"></textarea></div>
-      <div class="form-group"><label>Generated Code</label><textarea id="node-modal-code" rows="6" style="color:var(--success);"></textarea></div>
-      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.saveNodeConfig()">SAVE CONFIGURATION</button>
+      <div class="form-group"><label>File name</label><input type="text" id="node-modal-filename"></div>
+      <div class="form-group"><label>What should this part do?</label><textarea id="node-modal-prompt" rows="3"></textarea></div>
+      <div class="form-group"><label>AI-generated code</label><textarea id="node-modal-code" rows="6" style="color:var(--success);"></textarea></div>
+      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.saveNodeConfig()">SAVE CHANGES</button>
     </div>
   </div>
 
@@ -360,8 +901,8 @@
       </div>
       <div style="margin-top:1rem;border-top:1px solid var(--border-color);padding-top:1rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-          <span id="forge-limits-text" style="font-size:0.65rem;color:var(--text-secondary);">Limit: 0/3</span>
-          <span style="font-size:0.65rem;color:var(--saffron);font-weight:700;">PRO: UNLIMITED</span>
+          <span id="forge-limits-text" style="font-size:0.65rem;color:var(--text-secondary);">Free: 0/3. Session apps: 0/10</span>
+          <span id="forge-plan-text" style="font-size:0.65rem;color:var(--saffron);font-weight:700;">AUTH: CONNECTING</span>
         </div>
         <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">START COMMUNITY SYNTHESIS</button>
       </div>
@@ -378,7 +919,151 @@
     </div>
   </div>
 
+  <!-- FOUNDER CHECKOUT MODAL -->
+  <div class="modal" id="founder-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('founder-modal')">✕</button>
+      <div class="modal-header">💳 Founder Passes</div>
+
+      <div class="payment-card founder-hero">
+        <div class="founder-hero-title">
+          <h3>Get Founder Access Early</h3>
+          <span class="founder-badge">⚡ Limited early access</span>
+        </div>
+        <p>Pick the pass that fits your buyer. India can pay now with UPI, while global buyers can still see the locked-in $99 founder pricing before Razorpay goes live.</p>
+      </div>
+
+      <div class="founder-tier-grid">
+        <div class="payment-card pass-card-premium">
+          <div class="founder-plan-head">
+            <h4>India Founder Pass — ₹1717</h4>
+            <div class="founder-plan-badges">
+              <span class="tier-badge value">Best value</span>
+              <span class="tier-badge founder">Founder deal</span>
+            </div>
+          </div>
+          <div class="payment-amount" id="founder-price-inr">₹1717</div>
+          <p>Use this now for direct founder sales in India with a simple UPI + UTR flow and limited early-access positioning.</p>
+          <div class="payment-status-box">
+            <strong>UPI ID:</strong> <span id="founder-upi-id"></span><br>
+            <strong>Plan:</strong> India Founder Pass<br>
+            <strong>Project:</strong> <span id="founder-project-name"></span>
+          </div>
+          <div class="payment-actions">
+            <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
+            <button onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
+          </div>
+          <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">✅ I Paid — Submit UTR</button>
+          <div class="payment-note">Limited early-access wording helps this read like a founder launch, not a generic payment form.</div>
+        </div>
+
+        <div class="payment-card pass-card-premium">
+          <div class="founder-plan-head">
+            <h4>Global Founder Pass — $99</h4>
+            <div class="founder-plan-badges">
+              <span class="tier-badge founder">Founder deal</span>
+              <span class="tier-badge">Razorpay next</span>
+            </div>
+          </div>
+          <div class="payment-amount">$99 <span class="payment-muted">Razorpay coming soon</span></div>
+          <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
+          <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
+          <div class="payment-note">Best use: landing page pricing, founder outreach, and global waitlist conversations.</div>
+        </div>
+      </div>
+
+      <div class="mini-trust-bar">
+        <span class="trust-pill">🔒 Duplicate UTR protection</span>
+        <span class="trust-pill">⚡ Founder price reserved on this device</span>
+        <span class="trust-pill">🧾 Manual confirmation note shown clearly</span>
+      </div>
+
+      <div class="payment-divider"></div>
+      <div id="founder-utr-panel" style="display:none;">
+        <div class="form-group"><label>12-digit UTR</label><input type="text" id="founder-utr" inputmode="numeric" maxlength="12" placeholder="e.g. 123456789012"></div>
+        <button class="payment-wide-btn primary" onclick="app.submitFounderUtr()">SAVE FOUNDER REQUEST</button>
+        <div class="payment-note">Duplicate UTR values are blocked on this device so the same payment cannot be submitted twice by mistake.</div>
+      </div>
+
+      <div class="payment-card">
+        <h4>What happens after payment?</h4>
+        <ul class="next-steps-list">
+          <li class="next-step-item"><strong>1. Pay with UPI</strong> Open the ready-filled UPI payment link from this modal.</li>
+          <li class="next-step-item"><strong>2. Submit your UTR</strong> Save the 12-digit UTR so the founder request is recorded on this device.</li>
+          <li class="next-step-item"><strong>3. Manual founder confirmation</strong> For now, founder access is confirmed manually until backend verification or Razorpay automation is added.</li>
+        </ul>
+      </div>
+
+      <div class="payment-card">
+        <h4>Short FAQ</h4>
+        <ul class="faq-list">
+          <li class="faq-item"><strong>Is ₹1717 a one-time founder price?</strong> Yes — this is positioned as the India founder pass, not a monthly subscription.</li>
+          <li class="faq-item"><strong>Why show $99 already?</strong> It keeps the global founder story clear before Razorpay goes live.</li>
+          <li class="faq-item"><strong>Will my payment be lost?</strong> No — this UX stores the founder request locally on the device right after UTR submission.</li>
+        </ul>
+      </div>
+
+      <div class="payment-divider"></div>
+      <div id="founder-payment-status" class="payment-status-box">No founder payment saved on this device yet.</div>
+      <div class="payment-note">Founder payments are manually confirmed for now.</div>
+    </div>
+  </div>
+
   <script>
+    const FIREBASE_CONFIG = {
+      apiKey: 'AIzaSyA5yyW_s2AJiCloPU5_q7wVTdB9okb95Pk',
+      authDomain: 'logichub-app.firebaseapp.com',
+      projectId: 'logichub-app',
+      storageBucket: 'logichub-app.firebasestorage.app',
+      messagingSenderId: '4875740341'
+    };
+    const APP_SESSION_LIMIT = 10;
+
+    function getStoredFounderOrders() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('lh_founder_orders') || '[]');
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function hasPaidAccessFlag() {
+      return !!(window.app && window.app.serverAccess && window.app.serverAccess.paid);
+    }
+
+    function getSessionAppIds() {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('lh_session_app_ids') || '[]');
+        return Array.isArray(saved) ? [...new Set(saved.filter(Boolean))] : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveSessionAppIds(ids) {
+      sessionStorage.setItem('lh_session_app_ids', JSON.stringify([...new Set((ids || []).filter(Boolean))]));
+    }
+
+    function getSessionAppCount() {
+      return getSessionAppIds().length;
+    }
+
+    function canCreateAnotherSessionApp(mapId) {
+      const ids = getSessionAppIds();
+      return ids.includes(mapId) || ids.length < APP_SESSION_LIMIT;
+    }
+
+    function markSessionAppCreated(mapId) {
+      if (!mapId) return false;
+      const ids = getSessionAppIds();
+      if (ids.includes(mapId)) return true;
+      if (ids.length >= APP_SESSION_LIMIT) return false;
+      ids.push(mapId);
+      saveSessionAppIds(ids);
+      return true;
+    }
+
     // --- TIME LIMITS CORE ---
     function getLatestResetTimestamp() {
       const now = new Date();
@@ -393,6 +1078,10 @@
     }
 
     function syncForgeCounter() {
+      if (hasPaidAccessFlag()) {
+        localStorage.setItem('lh_gen_count', "0");
+        return 0;
+      }
       const latestReset = getLatestResetTimestamp();
       const lastReset = parseInt(localStorage.getItem('lh_last_reset_ts') || "0");
       if (latestReset > lastReset) {
@@ -404,12 +1093,20 @@
     }
 
     function updateForgeLimitUI() {
+      const paid = hasPaidAccessFlag();
       const count = syncForgeCounter();
+      const sessionCount = getSessionAppCount();
       const nextDate = new Date(getLatestResetTimestamp() + 5 * 60 * 60 * 1000);
       let ampm = nextDate.getHours() >= 12 ? 'PM' : 'AM';
       let hr = nextDate.getHours() % 12 || 12;
-      document.getElementById("forge-limits-text").textContent = `Limit: ${count}/3. Resets at ${hr}:00 ${ampm}`;
-      document.getElementById("forge-community-btn").disabled = count >= 3;
+      const limitText = paid
+        ? `Paid access: reset limits unlocked. Session apps ${sessionCount}/${APP_SESSION_LIMIT}.`
+        : `Free: ${count}/3. Session apps ${sessionCount}/${APP_SESSION_LIMIT}. Resets at ${hr}:00 ${ampm}`;
+      document.getElementById("forge-limits-text").textContent = limitText;
+      const planEl = document.getElementById("forge-plan-text");
+      if (planEl) planEl.textContent = paid ? 'PAID: RESET LIMITS ON' : 'FREE: AUTH ENABLED';
+      document.getElementById("forge-community-btn").disabled = sessionCount >= APP_SESSION_LIMIT || (!paid && count >= 3);
+      if (window.app && typeof window.app.updateAuthUI === 'function') window.app.updateAuthUI();
     }
 
     function openForgeModal() {
@@ -418,14 +1115,19 @@
     }
 
     async function executeCommunitySynthesis() {
+      const paid = hasPaidAccessFlag();
       const count = syncForgeCounter();
-      if (count >= 3) return alert("Compute limit reached.");
+      if (getSessionAppCount() >= APP_SESSION_LIMIT && !getSessionAppIds().includes(app.map.id)) {
+        updateForgeLimitUI();
+        return alert(`This session is limited to ${APP_SESSION_LIMIT} apps. Start a new session to make another app.`);
+      }
+      if (!paid && count >= 3) return alert("Compute limit reached.");
       const appName = document.getElementById("forge-app-name").value.trim();
       if (!appName) return alert("App name required.");
       closeModal('forge-modal');
       const success = await app.synthesizeArchitecture();
       if (success) {
-        localStorage.setItem('lh_gen_count', (count + 1).toString());
+        if (!paid) localStorage.setItem('lh_gen_count', (count + 1).toString());
         updateForgeLimitUI();
       }
     }
@@ -438,10 +1140,20 @@
         this.id = "VIBE_" + Math.random().toString(36).substring(7).toUpperCase();
       }
       addBlock(type, x, y) {
+        const typeInfo = {
+          ui: { label: 'Screen', badge: 'SCREEN', filename: 'index.html' },
+          api: { label: 'Live Data', badge: 'DATA', filename: 'api.js' },
+          database: { label: 'Saved Data', badge: 'DATA', filename: 'schema.sql' },
+          auth: { label: 'Login', badge: 'LOGIN', filename: 'auth.js' },
+          util: { label: 'App Logic', badge: 'LOGIC', filename: 'utils.js' },
+          styles: { label: 'Style', badge: 'STYLE', filename: 'styles.css' },
+          config: { label: 'Settings', badge: 'SETUP', filename: 'config.js' }
+        };
+        const info = typeInfo[type] || { label: 'App Part', badge: 'PART', filename: 'file.js' };
         const b = {
           id: "NODE_" + Math.random().toString(36).substring(7).toUpperCase(),
-          type, label: `${type.toUpperCase()} NODE`,
-          filename: { ui:'index.html', api:'api.js', database:'schema.sql', auth:'auth.js', util:'utils.js', styles:'styles.css', config:'config.js' }[type] || 'file.js',
+          type, label: info.label, typeLabel: info.badge,
+          filename: info.filename,
           prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: []
         };
         this.blocks.push(b); return b;
@@ -465,7 +1177,7 @@
       }
       buildPRD() {
         let prd = `# LOGICHUB ARCHITECTURE PRD: ${this.id}\n\n`;
-        if (this.blocks.length === 0) return "No nodes in architecture yet.";
+        if (this.blocks.length === 0) return "No parts in this app plan yet.";
         this.blocks.forEach(b => {
           prd += `## [${b.type.toUpperCase()}] ${b.label}\n`;
           prd += `**Filename:** \`${b.filename}\`\n`;
@@ -480,10 +1192,20 @@
     }
 
     // --- APP CONTROLLER ---
+    const FOUNDER_PAYMENT = {
+      inrAmount: 1717,
+      usdAmount: 99,
+      upiId: '6351537770@yapl',
+      payeeName: 'LogicHub',
+      note: 'LogicHub Founder Access'
+    };
+
     const app = {
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 },
       isDrawing: false, sourceId: null,
+      authUser: null,
+      serverAccess: { checked: false, paid: false, pending: false, source: 'unknown', plan: 'free' },
 
       init() {
         this.setupPointerEvents();
@@ -493,7 +1215,11 @@
           btn.onclick = () => btn.classList.toggle("active");
           grid.appendChild(btn);
         });
+        this.updateAuthUI();
+        this.initFirebaseAuth();
         this.render();
+        updateForgeLimitUI();
+        this.renderFounderStatus();
       },
 
       setupPointerEvents() {
@@ -529,7 +1255,7 @@
             if (targetPort) {
               const targetId = targetPort.getAttribute('data-id');
               if (this.sourceId !== targetId) {
-                if(this.map.connect(this.sourceId, targetId)) this.log("Nodes wired successfully.", "success");
+                if(this.map.connect(this.sourceId, targetId)) this.log("Parts linked successfully.", "success");
               }
             }
             this.isDrawing = false;
@@ -546,7 +1272,7 @@
         this.render();
       },
 
-      removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Node removed.", "info"); },
+      removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Part removed.", "info"); },
 
       render() {
         const container = document.getElementById("blocks-container");
@@ -559,7 +1285,7 @@
           el.style.left = `${b.x}px`; el.style.top = `${b.y}px`;
           el.innerHTML = `
             <div class="block-delete" onclick="app.removeBlock('${b.id}')">✕</div>
-            <div class="block-header"><span>[${b.type.toUpperCase()}]</span><span class="block-edit" onclick="app.openNodeEditor('${b.id}')">CONFIG</span></div>
+            <div class="block-header"><span>[${b.typeLabel || b.type.toUpperCase()}]</span><span class="block-edit" onclick="app.openNodeEditor('${b.id}')">EDIT</span></div>
             <div class="block-label">${b.label}</div>
             <div class="block-status" style="background:${colors[b.status] || colors.PENDING}">${b.status}</div>
             <div class="port-wrapper in" data-id="${b.id}"><div class="port"></div></div>
@@ -602,7 +1328,7 @@
           const dx = Math.max(40, Math.abs(end.x - start.x) * 0.5);
           path.setAttribute("d", `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`);
           path.setAttribute("marker-end", "url(#arrow)");
-          path.onclick = (e) => { e.stopPropagation(); if (confirm("Remove connection?")) { this.map.disconnect(c.from, c.to); this.render(); } };
+          path.onclick = (e) => { e.stopPropagation(); if (confirm("Remove this link between parts?")) { this.map.disconnect(c.from, c.to); this.render(); } };
           group.appendChild(path);
         });
       },
@@ -615,15 +1341,16 @@
 
       updateStats() {
         const n = this.map.blocks.length;
-        document.getElementById("block-count").textContent = `${n} nodes`;
+        document.getElementById("block-count").textContent = `${n} parts`;
         const ready = n > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
         document.getElementById("btn-export").disabled = !ready;
         document.getElementById("btn-apk").disabled = !ready;
+        document.getElementById("btn-publish").disabled = n === 0;
         const stat = document.getElementById("map-status");
-        if (n === 0) { stat.textContent = "AWAITING ARCHITECTURE"; stat.className = "map-status state-idle"; }
-        else if (ready) { stat.textContent = "SYNTHESIS COMPLETE"; stat.className = "map-status state-complete"; }
-        else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "SYNTHESISING..."; stat.className = "map-status state-active"; }
-        else { stat.textContent = "READY TO SYNTHESISE"; stat.className = "map-status state-ready"; }
+        if (n === 0) { stat.textContent = "ADD PARTS TO START"; stat.className = "map-status state-idle"; }
+        else if (ready) { stat.textContent = "APP READY"; stat.className = "map-status state-complete"; }
+        else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "MAKING APP..."; stat.className = "map-status state-active"; }
+        else { stat.textContent = "READY TO MAKE APP"; stat.className = "map-status state-ready"; }
       },
 
       log(msg, type = "info") {
@@ -633,13 +1360,13 @@
         l3.textContent = `>> ${msg}`; l3.className = `log-line ${type}`;
       },
 
-      clearMap() { if (confirm("Wipe the architecture?")) { this.map = new LogicMap(); this.render(); this.log("Cleared.", "info"); } },
+      clearMap() { if (confirm("Reset this app plan?")) { this.map = new LogicMap(); this.render(); this.log("Plan reset.", "info"); } },
 
       openNodeEditor(id) {
         const b = this.map.blocks.find(x => x.id === id);
         if (!b) return;
         document.getElementById("node-modal-id").value = b.id;
-        document.getElementById("node-modal-header").textContent = `Configure: ${b.label}`;
+        document.getElementById("node-modal-header").textContent = `Edit Part: ${b.label}`;
         document.getElementById("node-modal-filename").value = b.filename;
         document.getElementById("node-modal-prompt").value = b.prompt;
         const codeArea = document.getElementById("node-modal-code");
@@ -670,17 +1397,485 @@
         this.log("PRD copied.", "success"); closeModal("prd-modal");
       },
 
+      getFounderOrders() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('lh_founder_orders') || '[]');
+          return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+          return [];
+        }
+      },
+
+      saveFounderOrders(orders) {
+        localStorage.setItem('lh_founder_orders', JSON.stringify(Array.isArray(orders) ? orders : []));
+      },
+
+      getFounderUtrIndex() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('lh_founder_utr_index') || '{}');
+          return saved && typeof saved === 'object' ? saved : {};
+        } catch (error) {
+          return {};
+        }
+      },
+
+      saveFounderUtrIndex(index) {
+        localStorage.setItem('lh_founder_utr_index', JSON.stringify(index || {}));
+      },
+
+      getPaidOrderRecord() {
+        const orders = this.getFounderOrders();
+        for (let i = orders.length - 1; i >= 0; i--) {
+          const order = orders[i];
+          if (['founder_access_requested', 'founder_access_confirmed', 'paid', 'pro'].includes(String(order?.status || ''))) return order;
+        }
+        return null;
+      },
+
+      isPaidUser() {
+        return !!this.serverAccess?.paid;
+      },
+
+      async refreshServerAccessStatus(forceRefresh = false) {
+        if (!this.authUser?.getIdToken) {
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'guest', plan: 'free' };
+          this.updateAuthUI();
+          return this.serverAccess;
+        }
+        try {
+          const idToken = await this.authUser.getIdToken(forceRefresh);
+          const response = await fetch('/api/access-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify({ idToken })
+          });
+          const data = await this.readJsonResponse(response, 'Access status');
+          if (!response.ok || data.error) throw new Error(data.error || `Access status failed with status ${response.status}`);
+          this.serverAccess = { checked: true, ...data };
+        } catch (error) {
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'error', plan: 'free', error: error.message };
+          this.log(`Access check fallback: ${error.message}`, 'info');
+        }
+        this.updateAuthUI();
+        updateForgeLimitUI();
+        return this.serverAccess;
+      },
+
+      updateAuthUI() {
+        const authChip = document.getElementById('auth-state-chip');
+        const planChip = document.getElementById('plan-state-chip');
+        const sessionChip = document.getElementById('session-state-chip');
+        const localOrder = this.getPaidOrderRecord();
+        const paid = !!this.serverAccess?.paid;
+        const pending = !paid && (!!this.serverAccess?.pending || !!localOrder);
+        const authReady = !!(this.authUser && this.authUser.uid);
+        if (authChip) {
+          authChip.className = `auth-chip ${authReady ? 'success' : 'accent'}`;
+          authChip.textContent = authReady ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'user'} • ${this.authUser.uid.slice(0, 8)}` : 'Auth: local guest mode';
+        }
+        if (planChip) {
+          planChip.className = `auth-chip ${paid ? 'success' : pending ? 'accent' : 'warn'}`;
+          planChip.textContent = paid
+            ? `Plan: paid • server verified • ${this.serverAccess?.plan || 'founder'}`
+            : pending
+              ? 'Plan: payment requested • awaiting approval'
+              : 'Plan: free';
+        }
+        if (sessionChip) {
+          sessionChip.className = 'auth-chip';
+          sessionChip.textContent = `Apps this session: ${getSessionAppCount()}/${APP_SESSION_LIMIT}`;
+        }
+      },
+
+      async initFirebaseAuth() {
+        if (!window.firebase?.initializeApp || !window.firebase?.auth) {
+          this.log('Firebase auth scripts not available. Using local guest mode.', 'info');
+          this.updateAuthUI();
+          return;
+        }
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+          const auth = firebase.auth();
+          auth.onAuthStateChanged(async (user) => {
+            this.authUser = user || null;
+            this.updateAuthUI();
+            await this.refreshServerAccessStatus();
+          });
+          if (!auth.currentUser) await auth.signInAnonymously();
+          this.log('Auth ready for all users.', 'success');
+        } catch (error) {
+          this.authUser = null;
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'error', plan: 'free', error: error.message };
+          this.updateAuthUI();
+          updateForgeLimitUI();
+          this.log(`Auth fallback: ${error.message}`, 'info');
+        }
+      },
+
+      async syncFounderRequestToServer(order) {
+        if (!this.authUser?.getIdToken) throw new Error('Auth is still connecting. Please try again in a moment.');
+        const idToken = await this.authUser.getIdToken(true);
+        const response = await fetch('/api/founder-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ idToken, order })
+        });
+        const data = await this.readJsonResponse(response, 'Founder request');
+        if (!response.ok || data.error) throw new Error(data.error || `Founder request failed with status ${response.status}`);
+        return data;
+      },
+
+      renderFounderStatus() {
+        const statusEl = document.getElementById('founder-payment-status');
+        if (!statusEl) return;
+        const orders = this.getFounderOrders();
+        if (!orders.length) {
+          statusEl.innerHTML = 'No founder payment saved on this device yet.';
+          return;
+        }
+        const latest = orders[orders.length - 1];
+        const statusLabel = latest.status === 'founder_access_requested' ? 'Founder access requested' : String(latest.status || 'saved').replace(/_/g, ' ');
+        statusEl.innerHTML = `<div class="premium-thankyou"><span class="founder-success-badge">✅ Founder access requested</span><div><h4>Thanks — your founder request looks saved.</h4><p>Your request is now stored on this device with the project, amount, and UTR details ready for manual confirmation.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${this.escapeHtml(latest.id)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">₹${Number(latest.amount || 0).toLocaleString('en-IN')}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${this.escapeHtml(latest.projectName)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">UTR</div><div class="thankyou-stat-value">${this.escapeHtml(latest.utr)}</div></div></div><p><strong>Status:</strong> ${this.escapeHtml(statusLabel)}<br><strong>Saved:</strong> ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}</p></div>`;
+        this.updateAuthUI();
+      },
+
+      openFounderCheckout() {
+        document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
+        document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
+        document.getElementById('founder-price-inr').textContent = `₹${Number(FOUNDER_PAYMENT.inrAmount).toLocaleString('en-IN')}`;
+        document.getElementById('founder-utr-panel').style.display = 'none';
+        document.getElementById('founder-utr').value = '';
+        this.renderFounderStatus();
+        document.getElementById('founder-modal').classList.add('active');
+      },
+
+      copyFounderUpi() {
+        navigator.clipboard?.writeText(FOUNDER_PAYMENT.upiId)
+          .then(() => this.log('Founder UPI ID copied.', 'success'))
+          .catch(() => {
+            const temp = document.createElement('input');
+            temp.value = FOUNDER_PAYMENT.upiId;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            temp.remove();
+            this.log('Founder UPI ID copied.', 'success');
+          });
+      },
+
+      openFounderUpiApp() {
+        const amount = Number(FOUNDER_PAYMENT.inrAmount).toFixed(2);
+        const url = `upi://pay?pa=${encodeURIComponent(FOUNDER_PAYMENT.upiId)}&pn=${encodeURIComponent(FOUNDER_PAYMENT.payeeName)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(FOUNDER_PAYMENT.note)}`;
+        window.location.href = url;
+        this.log('Opening UPI app for founder payment...', 'accent');
+      },
+
+      showFounderUtrForm() {
+        document.getElementById('founder-utr-panel').style.display = 'block';
+        document.getElementById('founder-utr').focus();
+      },
+
+      async submitFounderUtr() {
+        const utrInput = document.getElementById('founder-utr');
+        const utr = String(utrInput.value || '').replace(/\s+/g, '').trim();
+        if (!/^\d{12}$/.test(utr)) {
+          alert('UTR must be exactly 12 digits.');
+          return;
+        }
+        const utrIndex = this.getFounderUtrIndex();
+        if (utrIndex[utr]) {
+          alert('That UTR is already saved on this device.');
+          return;
+        }
+        const orders = this.getFounderOrders();
+        const id = `LH-${Math.random().toString(36).slice(2, 6).toUpperCase()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+        const order = {
+          id,
+          projectName: this.getProjectDisplayName(),
+          amount: FOUNDER_PAYMENT.inrAmount,
+          currency: 'INR',
+          payment: 'upi',
+          plan: 'india_founder',
+          utr,
+          status: 'founder_access_requested',
+          createdAt: new Date().toISOString()
+        };
+        orders.push(order);
+        utrIndex[utr] = { orderId: id, createdAt: order.createdAt };
+        this.saveFounderOrders(orders);
+        this.saveFounderUtrIndex(utrIndex);
+        let serverMessage = 'Founder request saved on this device.';
+        try {
+          const result = await this.syncFounderRequestToServer(order);
+          serverMessage = result.message || 'Founder request saved for server review.';
+          this.log('Founder request synced to Firebase.', 'success');
+        } catch (error) {
+          this.log(`Founder request sync pending: ${error.message}`, 'info');
+        }
+        await this.refreshServerAccessStatus(true);
+        this.renderFounderStatus();
+        this.updateAuthUI();
+        updateForgeLimitUI();
+        document.getElementById('founder-utr-panel').style.display = 'none';
+        utrInput.value = '';
+        this.log(`Founder access requested: ${id}`, 'success');
+        alert(`${serverMessage} Order: ${id}`);
+      },
+
+      sanitizeCode(code) {
+        let cleaned = String(code || "").trim();
+        if (cleaned.startsWith("```")) {
+          cleaned = cleaned.replace(/^```[a-zA-Z0-9_-]*\n?/, "").replace(/\n?```$/, "").trim();
+        }
+        return cleaned;
+      },
+
+      getProjectDisplayName() {
+        return document.getElementById("forge-app-name").value.trim() || `LogicHub ${this.map.id}`;
+      },
+
+      escapeHtml(value) {
+        return String(value || "").replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+      },
+
+      injectBeforeTag(html, tagName, snippet) {
+        const closeTag = `</${tagName}>`;
+        return html.includes(closeTag) ? html.replace(closeTag, `${snippet}
+${closeTag}`) : `${html}
+${snippet}`;
+      },
+
+      extractLocalAssetRefs(html) {
+        const refs = [];
+        const regex = /<(script|link|img)[^>]+(?:src|href)=["']([^"']+)["'][^>]*>/gi;
+        let match;
+        while ((match = regex.exec(html))) {
+          const ref = String(match[2] || "").trim();
+          if (!ref || /^(https?:|data:|mailto:|tel:|#|\/\/)/i.test(ref)) continue;
+          const clean = ref.split(/[?#]/)[0].replace(/^\.\//, '');
+          if (!clean || clean.endsWith('/')) continue;
+          refs.push(clean);
+        }
+        return [...new Set(refs)];
+      },
+
+      hasInlineScript(html) {
+        return /<script\b[^>]*>([\s\S]*?)<\/script>/i.test(html);
+      },
+
+      pickBrowserScriptFile(files) {
+        const names = Object.keys(files);
+        return names.find((name) => /(^|\/)(app|main|script|index|ui|client)\.js$/i.test(name))
+          || names.find((name) => name.endsWith('.js') && !name.startsWith('api/') && !/(^|\/)(sw|service-worker)\.js$/i.test(name) && !/(^|\/)(auth|server|backend|config)\.js$/i.test(name))
+          || null;
+      },
+
+      pickStyleFile(files) {
+        return Object.keys(files).find((name) => name.endsWith('.css')) || null;
+      },
+
+      buildDefaultIndexHtml(appName) {
+        const safeName = this.escapeHtml(appName);
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${safeName}</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <main class="container hero">
+    <h1>${safeName}</h1>
+    <p>Your project was auto-repaired by LogicHub so it can still export cleanly.</p>
+    <button id="hello-btn" class="btn primary">Tap me</button>
+    <p id="hello-output" class="muted"></p>
+  </main>
+</body>
+</html>`;
+      },
+
+      buildDefaultStyles() {
+        return `:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #0b1220; color: #f8fafc; }
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px; border-radius: 10px; border: none; cursor: pointer; }
+.btn.primary { background: #00e5ff; color: #001018; font-weight: 700; }
+.muted { opacity: 0.75; }
+input, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; }
+`;
+      },
+
+      buildDefaultJs(appName) {
+        const safeName = String(appName || 'LogicHub').replace(/'/g, "\'");
+        return `document.addEventListener('DOMContentLoaded', () => {
+  const button = document.getElementById('hello-btn');
+  const output = document.getElementById('hello-output');
+  if (button && output) {
+    button.addEventListener('click', () => {
+      output.textContent = 'Your ${safeName} project is live and working.';
+    });
+  }
+});`;
+      },
+
+      buildDefaultManifest(appName) {
+        return JSON.stringify({
+          name: appName,
+          short_name: appName.slice(0, 12) || 'LogicHub',
+          start_url: './index.html',
+          display: 'standalone',
+          background_color: '#030508',
+          theme_color: '#00e5ff'
+        }, null, 2);
+      },
+
+      buildDefaultServiceWorker() {
+        return `self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`;
+      },
+
+      ensureUtilityCss(styles, html) {
+        const utilityClasses = /(container|d-flex|justify-content-between|align-items-center|text-center|btn|btn-primary|w-100|form-control|form-group|lead|mx-auto|mb-[123]|py-[23]|p-2|m-0|ml-2|mx-1|d-block|flex-row|justify-content-around)/;
+        if (!utilityClasses.test(html) || styles.includes('/* LogicHub utility repair */')) return styles;
+        return `${styles}
+
+/* LogicHub utility repair */
+.container{width:min(1100px,100% - 2rem);margin-inline:auto;}
+.d-flex{display:flex;}
+.flex-row{flex-direction:row;}
+.justify-content-between{justify-content:space-between;}
+.justify-content-around{justify-content:space-around;}
+.align-items-center{align-items:center;}
+.text-center{text-align:center;}
+.mx-auto{margin-left:auto;margin-right:auto;}
+.mx-1{margin-left:.25rem;margin-right:.25rem;}
+.ml-2{margin-left:.5rem;}
+.mb-1{margin-bottom:.25rem;}
+.mb-2{margin-bottom:.5rem;}
+.mb-3{margin-bottom:1rem;}
+.mt-auto{margin-top:auto;}
+.py-2{padding-top:.5rem;padding-bottom:.5rem;}
+.py-3{padding-top:1rem;padding-bottom:1rem;}
+.p-2{padding:.5rem;}
+.m-0{margin:0;}
+.h3{font-size:1.5rem;font-weight:700;}
+.lead{font-size:1.125rem;opacity:.8;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1rem;border-radius:.6rem;text-decoration:none;border:none;}
+.btn-primary{background:#0ea5e9;color:#fff;}
+.d-block{display:block;}
+.w-100{width:100%;}
+.form-group{margin-bottom:1rem;}
+.form-control{width:100%;padding:.75rem;border:1px solid #cbd5e1;border-radius:.5rem;}
+`;
+      },
+
+      collectProjectFiles(options = {}) {
+        const files = {};
+        this.map.blocks.forEach((block) => {
+          if (!block.filename || !block.code) return;
+          files[block.filename] = this.sanitizeCode(block.code);
+        });
+
+        const repaired = { ...files };
+        const appName = this.getProjectDisplayName();
+        const repairs = [];
+
+        if (!repaired["index.html"]) {
+          repaired["index.html"] = this.buildDefaultIndexHtml(appName);
+          repairs.push("index.html");
+        }
+
+        let html = repaired["index.html"];
+        let refs = this.extractLocalAssetRefs(html);
+        const hasLocalCssRef = refs.some((ref) => ref.endsWith('.css'));
+        const hasLocalJsRef = refs.some((ref) => ref.endsWith('.js'));
+        const hasInlineScript = this.hasInlineScript(html);
+
+        if (!hasLocalCssRef) {
+          const styleTarget = this.pickStyleFile(repaired) || 'styles.css';
+          if (!repaired[styleTarget]) {
+            repaired[styleTarget] = this.buildDefaultStyles();
+            repairs.push(styleTarget);
+          }
+          html = this.injectBeforeTag(html, 'head', `  <link rel="stylesheet" href="${styleTarget}">`);
+        }
+
+        if (!hasLocalJsRef && !hasInlineScript) {
+          const scriptTarget = this.pickBrowserScriptFile(repaired) || 'app.js';
+          if (!repaired[scriptTarget]) {
+            repaired[scriptTarget] = this.buildDefaultJs(appName);
+            repairs.push(scriptTarget);
+          }
+          html = this.injectBeforeTag(html, 'body', `  <script src="${scriptTarget}" defer><` + `/script>`);
+        }
+
+        refs = this.extractLocalAssetRefs(html);
+        refs.forEach((ref) => {
+          if (repaired[ref]) return;
+          if (ref.endsWith('.css')) {
+            repaired[ref] = this.buildDefaultStyles();
+            repairs.push(ref);
+          } else if (ref.endsWith('.js')) {
+            repaired[ref] = this.buildDefaultJs(appName);
+            repairs.push(ref);
+          } else if (ref.endsWith('.json') && ref.toLowerCase().includes('manifest')) {
+            repaired[ref] = this.buildDefaultManifest(appName);
+            repairs.push(ref);
+          }
+        });
+
+        if (repaired["styles.css"]) repaired["styles.css"] = this.ensureUtilityCss(repaired["styles.css"], html);
+
+        if (options.pwa) {
+          if (!repaired["manifest.json"]) {
+            repaired["manifest.json"] = this.buildDefaultManifest(appName);
+            repairs.push("manifest.json");
+          }
+          if (!repaired["sw.js"]) {
+            repaired["sw.js"] = this.buildDefaultServiceWorker();
+            repairs.push("sw.js");
+          }
+          if (!/rel=["']manifest["']/i.test(html)) html = this.injectBeforeTag(html, 'head', '  <link rel="manifest" href="manifest.json">');
+          if (!/serviceWorker\.register/i.test(html)) html = this.injectBeforeTag(html, 'body', `  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}<` + `/script>`);
+        }
+
+        repaired["index.html"] = html;
+        if (repairs.length) this.log(`Auto-repaired: ${[...new Set(repairs)].join(', ')}`, "accent");
+        return repaired;
+      },
+
+      async readJsonResponse(response, featureName) {
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const raw = await response.text();
+          if (raw.trim().startsWith("<")) {
+            throw new Error(`${featureName} needs the LogicHub server backend. This demo site can still Export ZIP, but ${featureName.toLowerCase()} will not work until /api is deployed.`);
+          }
+          throw new Error(`${featureName} returned an unexpected response.`);
+        }
+        return response.json();
+      },
+
       async synthesizeArchitecture() {
         const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
         if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
-        if (this.map.blocks.length === 0) { alert("Add nodes first."); return false; }
+        if (this.map.blocks.length === 0) { alert("Add a few parts first."); return false; }
+        if (!canCreateAnotherSessionApp(this.map.id)) {
+          updateForgeLimitUI();
+          alert(`This session is limited to ${APP_SESSION_LIMIT} apps. Start a new session to make another app.`);
+          return false;
+        }
         document.getElementById("btn-synth").disabled = true;
         let success = true;
         try {
           for (let b of this.map.blocks) {
             b.status = "GENERATING"; this.render(); this.log(`Generating ${b.filename}...`, "accent");
             const ctx = b.dependsOn.map(id => this.map.blocks.find(x => x.id === id)).filter(d => d?.code).map(d => `--- File: ${d.filename} ---\n${d.code}`).join("\n\n");
-            const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nOutput ONLY raw code. No markdown.`;
+            const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt || 'Synthesize logic based on connections.'}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nRequirements:\n- Output ONLY raw code. No markdown.\n- This app is for non-technical users, so prefer a working result over a perfect file split.\n- Do not reference missing local files.\n- If you create HTML, only reference CSS/JS files that already exist in the current architecture.\n- If no separate browser JS file exists, keep the page working with inline JavaScript or simple HTML-only behavior.\n- Keep filenames and imports consistent with the architecture.`;
             const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -691,7 +1886,11 @@
             if (code.startsWith("```")) code = code.split('\n').slice(1, -1).join('\n');
             b.code = code; b.status = "VERIFIED"; this.render();
           }
-          this.log("Synthesis Complete.", "success");
+          this.collectProjectFiles({ pwa: true });
+          if (!markSessionAppCreated(this.map.id)) throw new Error(`This session is limited to ${APP_SESSION_LIMIT} apps.`);
+          this.updateAuthUI();
+          updateForgeLimitUI();
+          this.log("Synthesis Complete. Missing runtime files were checked for auto-repair.", "success");
         } catch (err) {
           this.log(`Error: ${err.message}`, "error");
           this.map.blocks.forEach(b => { if (b.status === "GENERATING") b.status = "ERROR"; });
@@ -703,7 +1902,8 @@
 
       async buildProjectZipBlob() {
         const zip = new JSZip();
-        this.map.blocks.forEach(b => { if (b.code) zip.file(b.filename, b.code); });
+        const files = this.collectProjectFiles({ pwa: true });
+        Object.entries(files).forEach(([fileName, code]) => zip.file(fileName, code));
         zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
         return zip.generateAsync({ type: "blob" });
       },
@@ -724,9 +1924,9 @@
       },
 
       async buildApk() {
-        if (this.map.blocks.length === 0) { alert("Add and synthesize nodes first."); return; }
+        if (this.map.blocks.length === 0) { alert("Add the main pieces first. LogicHub can repair common missing JS/CSS files for you during APK build."); return; }
         if (this.map.blocks.some(b => b.status !== "VERIFIED" || !b.code)) {
-          alert("APK export requires all nodes to be synthesized successfully first.");
+          alert("Please run Synth first. LogicHub will auto-repair common missing files while packaging the APK.");
           return;
         }
 
@@ -753,7 +1953,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ zipBase64, mapId: this.map.id })
           });
-          const data = await response.json();
+          const data = await this.readJsonResponse(response, "APK build");
           if (!response.ok || data.error) throw new Error(data.error || `APK build failed with status ${response.status}`);
           if (!data.apkBase64) throw new Error("APK payload missing from server response.");
 
@@ -767,11 +1967,51 @@
         } finally {
           btn.disabled = false;
         }
+      },
+
+      async publishApp() {
+        if (this.map.blocks.length === 0) { alert("Add a few main nodes first. LogicHub can repair common missing JS/CSS files during publishing."); return; }
+        const appName = document.getElementById("forge-app-name").value.trim() || prompt("App name for publishing?", this.getProjectDisplayName()) || "";
+        if (!appName.trim()) return;
+
+        const btn = document.getElementById("btn-publish");
+        btn.disabled = true;
+        this.log("Preparing publish request...", "accent");
+
+        try {
+          const repairedFiles = this.collectProjectFiles({ pwa: true });
+          const repairedSummary = Object.keys(repairedFiles).sort().map((name) => `- ${name}`).join('\n');
+          const response = await fetch("/api/publish", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              appName,
+              prdContext: `${this.map.buildPRD()}\n# Auto-repaired package inventory\n${repairedSummary}`,
+              internalPRD: "Return one complete single-file HTML app. Inline any JavaScript or CSS needed. Do not reference missing local files. Make it deployment-ready for non-technical users."
+            })
+          });
+          const data = await this.readJsonResponse(response, "Publish");
+          if (!response.ok || data.error) throw new Error(data.error || `Publish failed with status ${response.status}`);
+          this.log("Publish complete.", "success");
+          if (data.url) {
+            alert(`Published successfully: ${data.url}`);
+            window.open(data.url, "_blank", "noopener,noreferrer");
+          } else {
+            alert("Published successfully.");
+          }
+        } catch (err) {
+          this.log(`Publish Error: ${err.message}`, "error");
+          alert(`Publish failed: ${err.message}`);
+        } finally {
+          btn.disabled = this.map.blocks.length === 0;
+        }
       }
     };
 
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) m.classList.remove("active"); }));
+
+    window.app = app;
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
