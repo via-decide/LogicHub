@@ -155,10 +155,20 @@
 
     /* ── FOOTER & BUTTONS ── */
     .footer {
-      display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 0.4rem;
       padding: 0.6rem 1.25rem; border-top: 1px solid var(--border-color);
       background: var(--bg-secondary); flex-shrink: 0;
     }
+    .helper-strip {
+      padding: 0.45rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(0,229,255,0.04);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      line-height: 1.5;
+    }
+    .helper-strip strong { color: var(--accent); }
     button {
       padding: 0.65rem 0.4rem; border: 1px solid var(--border-bright);
       background: var(--bg-primary); color: var(--text-primary); cursor: pointer;
@@ -167,7 +177,7 @@
       overflow: hidden; text-overflow: ellipsis;
     }
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    button:disabled { opacity: 0.58; cursor: not-allowed; }
     button.compile-btn { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
     button.forge-fab {
       background: linear-gradient(135deg, var(--accent), #00b8cc); color: #000;
@@ -247,11 +257,15 @@
       /* Main: stack vertically */
       .main-container { flex-direction: column; }
 
-      /* Footer: 3-col × 2-row grid */
+      /* Footer: 3-col responsive grid */
       .footer {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
         padding: 0.45rem 0.6rem;
         gap: 0.35rem;
+      }
+      .helper-strip {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.6rem;
       }
       .footer button {
         padding: 0.55rem 0.25rem;
@@ -276,7 +290,7 @@
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="btn-icon" onclick="alert('Rules:\n1. Add Node\n2. Drag right port to left port\n3. Synth!')">?</button>
+      <button class="btn-icon" onclick="alert('Quick help:\n1. Add the main screens or features you understand.\n2. You do not need separate JS or CSS nodes unless you want custom files.\n3. Press Synth to create the files.\n4. Export, APK, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
 
@@ -293,6 +307,8 @@
     </div>
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
+
+  <div class="helper-strip"><strong>New here?</strong> Add the main screens or features only. LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Export, APK, and Publish.</div>
 
   <!-- MAIN -->
   <div class="main-container">
@@ -320,7 +336,7 @@
       </svg>
       <div id="blocks-container"></div>
       <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.25;">
-        <div style="font-size:2rem">⬡</div><div style="font-family:var(--font-mono);font-size:0.7rem;">Add nodes to begin</div>
+        <div style="font-size:2rem">⬡</div><div style="font-family:var(--font-mono);font-size:0.7rem;">Add parts to begin</div>
       </div>
     </div>
   </div>
@@ -332,6 +348,7 @@
     <button onclick="app.viewPRD()">📋 PRD</button>
     <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
     <button id="btn-apk" disabled onclick="app.buildApk()">📱 APK</button>
+    <button id="btn-publish" disabled onclick="app.publishApp()">🌐 Publish</button>
     <button onclick="app.clearMap()">🗑 Wipe</button>
   </div>
 
@@ -619,6 +636,7 @@
         const ready = n > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
         document.getElementById("btn-export").disabled = !ready;
         document.getElementById("btn-apk").disabled = !ready;
+        document.getElementById("btn-publish").disabled = n === 0;
         const stat = document.getElementById("map-status");
         if (n === 0) { stat.textContent = "AWAITING ARCHITECTURE"; stat.className = "map-status state-idle"; }
         else if (ready) { stat.textContent = "SYNTHESIS COMPLETE"; stat.className = "map-status state-complete"; }
@@ -670,6 +688,244 @@
         this.log("PRD copied.", "success"); closeModal("prd-modal");
       },
 
+      sanitizeCode(code) {
+        let cleaned = String(code || "").trim();
+        if (cleaned.startsWith("```")) {
+          cleaned = cleaned.replace(/^```[a-zA-Z0-9_-]*\n?/, "").replace(/\n?```$/, "").trim();
+        }
+        return cleaned;
+      },
+
+      getProjectDisplayName() {
+        return document.getElementById("forge-app-name").value.trim() || `LogicHub ${this.map.id}`;
+      },
+
+      escapeHtml(value) {
+        return String(value || "").replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+      },
+
+      injectBeforeTag(html, tagName, snippet) {
+        const closeTag = `</${tagName}>`;
+        return html.includes(closeTag) ? html.replace(closeTag, `${snippet}
+${closeTag}`) : `${html}
+${snippet}`;
+      },
+
+      extractLocalAssetRefs(html) {
+        const refs = [];
+        const regex = /<(script|link|img)[^>]+(?:src|href)=["']([^"']+)["'][^>]*>/gi;
+        let match;
+        while ((match = regex.exec(html))) {
+          const ref = String(match[2] || "").trim();
+          if (!ref || /^(https?:|data:|mailto:|tel:|#|\/\/)/i.test(ref)) continue;
+          const clean = ref.split(/[?#]/)[0].replace(/^\.\//, '');
+          if (!clean || clean.endsWith('/')) continue;
+          refs.push(clean);
+        }
+        return [...new Set(refs)];
+      },
+
+      hasInlineScript(html) {
+        return /<script\b[^>]*>([\s\S]*?)<\/script>/i.test(html);
+      },
+
+      pickBrowserScriptFile(files) {
+        const names = Object.keys(files);
+        return names.find((name) => /(^|\/)(app|main|script|index|ui|client)\.js$/i.test(name))
+          || names.find((name) => name.endsWith('.js') && !name.startsWith('api/') && !/(^|\/)(sw|service-worker)\.js$/i.test(name) && !/(^|\/)(auth|server|backend|config)\.js$/i.test(name))
+          || null;
+      },
+
+      pickStyleFile(files) {
+        return Object.keys(files).find((name) => name.endsWith('.css')) || null;
+      },
+
+      buildDefaultIndexHtml(appName) {
+        const safeName = this.escapeHtml(appName);
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${safeName}</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <main class="container hero">
+    <h1>${safeName}</h1>
+    <p>Your project was auto-repaired by LogicHub so it can still export cleanly.</p>
+    <button id="hello-btn" class="btn primary">Tap me</button>
+    <p id="hello-output" class="muted"></p>
+  </main>
+</body>
+</html>`;
+      },
+
+      buildDefaultStyles() {
+        return `:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #0b1220; color: #f8fafc; }
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px; border-radius: 10px; border: none; cursor: pointer; }
+.btn.primary { background: #00e5ff; color: #001018; font-weight: 700; }
+.muted { opacity: 0.75; }
+input, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; }
+`;
+      },
+
+      buildDefaultJs(appName) {
+        const safeName = String(appName || 'LogicHub').replace(/'/g, "\'");
+        return `document.addEventListener('DOMContentLoaded', () => {
+  const button = document.getElementById('hello-btn');
+  const output = document.getElementById('hello-output');
+  if (button && output) {
+    button.addEventListener('click', () => {
+      output.textContent = 'Your ${safeName} project is live and working.';
+    });
+  }
+});`;
+      },
+
+      buildDefaultManifest(appName) {
+        return JSON.stringify({
+          name: appName,
+          short_name: appName.slice(0, 12) || 'LogicHub',
+          start_url: './index.html',
+          display: 'standalone',
+          background_color: '#030508',
+          theme_color: '#00e5ff'
+        }, null, 2);
+      },
+
+      buildDefaultServiceWorker() {
+        return `self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`;
+      },
+
+      ensureUtilityCss(styles, html) {
+        const utilityClasses = /(container|d-flex|justify-content-between|align-items-center|text-center|btn|btn-primary|w-100|form-control|form-group|lead|mx-auto|mb-[123]|py-[23]|p-2|m-0|ml-2|mx-1|d-block|flex-row|justify-content-around)/;
+        if (!utilityClasses.test(html) || styles.includes('/* LogicHub utility repair */')) return styles;
+        return `${styles}
+
+/* LogicHub utility repair */
+.container{width:min(1100px,100% - 2rem);margin-inline:auto;}
+.d-flex{display:flex;}
+.flex-row{flex-direction:row;}
+.justify-content-between{justify-content:space-between;}
+.justify-content-around{justify-content:space-around;}
+.align-items-center{align-items:center;}
+.text-center{text-align:center;}
+.mx-auto{margin-left:auto;margin-right:auto;}
+.mx-1{margin-left:.25rem;margin-right:.25rem;}
+.ml-2{margin-left:.5rem;}
+.mb-1{margin-bottom:.25rem;}
+.mb-2{margin-bottom:.5rem;}
+.mb-3{margin-bottom:1rem;}
+.mt-auto{margin-top:auto;}
+.py-2{padding-top:.5rem;padding-bottom:.5rem;}
+.py-3{padding-top:1rem;padding-bottom:1rem;}
+.p-2{padding:.5rem;}
+.m-0{margin:0;}
+.h3{font-size:1.5rem;font-weight:700;}
+.lead{font-size:1.125rem;opacity:.8;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1rem;border-radius:.6rem;text-decoration:none;border:none;}
+.btn-primary{background:#0ea5e9;color:#fff;}
+.d-block{display:block;}
+.w-100{width:100%;}
+.form-group{margin-bottom:1rem;}
+.form-control{width:100%;padding:.75rem;border:1px solid #cbd5e1;border-radius:.5rem;}
+`;
+      },
+
+      collectProjectFiles(options = {}) {
+        const files = {};
+        this.map.blocks.forEach((block) => {
+          if (!block.filename || !block.code) return;
+          files[block.filename] = this.sanitizeCode(block.code);
+        });
+
+        const repaired = { ...files };
+        const appName = this.getProjectDisplayName();
+        const repairs = [];
+
+        if (!repaired["index.html"]) {
+          repaired["index.html"] = this.buildDefaultIndexHtml(appName);
+          repairs.push("index.html");
+        }
+
+        let html = repaired["index.html"];
+        let refs = this.extractLocalAssetRefs(html);
+        const hasLocalCssRef = refs.some((ref) => ref.endsWith('.css'));
+        const hasLocalJsRef = refs.some((ref) => ref.endsWith('.js'));
+        const hasInlineScript = this.hasInlineScript(html);
+
+        if (!hasLocalCssRef) {
+          const styleTarget = this.pickStyleFile(repaired) || 'styles.css';
+          if (!repaired[styleTarget]) {
+            repaired[styleTarget] = this.buildDefaultStyles();
+            repairs.push(styleTarget);
+          }
+          html = this.injectBeforeTag(html, 'head', `  <link rel="stylesheet" href="${styleTarget}">`);
+        }
+
+        if (!hasLocalJsRef && !hasInlineScript) {
+          const scriptTarget = this.pickBrowserScriptFile(repaired) || 'app.js';
+          if (!repaired[scriptTarget]) {
+            repaired[scriptTarget] = this.buildDefaultJs(appName);
+            repairs.push(scriptTarget);
+          }
+          html = this.injectBeforeTag(html, 'body', `  <script src="${scriptTarget}" defer><` + `/script>`);
+        }
+
+        refs = this.extractLocalAssetRefs(html);
+        refs.forEach((ref) => {
+          if (repaired[ref]) return;
+          if (ref.endsWith('.css')) {
+            repaired[ref] = this.buildDefaultStyles();
+            repairs.push(ref);
+          } else if (ref.endsWith('.js')) {
+            repaired[ref] = this.buildDefaultJs(appName);
+            repairs.push(ref);
+          } else if (ref.endsWith('.json') && ref.toLowerCase().includes('manifest')) {
+            repaired[ref] = this.buildDefaultManifest(appName);
+            repairs.push(ref);
+          }
+        });
+
+        if (repaired["styles.css"]) repaired["styles.css"] = this.ensureUtilityCss(repaired["styles.css"], html);
+
+        if (options.pwa) {
+          if (!repaired["manifest.json"]) {
+            repaired["manifest.json"] = this.buildDefaultManifest(appName);
+            repairs.push("manifest.json");
+          }
+          if (!repaired["sw.js"]) {
+            repaired["sw.js"] = this.buildDefaultServiceWorker();
+            repairs.push("sw.js");
+          }
+          if (!/rel=["']manifest["']/i.test(html)) html = this.injectBeforeTag(html, 'head', '  <link rel="manifest" href="manifest.json">');
+          if (!/serviceWorker\.register/i.test(html)) html = this.injectBeforeTag(html, 'body', `  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}<` + `/script>`);
+        }
+
+        repaired["index.html"] = html;
+        if (repairs.length) this.log(`Auto-repaired: ${[...new Set(repairs)].join(', ')}`, "accent");
+        return repaired;
+      },
+
+      async readJsonResponse(response, featureName) {
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const raw = await response.text();
+          if (raw.trim().startsWith("<")) {
+            throw new Error(`${featureName} needs the LogicHub server backend. This demo site can still Export ZIP, but ${featureName.toLowerCase()} will not work until /api is deployed.`);
+          }
+          throw new Error(`${featureName} returned an unexpected response.`);
+        }
+        return response.json();
+      },
+
       async synthesizeArchitecture() {
         const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
         if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
@@ -680,7 +936,7 @@
           for (let b of this.map.blocks) {
             b.status = "GENERATING"; this.render(); this.log(`Generating ${b.filename}...`, "accent");
             const ctx = b.dependsOn.map(id => this.map.blocks.find(x => x.id === id)).filter(d => d?.code).map(d => `--- File: ${d.filename} ---\n${d.code}`).join("\n\n");
-            const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nOutput ONLY raw code. No markdown.`;
+            const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt || 'Synthesize logic based on connections.'}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nRequirements:\n- Output ONLY raw code. No markdown.\n- This app is for non-technical users, so prefer a working result over a perfect file split.\n- Do not reference missing local files.\n- If you create HTML, only reference CSS/JS files that already exist in the current architecture.\n- If no separate browser JS file exists, keep the page working with inline JavaScript or simple HTML-only behavior.\n- Keep filenames and imports consistent with the architecture.`;
             const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -691,7 +947,8 @@
             if (code.startsWith("```")) code = code.split('\n').slice(1, -1).join('\n');
             b.code = code; b.status = "VERIFIED"; this.render();
           }
-          this.log("Synthesis Complete.", "success");
+          this.collectProjectFiles({ pwa: true });
+          this.log("Synthesis Complete. Missing runtime files were checked for auto-repair.", "success");
         } catch (err) {
           this.log(`Error: ${err.message}`, "error");
           this.map.blocks.forEach(b => { if (b.status === "GENERATING") b.status = "ERROR"; });
@@ -703,7 +960,8 @@
 
       async buildProjectZipBlob() {
         const zip = new JSZip();
-        this.map.blocks.forEach(b => { if (b.code) zip.file(b.filename, b.code); });
+        const files = this.collectProjectFiles({ pwa: true });
+        Object.entries(files).forEach(([fileName, code]) => zip.file(fileName, code));
         zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
         return zip.generateAsync({ type: "blob" });
       },
@@ -724,9 +982,9 @@
       },
 
       async buildApk() {
-        if (this.map.blocks.length === 0) { alert("Add and synthesize nodes first."); return; }
+        if (this.map.blocks.length === 0) { alert("Add the main pieces first. LogicHub can repair common missing JS/CSS files for you during APK build."); return; }
         if (this.map.blocks.some(b => b.status !== "VERIFIED" || !b.code)) {
-          alert("APK export requires all nodes to be synthesized successfully first.");
+          alert("Please run Synth first. LogicHub will auto-repair common missing files while packaging the APK.");
           return;
         }
 
@@ -753,7 +1011,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ zipBase64, mapId: this.map.id })
           });
-          const data = await response.json();
+          const data = await this.readJsonResponse(response, "APK build");
           if (!response.ok || data.error) throw new Error(data.error || `APK build failed with status ${response.status}`);
           if (!data.apkBase64) throw new Error("APK payload missing from server response.");
 
@@ -766,6 +1024,44 @@
           alert(`APK build failed: ${err.message}`);
         } finally {
           btn.disabled = false;
+        }
+      },
+
+      async publishApp() {
+        if (this.map.blocks.length === 0) { alert("Add a few main nodes first. LogicHub can repair common missing JS/CSS files during publishing."); return; }
+        const appName = document.getElementById("forge-app-name").value.trim() || prompt("App name for publishing?", this.getProjectDisplayName()) || "";
+        if (!appName.trim()) return;
+
+        const btn = document.getElementById("btn-publish");
+        btn.disabled = true;
+        this.log("Preparing publish request...", "accent");
+
+        try {
+          const repairedFiles = this.collectProjectFiles({ pwa: true });
+          const repairedSummary = Object.keys(repairedFiles).sort().map((name) => `- ${name}`).join('\n');
+          const response = await fetch("/api/publish", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              appName,
+              prdContext: `${this.map.buildPRD()}\n# Auto-repaired package inventory\n${repairedSummary}`,
+              internalPRD: "Return one complete single-file HTML app. Inline any JavaScript or CSS needed. Do not reference missing local files. Make it deployment-ready for non-technical users."
+            })
+          });
+          const data = await this.readJsonResponse(response, "Publish");
+          if (!response.ok || data.error) throw new Error(data.error || `Publish failed with status ${response.status}`);
+          this.log("Publish complete.", "success");
+          if (data.url) {
+            alert(`Published successfully: ${data.url}`);
+            window.open(data.url, "_blank", "noopener,noreferrer");
+          } else {
+            alert("Published successfully.");
+          }
+        } catch (err) {
+          this.log(`Publish Error: ${err.message}`, "error");
+          alert(`Publish failed: ${err.message}`);
+        } finally {
+          btn.disabled = this.map.blocks.length === 0;
         }
       }
     };
