@@ -2,9 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#030508">
-  <title>LOGICHUB v2 — Sovereign Vibecoder</title>
+  <title>LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes</title>
+  <meta name="description" content="LogicHub is an AI app builder for non-technical users. Turn ideas into prompt apps, workflow tools, publishable web apps, ZIP exports, and Android-ready prototypes from a visual plan.">
+  <link rel="canonical" href="https://logichub.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes">
+  <meta property="og:description" content="Build prompt apps, workflow tools, and Android-ready prototypes from a visual plan. LogicHub is designed for non-technical users and auto-repairs missing runtime files.">
+  <meta property="og:url" content="https://logichub.app/">
+  <meta property="og:site_name" content="LogicHub">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes">
+  <meta name="twitter:description" content="AI app builder for non-technical users: plan visually, generate files, export ZIPs, publish apps, and package Android-ready prototypes.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "LogicHub",
+    "url": "https://logichub.app/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "description": "LogicHub is an AI app builder for non-technical users. It helps people turn ideas into prompt apps, workflow tools, publishable web apps, ZIP exports, and Android-ready prototypes from a visual plan.",
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "INR",
+      "price": "1717",
+      "description": "India Founder Pass"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "ViaDecide"
+    },
+    "featureList": [
+      "Visual app planning",
+      "Prompt app generation",
+      "Workflow tool prototyping",
+      "ZIP export",
+      "Android APK packaging",
+      "Publish to Daxini.space"
+    ]
+  }
+  </script>
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -30,6 +69,7 @@
       --state-generating: #00e5ff;
       --state-verified:   #2ecc71;
       --state-error:      #ff4444;
+      --app-vh: 1vh;
     }
 
     *, *::before, *::after {
@@ -167,6 +207,7 @@
 
     /* ── CANVAS ── */
     .canvas { flex: 1; position: relative; background-color: var(--bg-secondary); background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 24px 24px; overflow: hidden; touch-action: none; min-width: 0; }
+    .canvas.touch-dragging { touch-action: none; }
     #arrows-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     #blocks-container { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
     
@@ -631,7 +672,8 @@
     /* ── MODALS ── */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
     .modal.active { display: flex; }
-    .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-bright); border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 500px; max-height: calc(100dvh - 2rem); overflow-y: auto; position: relative; }
+    .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-bright); border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 500px; max-height: calc((var(--app-vh, 1vh) * 100) - 2rem); overflow-y: auto; position: relative; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    body.modal-open { overflow: hidden; }
     .modal-header { font-family: var(--font-mono); font-size: 0.95rem; color: var(--accent); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
     .modal-close { position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: var(--text-secondary); font-size: 1.2rem; background: transparent; border: none; z-index: 10; }
     .modal-close:hover { color: var(--error); }
@@ -651,14 +693,29 @@
 
     /* ── MOBILE RESPONSIVE ── */
     @media (max-width: 680px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+      }
+      body {
+        display: block;
+        height: auto;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: auto;
+      }
+
       /* Header */
-      .header { padding: 0.45rem 0.75rem; gap: 0.4rem; }
-      .header-left { gap: 0.4rem; }
-      .header-title { font-size: 1rem; }
+      .header { padding: 0.45rem 0.75rem; gap: 0.4rem; flex-wrap: wrap; align-items: flex-start; }
+      .header-left { gap: 0.4rem; flex-wrap: wrap; min-width: 0; }
+      .header-title { font-size: 1rem; max-width: 100%; }
       .header-title .sep,
       .header-title .badge { font-size: 0.65rem; }
-      .map-status { font-size: 0.58rem; max-width: 110px; }
+      .map-status { font-size: 0.58rem; max-width: 100%; flex-basis: 100%; white-space: normal; }
       .info-badge { font-size: 0.62rem; padding: 0.2rem 0.4rem; }
+      .toolbar { margin-left: auto; align-self: flex-start; width: 100%; justify-content: flex-end; }
 
       /* Hide desktop API input, show icon */
       .api-input { display: none; }
@@ -667,10 +724,17 @@
       .auth-strip {
         padding: 0.4rem 0.6rem;
         gap: 0.4rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
       }
+      .auth-strip::-webkit-scrollbar { display: none; }
       .auth-chip {
         font-size: 0.58rem;
         padding: 0.25rem 0.48rem;
+        flex: 0 0 auto;
       }
 
       /* Sidebar: horizontal scrollable strip */
@@ -707,13 +771,35 @@
       }
 
       /* Main: stack vertically */
-      .main-container { flex-direction: column; }
+      .main-container {
+        display: block;
+        flex: none;
+        overflow: visible;
+        min-height: 0;
+      }
+      .canvas {
+        display: block;
+        width: 100%;
+        height: clamp(320px, 54dvh, 560px);
+        min-height: clamp(320px, 54dvh, 560px);
+        overflow: hidden;
+        touch-action: pan-y pinch-zoom;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
 
       /* Footer: 3-col responsive grid */
       .footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 120;
         grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-        padding: 0.45rem 0.6rem;
+        padding: 0.45rem 0.6rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
         gap: 0.35rem;
+        margin-top: 0;
+        background: rgba(10,12,16,0.96);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 -10px 28px rgba(0,0,0,0.28);
       }
       .helper-strip {
         padding: 0.4rem 0.6rem;
@@ -734,8 +820,11 @@
         padding:0.65rem 0.6rem;
         font-size:0.64rem;
       }
+      .payment-strip-copy { width: 100%; min-width: 0; }
+      .price-chip { white-space: normal; word-break: break-word; }
       .payment-strip button {
         width:100%;
+        white-space: normal;
       }
       .payment-actions {
         grid-template-columns: 1fr;
@@ -746,11 +835,26 @@
       .footer button {
         padding: 0.55rem 0.25rem;
         font-size: 0.62rem;
+        min-height: 44px;
+      }
+      input, textarea {
+        font-size: 16px;
       }
 
       /* Modals */
-      .modal { padding: 0.5rem; align-items: flex-end; }
-      .modal-content { max-height: calc(100dvh - 1rem); border-radius: 16px 16px 12px 12px; }
+      .modal { padding: 0.35rem 0.35rem max(0.35rem, env(safe-area-inset-bottom, 0px)); align-items: flex-end; }
+      .modal-content { max-height: calc((var(--app-vh, 1vh) * 100) - 0.7rem); padding: 1rem 1rem max(1rem, env(safe-area-inset-bottom, 0px)); border-radius: 16px 16px 12px 12px; }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      @media (max-width: 680px) {
+        .footer {
+          padding-bottom: calc(1.05rem + env(safe-area-inset-bottom, 0px));
+        }
+        .modal-content {
+          padding-bottom: max(1.2rem, calc(env(safe-area-inset-bottom, 0px) + 0.9rem));
+        }
+      }
     }
   </style>
 </head>
@@ -759,7 +863,7 @@
   <!-- HEADER -->
   <div class="header">
     <div class="header-left">
-      <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">VIBECODER</span></div>
+      <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">AI APP BUILDER</span></div>
       <div class="map-status state-idle" id="map-status">ADD PARTS TO START</div>
       <div class="info-badge" id="block-count">0 parts</div>
     </div>
@@ -790,20 +894,20 @@
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> Add the main parts you understand. You do not need separate code files for everything—LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
+  <div class="helper-strip"><strong>New here?</strong> LogicHub helps you build prompt apps, internal tools, and lightweight workflow software without starting from a blank codebase. Add the main parts you understand and LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
   <div class="onboarding-shell">
     <div class="onboarding-card">
       <div class="onboarding-kicker">✨ Premium onboarding</div>
       <div class="onboarding-header">
         <div>
-          <h3>Start fast without losing the existing guide</h3>
-          <p>This adds a cleaner, StudyOS-inspired quick-start layer while keeping the current guide and every existing action exactly where users already expect them.</p>
+          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">LogicHub is an AI app builder for prompt apps, workflow tools, and Android-ready prototypes</h1>
+          <p>This reframes LogicHub clearly for search and AI discovery while keeping the existing guide and every existing action exactly where users already expect them. It is designed for non-technical users who want to plan, generate, export, publish, and iterate fast.</p>
         </div>
         <div class="onboarding-meta">
-          <span class="meta-chip">1. Add parts</span>
-          <span class="meta-chip">2. Make App</span>
-          <span class="meta-chip">3. Publish or export</span>
+          <span class="meta-chip">Prompt apps</span>
+          <span class="meta-chip">Workflow tools</span>
+          <span class="meta-chip">Publish or export</span>
         </div>
       </div>
       <div class="onboarding-grid">
@@ -1110,7 +1214,7 @@
     }
 
     function openForgeModal() {
-      document.getElementById("forge-modal").classList.add("active");
+      openModal("forge-modal");
       updateForgeLimitUI();
     }
 
@@ -1203,12 +1307,13 @@
     const app = {
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 },
-      isDrawing: false, sourceId: null,
+      isDrawing: false, sourceId: null, activePointerId: null,
       authUser: null,
       serverAccess: { checked: false, paid: false, pending: false, source: 'unknown', plan: 'free' },
 
       init() {
         this.setupPointerEvents();
+        this.setupViewportSizing();
         const grid = document.getElementById("engine-sandbox-grid");
         [{k:"squeeze",l:"🗜️ TokenSqueeze"}, {k:"macro",l:"📊 MacroForge"}, {k:"json",l:"🏗️ JSONCore"}].forEach(t => {
           let btn = document.createElement("button"); btn.className = "engine-tool-btn"; btn.textContent = t.l;
@@ -1224,27 +1329,8 @@
 
       setupPointerEvents() {
         const canvas = document.getElementById("canvas");
-
-        window.addEventListener("pointermove", e => {
-          if (!this.isDragging && !this.isDrawing) return;
-          const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          if (this.isDragging) {
-            const b = this.isDragging;
-            b.x = Math.max(0, Math.min(canvas.offsetWidth - 175, x - this.dragOffset.x));
-            b.y = Math.max(0, Math.min(canvas.offsetHeight - 90, y - this.dragOffset.y));
-            const el = document.getElementById(`block-${b.id}`);
-            if (el) { el.style.left = `${b.x}px`; el.style.top = `${b.y}px`; }
-            this.renderConnections();
-          } else if (this.isDrawing) {
-            const start = this.getPortPos(this.sourceId, 'out');
-            if (start) document.getElementById("drawing-path").setAttribute("d", `M ${start.x} ${start.y} L ${x} ${y}`);
-          }
-        });
-
-        window.addEventListener("pointerup", e => {
+        const endPointerInteraction = (e) => {
+          if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
           if (this.isDragging) {
             document.getElementById(`block-${this.isDragging.id}`)?.classList.remove('dragging');
             this.isDragging = null;
@@ -1263,6 +1349,53 @@
             document.querySelectorAll('.port-wrapper.active').forEach(p => p.classList.remove('active'));
             this.render();
           }
+          this.activePointerId = null;
+          canvas.classList.remove('touch-dragging');
+        };
+
+        window.addEventListener("pointermove", e => {
+          if (!this.isDragging && !this.isDrawing) return;
+          if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+          if (e.cancelable) e.preventDefault();
+          const rect = canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          if (this.isDragging) {
+            const b = this.isDragging;
+            b.x = Math.max(0, Math.min(canvas.offsetWidth - 175, x - this.dragOffset.x));
+            b.y = Math.max(0, Math.min(canvas.offsetHeight - 90, y - this.dragOffset.y));
+            const el = document.getElementById(`block-${b.id}`);
+            if (el) { el.style.left = `${b.x}px`; el.style.top = `${b.y}px`; }
+            this.renderConnections();
+          } else if (this.isDrawing) {
+            const start = this.getPortPos(this.sourceId, 'out');
+            if (start) document.getElementById("drawing-path").setAttribute("d", `M ${start.x} ${start.y} L ${x} ${y}`);
+          }
+        }, { passive: false });
+
+        window.addEventListener("pointerup", endPointerInteraction);
+        window.addEventListener("pointercancel", endPointerInteraction);
+      },
+
+      setupViewportSizing() {
+        const applyViewportHeight = () => {
+          const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+          document.documentElement.style.setProperty('--app-vh', `${viewportHeight * 0.01}px`);
+        };
+        applyViewportHeight();
+        window.addEventListener('resize', applyViewportHeight);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', applyViewportHeight);
+          window.visualViewport.addEventListener('scroll', applyViewportHeight);
+        }
+        document.addEventListener('focusin', (event) => {
+          if (window.innerWidth > 680) return;
+          const modalBody = event.target?.closest?.('.modal-content');
+          if (!modalBody) return;
+          window.setTimeout(() => {
+            event.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }, 180);
         });
       },
 
@@ -1293,7 +1426,12 @@
           `;
           el.onpointerdown = (e) => {
             if (e.target.closest('.port-wrapper') || e.target.closest('.block-delete') || e.target.closest('.block-edit')) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
             e.stopPropagation();
+            if (e.cancelable) e.preventDefault();
+            this.activePointerId = e.pointerId;
+            if (typeof el.setPointerCapture === 'function') el.setPointerCapture(e.pointerId);
+            document.getElementById('canvas')?.classList.add('touch-dragging');
             this.isDragging = b;
             const rect = el.getBoundingClientRect();
             this.dragOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -1302,7 +1440,12 @@
           };
           const outW = el.querySelector('.port-wrapper.out');
           outW.onpointerdown = (e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
             e.stopPropagation();
+            if (e.cancelable) e.preventDefault();
+            this.activePointerId = e.pointerId;
+            if (typeof outW.setPointerCapture === 'function') outW.setPointerCapture(e.pointerId);
+            document.getElementById('canvas')?.classList.add('touch-dragging');
             this.isDrawing = true;
             this.sourceId = b.id;
             outW.classList.add('active');
@@ -1372,7 +1515,7 @@
         const codeArea = document.getElementById("node-modal-code");
         codeArea.value = b.code;
         codeArea.readOnly = b.status !== "VERIFIED";
-        document.getElementById("node-modal").classList.add("active");
+        openModal("node-modal");
       },
 
       saveNodeConfig() {
@@ -1388,7 +1531,7 @@
 
       viewPRD() {
         document.getElementById("prd-output").value = this.map.buildPRD();
-        document.getElementById("prd-modal").classList.add("active");
+        openModal("prd-modal");
       },
 
       copyPRD() {
@@ -1546,7 +1689,7 @@
         document.getElementById('founder-utr-panel').style.display = 'none';
         document.getElementById('founder-utr').value = '';
         this.renderFounderStatus();
-        document.getElementById('founder-modal').classList.add('active');
+        openModal('founder-modal');
       },
 
       copyFounderUpi() {
@@ -2008,8 +2151,20 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       }
     };
 
-    function closeModal(id) { document.getElementById(id).classList.remove("active"); }
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) m.classList.remove("active"); }));
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.add("active");
+      document.body.classList.add('modal-open');
+    }
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+      modal.classList.remove("active");
+      if (!document.querySelector('.modal.active')) document.body.classList.remove('modal-open');
+    }
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); }));
 
     window.app = app;
 
