@@ -214,6 +214,77 @@
       font-size: 0.9rem;
       color: var(--text-primary);
     }
+    .founder-hero {
+      background: linear-gradient(135deg, rgba(255,153,0,0.12), rgba(0,229,255,0.08));
+      border-color: rgba(255,153,0,0.18);
+    }
+    .founder-hero-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .founder-hero-title h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    .founder-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.18);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .founder-tier-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+    .founder-success-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(0,230,118,0.12);
+      border: 1px solid rgba(0,230,118,0.24);
+      color: var(--success);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .faq-list,
+    .next-steps-list {
+      display: grid;
+      gap: 0.6rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .faq-item,
+    .next-step-item {
+      padding: 0.72rem 0.8rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .faq-item strong,
+    .next-step-item strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: var(--text-primary);
+      font-size: 0.74rem;
+    }
     .payment-card p {
       margin: 0;
       color: var(--text-secondary);
@@ -382,6 +453,9 @@
       .payment-actions {
         grid-template-columns: 1fr;
       }
+      .founder-tier-grid {
+        grid-template-columns: 1fr;
+      }
       .footer button {
         padding: 0.55rem 0.25rem;
         font-size: 0.62rem;
@@ -426,8 +500,8 @@
   <div class="helper-strip"><strong>New here?</strong> Add the main parts you understand. You do not need separate code files for everything—LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
   <div class="payment-strip">
-    <div><strong>Founder Launch:</strong> Get LogicHub founder access for <span class="price-chip">₹1717 via UPI</span>. Global checkout at <span class="price-chip">$99 via Razorpay</span> is coming next.</div>
-    <button onclick="app.openFounderCheckout()">💳 Buy Founder Pass</button>
+    <div><strong>Founder Launch:</strong> Choose <span class="price-chip">India Founder Pass — ₹1717</span> or keep <span class="price-chip">Global Founder Pass — $99</span> ready for Razorpay.</div>
+    <button onclick="app.openFounderCheckout()">💳 View Founder Passes</button>
   </div>
 
   <!-- MAIN -->
@@ -519,42 +593,66 @@
   <div class="modal" id="founder-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('founder-modal')">✕</button>
-      <div class="modal-header">💳 Founder Checkout</div>
-      <div class="payment-card">
-        <h4>LogicHub Founder Access</h4>
-        <div class="payment-amount">₹1717 <span class="payment-muted">via UPI today</span></div>
-        <p>Best for early builders who want the beginner-friendly app planner, ZIP export, Android packaging path, and publish path in one place.</p>
-        <div class="payment-note">Use the UPI flow below now. Razorpay checkout for <strong>$99 USD</strong> is shown here so the global path is ready for later integration.</div>
+      <div class="modal-header">💳 Founder Passes</div>
+
+      <div class="payment-card founder-hero">
+        <div class="founder-hero-title">
+          <h3>Get Founder Access Early</h3>
+          <span class="founder-badge">⚡ Early Builder Offer</span>
+        </div>
+        <p>Pick the pass that fits your buyer. India can pay now with UPI. Global buyers can still see the final $99 founder price before Razorpay goes live.</p>
       </div>
 
-      <div class="payment-card">
-        <h4>Pay by UPI</h4>
-        <div class="payment-amount" id="founder-price-inr">₹1717</div>
-        <div class="payment-status-box">
-          <strong>UPI ID:</strong> <span id="founder-upi-id"></span><br>
-          <strong>Plan:</strong> Founder Access<br>
-          <strong>Project:</strong> <span id="founder-project-name"></span>
+      <div class="founder-tier-grid">
+        <div class="payment-card">
+          <h4>India Founder Pass — ₹1717</h4>
+          <div class="payment-amount" id="founder-price-inr">₹1717</div>
+          <p>Use this now for direct founder sales in India with a simple UPI + UTR flow.</p>
+          <div class="payment-status-box">
+            <strong>UPI ID:</strong> <span id="founder-upi-id"></span><br>
+            <strong>Plan:</strong> India Founder Pass<br>
+            <strong>Project:</strong> <span id="founder-project-name"></span>
+          </div>
+          <div class="payment-actions">
+            <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
+            <button onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
+          </div>
+          <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">✅ I Paid — Submit UTR</button>
+          <div class="payment-note">This keeps founder sales moving now, even before full payment automation is live.</div>
         </div>
-        <div class="payment-actions">
-          <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
-          <button onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
-        </div>
-        <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">I PAID → SUBMIT UTR</button>
-        <div class="payment-note">This opens the device UPI app using a ready-filled payment link. After payment, submit the 12-digit UTR so LogicHub can save the founder order locally until backend verification is added.</div>
-      </div>
 
-      <div class="payment-card">
-        <h4>Global Checkout</h4>
-        <div class="payment-amount">$99 <span class="payment-muted">Razorpay coming soon</span></div>
-        <p>Keep this price visible for international buyers. You can wire the Razorpay button later without changing the pricing story.</p>
-        <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
+        <div class="payment-card">
+          <h4>Global Founder Pass — $99</h4>
+          <div class="payment-amount">$99 <span class="payment-muted">Razorpay coming soon</span></div>
+          <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
+          <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
+          <div class="payment-note">Best use: landing page pricing, founder outreach, and global waitlist conversations.</div>
+        </div>
       </div>
 
       <div class="payment-divider"></div>
       <div id="founder-utr-panel" style="display:none;">
         <div class="form-group"><label>12-digit UTR</label><input type="text" id="founder-utr" inputmode="numeric" maxlength="12" placeholder="e.g. 123456789012"></div>
-        <button class="payment-wide-btn primary" onclick="app.submitFounderUtr()">SAVE FOUNDER PAYMENT</button>
+        <button class="payment-wide-btn primary" onclick="app.submitFounderUtr()">SAVE FOUNDER REQUEST</button>
         <div class="payment-note">Duplicate UTR values are blocked on this device so the same payment cannot be submitted twice by mistake.</div>
+      </div>
+
+      <div class="payment-card">
+        <h4>What happens after payment?</h4>
+        <ul class="next-steps-list">
+          <li class="next-step-item"><strong>1. Pay with UPI</strong> Open the ready-filled UPI payment link from this modal.</li>
+          <li class="next-step-item"><strong>2. Submit your UTR</strong> Save the 12-digit UTR so the founder request is recorded on this device.</li>
+          <li class="next-step-item"><strong>3. Manual founder confirmation</strong> For now, founder access is confirmed manually until backend verification or Razorpay automation is added.</li>
+        </ul>
+      </div>
+
+      <div class="payment-card">
+        <h4>Short FAQ</h4>
+        <ul class="faq-list">
+          <li class="faq-item"><strong>Is ₹1717 a one-time founder price?</strong> Yes — this is positioned as the India founder pass, not a monthly subscription.</li>
+          <li class="faq-item"><strong>Why show $99 already?</strong> It keeps the global founder story clear before Razorpay goes live.</li>
+          <li class="faq-item"><strong>Will my payment be lost?</strong> No — this UX stores the founder request locally on the device right after UTR submission.</li>
+        </ul>
       </div>
 
       <div class="payment-divider"></div>
@@ -908,7 +1006,8 @@
           return;
         }
         const latest = orders[orders.length - 1];
-        statusEl.innerHTML = `<strong>Latest founder payment saved</strong><br>Order: ${this.escapeHtml(latest.id)}<br>Amount: ₹${Number(latest.amount || 0).toLocaleString('en-IN')}<br>UTR: ${this.escapeHtml(latest.utr)}<br>Project: ${this.escapeHtml(latest.projectName)}<br>Status: ${this.escapeHtml(latest.status)}<br>Saved: ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}`;
+        const statusLabel = latest.status === 'founder_access_requested' ? 'Founder access requested' : String(latest.status || 'saved').replace(/_/g, ' ');
+        statusEl.innerHTML = `<span class="founder-success-badge">✅ Founder access requested</span><br><br><strong>Latest founder request saved</strong><br>Order: ${this.escapeHtml(latest.id)}<br>Amount: ₹${Number(latest.amount || 0).toLocaleString('en-IN')}<br>UTR: ${this.escapeHtml(latest.utr)}<br>Project: ${this.escapeHtml(latest.projectName)}<br>Status: ${this.escapeHtml(statusLabel)}<br>Saved: ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}`;
       },
 
       openFounderCheckout() {
@@ -968,7 +1067,7 @@
           currency: 'INR',
           payment: 'upi',
           utr,
-          status: 'utr_submitted',
+          status: 'founder_access_requested',
           createdAt: new Date().toISOString()
         };
         orders.push(order);
@@ -978,8 +1077,8 @@
         this.renderFounderStatus();
         document.getElementById('founder-utr-panel').style.display = 'none';
         utrInput.value = '';
-        this.log(`Founder payment saved: ${id}`, 'success');
-        alert(`Founder payment saved locally. Order: ${id}`);
+        this.log(`Founder access requested: ${id}`, 'success');
+        alert(`Founder access requested. Order: ${id}`);
       },
 
       sanitizeCode(code) {
