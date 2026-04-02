@@ -182,6 +182,194 @@
       color: var(--saffron);
     }
 
+    .premium-experience-shell {
+      padding: 0.85rem 1.25rem 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+    }
+    .premium-experience-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(18,22,30,0.95), rgba(8,11,16,0.98));
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      display: grid;
+      gap: 0.9rem;
+    }
+    .premium-experience-card.pending {
+      border-color: rgba(255,153,0,0.18);
+      background: linear-gradient(135deg, rgba(255,153,0,0.10), rgba(8,11,16,0.98));
+    }
+    .premium-experience-card.paid {
+      border-color: rgba(0,230,118,0.2);
+      background: linear-gradient(135deg, rgba(0,230,118,0.12), rgba(0,229,255,0.08));
+    }
+    .premium-experience-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .premium-experience-head h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    .premium-experience-head p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      line-height: 1.6;
+      max-width: 720px;
+    }
+    .premium-state-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.26rem 0.62rem;
+      border-radius: 999px;
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-secondary);
+    }
+    .premium-state-badge.free {
+      border-color: rgba(0,229,255,0.2);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+    }
+    .premium-state-badge.pending {
+      border-color: rgba(255,153,0,0.26);
+      background: rgba(255,153,0,0.12);
+      color: var(--saffron);
+    }
+    .premium-state-badge.paid {
+      border-color: rgba(0,230,118,0.24);
+      background: rgba(0,230,118,0.12);
+      color: var(--success);
+    }
+    .premium-state-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+    .premium-mini-card {
+      border-radius: 14px;
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      gap: 0.45rem;
+    }
+    .premium-mini-card h4 {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+    }
+    .premium-mini-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      line-height: 1.55;
+    }
+    .premium-kpi {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .premium-mini-card.paid .premium-kpi {
+      color: var(--success);
+    }
+    .premium-mini-card.pending .premium-kpi {
+      color: var(--saffron);
+    }
+    .premium-feature-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .premium-feature-list li {
+      padding-left: 1rem;
+      position: relative;
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+    .premium-feature-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--accent);
+      font-weight: 900;
+    }
+    .premium-action-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .premium-action-btn {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.72rem 0.95rem;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-primary);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .premium-action-btn.primary {
+      border: none;
+      background: linear-gradient(90deg, var(--saffron), var(--accent));
+      color: #031118;
+    }
+    .premium-action-btn.secondary {
+      border-color: rgba(0,229,255,0.22);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+    }
+    .premium-support-note {
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      line-height: 1.55;
+    }
+    .forge-premium-banner {
+      margin: 0.15rem 0 0.85rem;
+      padding: 0.8rem 0.9rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      gap: 0.3rem;
+    }
+    .forge-premium-banner strong {
+      font-size: 0.74rem;
+      color: var(--text-primary);
+    }
+    .forge-premium-banner p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      line-height: 1.5;
+    }
+    .forge-premium-banner.free {
+      border-color: rgba(0,229,255,0.18);
+      background: rgba(0,229,255,0.06);
+    }
+    .forge-premium-banner.pending {
+      border-color: rgba(255,153,0,0.22);
+      background: rgba(255,153,0,0.08);
+    }
+    .forge-premium-banner.paid {
+      border-color: rgba(0,230,118,0.22);
+      background: rgba(0,230,118,0.09);
+    }
+
     /* ── LOGGER ── */
     .logger-row {
       padding: 0.35rem 1.25rem; background: var(--bg-primary);
@@ -527,6 +715,17 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
+
+    .founder-success-badge.pending {
+      background: rgba(255,153,0,0.14);
+      border-color: rgba(255,153,0,0.24);
+      color: var(--saffron);
+    }
+    .founder-success-badge.free {
+      background: rgba(0,229,255,0.1);
+      border-color: rgba(0,229,255,0.2);
+      color: var(--accent);
+    }
     .premium-thankyou {
       display: grid;
       gap: 0.7rem;
@@ -536,6 +735,15 @@
       border: 1px solid rgba(0,230,118,0.22);
       color: var(--text-primary);
       box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+
+    .premium-thankyou.pending {
+      background: linear-gradient(135deg, rgba(255,153,0,0.12), rgba(0,229,255,0.06));
+      border-color: rgba(255,153,0,0.22);
+    }
+    .premium-thankyou.free {
+      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(255,255,255,0.03));
+      border-color: rgba(0,229,255,0.18);
     }
     .premium-thankyou h4 {
       margin: 0;
@@ -884,6 +1092,19 @@
     <div class="auth-chip" id="session-state-chip">Apps this session: 0/10</div>
   </div>
 
+
+  <div class="premium-experience-shell">
+    <div class="premium-experience-card" id="premium-experience-card">
+      <div class="premium-experience-head">
+        <div>
+          <h3>Checking your founder access…</h3>
+          <p>LogicHub will switch this area between free onboarding, pending approval, and the live premium workspace.</p>
+        </div>
+        <span class="premium-state-badge free">status loading</span>
+      </div>
+    </div>
+  </div>
+
   <!-- LOGGER -->
   <div class="logger-row">
     <div class="logger">
@@ -999,6 +1220,10 @@
       <button class="modal-close" onclick="closeModal('forge-modal')">✕</button>
       <div class="modal-header">⚒️ Daxini Forge</div>
       <div class="form-group"><label>App Name</label><input type="text" id="forge-app-name" placeholder="My Awesome Project"></div>
+      <div id="forge-premium-banner" class="forge-premium-banner free">
+        <strong>⚡ Free Forge active</strong>
+        <p id="forge-premium-hint">Founder approval upgrades this modal with unlimited Forge messaging and premium next-step guidance.</p>
+      </div>
       <div style="background:rgba(0,229,255,0.05);padding:1rem;border-radius:12px;border:1px solid rgba(0,229,255,0.1);">
         <h4 style="margin:0;font-size:0.75rem;color:var(--accent);">ENGINE SANDBOX</h4>
         <div class="engine-sandbox-grid" id="engine-sandbox-grid"></div>
@@ -1644,23 +1869,116 @@
         return this.serverAccess;
       },
 
+      getLatestFounderOrder() {
+        const orders = this.getFounderOrders();
+        return orders.length ? orders[orders.length - 1] : null;
+      },
+
+      formatMoney(amount, currency = 'INR') {
+        const value = Number(amount || 0);
+        if (String(currency || '').toUpperCase() === 'USD') return `$${value.toLocaleString('en-US')}`;
+        return `₹${value.toLocaleString('en-IN')}`;
+      },
+
+      getAccessSnapshot() {
+        const latestOrder = this.getLatestFounderOrder();
+        const paid = !!this.serverAccess?.paid;
+        const pending = !paid && (!!this.serverAccess?.pending || !!latestOrder);
+        const authReady = !!(this.authUser && this.authUser.uid);
+        const access = this.serverAccess?.access || {};
+        return {
+          paid,
+          pending,
+          authReady,
+          latestOrder,
+          orderId: latestOrder?.id || access.latestOrderId || null,
+          amount: latestOrder?.amount || access.amount || FOUNDER_PAYMENT.inrAmount,
+          currency: latestOrder?.currency || access.currency || 'INR',
+          utr: latestOrder?.utr || null,
+          projectName: latestOrder?.projectName || this.getProjectDisplayName(),
+          createdAt: latestOrder?.createdAt || this.serverAccess?.checkedAt || null,
+          plan: this.serverAccess?.plan || (paid ? 'founder' : pending ? 'pending' : 'free'),
+          email: this.authUser?.email || null,
+          uid: this.authUser?.uid || null
+        };
+      },
+
+      triggerFooterAction(buttonId, fallbackMessage) {
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+        if (button.disabled) {
+          alert(fallbackMessage || 'This action is not ready yet.');
+          return;
+        }
+        button.click();
+      },
+
+      renderPremiumExperience() {
+        const card = document.getElementById('premium-experience-card');
+        if (!card) return;
+        if (!this.serverAccess?.checked && !this.authUser) {
+          card.className = 'premium-experience-card';
+          card.innerHTML = `<div class="premium-experience-head"><div><h3>Checking your founder access…</h3><p>LogicHub is connecting auth and refreshing your payment state.</p></div><span class="premium-state-badge free">status loading</span></div>`;
+          return;
+        }
+        const state = this.getAccessSnapshot();
+        const orderLabel = state.orderId ? this.escapeHtml(state.orderId) : 'Not assigned yet';
+        const amountLabel = this.formatMoney(state.amount, state.currency);
+        const projectLabel = this.escapeHtml(state.projectName || 'LogicHub project');
+        const emailLabel = this.escapeHtml(state.email || (state.uid ? `UID ${state.uid.slice(0, 8)}` : 'Guest workspace'));
+        if (state.paid) {
+          card.className = 'premium-experience-card paid';
+          card.innerHTML = `<div class="premium-experience-head"><div><h3>Welcome back — your founder workspace is live.</h3><p>Your paid account is approved, so LogicHub now surfaces the premium path first: unlimited Forge messaging, premium tools shortcuts, and a dedicated publish lane.</p></div><span class="premium-state-badge paid">✅ founder approved</span></div><div class="premium-state-grid"><div class="premium-mini-card paid"><div class="premium-kpi">Unlimited Forge</div><h4>No rolling reset cap</h4><p>Your Forge modal now shows the premium state immediately, so you do not have to decode limits before creating the next app.</p></div><div class="premium-mini-card paid"><div class="premium-kpi">Priority publish</div><h4>Premium path surfaced</h4><p>The workspace highlights Publish as a founder action and keeps premium tools together once your app is ready.</p></div><div class="premium-mini-card paid"><div class="premium-kpi">${this.escapeHtml(amountLabel)}</div><h4>Founder pass active</h4><p><strong>Order:</strong> ${orderLabel}<br><strong>Project:</strong> ${projectLabel}<br><strong>Account:</strong> ${emailLabel}</p></div></div><div class="premium-state-grid"><div class="premium-mini-card"><h4>Premium tools</h4><ul class="premium-feature-list"><li>Unlimited Forge badge inside the modal.</li><li>Founder account approved screen inside checkout.</li><li>Priority publish section with faster next-step affordances.</li></ul></div><div class="premium-mini-card"><h4>Recommended next steps</h4><div class="premium-action-row"><button class="premium-action-btn primary" onclick="openForgeModal()">⚡ Open Unlimited Forge</button><button class="premium-action-btn secondary" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">🌐 Open Priority Publish</button><button class="premium-action-btn" onclick="app.viewPRD()">📋 Premium tools</button></div><div class="premium-support-note">Founder status is verified server-side, so this premium workspace comes back on the next login.</div></div></div>`;
+          return;
+        }
+        if (state.pending) {
+          card.className = 'premium-experience-card pending';
+          card.innerHTML = `<div class="premium-experience-head"><div><h3>Payment saved — founder approval is still in progress.</h3><p>This screen now makes the status obvious: your payment is recorded, the approval email is the next step, and unlimited Forge will unlock only after approval.</p></div><span class="premium-state-badge pending">⏳ pending approval</span></div><div class="premium-state-grid"><div class="premium-mini-card pending"><div class="premium-kpi">Awaiting review</div><h4>Current state</h4><p><strong>Order:</strong> ${orderLabel}<br><strong>Amount:</strong> ${this.escapeHtml(amountLabel)}<br><strong>UTR:</strong> ${this.escapeHtml(state.utr || 'Saved on this device')}</p></div><div class="premium-mini-card"><h4>What happens next</h4><ul class="premium-feature-list"><li>Send the approval email to dharam@viadecide.com if it did not send automatically.</li><li>Free Forge limits stay active until the founder pass is approved.</li><li>Once approved, this area flips into the paid welcome workspace automatically.</li></ul></div><div class="premium-mini-card"><h4>While you wait</h4><div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 Review payment details</button>${state.latestOrder ? `<button class="premium-action-btn secondary" onclick="app.openFounderVerificationEmail(app.getLatestFounderOrder())">📧 Draft approval email</button>` : `<button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Keep using free Forge</button>`}</div><div class="premium-support-note">Project saved: ${projectLabel}. Approval state syncs after login refresh or after Dharam approves the founder pass.</div></div></div>`;
+          return;
+        }
+        card.className = 'premium-experience-card';
+        card.innerHTML = `<div class="premium-experience-head"><div><h3>Free workspace ready — upgrade when you want the founder path.</h3><p>Free users keep the current builder flow, while paid founder accounts swap this panel into a premium welcome state with clearer status, unlimited Forge messaging, and premium tool shortcuts.</p></div><span class="premium-state-badge free">⚡ free workspace</span></div><div class="premium-state-grid"><div class="premium-mini-card"><div class="premium-kpi">3 / 5h</div><h4>Current Forge window</h4><p>You can keep building with the free rolling Forge window and session app allowance today.</p></div><div class="premium-mini-card"><h4>Founder unlocks</h4><ul class="premium-feature-list"><li>Paid user welcome banner with founder status.</li><li>Unlimited Forge badge and premium modal copy.</li><li>Cleaner pending and approved founder screens.</li></ul></div><div class="premium-mini-card"><h4>Upgrade path</h4><div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">India Founder Pass: ₹1717 with manual UPI payment and approval review.</div></div></div>`;
+      },
+
+      renderForgePremiumState() {
+        const banner = document.getElementById('forge-premium-banner');
+        const hint = document.getElementById('forge-premium-hint');
+        const actionButton = document.getElementById('forge-community-btn');
+        if (!banner || !hint || !actionButton) return;
+        const state = this.getAccessSnapshot();
+        banner.className = `forge-premium-banner ${state.paid ? 'paid' : state.pending ? 'pending' : 'free'}`;
+        if (state.paid) {
+          banner.querySelector('strong').textContent = '♾ Unlimited Forge unlocked';
+          hint.textContent = 'Founder approval is active. This modal now reads like a premium creation workspace instead of a metered trial.';
+          actionButton.textContent = 'START UNLIMITED FORGE';
+          return;
+        }
+        if (state.pending) {
+          banner.querySelector('strong').textContent = '⏳ Payment pending approval';
+          hint.textContent = 'Your request is saved, but the free Forge window stays active until the founder account is approved.';
+          actionButton.textContent = 'START COMMUNITY SYNTHESIS';
+          return;
+        }
+        banner.querySelector('strong').textContent = '⚡ Free Forge active';
+        hint.textContent = 'Founder approval upgrades this modal with unlimited Forge messaging and premium next-step guidance.';
+        actionButton.textContent = 'START COMMUNITY SYNTHESIS';
+      },
+
       updateAuthUI() {
         const authChip = document.getElementById('auth-state-chip');
         const planChip = document.getElementById('plan-state-chip');
         const sessionChip = document.getElementById('session-state-chip');
-        const localOrder = this.getPaidOrderRecord();
-        const paid = !!this.serverAccess?.paid;
-        const pending = !paid && (!!this.serverAccess?.pending || !!localOrder);
-        const authReady = !!(this.authUser && this.authUser.uid);
+        const publishBtn = document.getElementById('btn-publish');
+        const state = this.getAccessSnapshot();
         if (authChip) {
-          authChip.className = `auth-chip ${authReady ? 'success' : 'accent'}`;
-          authChip.textContent = authReady ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'user'} • ${this.authUser.uid.slice(0, 8)}` : 'Auth: local guest mode';
+          authChip.className = `auth-chip ${state.authReady ? 'success' : 'accent'}`;
+          authChip.textContent = state.authReady ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'user'} • ${this.authUser.uid.slice(0, 8)}` : 'Auth: local guest mode';
         }
         if (planChip) {
-          planChip.className = `auth-chip ${paid ? 'success' : pending ? 'accent' : 'warn'}`;
-          planChip.textContent = paid
-            ? `Plan: paid • server verified • ${this.serverAccess?.plan || 'founder'}`
-            : pending
+          planChip.className = `auth-chip ${state.paid ? 'success' : state.pending ? 'accent' : 'warn'}`;
+          planChip.textContent = state.paid
+            ? `Plan: paid • server verified • ${state.plan || 'founder'}`
+            : state.pending
               ? 'Plan: payment requested • awaiting approval'
               : 'Plan: free';
         }
@@ -1668,6 +1986,13 @@
           sessionChip.className = 'auth-chip';
           sessionChip.textContent = `Apps this session: ${getSessionAppCount()}/${APP_SESSION_LIMIT}`;
         }
+        if (publishBtn) {
+          publishBtn.textContent = state.paid ? '🌐 Priority Publish' : '🌐 Publish';
+          publishBtn.classList.toggle('compile-btn', !!state.paid);
+        }
+        this.renderPremiumExperience();
+        this.renderForgePremiumState();
+        this.renderFounderStatus();
       },
 
       async initFirebaseAuth() {
@@ -1711,15 +2036,20 @@
       renderFounderStatus() {
         const statusEl = document.getElementById('founder-payment-status');
         if (!statusEl) return;
-        const orders = this.getFounderOrders();
-        if (!orders.length) {
-          statusEl.innerHTML = 'No founder payment saved on this device yet.';
+        const state = this.getAccessSnapshot();
+        const orderLabel = state.orderId ? this.escapeHtml(state.orderId) : 'Pending sync';
+        const amountLabel = this.escapeHtml(this.formatMoney(state.amount, state.currency));
+        const projectLabel = this.escapeHtml(state.projectName || 'LogicHub project');
+        const savedLabel = state.createdAt ? this.escapeHtml(new Date(state.createdAt).toLocaleString('en-IN')) : 'Waiting for first submission';
+        if (state.paid) {
+          statusEl.innerHTML = `<div class="premium-thankyou"><span class="founder-success-badge">✅ Founder account approved</span><div><h4>Your founder access is active.</h4><p>This is now the approved account screen: the payment flow is complete, unlimited Forge messaging is unlocked, and premium sections are surfaced in the workspace.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${orderLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">${amountLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${projectLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Plan</div><div class="thankyou-stat-value">${this.escapeHtml(state.plan || 'founder')}</div></div></div><ul class="next-steps-list"><li class="next-step-item"><strong>Unlimited Forge</strong>The Forge modal now shows the premium state and no free rolling reset cap.</li><li class="next-step-item"><strong>Priority publish surfaced</strong>The Publish action is highlighted in the footer as the premium next step.</li><li class="next-step-item"><strong>Founder workspace returns on login</strong>Server-verified paid state restores this premium UX automatically.</li></ul><div class="payment-actions"><button onclick="openForgeModal()">⚡ Open Unlimited Forge</button><button onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">🌐 Open Priority Publish</button></div></div>`;
           return;
         }
-        const latest = orders[orders.length - 1];
-        const statusLabel = latest.status === 'founder_access_requested' ? 'Founder access requested' : String(latest.status || 'saved').replace(/_/g, ' ');
-        statusEl.innerHTML = `<div class="premium-thankyou"><span class="founder-success-badge">✅ Founder access requested</span><div><h4>Thanks — your founder request looks saved.</h4><p>Your request is now stored on this device with the project, amount, and UTR details ready for manual confirmation.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${this.escapeHtml(latest.id)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">₹${Number(latest.amount || 0).toLocaleString('en-IN')}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${this.escapeHtml(latest.projectName)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">UTR</div><div class="thankyou-stat-value">${this.escapeHtml(latest.utr)}</div></div></div><p><strong>Status:</strong> ${this.escapeHtml(statusLabel)}<br><strong>Saved:</strong> ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}</p></div>`;
-        this.updateAuthUI();
+        if (state.pending) {
+          statusEl.innerHTML = `<div class="premium-thankyou pending"><span class="founder-success-badge pending">⏳ Pending approval</span><div><h4>Your payment is saved. Approval is still required.</h4><p>This pending screen now explains exactly where you are: payment details are stored, approval is next, and free limits remain until the founder account is approved.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${orderLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">${amountLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${projectLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Saved</div><div class="thankyou-stat-value">${savedLabel}</div></div></div><ul class="next-steps-list"><li class="next-step-item"><strong>1. Review your founder request</strong>Make sure the UTR and project details are correct.</li><li class="next-step-item"><strong>2. Send approval email if needed</strong>LogicHub can draft the verification mail to dharam@viadecide.com.</li><li class="next-step-item"><strong>3. Wait for approval</strong>Once approved, this screen flips into the founder-approved state automatically.</li></ul><div class="payment-actions"><button onclick="app.openFounderCheckout()">💳 Review founder details</button>${state.latestOrder ? `<button onclick="app.openFounderVerificationEmail(app.getLatestFounderOrder())">📧 Draft approval email</button>` : `<button onclick="openForgeModal()">⚡ Keep using free Forge</button>`}</div></div>`;
+          return;
+        }
+        statusEl.innerHTML = `<div class="premium-thankyou free"><span class="founder-success-badge free">💳 Founder access not started</span><div><h4>No founder payment saved on this device yet.</h4><p>When a user pays ₹1717 and submits the UTR, this area becomes the pending approval screen. After approval, it turns into the founder-approved premium screen.</p></div><ul class="next-steps-list"><li class="next-step-item"><strong>India Founder Pass</strong>Manual UPI payment to ${this.escapeHtml(FOUNDER_PAYMENT.upiId)} with 12-digit UTR submission.</li><li class="next-step-item"><strong>Pending state</strong>A clearer status card appears immediately after submission.</li><li class="next-step-item"><strong>Paid state</strong>Unlimited Forge and premium publish sections become the default UX.</li></ul><div class="payment-actions"><button onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button></div></div>`;
       },
 
       buildFounderVerificationMailto(order) {
