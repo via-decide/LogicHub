@@ -695,11 +695,13 @@
         min-height: 100%;
       }
       body {
+        display: block;
         height: auto;
         min-height: 100dvh;
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: auto;
       }
 
       /* Header */
@@ -759,14 +761,17 @@
 
       /* Main: stack vertically */
       .main-container {
-        flex-direction: column;
+        display: block;
         flex: none;
         overflow: visible;
-        min-height: clamp(360px, 58dvh, 640px);
+        min-height: 0;
       }
       .canvas {
+        display: block;
+        width: 100%;
+        height: clamp(320px, 54dvh, 560px);
         min-height: clamp(320px, 54dvh, 560px);
-        overflow: auto;
+        overflow: hidden;
         touch-action: pan-y pinch-zoom;
         -webkit-overflow-scrolling: touch;
       }
@@ -776,6 +781,7 @@
         grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
         padding: 0.45rem 0.6rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
         gap: 0.35rem;
+        margin-top: 0;
       }
       .helper-strip {
         padding: 0.4rem 0.6rem;
