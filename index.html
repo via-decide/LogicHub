@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#030508">
+  <title>LOGICHUB v2 — Sovereign Vibecoder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary:   #030508;
+      --bg-secondary: #0a0c10;
+      --border-color: #222222;
+      --border-bright: rgba(255,255,255,0.15);
+      --accent:       #00e5ff;
+      --saffron:      #ff671f;
+      --success:      #2ecc71;
+      --error:        #ff4444;
+      --text-primary: #ffffff;
+      --text-secondary: #888899;
+      --font-serif: 'Crimson Text', serif;
+      --font-sans:  'Inter', sans-serif;
+      --font-mono:  'JetBrains Mono', monospace;
+      --state-pending:    #444444;
+      --state-generating: #00e5ff;
+      --state-verified:   #2ecc71;
+      --state-error:      #ff4444;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body { margin: 0; padding: 0; height: 100%; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 1.25rem; border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary); z-index: 100; flex-shrink: 0;
+      min-width: 0; gap: 0.5rem;
+    }
+    .header-left {
+      display: flex; align-items: center; gap: 0.6rem;
+      flex: 1; min-width: 0; overflow: hidden;
+    }
+    .header-title {
+      font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600;
+      display: flex; align-items: baseline; gap: 0.3rem;
+      flex-shrink: 0;
+    }
+    .header-title .sep { color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem; }
+    .header-title .badge { color: var(--accent); font-family: var(--font-mono); font-size: 0.7rem; }
+    .map-status {
+      font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      min-width: 0; flex-shrink: 1;
+    }
+    .map-status.state-idle { color: var(--text-secondary); }
+    .map-status.state-ready { color: #f59e0b; animation: pulse-ready 1.5s infinite; }
+    .map-status.state-active { color: var(--accent); animation: pulse-active 0.8s infinite; }
+    .map-status.state-complete { color: var(--success); text-shadow: 0 0 10px rgba(46,204,113,0.4); }
+    .info-badge {
+      font-family: var(--font-mono); font-size: 0.68rem; padding: 0.25rem 0.55rem;
+      background: rgba(0,229,255,0.1); border: 1px solid var(--accent);
+      border-radius: 4px; color: var(--accent); font-weight: 700;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .toolbar { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+    .api-input {
+      padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px;
+      background: var(--bg-primary); color: var(--accent); font-family: var(--font-mono);
+      font-size: 0.75rem; width: 220px; outline: none; user-select: auto; -webkit-user-select: auto;
+    }
+    .api-input:focus { border-color: var(--accent); }
+    .btn-icon {
+      background: transparent; border: 1px solid var(--border-bright); color: var(--text-secondary);
+      border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; font-family: var(--font-mono); font-weight: bold;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+    .api-mobile-btn { display: none; }
+    .api-panel { display: none; padding: 0.5rem 1.25rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); }
+    .api-panel.open { display: block; }
+    .api-panel input { width: 100%; font-size: 0.8rem; user-select: auto; -webkit-user-select: auto;}
+
+    /* ── LOGGER ── */
+    .logger-row {
+      padding: 0.35rem 1.25rem; background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; z-index: 99; flex-shrink: 0;
+    }
+    .logger { font-family: var(--font-mono); font-size: 0.68rem; height: 44px; display: flex; flex-direction: column; justify-content: flex-end; flex: 1; min-width: 0; }
+    .log-line { margin: 1px 0; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+    .log-line.success { color: var(--success); }
+    .log-line.accent { color: var(--accent); }
+    .log-line.error { color: var(--error); }
+
+    /* ── MAIN LAYOUT ── */
+    .main-container { display: flex; flex: 1; overflow: hidden; position: relative; min-height: 0; }
+    
+    /* ── SIDEBAR ── */
+    .sidebar { width: 190px; padding: 0.9rem; border-right: 1px solid var(--border-color); background: var(--bg-secondary); overflow-y: auto; z-index: 50; display: flex; flex-direction: column; gap: 1rem; flex-shrink: 0; }
+    .sidebar h3 { margin: 0 0 0.5rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1px; }
+    .sidebar-grid { display: flex; flex-direction: column; gap: 0.35rem; }
+    .palette-item { padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; cursor: pointer; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; background: var(--bg-primary); color: var(--text-primary); transition: 0.2s; }
+    .palette-item:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.05); }
+
+    /* ── CANVAS ── */
+    .canvas { flex: 1; position: relative; background-color: var(--bg-secondary); background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 24px 24px; overflow: hidden; touch-action: none; min-width: 0; }
+    #arrows-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    #blocks-container { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+    
+    #drawing-path { pointer-events: none; fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 5 5; }
+    .arrow-path { fill: none; stroke: var(--text-secondary); stroke-width: 2.5; stroke-dasharray: 5 5; animation: flow 20s linear infinite; pointer-events: stroke; cursor: pointer; }
+    .arrow-path:hover { stroke: var(--error); stroke-width: 3.5; }
+    .arrow-path.verified { stroke: var(--success); stroke-dasharray: none; animation: none; }
+    @keyframes flow { to { stroke-dashoffset: -500; } }
+
+    /* ── BLOCKS ── */
+    .block { position: absolute; width: 175px; padding: 0.65rem; background: rgba(10,12,16,0.95); backdrop-filter: blur(8px); border: 2px solid var(--text-secondary); border-radius: 12px; font-family: var(--font-sans); cursor: grab; touch-action: none; display: flex; flex-direction: column; gap: 0.45rem; box-shadow: 0 8px 24px rgba(0,0,0,0.6); font-size: 0.78rem; z-index: 10; }
+    .block.dragging { cursor: grabbing; z-index: 1000 !important; transform: scale(1.02); border-color: var(--accent); box-shadow: 0 12px 32px rgba(0,229,255,0.2); }
+    .block-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.6rem; color: var(--text-secondary); pointer-events: none; }
+    .block-edit { cursor: pointer; pointer-events: auto; color: var(--accent); font-weight: 700; padding: 2px 4px; border-radius: 3px; }
+    .block-edit:hover { background: rgba(0,229,255,0.1); }
+    .block-label { font-weight: 700; font-size: 0.85rem; color: var(--text-primary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .block-status { font-family: var(--font-mono); font-size: 0.58rem; text-align: center; padding: 3px; border-radius: 4px; font-weight: 700; color: #fff; background: var(--state-pending); }
+    .block-delete { position: absolute; top: -10px; right: -10px; background: var(--error); color: white; width: 24px; height: 24px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 11px; cursor: pointer; border: 2px solid var(--bg-secondary); z-index: 20; }
+    .block:hover .block-delete, .block.dragging .block-delete { display: flex; }
+
+    /* Ports */
+    .port-wrapper { position: absolute; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: crosshair; z-index: 20; touch-action: none; }
+    .port-wrapper.in { left: -22px; top: calc(50% - 22px); }
+    .port-wrapper.out { right: -22px; top: calc(50% - 22px); }
+    .port { width: 12px; height: 12px; background: var(--bg-primary); border: 2px solid var(--text-secondary); border-radius: 50%; pointer-events: none; transition: 0.2s; }
+    .port-wrapper:hover .port, .port-wrapper.active .port { background: var(--accent); border-color: var(--accent); transform: scale(1.3); }
+
+    /* ── FOOTER & BUTTONS ── */
+    .footer {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem;
+      padding: 0.6rem 1.25rem; border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary); flex-shrink: 0;
+    }
+    button {
+      padding: 0.65rem 0.4rem; border: 1px solid var(--border-bright);
+      background: var(--bg-primary); color: var(--text-primary); cursor: pointer;
+      border-radius: 8px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase;
+      transition: 0.2s; font-family: var(--font-mono); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    button.compile-btn { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
+    button.forge-fab {
+      background: linear-gradient(135deg, var(--accent), #00b8cc); color: #000;
+      border: none; padding: 0.55rem 1rem; border-radius: 8px; font-weight: 800;
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── MODALS ── */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-bright); border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 500px; max-height: calc(100dvh - 2rem); overflow-y: auto; position: relative; }
+    .modal-header { font-family: var(--font-mono); font-size: 0.95rem; color: var(--accent); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: var(--text-secondary); font-size: 1.2rem; background: transparent; border: none; z-index: 10; }
+    .modal-close:hover { color: var(--error); }
+    .form-group { margin-bottom: 0.9rem; }
+    label { display: block; font-size: 0.62rem; color: var(--text-secondary); margin-bottom: 0.35rem; text-transform: uppercase; font-family: var(--font-mono); }
+    input, textarea { width: 100%; padding: 0.65rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-family: var(--font-mono); font-size: 0.78rem; outline: none; user-select: auto; -webkit-user-select: auto; }
+    input:focus, textarea:focus { border-color: var(--accent); }
+
+    /* Engine Sandbox */
+    .engine-sandbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; margin-top: 0.75rem; }
+    .engine-tool-btn { font-size: 0.62rem; padding: 0.45rem; border-color: var(--border-color); }
+    .engine-tool-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.06); }
+
+    /* Animations */
+    @keyframes pulse-ready { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @keyframes pulse-active { 0%,100%{color:var(--accent)} 50%{color:#fff} }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 680px) {
+      /* Header */
+      .header { padding: 0.45rem 0.75rem; gap: 0.4rem; }
+      .header-left { gap: 0.4rem; }
+      .header-title { font-size: 1rem; }
+      .header-title .sep,
+      .header-title .badge { font-size: 0.65rem; }
+      .map-status { font-size: 0.58rem; max-width: 110px; }
+      .info-badge { font-size: 0.62rem; padding: 0.2rem 0.4rem; }
+
+      /* Hide desktop API input, show icon */
+      .api-input { display: none; }
+      .api-mobile-btn { display: flex !important; }
+
+      /* Sidebar: horizontal scrollable strip */
+      .sidebar {
+        width: 100%;
+        height: auto;
+        min-height: 52px;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.4rem 0.6rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 0.4rem;
+        align-items: center;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sidebar::-webkit-scrollbar { display: none; }
+      .sidebar h3 { display: none; }
+      .sidebar-grid {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+        flex-shrink: 0;
+      }
+      .palette-item {
+        padding: 0.38rem 0.65rem;
+        font-size: 0.6rem;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      /* Main: stack vertically */
+      .main-container { flex-direction: column; }
+
+      /* Footer: 3-col × 2-row grid */
+      .footer {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 0.45rem 0.6rem;
+        gap: 0.35rem;
+      }
+      .footer button {
+        padding: 0.55rem 0.25rem;
+        font-size: 0.62rem;
+      }
+
+      /* Modals */
+      .modal { padding: 0.5rem; align-items: flex-end; }
+      .modal-content { max-height: calc(100dvh - 1rem); border-radius: 16px 16px 12px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">VIBECODER</span></div>
+      <div class="map-status state-idle" id="map-status">AWAITING ARCHITECTURE</div>
+      <div class="info-badge" id="block-count">0 nodes</div>
+    </div>
+    <div class="toolbar">
+      <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
+      <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
+      <button class="btn-icon" onclick="alert('Rules:\n1. Add Node\n2. Drag right port to left port\n3. Synth!')">?</button>
+      <button id="gh-connect-btn" onclick="connectGitHub()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#e0e6f0;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:all 0.15s;white-space:nowrap;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span id="gh-connect-label">Connect GitHub</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="api-panel" id="api-panel">
+    <input type="password" id="api-key-mobile" placeholder="Paste Gemini API Key here…">
+  </div>
+
+  <!-- LOGGER -->
+  <div class="logger-row">
+    <div class="logger">
+      <div class="log-line" id="log-1">>> SYSTEM BOOTING...</div>
+      <div class="log-line" id="log-2">>> READY TO VIBECODE</div>
+      <div class="log-line success" id="log-3">>> AWAITING ARCHITECTURE</div>
+    </div>
+    <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-container">
+    <div class="sidebar" id="sidebar">
+      <h3>Core Nodes</h3>
+      <div class="sidebar-grid">
+        <div class="palette-item" onclick="app.addBlock('ui')">[UI] COMPONENT</div>
+        <div class="palette-item" onclick="app.addBlock('api')">[API] ROUTE</div>
+        <div class="palette-item" onclick="app.addBlock('database')">[DB] SCHEMA</div>
+        <div class="palette-item" onclick="app.addBlock('auth')">[AUTH] LAYER</div>
+      </div>
+      <h3>Utility</h3>
+      <div class="sidebar-grid">
+        <div class="palette-item" onclick="app.addBlock('util')">[UTIL] HELPER</div>
+        <div class="palette-item" onclick="app.addBlock('styles')">[CSS] STYLES</div>
+        <div class="palette-item" onclick="app.addBlock('config')">[CFG] CONFIG</div>
+      </div>
+    </div>
+
+    <div class="canvas" id="canvas">
+      <svg id="arrows-svg">
+        <defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--text-secondary)"/></marker></defs>
+        <path id="drawing-path"></path>
+        <g id="connections-group"></g>
+      </svg>
+      <div id="blocks-container"></div>
+      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.25;">
+        <div style="font-size:2rem">⬡</div><div style="font-family:var(--font-mono);font-size:0.7rem;">Add nodes to begin</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <button onclick="app.addBlock('ui')">+ Node</button>
+    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Synth</button>
+    <button onclick="app.viewPRD()">📋 PRD</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
+    <button id="btn-publish" disabled onclick="openPublishModal()" style="background:var(--accent);color:#000;font-weight:800;border-color:var(--accent);">🚀 Publish</button>
+    <button id="btn-apk" disabled onclick="alert('APK build queued on server.')">📱 APK</button>
+    <button onclick="app.clearMap()">🗑 Wipe</button>
+  </div>
+
+  <!-- NODE MODAL -->
+  <div class="modal" id="node-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
+      <div class="modal-header" id="node-modal-header">Configure Node</div>
+      <input type="hidden" id="node-modal-id">
+      <div class="form-group"><label>Target Filename</label><input type="text" id="node-modal-filename"></div>
+      <div class="form-group"><label>AI Instructions</label><textarea id="node-modal-prompt" rows="3"></textarea></div>
+      <div class="form-group"><label>Generated Code</label><textarea id="node-modal-code" rows="6" style="color:var(--success);"></textarea></div>
+      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.saveNodeConfig()">SAVE CONFIGURATION</button>
+    </div>
+  </div>
+
+  <!-- FORGE MODAL -->
+  <div class="modal" id="forge-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('forge-modal')">✕</button>
+      <div class="modal-header">⚒️ Daxini Forge</div>
+      <div class="form-group"><label>App Name</label><input type="text" id="forge-app-name" placeholder="My Awesome Project"></div>
+      <div style="background:rgba(0,229,255,0.05);padding:1rem;border-radius:12px;border:1px solid rgba(0,229,255,0.1);">
+        <h4 style="margin:0;font-size:0.75rem;color:var(--accent);">ENGINE SANDBOX</h4>
+        <div class="engine-sandbox-grid" id="engine-sandbox-grid"></div>
+      </div>
+      <div style="margin-top:1rem;border-top:1px solid var(--border-color);padding-top:1rem;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+          <span id="forge-limits-text" style="font-size:0.65rem;color:var(--text-secondary);">Limit: 0/3</span>
+          <span style="font-size:0.65rem;color:var(--saffron);font-weight:700;">PRO: UNLIMITED</span>
+        </div>
+        <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">START COMMUNITY SYNTHESIS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRD MODAL -->
+  <div class="modal" id="prd-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('prd-modal')">✕</button>
+      <div class="modal-header">📋 Architecture PRD</div>
+      <textarea id="prd-output" readonly style="width:100%;height:260px;resize:none;color:var(--text-secondary);font-size:0.7rem;"></textarea>
+      <button style="width:100%;margin-top:1rem;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.copyPRD()">📋 COPY TO CLIPBOARD</button>
+    </div>
+  </div>
+
+  <!-- PUBLISH MODAL -->
+  <div class="modal" id="publish-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('publish-modal')">✕</button>
+      <div class="modal-header">🚀 Publish to LogicHub</div>
+      <div id="publish-gh-warning" style="display:none;background:rgba(255,103,31,0.1);border:1px solid rgba(255,103,31,0.3);border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.72rem;color:#ff9a6c;">
+        ⚠️ Connect GitHub first to get a personal share link with your username.
+        <br><button onclick="connectGitHub()" style="margin-top:0.5rem;background:none;border:1px solid rgba(255,103,31,0.5);color:#ff9a6c;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font-mono);font-size:10px;">Connect GitHub →</button>
+      </div>
+      <div class="form-group">
+        <label>App Name</label>
+        <input type="text" id="publish-app-name" placeholder="My Awesome App">
+      </div>
+      <div id="publish-user-row" style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;font-size:0.72rem;color:var(--text-secondary);">
+        <span>Publishing as:</span>
+        <span id="publish-username-display" style="color:var(--saffron);font-weight:700;">anonymous</span>
+      </div>
+      <div style="font-size:0.68rem;color:var(--text-secondary);margin-bottom:1rem;opacity:0.7;">
+        Your app will be published to <span style="color:var(--accent);">logichub.app/view?u={username}&p={slug}</span> and committed to the LogicHub repo.
+      </div>
+      <button id="publish-go-btn" class="compile-btn" style="width:100%;" onclick="executePublish()">
+        🚀 Publish Now
+      </button>
+    </div>
+  </div>
+
+  <!-- SHARE MODAL (shown after publish) -->
+  <div class="modal" id="share-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('share-modal')">✕</button>
+      <div class="modal-header" style="color:var(--success);">✅ Published!</div>
+      <div style="text-align:center;padding:1rem 0;">
+        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:0.5rem;">Your share link</div>
+        <div id="share-url-display" style="background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.2);border-radius:10px;padding:0.75rem;font-size:0.7rem;word-break:break-all;color:var(--accent);margin-bottom:1rem;"></div>
+        <button onclick="copyShareUrl()" id="share-copy-btn" style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;padding:0.65rem;cursor:pointer;font-family:var(--font-mono);font-size:0.8rem;margin-bottom:0.75rem;">
+          📋 Copy Link
+        </button>
+        <a id="share-open-btn" href="#" target="_blank" style="display:block;text-align:center;font-size:0.7rem;color:var(--text-secondary);text-decoration:none;border:1px solid var(--border-color);border-radius:8px;padding:0.5rem;transition:0.2s;">
+          ↗️ Open App
+        </a>
+      </div>
+      <div style="border-top:1px solid var(--border-color);padding-top:0.75rem;margin-top:0.25rem;">
+        <div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.35rem;">Also available at:</div>
+        <a id="share-repo-link" href="#" target="_blank" style="font-size:0.65rem;color:var(--muted);text-decoration:none;">📁 GitHub Repo →</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- TIME LIMITS CORE ---
+    function getLatestResetTimestamp() {
+      const now = new Date();
+      const h = now.getHours();
+      const resetBlocks = [0, 5, 10, 15, 20];
+      let resetHour = 0;
+      for (let i = resetBlocks.length - 1; i >= 0; i--) {
+        if (h >= resetBlocks[i]) { resetHour = resetBlocks[i]; break; }
+      }
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), resetHour, 0, 0, 0);
+      return d.getTime();
+    }
+
+    function syncForgeCounter() {
+      const latestReset = getLatestResetTimestamp();
+      const lastReset = parseInt(localStorage.getItem('lh_last_reset_ts') || "0");
+      if (latestReset > lastReset) {
+        localStorage.setItem('lh_gen_count', "0");
+        localStorage.setItem('lh_last_reset_ts', latestReset.toString());
+        return 0;
+      }
+      return parseInt(localStorage.getItem('lh_gen_count') || "0");
+    }
+
+    function updateForgeLimitUI() {
+      const count = syncForgeCounter();
+      const nextDate = new Date(getLatestResetTimestamp() + 5 * 60 * 60 * 1000);
+      let ampm = nextDate.getHours() >= 12 ? 'PM' : 'AM';
+      let hr = nextDate.getHours() % 12 || 12;
+      document.getElementById("forge-limits-text").textContent = `Limit: ${count}/3. Resets at ${hr}:00 ${ampm}`;
+      document.getElementById("forge-community-btn").disabled = count >= 3;
+    }
+
+    function openForgeModal() {
+      document.getElementById("forge-modal").classList.add("active");
+      updateForgeLimitUI();
+    }
+
+    async function executeCommunitySynthesis() {
+      const count = syncForgeCounter();
+      if (count >= 3) return alert("Compute limit reached.");
+      const appName = document.getElementById("forge-app-name").value.trim();
+      if (!appName) return alert("App name required.");
+      closeModal('forge-modal');
+      const success = await app.synthesizeArchitecture();
+      if (success) {
+        localStorage.setItem('lh_gen_count', (count + 1).toString());
+        updateForgeLimitUI();
+      }
+    }
+
+    // --- LOGIC ENGINE ---
+    class LogicMap {
+      constructor() {
+        this.blocks = [];
+        this.connections = [];
+        this.id = "VIBE_" + Math.random().toString(36).substring(7).toUpperCase();
+      }
+      addBlock(type, x, y) {
+        const b = {
+          id: "NODE_" + Math.random().toString(36).substring(7).toUpperCase(),
+          type, label: `${type.toUpperCase()} NODE`,
+          filename: { ui:'index.html', api:'api.js', database:'schema.sql', auth:'auth.js', util:'utils.js', styles:'styles.css', config:'config.js' }[type] || 'file.js',
+          prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: []
+        };
+        this.blocks.push(b); return b;
+      }
+      removeBlock(id) {
+        this.blocks = this.blocks.filter(b => b.id !== id);
+        this.connections = this.connections.filter(c => c.from !== id && c.to !== id);
+        this.blocks.forEach(b => { b.dependsOn = b.dependsOn.filter(x => x !== id); b.connectedTo = b.connectedTo.filter(x => x !== id); });
+      }
+      connect(from, to) {
+        if (from === to || this.connections.some(c => c.from === from && c.to === to)) return false;
+        this.connections.push({ from, to });
+        this.blocks.find(b => b.id === from).connectedTo.push(to);
+        this.blocks.find(b => b.id === to).dependsOn.push(from);
+        return true;
+      }
+      disconnect(from, to) {
+        this.connections = this.connections.filter(c => !(c.from === from && c.to === to));
+        this.blocks.find(b => b.id === from).connectedTo = this.blocks.find(b => b.id === from).connectedTo.filter(x => x !== to);
+        this.blocks.find(b => b.id === to).dependsOn = this.blocks.find(b => b.id === to).dependsOn.filter(x => x !== from);
+      }
+      buildPRD() {
+        let prd = `# LOGICHUB ARCHITECTURE PRD: ${this.id}\n\n`;
+        if (this.blocks.length === 0) return "No nodes in architecture yet.";
+        this.blocks.forEach(b => {
+          prd += `## [${b.type.toUpperCase()}] ${b.label}\n`;
+          prd += `**Filename:** \`${b.filename}\`\n`;
+          const deps = b.dependsOn.map(id => this.blocks.find(x => x.id === id)?.label).filter(Boolean);
+          prd += `**Dependencies:** ${deps.length ? deps.join(', ') : 'None'}\n`;
+          prd += `**Instruction:** ${b.prompt || 'Synthesize logic based on connections.'}\n\n`;
+          if (b.code) prd += `**Source Output:**\n\`\`\`javascript\n${b.code}\n\`\`\`\n\n`;
+          prd += `---\n\n`;
+        });
+        return prd;
+      }
+    }
+
+    // --- APP CONTROLLER ---
+    const app = {
+      map: new LogicMap(),
+      isDragging: null, dragOffset: { x: 0, y: 0 },
+      isDrawing: false, sourceId: null,
+
+      init() {
+        this.setupPointerEvents();
+        const grid = document.getElementById("engine-sandbox-grid");
+        [{k:"squeeze",l:"🗜️ TokenSqueeze"}, {k:"macro",l:"📊 MacroForge"}, {k:"json",l:"🏗️ JSONCore"}].forEach(t => {
+          let btn = document.createElement("button"); btn.className = "engine-tool-btn"; btn.textContent = t.l;
+          btn.onclick = () => btn.classList.toggle("active");
+          grid.appendChild(btn);
+        });
+        this.render();
+      },
+
+      setupPointerEvents() {
+        const canvas = document.getElementById("canvas");
+
+        window.addEventListener("pointermove", e => {
+          if (!this.isDragging && !this.isDrawing) return;
+          const rect = canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          if (this.isDragging) {
+            const b = this.isDragging;
+            b.x = Math.max(0, Math.min(canvas.offsetWidth - 175, x - this.dragOffset.x));
+            b.y = Math.max(0, Math.min(canvas.offsetHeight - 90, y - this.dragOffset.y));
+            const el = document.getElementById(`block-${b.id}`);
+            if (el) { el.style.left = `${b.x}px`; el.style.top = `${b.y}px`; }
+            this.renderConnections();
+          } else if (this.isDrawing) {
+            const start = this.getPortPos(this.sourceId, 'out');
+            if (start) document.getElementById("drawing-path").setAttribute("d", `M ${start.x} ${start.y} L ${x} ${y}`);
+          }
+        });
+
+        window.addEventListener("pointerup", e => {
+          if (this.isDragging) {
+            document.getElementById(`block-${this.isDragging.id}`)?.classList.remove('dragging');
+            this.isDragging = null;
+          }
+          if (this.isDrawing) {
+            const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
+            const targetPort = elAtPoint ? elAtPoint.closest('.port-wrapper.in') : null;
+            if (targetPort) {
+              const targetId = targetPort.getAttribute('data-id');
+              if (this.sourceId !== targetId) {
+                if(this.map.connect(this.sourceId, targetId)) this.log("Nodes wired successfully.", "success");
+              }
+            }
+            this.isDrawing = false;
+            document.getElementById("drawing-path").setAttribute("d", "");
+            document.querySelectorAll('.port-wrapper.active').forEach(p => p.classList.remove('active'));
+            this.render();
+          }
+        });
+      },
+
+      addBlock(type) {
+        const c = document.getElementById("canvas");
+        this.map.addBlock(type, c.offsetWidth / 2 - 87 + (Math.random()*40-20), c.offsetHeight / 2 - 45 + (Math.random()*40-20));
+        this.render();
+      },
+
+      removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Node removed.", "info"); },
+
+      render() {
+        const container = document.getElementById("blocks-container");
+        container.innerHTML = "";
+        const colors = { PENDING: "var(--state-pending)", GENERATING: "var(--state-generating)", VERIFIED: "var(--state-verified)", ERROR: "var(--error)" };
+        
+        this.map.blocks.forEach(b => {
+          const el = document.createElement("div");
+          el.className = "block"; el.id = `block-${b.id}`;
+          el.style.left = `${b.x}px`; el.style.top = `${b.y}px`;
+          el.innerHTML = `
+            <div class="block-delete" onclick="app.removeBlock('${b.id}')">✕</div>
+            <div class="block-header"><span>[${b.type.toUpperCase()}]</span><span class="block-edit" onclick="app.openNodeEditor('${b.id}')">CONFIG</span></div>
+            <div class="block-label">${b.label}</div>
+            <div class="block-status" style="background:${colors[b.status] || colors.PENDING}">${b.status}</div>
+            <div class="port-wrapper in" data-id="${b.id}"><div class="port"></div></div>
+            <div class="port-wrapper out" data-id="${b.id}"><div class="port"></div></div>
+          `;
+          el.onpointerdown = (e) => {
+            if (e.target.closest('.port-wrapper') || e.target.closest('.block-delete') || e.target.closest('.block-edit')) return;
+            e.stopPropagation();
+            this.isDragging = b;
+            const rect = el.getBoundingClientRect();
+            this.dragOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            el.classList.add('dragging');
+            container.appendChild(el);
+          };
+          const outW = el.querySelector('.port-wrapper.out');
+          outW.onpointerdown = (e) => {
+            e.stopPropagation();
+            this.isDrawing = true;
+            this.sourceId = b.id;
+            outW.classList.add('active');
+          };
+          container.appendChild(el);
+        });
+
+        document.getElementById("canvas-hint").style.display = this.map.blocks.length ? "none" : "flex";
+        this.renderConnections();
+        this.updateStats();
+      },
+
+      renderConnections() {
+        const group = document.getElementById("connections-group");
+        group.innerHTML = "";
+        this.map.connections.forEach(c => {
+          const start = this.getPortPos(c.from, 'out');
+          const end = this.getPortPos(c.to, 'in');
+          if (!start || !end) return;
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          const isVerified = this.map.blocks.find(b => b.id === c.from)?.status === "VERIFIED";
+          path.setAttribute("class", `arrow-path ${isVerified ? 'verified' : ''}`);
+          const dx = Math.max(40, Math.abs(end.x - start.x) * 0.5);
+          path.setAttribute("d", `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`);
+          path.setAttribute("marker-end", "url(#arrow)");
+          path.onclick = (e) => { e.stopPropagation(); if (confirm("Remove connection?")) { this.map.disconnect(c.from, c.to); this.render(); } };
+          group.appendChild(path);
+        });
+      },
+
+      getPortPos(id, type) {
+        const b = this.map.blocks.find(x => x.id === id);
+        if (!b) return null;
+        return type === 'in' ? { x: b.x, y: b.y + 45 } : { x: b.x + 175, y: b.y + 45 };
+      },
+
+      updateStats() {
+        const n = this.map.blocks.length;
+        document.getElementById("block-count").textContent = `${n} nodes`;
+        const ready = n > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
+        document.getElementById("btn-export").disabled = !ready;
+        document.getElementById("btn-apk").disabled = !ready;
+        const stat = document.getElementById("map-status");
+        if (n === 0) { stat.textContent = "AWAITING ARCHITECTURE"; stat.className = "map-status state-idle"; }
+        else if (ready) { stat.textContent = "SYNTHESIS COMPLETE"; stat.className = "map-status state-complete"; }
+        else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "SYNTHESISING..."; stat.className = "map-status state-active"; }
+        else { stat.textContent = "READY TO SYNTHESISE"; stat.className = "map-status state-ready"; }
+      },
+
+      log(msg, type = "info") {
+        const l1 = document.getElementById("log-1"), l2 = document.getElementById("log-2"), l3 = document.getElementById("log-3");
+        l1.textContent = l2.textContent; l1.className = l2.className;
+        l2.textContent = l3.textContent; l2.className = l3.className;
+        l3.textContent = `>> ${msg}`; l3.className = `log-line ${type}`;
+      },
+
+      clearMap() { if (confirm("Wipe the architecture?")) { this.map = new LogicMap(); this.render(); this.log("Cleared.", "info"); } },
+
+      openNodeEditor(id) {
+        const b = this.map.blocks.find(x => x.id === id);
+        if (!b) return;
+        document.getElementById("node-modal-id").value = b.id;
+        document.getElementById("node-modal-header").textContent = `Configure: ${b.label}`;
+        document.getElementById("node-modal-filename").value = b.filename;
+        document.getElementById("node-modal-prompt").value = b.prompt;
+        const codeArea = document.getElementById("node-modal-code");
+        codeArea.value = b.code;
+        codeArea.readOnly = b.status !== "VERIFIED";
+        document.getElementById("node-modal").classList.add("active");
+      },
+
+      saveNodeConfig() {
+        const b = this.map.blocks.find(x => x.id === document.getElementById("node-modal-id").value);
+        if (b) {
+          b.filename = document.getElementById("node-modal-filename").value.trim() || b.filename;
+          b.prompt = document.getElementById("node-modal-prompt").value.trim();
+          if (b.status === "VERIFIED") b.code = document.getElementById("node-modal-code").value;
+          this.log(`Config saved: ${b.label}`, "success");
+        }
+        closeModal("node-modal"); this.render();
+      },
+
+      viewPRD() {
+        document.getElementById("prd-output").value = this.map.buildPRD();
+        document.getElementById("prd-modal").classList.add("active");
+      },
+
+      copyPRD() {
+        const ta = document.getElementById("prd-output"); ta.select();
+        navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand("copy"));
+        this.log("PRD copied.", "success"); closeModal("prd-modal");
+      },
+
+      async synthesizeArchitecture() {
+        const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
+        if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
+        if (this.map.blocks.length === 0) { alert("Add nodes first."); return false; }
+        document.getElementById("btn-synth").disabled = true;
+        let success = true;
+        try {
+          for (let b of this.map.blocks) {
+            b.status = "GENERATING"; this.render(); this.log(`Generating ${b.filename}...`, "accent");
+            const ctx = b.dependsOn.map(id => this.map.blocks.find(x => x.id === id)).filter(d => d?.code).map(d => `--- File: ${d.filename} ---\n${d.code}`).join("\n\n");
+            const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nOutput ONLY raw code. No markdown.`;
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error.message);
+            let code = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+            if (code.startsWith("```")) code = code.split('\n').slice(1, -1).join('\n');
+            b.code = code; b.status = "VERIFIED"; this.render();
+          }
+          this.log("Synthesis Complete.", "success");
+        } catch (err) {
+          this.log(`Error: ${err.message}`, "error");
+          this.map.blocks.forEach(b => { if (b.status === "GENERATING") b.status = "ERROR"; });
+          success = false;
+        }
+        this.render(); document.getElementById("btn-synth").disabled = false;
+        return success;
+      },
+
+      async exportZip() {
+        const zip = new JSZip();
+        this.map.blocks.forEach(b => { if (b.code) zip.file(b.filename, b.code); });
+        zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
+        const blob = await zip.generateAsync({ type: "blob" });
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `LogicHub_${this.map.id}.zip`; a.click();
+        this.log("ZIP Exported.", "success");
+      }
+    };
+
+    function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) m.classList.remove("active"); }));
+
+    app.init();
+
+    // ── GITHUB OAUTH + PUBLISH ────────────────────────────────────────────────
+    const GH_CLIENT_ID = window.__GH_CLIENT_ID__ || 'YOUR_GITHUB_CLIENT_ID'; // set via env or config
+    let ghUser = null; // { username, avatar, name }
+
+    function loadGhUser() {
+      try {
+        const stored = sessionStorage.getItem('lh_gh_user');
+        if (stored) ghUser = JSON.parse(stored);
+      } catch (_) {}
+      updateGhUI();
+    }
+
+    function saveGhUser(u) {
+      ghUser = u;
+      sessionStorage.setItem('lh_gh_user', JSON.stringify(u));
+      updateGhUI();
+    }
+
+    function updateGhUI() {
+      const btn   = document.getElementById('gh-connect-btn');
+      const label = document.getElementById('gh-connect-label');
+      if (ghUser) {
+        label.textContent = '@' + ghUser.username;
+        btn.style.borderColor  = 'rgba(255,103,31,0.5)';
+        btn.style.color        = '#ff671f';
+        btn.onclick            = () => {
+          if (confirm('Disconnect GitHub account @' + ghUser.username + '?')) {
+            ghUser = null;
+            sessionStorage.removeItem('lh_gh_user');
+            updateGhUI();
+          }
+        };
+      } else {
+        label.textContent      = 'Connect GitHub';
+        btn.style.borderColor  = 'rgba(255,255,255,0.12)';
+        btn.style.color        = '#e0e6f0';
+        btn.onclick            = connectGitHub;
+      }
+    }
+
+    function connectGitHub() {
+      const redirect = encodeURIComponent(location.origin + location.pathname);
+      const scope    = 'user:email';
+      location.href  = `https://github.com/login/oauth/authorize?client_id=${GH_CLIENT_ID}&redirect_uri=${redirect}&scope=${scope}`;
+    }
+
+    // Handle OAuth callback: ?gh_code=xxx
+    async function handleOAuthCallback() {
+      const p    = new URLSearchParams(location.search);
+      const code = p.get('gh_code') || p.get('code');
+      if (!code) return;
+
+      // Clean URL
+      history.replaceState({}, '', location.pathname);
+
+      try {
+        const r = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const d = await r.json();
+        if (d.username) {
+          saveGhUser(d);
+          app.log('GitHub connected: @' + d.username, 'success');
+        } else {
+          app.log('GitHub auth failed: ' + (d.error || 'unknown'), 'error');
+        }
+      } catch (err) {
+        app.log('GitHub auth error: ' + err.message, 'error');
+      }
+    }
+
+    function openPublishModal() {
+      const ready = app.map.blocks.some(b => b.code);
+      if (!ready) return alert('Synthesize your architecture first (⚡ Synth).');
+      document.getElementById('publish-app-name').value = '';
+      const warn = document.getElementById('publish-gh-warning');
+      warn.style.display = ghUser ? 'none' : 'block';
+      document.getElementById('publish-username-display').textContent = ghUser ? ghUser.username : 'anonymous';
+      document.getElementById('publish-modal').classList.add('active');
+    }
+
+    let _lastShareUrl  = '';
+    let _lastRepoUrl   = '';
+
+    async function executePublish() {
+      const appName = document.getElementById('publish-app-name').value.trim();
+      if (!appName) return alert('App name required.');
+
+      const prdContext = app.map.buildPRD();
+      const username   = ghUser?.username || 'anonymous';
+
+      const btn = document.getElementById('publish-go-btn');
+      btn.disabled    = true;
+      btn.textContent = '⏳ Publishing...';
+
+      try {
+        const res = await fetch('/api/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appName, prdContext, username }),
+        });
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.error || 'Publish failed');
+
+        _lastShareUrl = data.shareUrl;
+        _lastRepoUrl  = data.repoUrl || '';
+
+        closeModal('publish-modal');
+
+        // Show share modal
+        document.getElementById('share-url-display').textContent  = data.shareUrl;
+        document.getElementById('share-open-btn').href            = data.shareUrl;
+        document.getElementById('share-repo-link').href           = data.repoUrl || '#';
+        document.getElementById('share-repo-link').textContent    = '📁 ' + (data.repoUrl || 'GitHub Repo') + ' →';
+        document.getElementById('share-modal').classList.add('active');
+
+        app.log('Published! ' + data.shareUrl, 'success');
+
+      } catch (err) {
+        app.log('Publish failed: ' + err.message, 'error');
+        alert('Publish failed: ' + err.message);
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = '🚀 Publish Now';
+      }
+    }
+
+    function copyShareUrl() {
+      const ta = document.createElement('textarea');
+      ta.value = _lastShareUrl;
+      ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      const btn = document.getElementById('share-copy-btn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 2000);
+    }
+
+    // Enable publish button when code is synthesized
+    const _origUpdate = app.updateUI?.bind(app);
+    const _origRender = app.render?.bind(app);
+    function _checkPublishReady() {
+      const ready = app.map?.blocks?.some(b => b.code);
+      const pb = document.getElementById('btn-publish');
+      if (pb) pb.disabled = !ready;
+    }
+    if (app.render) {
+      const orig = app.render.bind(app);
+      app.render = function() { orig(); _checkPublishReady(); };
+    }
+
+    loadGhUser();
+    handleOAuthCallback();
+
+  </script>
+</body>
+</html>

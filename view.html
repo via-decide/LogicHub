@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#030508">
+  <title>LOGICHUB Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary:   #030508;
+      --bg-secondary: #0a0c10;
+      --border-color: #222222;
+      --accent:       #00e5ff;
+      --text-secondary: #888899;
+      --font-sans:  'Inter', sans-serif;
+      --font-mono:  'JetBrains Mono', monospace;
+    }
+
+    body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-primary); color: #fff; font-family: var(--font-sans); }
+
+    /* ── LOADER ── */
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-primary); z-index: 1000; transition: opacity 0.4s; }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(0,229,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 2px; color: var(--accent); }
+
+    /* ── ERROR ── */
+    #error-container { display: none; position: fixed; inset: 0; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; background: var(--bg-primary); z-index: 2000; }
+    .error-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #ff4444; }
+    .error-msg { color: var(--text-secondary); max-width: 400px; line-height: 1.5; margin-bottom: 2rem; }
+    .retry-btn { padding: 0.75rem 2rem; background: var(--accent); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: var(--font-mono); }
+
+    /* ── APP IFRAME ── */
+    #app-frame { width: 100%; height: 100%; border: none; display: none; }
+
+    /* ── HEADER OVERLAY ── */
+    #viewer-header { position: fixed; top: 1rem; left: 1rem; right: 1rem; display: flex; justify-content: space-between; align-items: center; pointer-events: none; z-index: 500; }
+    .badge { background: rgba(10,12,16,0.85); backdrop-filter: blur(8px); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 99px; font-size: 0.72rem; color: var(--text-secondary); pointer-events: auto; display: flex; align-items: center; gap: 8px; }
+    .badge strong { color: #fff; }
+    .back-btn { background: rgba(10,12,16,0.85); backdrop-filter: blur(8px); border: 1px solid var(--border-color); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; color: #fff; text-decoration: none; transition: 0.2s; }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+    
+    #meta-info { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING -->
+  <div id="loader">
+    <div class="spinner"></div>
+    <div class="loading-text">FETCHING FROM CLOUD...</div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="error-container">
+    <div class="error-title">PROJECT NOT FOUND</div>
+    <div id="error-msg" class="error-msg">The application profile you're looking for doesn't exist or is undergoing validation.</div>
+    <button class="retry-btn" onclick="location.reload()">RE-INITIALIZE</button>
+  </div>
+
+  <!-- HEADER -->
+  <div id="viewer-header">
+    <a href="/" class="back-btn" title="Back to LogicHub">←</a>
+    <div id="meta-info" class="badge">
+      <span>App: <strong id="app-name">...</strong></span>
+      <span style="opacity: 0.2;">|</span>
+      <span>By: <strong id="app-user">...</strong></span>
+    </div>
+  </div>
+
+  <!-- APP INTERFACE -->
+  <iframe id="app-frame" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-same-origin"></iframe>
+
+  <script>
+    async function init() {
+      const p = new URLSearchParams(location.search);
+      const user = p.get('u');
+      const slug = p.get('p');
+
+      if (!user || !slug) {
+        showError('Application parameters missing. URL format: /view?u=username&p=slug');
+        return;
+      }
+
+      // 1. Fetch metadata first to get App Name
+      try {
+        const metaUrl = `https://raw.githubusercontent.com/via-decide/LogicHub/main/artifacts/${user}/${slug}/meta.json`;
+        const res = await fetch(metaUrl);
+        if (!res.ok) throw new Error('Project meta failed');
+        const meta = await res.json();
+        
+        document.getElementById('app-name').textContent = meta.appName || 'LogicHub App';
+        document.getElementById('app-user').textContent = '@' + meta.username;
+        document.title = `${meta.appName || 'LogicHub App'} — by @${meta.username}`;
+        document.getElementById('meta-info').style.display = 'flex';
+        
+      } catch (err) {
+        console.warn('Meta fetch failed, falling back to slug defaults');
+        document.getElementById('app-name').textContent = slug.split('-').slice(0, -1).join(' ').toUpperCase();
+        document.getElementById('app-user').textContent = '@' + user;
+        document.getElementById('meta-info').style.display = 'flex';
+      }
+
+      // 2. Fetch the actual HTML
+      try {
+        const htmlUrl = `https://raw.githubusercontent.com/via-decide/LogicHub/main/artifacts/${user}/${slug}/index.html`;
+        const res = await fetch(htmlUrl);
+        if (!res.ok) throw new Error('App retrieval failed');
+        const html = await res.text();
+
+        const frame = document.getElementById('app-frame');
+        const doc = frame.contentWindow.document;
+        doc.open();
+        doc.write(html);
+        doc.close();
+
+        // Reveal
+        setTimeout(() => {
+          document.getElementById('loader').style.opacity = '0';
+          setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            frame.style.display = 'block';
+          }, 400);
+        }, 800);
+
+      } catch (err) {
+        showError('The application could not be retrieved from the Daxini network. ' + err.message);
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('error-container').style.display = 'flex';
+      document.getElementById('error-msg').textContent = msg;
+    }
+
+    init();
+  </script>
+</body>
+</html>
