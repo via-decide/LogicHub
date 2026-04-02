@@ -1029,7 +1029,7 @@
     }
 
     function hasPaidAccessFlag() {
-      return getStoredFounderOrders().some((order) => ['founder_access_requested', 'founder_access_confirmed', 'paid', 'pro'].includes(String(order?.status || '')));
+      return !!(window.app && window.app.serverAccess && window.app.serverAccess.paid);
     }
 
     function getSessionAppIds() {
@@ -1204,6 +1204,8 @@
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 },
       isDrawing: false, sourceId: null,
+      authUser: null,
+      serverAccess: { checked: false, paid: false, pending: false, source: 'unknown', plan: 'free' },
 
       init() {
         this.setupPointerEvents();
@@ -1217,6 +1219,7 @@
         this.initFirebaseAuth();
         this.render();
         updateForgeLimitUI();
+        this.renderFounderStatus();
       },
 
       setupPointerEvents() {
@@ -1430,23 +1433,53 @@
       },
 
       isPaidUser() {
-        return !!this.getPaidOrderRecord();
+        return !!this.serverAccess?.paid;
+      },
+
+      async refreshServerAccessStatus(forceRefresh = false) {
+        if (!this.authUser?.getIdToken) {
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'guest', plan: 'free' };
+          this.updateAuthUI();
+          return this.serverAccess;
+        }
+        try {
+          const idToken = await this.authUser.getIdToken(forceRefresh);
+          const response = await fetch('/api/access-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify({ idToken })
+          });
+          const data = await this.readJsonResponse(response, 'Access status');
+          if (!response.ok || data.error) throw new Error(data.error || `Access status failed with status ${response.status}`);
+          this.serverAccess = { checked: true, ...data };
+        } catch (error) {
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'error', plan: 'free', error: error.message };
+          this.log(`Access check fallback: ${error.message}`, 'info');
+        }
+        this.updateAuthUI();
+        updateForgeLimitUI();
+        return this.serverAccess;
       },
 
       updateAuthUI() {
         const authChip = document.getElementById('auth-state-chip');
         const planChip = document.getElementById('plan-state-chip');
         const sessionChip = document.getElementById('session-state-chip');
-        const paidOrder = this.getPaidOrderRecord();
-        const paid = !!paidOrder;
+        const localOrder = this.getPaidOrderRecord();
+        const paid = !!this.serverAccess?.paid;
+        const pending = !paid && (!!this.serverAccess?.pending || !!localOrder);
         const authReady = !!(this.authUser && this.authUser.uid);
         if (authChip) {
           authChip.className = `auth-chip ${authReady ? 'success' : 'accent'}`;
           authChip.textContent = authReady ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'user'} • ${this.authUser.uid.slice(0, 8)}` : 'Auth: local guest mode';
         }
         if (planChip) {
-          planChip.className = `auth-chip ${paid ? 'success' : 'warn'}`;
-          planChip.textContent = paid ? `Plan: paid • limits reset • ${paidOrder.currency || 'INR'} ${paidOrder.amount || ''}`.trim() : 'Plan: free';
+          planChip.className = `auth-chip ${paid ? 'success' : pending ? 'accent' : 'warn'}`;
+          planChip.textContent = paid
+            ? `Plan: paid • server verified • ${this.serverAccess?.plan || 'founder'}`
+            : pending
+              ? 'Plan: payment requested • awaiting approval'
+              : 'Plan: free';
         }
         if (sessionChip) {
           sessionChip.className = 'auth-chip';
@@ -1463,19 +1496,33 @@
         try {
           if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
           const auth = firebase.auth();
-          auth.onAuthStateChanged((user) => {
+          auth.onAuthStateChanged(async (user) => {
             this.authUser = user || null;
             this.updateAuthUI();
-            updateForgeLimitUI();
+            await this.refreshServerAccessStatus();
           });
           if (!auth.currentUser) await auth.signInAnonymously();
           this.log('Auth ready for all users.', 'success');
         } catch (error) {
           this.authUser = null;
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'error', plan: 'free', error: error.message };
           this.updateAuthUI();
           updateForgeLimitUI();
           this.log(`Auth fallback: ${error.message}`, 'info');
         }
+      },
+
+      async syncFounderRequestToServer(order) {
+        if (!this.authUser?.getIdToken) throw new Error('Auth is still connecting. Please try again in a moment.');
+        const idToken = await this.authUser.getIdToken(true);
+        const response = await fetch('/api/founder-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ idToken, order })
+        });
+        const data = await this.readJsonResponse(response, 'Founder request');
+        if (!response.ok || data.error) throw new Error(data.error || `Founder request failed with status ${response.status}`);
+        return data;
       },
 
       renderFounderStatus() {
@@ -1528,7 +1575,7 @@
         document.getElementById('founder-utr').focus();
       },
 
-      submitFounderUtr() {
+      async submitFounderUtr() {
         const utrInput = document.getElementById('founder-utr');
         const utr = String(utrInput.value || '').replace(/\s+/g, '').trim();
         if (!/^\d{12}$/.test(utr)) {
@@ -1548,6 +1595,7 @@
           amount: FOUNDER_PAYMENT.inrAmount,
           currency: 'INR',
           payment: 'upi',
+          plan: 'india_founder',
           utr,
           status: 'founder_access_requested',
           createdAt: new Date().toISOString()
@@ -1556,13 +1604,22 @@
         utrIndex[utr] = { orderId: id, createdAt: order.createdAt };
         this.saveFounderOrders(orders);
         this.saveFounderUtrIndex(utrIndex);
+        let serverMessage = 'Founder request saved on this device.';
+        try {
+          const result = await this.syncFounderRequestToServer(order);
+          serverMessage = result.message || 'Founder request saved for server review.';
+          this.log('Founder request synced to Firebase.', 'success');
+        } catch (error) {
+          this.log(`Founder request sync pending: ${error.message}`, 'info');
+        }
+        await this.refreshServerAccessStatus(true);
         this.renderFounderStatus();
         this.updateAuthUI();
         updateForgeLimitUI();
         document.getElementById('founder-utr-panel').style.display = 'none';
         utrInput.value = '';
         this.log(`Founder access requested: ${id}`, 'success');
-        alert(`Founder access requested. Order: ${id}`);
+        alert(`${serverMessage} Order: ${id}`);
       },
 
       sanitizeCode(code) {
