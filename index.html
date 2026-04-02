@@ -169,6 +169,110 @@
       line-height: 1.5;
     }
     .helper-strip strong { color: var(--accent); }
+    .payment-strip {
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(135deg, rgba(255,153,0,0.08), rgba(0,229,255,0.08));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+    .payment-strip button {
+      border: none;
+      border-radius: 10px;
+      padding: 0.72rem 0.95rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--saffron), var(--accent));
+      color: #031118;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .payment-strip button:hover { filter: brightness(1.05); }
+    .price-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.12rem 0.42rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-weight: 700;
+    }
+    .payment-card {
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      gap: 0.55rem;
+      margin-bottom: 0.8rem;
+    }
+    .payment-card h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+    .payment-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.73rem;
+      line-height: 1.5;
+    }
+    .payment-amount {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .payment-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+    .payment-actions button,
+    .payment-wide-btn {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-primary);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .payment-wide-btn.primary {
+      background: var(--accent);
+      color: #031118;
+      border: none;
+    }
+    .payment-wide-btn.secondary {
+      background: rgba(255,153,0,0.15);
+      border-color: rgba(255,153,0,0.25);
+      color: var(--saffron);
+    }
+    .payment-actions button:hover,
+    .payment-wide-btn:hover { filter: brightness(1.05); }
+    .payment-note {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .payment-status-box {
+      padding: 0.8rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    .payment-status-box strong { color: var(--text-primary); }
+    .payment-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 0.9rem 0;
+    }
+    .payment-muted { color: var(--text-secondary); font-size: 0.7rem; }
     button {
       padding: 0.65rem 0.4rem; border: 1px solid var(--border-bright);
       background: var(--bg-primary); color: var(--text-primary); cursor: pointer;
@@ -267,6 +371,17 @@
         padding: 0.4rem 0.6rem;
         font-size: 0.6rem;
       }
+      .payment-strip {
+        display:flex; flex-direction:column; align-items:flex-start; gap:0.5rem;
+        padding:0.65rem 0.6rem;
+        font-size:0.64rem;
+      }
+      .payment-strip button {
+        width:100%;
+      }
+      .payment-actions {
+        grid-template-columns: 1fr;
+      }
       .footer button {
         padding: 0.55rem 0.25rem;
         font-size: 0.62rem;
@@ -310,21 +425,26 @@
 
   <div class="helper-strip"><strong>New here?</strong> Add the main parts you understand. You do not need separate code files for everything—LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
+  <div class="payment-strip">
+    <div><strong>Founder Launch:</strong> Get LogicHub founder access for <span class="price-chip">₹1717 via UPI</span>. Global checkout at <span class="price-chip">$99 via Razorpay</span> is coming next.</div>
+    <button onclick="app.openFounderCheckout()">💳 Buy Founder Pass</button>
+  </div>
+
   <!-- MAIN -->
   <div class="main-container">
     <div class="sidebar" id="sidebar">
-      <h3>Core Nodes</h3>
+      <h3>Main Parts</h3>
       <div class="sidebar-grid">
         <div class="palette-item" onclick="app.addBlock('ui')">SCREEN</div>
-        <div class="palette-item" onclick="app.addBlock('api')">DATA / API</div>
-        <div class="palette-item" onclick="app.addBlock('database')">DATA STORE</div>
-        <div class="palette-item" onclick="app.addBlock('auth')">SIGN IN</div>
+        <div class="palette-item" onclick="app.addBlock('api')">LIVE DATA</div>
+        <div class="palette-item" onclick="app.addBlock('database')">SAVED DATA</div>
+        <div class="palette-item" onclick="app.addBlock('auth')">LOGIN</div>
       </div>
-      <h3>Utility</h3>
+      <h3>Extra Parts</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('util')">HELPER LOGIC</div>
-        <div class="palette-item" onclick="app.addBlock('styles')">LOOK & FEEL</div>
-        <div class="palette-item" onclick="app.addBlock('config')">APP SETUP</div>
+        <div class="palette-item" onclick="app.addBlock('util')">APP LOGIC</div>
+        <div class="palette-item" onclick="app.addBlock('styles')">STYLE</div>
+        <div class="palette-item" onclick="app.addBlock('config')">SETTINGS</div>
       </div>
     </div>
 
@@ -395,6 +515,53 @@
     </div>
   </div>
 
+  <!-- FOUNDER CHECKOUT MODAL -->
+  <div class="modal" id="founder-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('founder-modal')">✕</button>
+      <div class="modal-header">💳 Founder Checkout</div>
+      <div class="payment-card">
+        <h4>LogicHub Founder Access</h4>
+        <div class="payment-amount">₹1717 <span class="payment-muted">via UPI today</span></div>
+        <p>Best for early builders who want the beginner-friendly app planner, ZIP export, Android packaging path, and publish path in one place.</p>
+        <div class="payment-note">Use the UPI flow below now. Razorpay checkout for <strong>$99 USD</strong> is shown here so the global path is ready for later integration.</div>
+      </div>
+
+      <div class="payment-card">
+        <h4>Pay by UPI</h4>
+        <div class="payment-amount" id="founder-price-inr">₹1717</div>
+        <div class="payment-status-box">
+          <strong>UPI ID:</strong> <span id="founder-upi-id"></span><br>
+          <strong>Plan:</strong> Founder Access<br>
+          <strong>Project:</strong> <span id="founder-project-name"></span>
+        </div>
+        <div class="payment-actions">
+          <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
+          <button onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
+        </div>
+        <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">I PAID → SUBMIT UTR</button>
+        <div class="payment-note">This opens the device UPI app using a ready-filled payment link. After payment, submit the 12-digit UTR so LogicHub can save the founder order locally until backend verification is added.</div>
+      </div>
+
+      <div class="payment-card">
+        <h4>Global Checkout</h4>
+        <div class="payment-amount">$99 <span class="payment-muted">Razorpay coming soon</span></div>
+        <p>Keep this price visible for international buyers. You can wire the Razorpay button later without changing the pricing story.</p>
+        <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
+      </div>
+
+      <div class="payment-divider"></div>
+      <div id="founder-utr-panel" style="display:none;">
+        <div class="form-group"><label>12-digit UTR</label><input type="text" id="founder-utr" inputmode="numeric" maxlength="12" placeholder="e.g. 123456789012"></div>
+        <button class="payment-wide-btn primary" onclick="app.submitFounderUtr()">SAVE FOUNDER PAYMENT</button>
+        <div class="payment-note">Duplicate UTR values are blocked on this device so the same payment cannot be submitted twice by mistake.</div>
+      </div>
+
+      <div class="payment-divider"></div>
+      <div id="founder-payment-status" class="payment-status-box">No founder payment saved on this device yet.</div>
+    </div>
+  </div>
+
   <script>
     // --- TIME LIMITS CORE ---
     function getLatestResetTimestamp() {
@@ -456,13 +623,13 @@
       }
       addBlock(type, x, y) {
         const typeInfo = {
-          ui: { label: 'Main Screen', badge: 'SCREEN', filename: 'index.html' },
-          api: { label: 'Data / API', badge: 'DATA', filename: 'api.js' },
-          database: { label: 'Data Store', badge: 'STORE', filename: 'schema.sql' },
-          auth: { label: 'Sign In', badge: 'LOGIN', filename: 'auth.js' },
-          util: { label: 'Helper Logic', badge: 'HELPER', filename: 'utils.js' },
-          styles: { label: 'Look & Feel', badge: 'STYLE', filename: 'styles.css' },
-          config: { label: 'App Setup', badge: 'SETUP', filename: 'config.js' }
+          ui: { label: 'Screen', badge: 'SCREEN', filename: 'index.html' },
+          api: { label: 'Live Data', badge: 'DATA', filename: 'api.js' },
+          database: { label: 'Saved Data', badge: 'DATA', filename: 'schema.sql' },
+          auth: { label: 'Login', badge: 'LOGIN', filename: 'auth.js' },
+          util: { label: 'App Logic', badge: 'LOGIC', filename: 'utils.js' },
+          styles: { label: 'Style', badge: 'STYLE', filename: 'styles.css' },
+          config: { label: 'Settings', badge: 'SETUP', filename: 'config.js' }
         };
         const info = typeInfo[type] || { label: 'App Part', badge: 'PART', filename: 'file.js' };
         const b = {
@@ -492,7 +659,7 @@
       }
       buildPRD() {
         let prd = `# LOGICHUB ARCHITECTURE PRD: ${this.id}\n\n`;
-        if (this.blocks.length === 0) return "No nodes in architecture yet.";
+        if (this.blocks.length === 0) return "No parts in this app plan yet.";
         this.blocks.forEach(b => {
           prd += `## [${b.type.toUpperCase()}] ${b.label}\n`;
           prd += `**Filename:** \`${b.filename}\`\n`;
@@ -507,6 +674,14 @@
     }
 
     // --- APP CONTROLLER ---
+    const FOUNDER_PAYMENT = {
+      inrAmount: 1717,
+      usdAmount: 99,
+      upiId: '6351537770@yapl',
+      payeeName: 'LogicHub',
+      note: 'LogicHub Founder Access'
+    };
+
     const app = {
       map: new LogicMap(),
       isDragging: null, dragOffset: { x: 0, y: 0 },
@@ -556,7 +731,7 @@
             if (targetPort) {
               const targetId = targetPort.getAttribute('data-id');
               if (this.sourceId !== targetId) {
-                if(this.map.connect(this.sourceId, targetId)) this.log("Nodes wired successfully.", "success");
+                if(this.map.connect(this.sourceId, targetId)) this.log("Parts linked successfully.", "success");
               }
             }
             this.isDrawing = false;
@@ -573,7 +748,7 @@
         this.render();
       },
 
-      removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Node removed.", "info"); },
+      removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Part removed.", "info"); },
 
       render() {
         const container = document.getElementById("blocks-container");
@@ -629,7 +804,7 @@
           const dx = Math.max(40, Math.abs(end.x - start.x) * 0.5);
           path.setAttribute("d", `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`);
           path.setAttribute("marker-end", "url(#arrow)");
-          path.onclick = (e) => { e.stopPropagation(); if (confirm("Remove connection?")) { this.map.disconnect(c.from, c.to); this.render(); } };
+          path.onclick = (e) => { e.stopPropagation(); if (confirm("Remove this link between parts?")) { this.map.disconnect(c.from, c.to); this.render(); } };
           group.appendChild(path);
         });
       },
@@ -696,6 +871,115 @@
         const ta = document.getElementById("prd-output"); ta.select();
         navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand("copy"));
         this.log("PRD copied.", "success"); closeModal("prd-modal");
+      },
+
+      getFounderOrders() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('lh_founder_orders') || '[]');
+          return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+          return [];
+        }
+      },
+
+      saveFounderOrders(orders) {
+        localStorage.setItem('lh_founder_orders', JSON.stringify(Array.isArray(orders) ? orders : []));
+      },
+
+      getFounderUtrIndex() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('lh_founder_utr_index') || '{}');
+          return saved && typeof saved === 'object' ? saved : {};
+        } catch (error) {
+          return {};
+        }
+      },
+
+      saveFounderUtrIndex(index) {
+        localStorage.setItem('lh_founder_utr_index', JSON.stringify(index || {}));
+      },
+
+      renderFounderStatus() {
+        const statusEl = document.getElementById('founder-payment-status');
+        if (!statusEl) return;
+        const orders = this.getFounderOrders();
+        if (!orders.length) {
+          statusEl.innerHTML = 'No founder payment saved on this device yet.';
+          return;
+        }
+        const latest = orders[orders.length - 1];
+        statusEl.innerHTML = `<strong>Latest founder payment saved</strong><br>Order: ${this.escapeHtml(latest.id)}<br>Amount: ₹${Number(latest.amount || 0).toLocaleString('en-IN')}<br>UTR: ${this.escapeHtml(latest.utr)}<br>Project: ${this.escapeHtml(latest.projectName)}<br>Status: ${this.escapeHtml(latest.status)}<br>Saved: ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}`;
+      },
+
+      openFounderCheckout() {
+        document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
+        document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
+        document.getElementById('founder-price-inr').textContent = `₹${Number(FOUNDER_PAYMENT.inrAmount).toLocaleString('en-IN')}`;
+        document.getElementById('founder-utr-panel').style.display = 'none';
+        document.getElementById('founder-utr').value = '';
+        this.renderFounderStatus();
+        document.getElementById('founder-modal').classList.add('active');
+      },
+
+      copyFounderUpi() {
+        navigator.clipboard?.writeText(FOUNDER_PAYMENT.upiId)
+          .then(() => this.log('Founder UPI ID copied.', 'success'))
+          .catch(() => {
+            const temp = document.createElement('input');
+            temp.value = FOUNDER_PAYMENT.upiId;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            temp.remove();
+            this.log('Founder UPI ID copied.', 'success');
+          });
+      },
+
+      openFounderUpiApp() {
+        const amount = Number(FOUNDER_PAYMENT.inrAmount).toFixed(2);
+        const url = `upi://pay?pa=${encodeURIComponent(FOUNDER_PAYMENT.upiId)}&pn=${encodeURIComponent(FOUNDER_PAYMENT.payeeName)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(FOUNDER_PAYMENT.note)}`;
+        window.location.href = url;
+        this.log('Opening UPI app for founder payment...', 'accent');
+      },
+
+      showFounderUtrForm() {
+        document.getElementById('founder-utr-panel').style.display = 'block';
+        document.getElementById('founder-utr').focus();
+      },
+
+      submitFounderUtr() {
+        const utrInput = document.getElementById('founder-utr');
+        const utr = String(utrInput.value || '').replace(/\s+/g, '').trim();
+        if (!/^\d{12}$/.test(utr)) {
+          alert('UTR must be exactly 12 digits.');
+          return;
+        }
+        const utrIndex = this.getFounderUtrIndex();
+        if (utrIndex[utr]) {
+          alert('That UTR is already saved on this device.');
+          return;
+        }
+        const orders = this.getFounderOrders();
+        const id = `LH-${Math.random().toString(36).slice(2, 6).toUpperCase()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+        const order = {
+          id,
+          projectName: this.getProjectDisplayName(),
+          amount: FOUNDER_PAYMENT.inrAmount,
+          currency: 'INR',
+          payment: 'upi',
+          utr,
+          status: 'utr_submitted',
+          createdAt: new Date().toISOString()
+        };
+        orders.push(order);
+        utrIndex[utr] = { orderId: id, createdAt: order.createdAt };
+        this.saveFounderOrders(orders);
+        this.saveFounderUtrIndex(utrIndex);
+        this.renderFounderStatus();
+        document.getElementById('founder-utr-panel').style.display = 'none';
+        utrInput.value = '';
+        this.log(`Founder payment saved: ${id}`, 'success');
+        alert(`Founder payment saved locally. Order: ${id}`);
       },
 
       sanitizeCode(code) {
@@ -939,7 +1223,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       async synthesizeArchitecture() {
         const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
         if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
-        if (this.map.blocks.length === 0) { alert("Add nodes first."); return false; }
+        if (this.map.blocks.length === 0) { alert("Add a few parts first."); return false; }
         document.getElementById("btn-synth").disabled = true;
         let success = true;
         try {
@@ -1078,6 +1362,8 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
 
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) m.classList.remove("active"); }));
+
+    window.app = app;
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
