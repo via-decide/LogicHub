@@ -284,13 +284,13 @@
   <div class="header">
     <div class="header-left">
       <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">VIBECODER</span></div>
-      <div class="map-status state-idle" id="map-status">AWAITING ARCHITECTURE</div>
-      <div class="info-badge" id="block-count">0 nodes</div>
+      <div class="map-status state-idle" id="map-status">ADD PARTS TO START</div>
+      <div class="info-badge" id="block-count">0 parts</div>
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="btn-icon" onclick="alert('Quick help:\n1. Add the main screens or features you understand.\n2. You do not need separate JS or CSS nodes unless you want custom files.\n3. Press Synth to create the files.\n4. Export, APK, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
+      <button class="btn-icon" onclick="alert('Quick help:\n1. Add the main parts you understand, like a screen or sign-in flow.\n2. You do not need separate JS or CSS parts unless you want custom files.\n3. Press Make App to generate the files.\n4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
 
@@ -302,29 +302,29 @@
   <div class="logger-row">
     <div class="logger">
       <div class="log-line" id="log-1">>> SYSTEM BOOTING...</div>
-      <div class="log-line" id="log-2">>> READY TO VIBECODE</div>
-      <div class="log-line success" id="log-3">>> AWAITING ARCHITECTURE</div>
+      <div class="log-line" id="log-2">>> READY TO BUILD</div>
+      <div class="log-line success" id="log-3">>> ADD PARTS TO START</div>
     </div>
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> Add the main screens or features only. LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Export, APK, and Publish.</div>
+  <div class="helper-strip"><strong>New here?</strong> Add the main parts you understand. You do not need separate code files for everything—LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
   <!-- MAIN -->
   <div class="main-container">
     <div class="sidebar" id="sidebar">
       <h3>Core Nodes</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('ui')">[UI] COMPONENT</div>
-        <div class="palette-item" onclick="app.addBlock('api')">[API] ROUTE</div>
-        <div class="palette-item" onclick="app.addBlock('database')">[DB] SCHEMA</div>
-        <div class="palette-item" onclick="app.addBlock('auth')">[AUTH] LAYER</div>
+        <div class="palette-item" onclick="app.addBlock('ui')">SCREEN</div>
+        <div class="palette-item" onclick="app.addBlock('api')">DATA / API</div>
+        <div class="palette-item" onclick="app.addBlock('database')">DATA STORE</div>
+        <div class="palette-item" onclick="app.addBlock('auth')">SIGN IN</div>
       </div>
       <h3>Utility</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('util')">[UTIL] HELPER</div>
-        <div class="palette-item" onclick="app.addBlock('styles')">[CSS] STYLES</div>
-        <div class="palette-item" onclick="app.addBlock('config')">[CFG] CONFIG</div>
+        <div class="palette-item" onclick="app.addBlock('util')">HELPER LOGIC</div>
+        <div class="palette-item" onclick="app.addBlock('styles')">LOOK & FEEL</div>
+        <div class="palette-item" onclick="app.addBlock('config')">APP SETUP</div>
       </div>
     </div>
 
@@ -343,25 +343,25 @@
 
   <!-- FOOTER -->
   <div class="footer">
-    <button onclick="app.addBlock('ui')">+ Node</button>
-    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Synth</button>
-    <button onclick="app.viewPRD()">📋 PRD</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
-    <button id="btn-apk" disabled onclick="app.buildApk()">📱 APK</button>
+    <button onclick="app.addBlock('ui')">+ Part</button>
+    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
+    <button onclick="app.viewPRD()">📋 Plan</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">📦 Download ZIP</button>
+    <button id="btn-apk" disabled onclick="app.buildApk()">📱 Android App</button>
     <button id="btn-publish" disabled onclick="app.publishApp()">🌐 Publish</button>
-    <button onclick="app.clearMap()">🗑 Wipe</button>
+    <button onclick="app.clearMap()">🗑 Reset</button>
   </div>
 
   <!-- NODE MODAL -->
   <div class="modal" id="node-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
-      <div class="modal-header" id="node-modal-header">Configure Node</div>
+      <div class="modal-header" id="node-modal-header">Edit Part</div>
       <input type="hidden" id="node-modal-id">
-      <div class="form-group"><label>Target Filename</label><input type="text" id="node-modal-filename"></div>
-      <div class="form-group"><label>AI Instructions</label><textarea id="node-modal-prompt" rows="3"></textarea></div>
-      <div class="form-group"><label>Generated Code</label><textarea id="node-modal-code" rows="6" style="color:var(--success);"></textarea></div>
-      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.saveNodeConfig()">SAVE CONFIGURATION</button>
+      <div class="form-group"><label>File name</label><input type="text" id="node-modal-filename"></div>
+      <div class="form-group"><label>What should this part do?</label><textarea id="node-modal-prompt" rows="3"></textarea></div>
+      <div class="form-group"><label>AI-generated code</label><textarea id="node-modal-code" rows="6" style="color:var(--success);"></textarea></div>
+      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.saveNodeConfig()">SAVE CHANGES</button>
     </div>
   </div>
 
@@ -455,10 +455,20 @@
         this.id = "VIBE_" + Math.random().toString(36).substring(7).toUpperCase();
       }
       addBlock(type, x, y) {
+        const typeInfo = {
+          ui: { label: 'Main Screen', badge: 'SCREEN', filename: 'index.html' },
+          api: { label: 'Data / API', badge: 'DATA', filename: 'api.js' },
+          database: { label: 'Data Store', badge: 'STORE', filename: 'schema.sql' },
+          auth: { label: 'Sign In', badge: 'LOGIN', filename: 'auth.js' },
+          util: { label: 'Helper Logic', badge: 'HELPER', filename: 'utils.js' },
+          styles: { label: 'Look & Feel', badge: 'STYLE', filename: 'styles.css' },
+          config: { label: 'App Setup', badge: 'SETUP', filename: 'config.js' }
+        };
+        const info = typeInfo[type] || { label: 'App Part', badge: 'PART', filename: 'file.js' };
         const b = {
           id: "NODE_" + Math.random().toString(36).substring(7).toUpperCase(),
-          type, label: `${type.toUpperCase()} NODE`,
-          filename: { ui:'index.html', api:'api.js', database:'schema.sql', auth:'auth.js', util:'utils.js', styles:'styles.css', config:'config.js' }[type] || 'file.js',
+          type, label: info.label, typeLabel: info.badge,
+          filename: info.filename,
           prompt: "", code: "", x, y, status: "PENDING", dependsOn: [], connectedTo: []
         };
         this.blocks.push(b); return b;
@@ -576,7 +586,7 @@
           el.style.left = `${b.x}px`; el.style.top = `${b.y}px`;
           el.innerHTML = `
             <div class="block-delete" onclick="app.removeBlock('${b.id}')">✕</div>
-            <div class="block-header"><span>[${b.type.toUpperCase()}]</span><span class="block-edit" onclick="app.openNodeEditor('${b.id}')">CONFIG</span></div>
+            <div class="block-header"><span>[${b.typeLabel || b.type.toUpperCase()}]</span><span class="block-edit" onclick="app.openNodeEditor('${b.id}')">EDIT</span></div>
             <div class="block-label">${b.label}</div>
             <div class="block-status" style="background:${colors[b.status] || colors.PENDING}">${b.status}</div>
             <div class="port-wrapper in" data-id="${b.id}"><div class="port"></div></div>
@@ -632,16 +642,16 @@
 
       updateStats() {
         const n = this.map.blocks.length;
-        document.getElementById("block-count").textContent = `${n} nodes`;
+        document.getElementById("block-count").textContent = `${n} parts`;
         const ready = n > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
         document.getElementById("btn-export").disabled = !ready;
         document.getElementById("btn-apk").disabled = !ready;
         document.getElementById("btn-publish").disabled = n === 0;
         const stat = document.getElementById("map-status");
-        if (n === 0) { stat.textContent = "AWAITING ARCHITECTURE"; stat.className = "map-status state-idle"; }
-        else if (ready) { stat.textContent = "SYNTHESIS COMPLETE"; stat.className = "map-status state-complete"; }
-        else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "SYNTHESISING..."; stat.className = "map-status state-active"; }
-        else { stat.textContent = "READY TO SYNTHESISE"; stat.className = "map-status state-ready"; }
+        if (n === 0) { stat.textContent = "ADD PARTS TO START"; stat.className = "map-status state-idle"; }
+        else if (ready) { stat.textContent = "APP READY"; stat.className = "map-status state-complete"; }
+        else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "MAKING APP..."; stat.className = "map-status state-active"; }
+        else { stat.textContent = "READY TO MAKE APP"; stat.className = "map-status state-ready"; }
       },
 
       log(msg, type = "info") {
@@ -651,13 +661,13 @@
         l3.textContent = `>> ${msg}`; l3.className = `log-line ${type}`;
       },
 
-      clearMap() { if (confirm("Wipe the architecture?")) { this.map = new LogicMap(); this.render(); this.log("Cleared.", "info"); } },
+      clearMap() { if (confirm("Reset this app plan?")) { this.map = new LogicMap(); this.render(); this.log("Plan reset.", "info"); } },
 
       openNodeEditor(id) {
         const b = this.map.blocks.find(x => x.id === id);
         if (!b) return;
         document.getElementById("node-modal-id").value = b.id;
-        document.getElementById("node-modal-header").textContent = `Configure: ${b.label}`;
+        document.getElementById("node-modal-header").textContent = `Edit Part: ${b.label}`;
         document.getElementById("node-modal-filename").value = b.filename;
         document.getElementById("node-modal-prompt").value = b.prompt;
         const codeArea = document.getElementById("node-modal-code");
