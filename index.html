@@ -1055,8 +1055,9 @@
           </div>
           <div class="payment-actions">
             <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
-            <button onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
+            <button type="button" onclick="app.showFounderIndiaPaymentHelp()">ℹ️ ₹1717 payment instructions</button>
           </div>
+          <div class="payment-note"><strong>₹1717 payment link update:</strong> The UPI deep link is not working right now. Please pay manually in any UPI app to the UPI ID above, then submit your 12-digit UTR. After submission, LogicHub will draft the verification email to dharam@viadecide.com for approval.</div>
           <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">✅ I Paid — Submit UTR</button>
           <div class="payment-note">Limited early-access wording helps this read like a founder launch, not a generic payment form.</div>
         </div>
@@ -1092,9 +1093,9 @@
       <div class="payment-card">
         <h4>What happens after payment?</h4>
         <ul class="next-steps-list">
-          <li class="next-step-item"><strong>1. Pay with UPI</strong> Open the ready-filled UPI payment link from this modal.</li>
+          <li class="next-step-item"><strong>1. Pay ₹1717 in any UPI app</strong> Copy the UPI ID from this modal and complete the India Founder Pass payment manually.</li>
           <li class="next-step-item"><strong>2. Submit your UTR</strong> Save the 12-digit UTR so the founder request is recorded on this device.</li>
-          <li class="next-step-item"><strong>3. Manual founder confirmation</strong> For now, founder access is confirmed manually until backend verification or Razorpay automation is added.</li>
+          <li class="next-step-item"><strong>3. Email Dharam for review</strong> After submission, LogicHub drafts the payment email to dharam@viadecide.com so founder access can be verified and approved.</li>
         </ul>
       </div>
 
@@ -1682,6 +1683,46 @@
         this.updateAuthUI();
       },
 
+      buildFounderVerificationMailto(order) {
+        const createdLabel = order?.createdAt
+          ? new Date(order.createdAt).toLocaleString('en-IN')
+          : new Date().toLocaleString('en-IN');
+        const lines = [
+          'Hi Dharam,',
+          '',
+          'Please verify and approve this LogicHub India Founder Pass payment.',
+          '',
+          `Order ID: ${order?.id || 'N/A'}`,
+          `Project: ${order?.projectName || 'N/A'}`,
+          `Amount: ₹${Number(order?.amount || FOUNDER_PAYMENT.inrAmount).toLocaleString('en-IN')}`,
+          `Currency: ${order?.currency || 'INR'}`,
+          `Plan: ${order?.plan || 'india_founder'}`,
+          `Payment mode: ${order?.payment || 'upi'}`,
+          `UTR: ${order?.utr || 'N/A'}`,
+          `UPI ID paid to: ${FOUNDER_PAYMENT.upiId}`,
+          `Buyer email: ${this.authUser?.email || 'Not available'}`,
+          `Buyer uid: ${this.authUser?.uid || 'Not available'}`,
+          `Submitted at: ${createdLabel}`,
+          `Project URL: ${window.location.href}`,
+          '',
+          'Please verify the payment and approve founder access.',
+          '',
+          'Sent from the LogicHub founder flow.'
+        ];
+        const subject = `LogicHub founder payment verification • ${order?.id || 'pending'}`;
+        return `mailto:dharam@viadecide.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+      },
+
+      openFounderVerificationEmail(order) {
+        window.location.href = this.buildFounderVerificationMailto(order);
+        this.log('Opening payment verification email draft for Dharam...', 'accent');
+      },
+
+      showFounderIndiaPaymentHelp() {
+        alert(`₹1717 UPI payment link is not working right now.\n\nPlease open any UPI app manually and pay to ${FOUNDER_PAYMENT.upiId}.\nThen tap “I Paid — Submit UTR”. LogicHub will draft an email to dharam@viadecide.com with your payment details so the founder pass can be verified and approved.`);
+        this.log('Showing India founder payment instructions.', 'info');
+      },
+
       openFounderCheckout() {
         document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
         document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
@@ -1707,10 +1748,7 @@
       },
 
       openFounderUpiApp() {
-        const amount = Number(FOUNDER_PAYMENT.inrAmount).toFixed(2);
-        const url = `upi://pay?pa=${encodeURIComponent(FOUNDER_PAYMENT.upiId)}&pn=${encodeURIComponent(FOUNDER_PAYMENT.payeeName)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(FOUNDER_PAYMENT.note)}`;
-        window.location.href = url;
-        this.log('Opening UPI app for founder payment...', 'accent');
+        this.showFounderIndiaPaymentHelp();
       },
 
       showFounderUtrForm() {
@@ -1748,9 +1786,11 @@
         this.saveFounderOrders(orders);
         this.saveFounderUtrIndex(utrIndex);
         let serverMessage = 'Founder request saved on this device.';
+        let shouldDraftVerificationEmail = true;
         try {
           const result = await this.syncFounderRequestToServer(order);
           serverMessage = result.message || 'Founder request saved for server review.';
+          shouldDraftVerificationEmail = result?.emailNotification?.sent !== true;
           this.log('Founder request synced to Firebase.', 'success');
         } catch (error) {
           this.log(`Founder request sync pending: ${error.message}`, 'info');
@@ -1761,8 +1801,9 @@
         updateForgeLimitUI();
         document.getElementById('founder-utr-panel').style.display = 'none';
         utrInput.value = '';
+        if (shouldDraftVerificationEmail) this.openFounderVerificationEmail(order);
         this.log(`Founder access requested: ${id}`, 'success');
-        alert(`${serverMessage} Order: ${id}`);
+        alert(`${serverMessage} Order: ${id}. If your mail app opened, send that draft to dharam@viadecide.com so the payment can be verified and approved.`);
       },
 
       sanitizeCode(code) {
