@@ -8,6 +8,8 @@
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <style>
     :root {
@@ -100,6 +102,45 @@
     .api-panel { display: none; padding: 0.5rem 1.25rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); }
     .api-panel.open { display: block; }
     .api-panel input { width: 100%; font-size: 0.8rem; user-select: auto; -webkit-user-select: auto;}
+
+    .auth-strip {
+      padding: 0.45rem 1.25rem;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+    }
+    .auth-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+      font-size: 0.64rem;
+      font-weight: 700;
+    }
+    .auth-chip strong { color: var(--text-primary); }
+    .auth-chip.accent {
+      border-color: rgba(0,229,255,0.22);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+    }
+    .auth-chip.success {
+      border-color: rgba(46,204,113,0.24);
+      background: rgba(46,204,113,0.1);
+      color: var(--success);
+    }
+    .auth-chip.warn {
+      border-color: rgba(255,153,0,0.24);
+      background: rgba(255,153,0,0.1);
+      color: var(--saffron);
+    }
 
     /* ── LOGGER ── */
     .logger-row {
@@ -623,6 +664,15 @@
       .api-input { display: none; }
       .api-mobile-btn { display: flex !important; }
 
+      .auth-strip {
+        padding: 0.4rem 0.6rem;
+        gap: 0.4rem;
+      }
+      .auth-chip {
+        font-size: 0.58rem;
+        padding: 0.25rem 0.48rem;
+      }
+
       /* Sidebar: horizontal scrollable strip */
       .sidebar {
         width: 100%;
@@ -722,6 +772,12 @@
 
   <div class="api-panel" id="api-panel">
     <input type="password" id="api-key-mobile" placeholder="Paste Gemini API Key here…">
+  </div>
+
+  <div class="auth-strip" id="auth-strip">
+    <div class="auth-chip accent" id="auth-state-chip">Auth: connecting…</div>
+    <div class="auth-chip" id="plan-state-chip">Plan: free</div>
+    <div class="auth-chip" id="session-state-chip">Apps this session: 0/10</div>
   </div>
 
   <!-- LOGGER -->
@@ -845,8 +901,8 @@
       </div>
       <div style="margin-top:1rem;border-top:1px solid var(--border-color);padding-top:1rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-          <span id="forge-limits-text" style="font-size:0.65rem;color:var(--text-secondary);">Limit: 0/3</span>
-          <span style="font-size:0.65rem;color:var(--saffron);font-weight:700;">PRO: UNLIMITED</span>
+          <span id="forge-limits-text" style="font-size:0.65rem;color:var(--text-secondary);">Free: 0/3. Session apps: 0/10</span>
+          <span id="forge-plan-text" style="font-size:0.65rem;color:var(--saffron);font-weight:700;">AUTH: CONNECTING</span>
         </div>
         <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">START COMMUNITY SYNTHESIS</button>
       </div>
@@ -954,6 +1010,60 @@
   </div>
 
   <script>
+    const FIREBASE_CONFIG = {
+      apiKey: 'AIzaSyA5yyW_s2AJiCloPU5_q7wVTdB9okb95Pk',
+      authDomain: 'logichub-app.firebaseapp.com',
+      projectId: 'logichub-app',
+      storageBucket: 'logichub-app.firebasestorage.app',
+      messagingSenderId: '4875740341'
+    };
+    const APP_SESSION_LIMIT = 10;
+
+    function getStoredFounderOrders() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('lh_founder_orders') || '[]');
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function hasPaidAccessFlag() {
+      return getStoredFounderOrders().some((order) => ['founder_access_requested', 'founder_access_confirmed', 'paid', 'pro'].includes(String(order?.status || '')));
+    }
+
+    function getSessionAppIds() {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('lh_session_app_ids') || '[]');
+        return Array.isArray(saved) ? [...new Set(saved.filter(Boolean))] : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveSessionAppIds(ids) {
+      sessionStorage.setItem('lh_session_app_ids', JSON.stringify([...new Set((ids || []).filter(Boolean))]));
+    }
+
+    function getSessionAppCount() {
+      return getSessionAppIds().length;
+    }
+
+    function canCreateAnotherSessionApp(mapId) {
+      const ids = getSessionAppIds();
+      return ids.includes(mapId) || ids.length < APP_SESSION_LIMIT;
+    }
+
+    function markSessionAppCreated(mapId) {
+      if (!mapId) return false;
+      const ids = getSessionAppIds();
+      if (ids.includes(mapId)) return true;
+      if (ids.length >= APP_SESSION_LIMIT) return false;
+      ids.push(mapId);
+      saveSessionAppIds(ids);
+      return true;
+    }
+
     // --- TIME LIMITS CORE ---
     function getLatestResetTimestamp() {
       const now = new Date();
@@ -968,6 +1078,10 @@
     }
 
     function syncForgeCounter() {
+      if (hasPaidAccessFlag()) {
+        localStorage.setItem('lh_gen_count', "0");
+        return 0;
+      }
       const latestReset = getLatestResetTimestamp();
       const lastReset = parseInt(localStorage.getItem('lh_last_reset_ts') || "0");
       if (latestReset > lastReset) {
@@ -979,12 +1093,20 @@
     }
 
     function updateForgeLimitUI() {
+      const paid = hasPaidAccessFlag();
       const count = syncForgeCounter();
+      const sessionCount = getSessionAppCount();
       const nextDate = new Date(getLatestResetTimestamp() + 5 * 60 * 60 * 1000);
       let ampm = nextDate.getHours() >= 12 ? 'PM' : 'AM';
       let hr = nextDate.getHours() % 12 || 12;
-      document.getElementById("forge-limits-text").textContent = `Limit: ${count}/3. Resets at ${hr}:00 ${ampm}`;
-      document.getElementById("forge-community-btn").disabled = count >= 3;
+      const limitText = paid
+        ? `Paid access: reset limits unlocked. Session apps ${sessionCount}/${APP_SESSION_LIMIT}.`
+        : `Free: ${count}/3. Session apps ${sessionCount}/${APP_SESSION_LIMIT}. Resets at ${hr}:00 ${ampm}`;
+      document.getElementById("forge-limits-text").textContent = limitText;
+      const planEl = document.getElementById("forge-plan-text");
+      if (planEl) planEl.textContent = paid ? 'PAID: RESET LIMITS ON' : 'FREE: AUTH ENABLED';
+      document.getElementById("forge-community-btn").disabled = sessionCount >= APP_SESSION_LIMIT || (!paid && count >= 3);
+      if (window.app && typeof window.app.updateAuthUI === 'function') window.app.updateAuthUI();
     }
 
     function openForgeModal() {
@@ -993,14 +1115,19 @@
     }
 
     async function executeCommunitySynthesis() {
+      const paid = hasPaidAccessFlag();
       const count = syncForgeCounter();
-      if (count >= 3) return alert("Compute limit reached.");
+      if (getSessionAppCount() >= APP_SESSION_LIMIT && !getSessionAppIds().includes(app.map.id)) {
+        updateForgeLimitUI();
+        return alert(`This session is limited to ${APP_SESSION_LIMIT} apps. Start a new session to make another app.`);
+      }
+      if (!paid && count >= 3) return alert("Compute limit reached.");
       const appName = document.getElementById("forge-app-name").value.trim();
       if (!appName) return alert("App name required.");
       closeModal('forge-modal');
       const success = await app.synthesizeArchitecture();
       if (success) {
-        localStorage.setItem('lh_gen_count', (count + 1).toString());
+        if (!paid) localStorage.setItem('lh_gen_count', (count + 1).toString());
         updateForgeLimitUI();
       }
     }
@@ -1086,7 +1213,10 @@
           btn.onclick = () => btn.classList.toggle("active");
           grid.appendChild(btn);
         });
+        this.updateAuthUI();
+        this.initFirebaseAuth();
         this.render();
+        updateForgeLimitUI();
       },
 
       setupPointerEvents() {
@@ -1290,6 +1420,64 @@
         localStorage.setItem('lh_founder_utr_index', JSON.stringify(index || {}));
       },
 
+      getPaidOrderRecord() {
+        const orders = this.getFounderOrders();
+        for (let i = orders.length - 1; i >= 0; i--) {
+          const order = orders[i];
+          if (['founder_access_requested', 'founder_access_confirmed', 'paid', 'pro'].includes(String(order?.status || ''))) return order;
+        }
+        return null;
+      },
+
+      isPaidUser() {
+        return !!this.getPaidOrderRecord();
+      },
+
+      updateAuthUI() {
+        const authChip = document.getElementById('auth-state-chip');
+        const planChip = document.getElementById('plan-state-chip');
+        const sessionChip = document.getElementById('session-state-chip');
+        const paidOrder = this.getPaidOrderRecord();
+        const paid = !!paidOrder;
+        const authReady = !!(this.authUser && this.authUser.uid);
+        if (authChip) {
+          authChip.className = `auth-chip ${authReady ? 'success' : 'accent'}`;
+          authChip.textContent = authReady ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'user'} • ${this.authUser.uid.slice(0, 8)}` : 'Auth: local guest mode';
+        }
+        if (planChip) {
+          planChip.className = `auth-chip ${paid ? 'success' : 'warn'}`;
+          planChip.textContent = paid ? `Plan: paid • limits reset • ${paidOrder.currency || 'INR'} ${paidOrder.amount || ''}`.trim() : 'Plan: free';
+        }
+        if (sessionChip) {
+          sessionChip.className = 'auth-chip';
+          sessionChip.textContent = `Apps this session: ${getSessionAppCount()}/${APP_SESSION_LIMIT}`;
+        }
+      },
+
+      async initFirebaseAuth() {
+        if (!window.firebase?.initializeApp || !window.firebase?.auth) {
+          this.log('Firebase auth scripts not available. Using local guest mode.', 'info');
+          this.updateAuthUI();
+          return;
+        }
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+          const auth = firebase.auth();
+          auth.onAuthStateChanged((user) => {
+            this.authUser = user || null;
+            this.updateAuthUI();
+            updateForgeLimitUI();
+          });
+          if (!auth.currentUser) await auth.signInAnonymously();
+          this.log('Auth ready for all users.', 'success');
+        } catch (error) {
+          this.authUser = null;
+          this.updateAuthUI();
+          updateForgeLimitUI();
+          this.log(`Auth fallback: ${error.message}`, 'info');
+        }
+      },
+
       renderFounderStatus() {
         const statusEl = document.getElementById('founder-payment-status');
         if (!statusEl) return;
@@ -1301,6 +1489,7 @@
         const latest = orders[orders.length - 1];
         const statusLabel = latest.status === 'founder_access_requested' ? 'Founder access requested' : String(latest.status || 'saved').replace(/_/g, ' ');
         statusEl.innerHTML = `<div class="premium-thankyou"><span class="founder-success-badge">✅ Founder access requested</span><div><h4>Thanks — your founder request looks saved.</h4><p>Your request is now stored on this device with the project, amount, and UTR details ready for manual confirmation.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${this.escapeHtml(latest.id)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">₹${Number(latest.amount || 0).toLocaleString('en-IN')}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${this.escapeHtml(latest.projectName)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">UTR</div><div class="thankyou-stat-value">${this.escapeHtml(latest.utr)}</div></div></div><p><strong>Status:</strong> ${this.escapeHtml(statusLabel)}<br><strong>Saved:</strong> ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}</p></div>`;
+        this.updateAuthUI();
       },
 
       openFounderCheckout() {
@@ -1368,6 +1557,8 @@
         this.saveFounderOrders(orders);
         this.saveFounderUtrIndex(utrIndex);
         this.renderFounderStatus();
+        this.updateAuthUI();
+        updateForgeLimitUI();
         document.getElementById('founder-utr-panel').style.display = 'none';
         utrInput.value = '';
         this.log(`Founder access requested: ${id}`, 'success');
@@ -1616,6 +1807,11 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
         if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
         if (this.map.blocks.length === 0) { alert("Add a few parts first."); return false; }
+        if (!canCreateAnotherSessionApp(this.map.id)) {
+          updateForgeLimitUI();
+          alert(`This session is limited to ${APP_SESSION_LIMIT} apps. Start a new session to make another app.`);
+          return false;
+        }
         document.getElementById("btn-synth").disabled = true;
         let success = true;
         try {
@@ -1634,6 +1830,9 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
             b.code = code; b.status = "VERIFIED"; this.render();
           }
           this.collectProjectFiles({ pwa: true });
+          if (!markSessionAppCreated(this.map.id)) throw new Error(`This session is limited to ${APP_SESSION_LIMIT} apps.`);
+          this.updateAuthUI();
+          updateForgeLimitUI();
           this.log("Synthesis Complete. Missing runtime files were checked for auto-repair.", "success");
         } catch (err) {
           this.log(`Error: ${err.message}`, "error");

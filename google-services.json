@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "4875740341",
+    "project_id": "logichub-app",
+    "storage_bucket": "logichub-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:4875740341:android:43e6630b6efafd2c088afc",
+        "android_client_info": {
+          "package_name": "logichub.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5yyW_s2AJiCloPU5_q7wVTdB9okb95Pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
