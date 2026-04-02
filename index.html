@@ -169,8 +169,109 @@
       line-height: 1.5;
     }
     .helper-strip strong { color: var(--accent); }
+    .onboarding-shell {
+      padding: 0.85rem 1.25rem 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .onboarding-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(18,22,30,0.92), rgba(8,11,16,0.98));
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      display: grid;
+      gap: 0.9rem;
+    }
+    .onboarding-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.24rem 0.62rem;
+      width: fit-content;
+      border-radius: 999px;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.18);
+      color: var(--accent);
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .onboarding-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .onboarding-header h3 {
+      margin: 0.12rem 0 0.35rem;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    .onboarding-header p {
+      margin: 0;
+      font-size: 0.74rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 640px;
+    }
+    .onboarding-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.28rem 0.56rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    .onboarding-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .onboarding-step {
+      border-radius: 14px;
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      gap: 0.45rem;
+    }
+    .onboarding-step-number {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: #031118;
+      background: linear-gradient(135deg, var(--accent), var(--saffron));
+    }
+    .onboarding-step h4 {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+    }
+    .onboarding-step p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      line-height: 1.55;
+    }
     .payment-strip {
-      padding: 0.75rem 1.25rem;
+      padding: 0.8rem 1.25rem;
       border-bottom: 1px solid var(--border-color);
       background: linear-gradient(135deg, rgba(255,153,0,0.08), rgba(0,229,255,0.08));
       display: flex;
@@ -179,6 +280,10 @@
       gap: 0.85rem;
       font-size: 0.72rem;
       line-height: 1.5;
+    }
+    .payment-strip-copy {
+      display: grid;
+      gap: 0.34rem;
     }
     .payment-strip button {
       border: none;
@@ -199,6 +304,12 @@
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.12);
       font-weight: 700;
+    }
+    .limited-note {
+      color: var(--saffron);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
     .payment-card {
       border: 1px solid var(--border-color);
@@ -249,6 +360,77 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.7rem;
     }
+    .pass-card-premium {
+      position: relative;
+      overflow: hidden;
+    }
+    .pass-card-premium::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 42%);
+      pointer-events: none;
+    }
+    .founder-plan-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .founder-plan-badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.24rem 0.56rem;
+      border-radius: 999px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+    }
+    .tier-badge.value {
+      background: rgba(255,153,0,0.14);
+      border-color: rgba(255,153,0,0.28);
+      color: var(--saffron);
+    }
+    .tier-badge.founder {
+      background: rgba(0,229,255,0.1);
+      border-color: rgba(0,229,255,0.22);
+      color: var(--accent);
+    }
+    .mini-trust-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0.7rem 0.8rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      margin-top: 0.1rem;
+    }
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.34rem;
+      padding: 0.24rem 0.52rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      font-size: 0.63rem;
+      font-weight: 700;
+    }
     .founder-success-badge {
       display: inline-flex;
       align-items: center;
@@ -262,6 +444,51 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+    }
+    .premium-thankyou {
+      display: grid;
+      gap: 0.7rem;
+      padding: 1rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(0,230,118,0.1), rgba(0,229,255,0.08));
+      border: 1px solid rgba(0,230,118,0.22);
+      color: var(--text-primary);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    .premium-thankyou h4 {
+      margin: 0;
+      font-size: 0.96rem;
+      color: var(--text-primary);
+    }
+    .premium-thankyou p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      line-height: 1.6;
+    }
+    .thankyou-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+    .thankyou-stat {
+      padding: 0.72rem 0.78rem;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .thankyou-stat-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 0.2rem;
+    }
+    .thankyou-stat-value {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      word-break: break-word;
     }
     .faq-list,
     .next-steps-list {
@@ -442,6 +669,16 @@
         padding: 0.4rem 0.6rem;
         font-size: 0.6rem;
       }
+      .onboarding-shell {
+        padding: 0.65rem 0.6rem 0;
+      }
+      .onboarding-card {
+        padding: 0.85rem;
+      }
+      .onboarding-grid,
+      .thankyou-meta {
+        grid-template-columns: 1fr;
+      }
       .payment-strip {
         display:flex; flex-direction:column; align-items:flex-start; gap:0.5rem;
         padding:0.65rem 0.6rem;
@@ -499,8 +736,45 @@
 
   <div class="helper-strip"><strong>New here?</strong> Add the main parts you understand. You do not need separate code files for everything—LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
+  <div class="onboarding-shell">
+    <div class="onboarding-card">
+      <div class="onboarding-kicker">✨ Premium onboarding</div>
+      <div class="onboarding-header">
+        <div>
+          <h3>Start fast without losing the existing guide</h3>
+          <p>This adds a cleaner, StudyOS-inspired quick-start layer while keeping the current guide and every existing action exactly where users already expect them.</p>
+        </div>
+        <div class="onboarding-meta">
+          <span class="meta-chip">1. Add parts</span>
+          <span class="meta-chip">2. Make App</span>
+          <span class="meta-chip">3. Publish or export</span>
+        </div>
+      </div>
+      <div class="onboarding-grid">
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">01</span>
+          <h4>Pick the parts you understand</h4>
+          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">02</span>
+          <h4>Press Make App</h4>
+          <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">03</span>
+          <h4>Choose your next step</h4>
+          <p>Review the plan, download a ZIP, build the Android app, or publish to the connected community flow when your app is ready.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="payment-strip">
-    <div><strong>Founder Launch:</strong> Choose <span class="price-chip">India Founder Pass — ₹1717</span> or keep <span class="price-chip">Global Founder Pass — $99</span> ready for Razorpay.</div>
+    <div class="payment-strip-copy">
+      <div><strong>Founder Launch:</strong> Choose <span class="price-chip">India Founder Pass — ₹1717</span> or keep <span class="price-chip">Global Founder Pass — $99</span> visible for international buyers.</div>
+      <div class="limited-note">Founder deal • limited early-access pricing while manual confirmation is active.</div>
+    </div>
     <button onclick="app.openFounderCheckout()">💳 View Founder Passes</button>
   </div>
 
@@ -598,16 +872,22 @@
       <div class="payment-card founder-hero">
         <div class="founder-hero-title">
           <h3>Get Founder Access Early</h3>
-          <span class="founder-badge">⚡ Early Builder Offer</span>
+          <span class="founder-badge">⚡ Limited early access</span>
         </div>
-        <p>Pick the pass that fits your buyer. India can pay now with UPI. Global buyers can still see the final $99 founder price before Razorpay goes live.</p>
+        <p>Pick the pass that fits your buyer. India can pay now with UPI, while global buyers can still see the locked-in $99 founder pricing before Razorpay goes live.</p>
       </div>
 
       <div class="founder-tier-grid">
-        <div class="payment-card">
-          <h4>India Founder Pass — ₹1717</h4>
+        <div class="payment-card pass-card-premium">
+          <div class="founder-plan-head">
+            <h4>India Founder Pass — ₹1717</h4>
+            <div class="founder-plan-badges">
+              <span class="tier-badge value">Best value</span>
+              <span class="tier-badge founder">Founder deal</span>
+            </div>
+          </div>
           <div class="payment-amount" id="founder-price-inr">₹1717</div>
-          <p>Use this now for direct founder sales in India with a simple UPI + UTR flow.</p>
+          <p>Use this now for direct founder sales in India with a simple UPI + UTR flow and limited early-access positioning.</p>
           <div class="payment-status-box">
             <strong>UPI ID:</strong> <span id="founder-upi-id"></span><br>
             <strong>Plan:</strong> India Founder Pass<br>
@@ -618,16 +898,28 @@
             <button onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
           </div>
           <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">✅ I Paid — Submit UTR</button>
-          <div class="payment-note">This keeps founder sales moving now, even before full payment automation is live.</div>
+          <div class="payment-note">Limited early-access wording helps this read like a founder launch, not a generic payment form.</div>
         </div>
 
-        <div class="payment-card">
-          <h4>Global Founder Pass — $99</h4>
+        <div class="payment-card pass-card-premium">
+          <div class="founder-plan-head">
+            <h4>Global Founder Pass — $99</h4>
+            <div class="founder-plan-badges">
+              <span class="tier-badge founder">Founder deal</span>
+              <span class="tier-badge">Razorpay next</span>
+            </div>
+          </div>
           <div class="payment-amount">$99 <span class="payment-muted">Razorpay coming soon</span></div>
           <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
           <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
           <div class="payment-note">Best use: landing page pricing, founder outreach, and global waitlist conversations.</div>
         </div>
+      </div>
+
+      <div class="mini-trust-bar">
+        <span class="trust-pill">🔒 Duplicate UTR protection</span>
+        <span class="trust-pill">⚡ Founder price reserved on this device</span>
+        <span class="trust-pill">🧾 Manual confirmation note shown clearly</span>
       </div>
 
       <div class="payment-divider"></div>
@@ -1008,7 +1300,7 @@
         }
         const latest = orders[orders.length - 1];
         const statusLabel = latest.status === 'founder_access_requested' ? 'Founder access requested' : String(latest.status || 'saved').replace(/_/g, ' ');
-        statusEl.innerHTML = `<span class="founder-success-badge">✅ Founder access requested</span><br><br><strong>Latest founder request saved</strong><br>Order: ${this.escapeHtml(latest.id)}<br>Amount: ₹${Number(latest.amount || 0).toLocaleString('en-IN')}<br>UTR: ${this.escapeHtml(latest.utr)}<br>Project: ${this.escapeHtml(latest.projectName)}<br>Status: ${this.escapeHtml(statusLabel)}<br>Saved: ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}`;
+        statusEl.innerHTML = `<div class="premium-thankyou"><span class="founder-success-badge">✅ Founder access requested</span><div><h4>Thanks — your founder request looks saved.</h4><p>Your request is now stored on this device with the project, amount, and UTR details ready for manual confirmation.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${this.escapeHtml(latest.id)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">₹${Number(latest.amount || 0).toLocaleString('en-IN')}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${this.escapeHtml(latest.projectName)}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">UTR</div><div class="thankyou-stat-value">${this.escapeHtml(latest.utr)}</div></div></div><p><strong>Status:</strong> ${this.escapeHtml(statusLabel)}<br><strong>Saved:</strong> ${this.escapeHtml(new Date(latest.createdAt).toLocaleString('en-IN'))}</p></div>`;
       },
 
       openFounderCheckout() {
