@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#030508">
   <title>LOGICHUB v2 — Sovereign Vibecoder</title>
+  <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
@@ -330,7 +331,7 @@
     <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Synth</button>
     <button onclick="app.viewPRD()">📋 PRD</button>
     <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
-    <button id="btn-apk" disabled onclick="alert('APK build queued on server.')">📱 APK</button>
+    <button id="btn-apk" disabled onclick="app.buildApk()">📱 APK</button>
     <button onclick="app.clearMap()">🗑 Wipe</button>
   </div>
 
@@ -700,18 +701,83 @@
         return success;
       },
 
-      async exportZip() {
+      async buildProjectZipBlob() {
         const zip = new JSZip();
         this.map.blocks.forEach(b => { if (b.code) zip.file(b.filename, b.code); });
         zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
-        const blob = await zip.generateAsync({ type: "blob" });
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `LogicHub_${this.map.id}.zip`; a.click();
+        return zip.generateAsync({ type: "blob" });
+      },
+
+      downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      },
+
+      async exportZip() {
+        const blob = await this.buildProjectZipBlob();
+        this.downloadBlob(blob, `LogicHub_${this.map.id}.zip`);
         this.log("ZIP Exported.", "success");
+      },
+
+      async buildApk() {
+        if (this.map.blocks.length === 0) { alert("Add and synthesize nodes first."); return; }
+        if (this.map.blocks.some(b => b.status !== "VERIFIED" || !b.code)) {
+          alert("APK export requires all nodes to be synthesized successfully first.");
+          return;
+        }
+
+        const btn = document.getElementById("btn-apk");
+        btn.disabled = true;
+        this.log("Packaging APK build request...", "accent");
+
+        try {
+          const zipBlob = await this.buildProjectZipBlob();
+          const zipBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const result = String(reader.result || "");
+              const base64 = result.includes(",") ? result.split(",")[1] : "";
+              if (!base64) reject(new Error("Failed to encode ZIP payload."));
+              else resolve(base64);
+            };
+            reader.onerror = () => reject(reader.error || new Error("Failed to read ZIP blob."));
+            reader.readAsDataURL(zipBlob);
+          });
+
+          const response = await fetch("/api/build-apk", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ zipBase64, mapId: this.map.id })
+          });
+          const data = await response.json();
+          if (!response.ok || data.error) throw new Error(data.error || `APK build failed with status ${response.status}`);
+          if (!data.apkBase64) throw new Error("APK payload missing from server response.");
+
+          const apkBytes = Uint8Array.from(atob(data.apkBase64), c => c.charCodeAt(0));
+          const apkBlob = new Blob([apkBytes], { type: "application/vnd.android.package-archive" });
+          this.downloadBlob(apkBlob, `LogicHub_${this.map.id}.apk`);
+          this.log("APK downloaded.", "success");
+        } catch (err) {
+          this.log(`APK Error: ${err.message}`, "error");
+          alert(`APK build failed: ${err.message}`);
+        } finally {
+          btn.disabled = false;
+        }
       }
     };
 
     function closeModal(id) { document.getElementById(id).classList.remove("active"); }
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) m.classList.remove("active"); }));
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.error('Service worker registration failed:', err));
+      });
+    }
 
     app.init();
   </script>
