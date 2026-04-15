@@ -2,6 +2,9 @@
 # Place this file at: .codex/instructions.md
 # Codex reads this before every task in this repo.
 
+# Place this file at: .codex/instructions.md
+# Codex reads this before every task in this repo.
+
 ════════════════════════════════════════════
 REPO IDENTITY
 ════════════════════════════════════════════
@@ -311,6 +314,44 @@ integrating bug scanning before edits
 
 ---
 
+## New addon rules
+
+1. Core Principle: Adherence to Original Instructions
+
+Codex shall strictly adhere to the explicit instructions provided by the user. No changes, interpretations, or optimizations shall be implemented without prior clarification, explicit proposal, and user approval, as outlined in the following rules.
+
+2. Clarification and Confirmation
+
+Before proceeding with any coding task, Codex must ensure a complete and unambiguous understanding of the instructions.
+
+2.1 Ambiguity Detection: If any part of the instructions is unclear, vague, or open to multiple interpretations, Codex must immediately ask for clarification.
+
+2.2 Incompleteness Identification: If crucial information is missing that prevents the successful or complete execution of the task, Codex must identify the missing details and request them.
+
+2.3 Contradiction Resolution: If instructions appear to contradict each other, Codex must highlight the conflict and ask the user to resolve it.
+
+2.4 Complex Instruction Paraphrasing: For complex or multi-step instructions, Codex may paraphrase its understanding back to the user to confirm alignment before starting work.
+
+3. Proposal for Improvements or Alternatives
+
+Codex may identify opportunities for improvement, but these must always be presented as proposals.
+
+3.1 Proposing Best Practices: If the user's instructions deviate from common best practices (e.g., security, performance, readability, maintainability, idiomatic code), Codex may propose an alternative approach.
+
+3.2 Proposing Optimizations: If a more efficient or robust solution exists than what is directly implied by the instructions, Codex may suggest it for user approval.
+
+Your current Codex agent rules are already very strong — honestly they look like something a senior platform engineer would write to control an autonomous code agent.
+
+But they can be refined to be safer for AI agents, especially for:
+
+- preventing hallucinated refactors
+- forcing structured reasoning
+- preventing large rewrites
+- adding repo-wide auditing ability
+- integrating bug scanning before edits
+
+---
+
 AI EXECUTION PROTOCOL
 
 Codex must follow this protocol before performing any modification.
@@ -342,6 +383,13 @@ introduce dependencies
 
 rewrite large files
 
+- reinterpret user instructions
+- change architecture
+- refactor unrelated code
+- introduce frameworks
+- introduce build tools
+- introduce dependencies
+- rewrite large files
 
 unless explicitly instructed by the user.
 
@@ -375,6 +423,15 @@ functions defined
 
 Codex must never edit code blindly.
 
+
+2. Identify:
+   - purpose of the file
+   - dependencies
+   - imported scripts
+   - functions defined
+3. Determine safe insertion points.
+
+Codex must never edit code blindly.
 
 ---
 
@@ -461,23 +518,13 @@ Proceed?
 Codex must wait for confirmation.
 
 
+Codex must wait for confirmation.
+
 ---
 
 7. PROPOSAL SYSTEM (OPTIONAL IMPROVEMENTS)
 
 Codex may propose improvements but must never implement them automatically.
-
-Example:
-
-Observation:
-
-API key is hardcoded.
-
-Recommendation:
-Move API key to environment variable.
-
-Implement?
-
 
 ---
 
@@ -491,6 +538,11 @@ Max lines modified per file	20
 Max files changed per task	5
 Max new functions added	3
 
+| Rule | Limit |
+|------|-------|
+| Max lines modified per file | 20 |
+| Max files changed per task | 5 |
+| Max new functions added | 3 |
 
 If more changes are required:
 
@@ -522,6 +574,15 @@ convert scripts to modules
 modify protected files listed above
 
 
+- rewrite entire files
+- rename files without instruction
+- delete files
+- move directories
+- change architecture
+- introduce frameworks
+- introduce package managers
+- convert scripts to modules
+- modify protected files listed above
 
 ---
 
@@ -542,6 +603,16 @@ invalid JSON
 If detected, report them before editing.
 
 
+- undefined variables
+- duplicate const
+- missing try/catch
+- unhandled promise
+- DOM reference before load
+- broken script order
+- invalid JSON
+
+If detected, report them before editing.
+
 ---
 
 11. SAFE COMMIT FORMAT
@@ -559,6 +630,14 @@ Files skipped
 Reason skipped
 Checklist results
 
+| router.js | fixed duplicate const | 112-118 | yes |
+| index.html | added wallet guard | 44-50 | yes |
+
+Also list:
+
+- Files skipped
+- Reason skipped
+- Checklist results
 
 ---
 
@@ -571,6 +650,10 @@ RUN REPO AUDIT
 This command triggers:
 
 1 repository scan 2 bug detection 3 dependency analysis 4 security checks
+1 repository scan
+2 bug detection
+3 dependency analysis
+4 security checks
 
 Output:
 
@@ -610,3 +693,16 @@ All code must work in:
 modern browser
 GitHub Pages
 no build step
+- process.env
+- require()
+- node modules
+- npm packages
+- bundlers
+- webpack
+- vite
+
+All code must work in:
+
+- modern browser
+- GitHub Pages
+- no build step
