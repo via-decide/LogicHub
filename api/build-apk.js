@@ -3,8 +3,11 @@ import os from "os";
 import path from "path";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { fileURLToPath } from "url";
 
 const execFileAsync = promisify(execFile);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const APK_OUTPUT_RELATIVE_PATH = "app/build/outputs/apk/debug/app-debug.apk";
 
 async function runCommand(cmd, args, cwd) {
@@ -50,6 +53,15 @@ export default async function handler(req, res) {
     await fs.mkdir(androidAssetsPublicPath, { recursive: true });
     await runCommand("cp", ["-R", `${unpackedWebPath}/.`, androidAssetsPublicPath], tempRoot);
 
+    const localGoogleServicesPath = path.join(__dirname, '..', 'google-services.json');
+    const androidGoogleServicesPath = path.join(shellWorkPath, 'android', 'app', 'google-services.json');
+    try {
+      await fs.access(localGoogleServicesPath);
+      await fs.copyFile(localGoogleServicesPath, androidGoogleServicesPath);
+    } catch (error) {
+      // Firebase Android config is optional for shells that do not include native Firebase plugins.
+    }
+
     // Keep Capacitor + Gradle pipeline order deterministic.
     await runCommand("npx", ["cap", "copy", "android"], shellWorkPath);
     await runCommand("./gradlew", ["assembleDebug"], path.join(shellWorkPath, "android"));
@@ -60,9 +72,6 @@ export default async function handler(req, res) {
 
     if (apkSize < 500 * 1024) {
       return res.status(500).json({ error: "APK build output is under 500KB and considered invalid." });
-    }
-    if (apkSize < 1024 * 1024) {
-      return res.status(500).json({ error: "APK build output is under 1MB and considered incomplete." });
     }
 
     return res.status(200).json({

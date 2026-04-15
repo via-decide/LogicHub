@@ -1,71 +1,71 @@
 # LogicHub ⚡
 
-**The Visual Architecture Builder for the AI Era.**
+**Visual architecture builder for AI-assisted app scaffolding.**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Built with Vanilla JS](https://img.shields.io/badge/Tech-Vanilla%20JS-f1e05a.svg)]()
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen.svg)]()
+[![Built with Vanilla JS](https://img.shields.io/badge/Tech-Vanilla%20JS-f1e05a.svg)](https://github.com/via-decide/LogicHub)
+[![Single File App](https://img.shields.io/badge/App-Single%20HTML-111827.svg)](https://github.com/via-decide/LogicHub/blob/main/index.html)
 
-Every week, another "AI app builder" launches charging ₹999/month for locked-in drag-and-drop UI that generates bloated code you can never really own. 
+LogicHub is a browser-first node canvas for mapping an application architecture, generating a structured PRD, synthesizing file-by-file code with your own Gemini API key, and exporting the result as a ZIP. The current product is centered on the single-file UI in [`index.html`](https://github.com/via-decide/LogicHub/blob/main/index.html). [Source](https://github.com/via-decide/LogicHub/blob/main/index.html)
 
-**LogicHub is the antidote.** It is a free, open-source, visual logic-to-code builder. Instead of generating unreadable slop, it lets you visually map your app's architecture and instantly generates a **structured PRD (Product Requirements Document)**—a precise, architecture-level prompt designed perfectly for Claude or GPT.
-
-Real infrastructure should be owned, not rented.
-
-🌐 **[Try LogicHub Live Here](https://via-decide.github.io/LogicHub)**
+🌐 **Live demo:** https://via-decide.github.io/LogicHub  
+📦 **Repo:** https://github.com/via-decide/LogicHub
 
 ---
 
-## 🔥 Why LogicHub?
+## What LogicHub does
 
-- 🔌 **No Templates:** Every node is highly configurable. You wire your exact product logic (inputs, compute, outputs).
-- 📋 **Architecture First:** It outputs a master PRD, not a vague brief. You get the blueprint before the code.
-- 🔑 **Bring Your Own Key (BYOK):** Want to synthesize code directly in-app? Drop in your Gemini API key. No middlemen marking up your tokens 10x.
-- 📱 **PWA Ready:** Install it locally on your desktop or mobile. It works completely offline for PRD generation.
-- 🪶 **Zero Build Steps:** Built as a single-file Vanilla JS application. No npm, no webpack, no bloat.
+- Build an architecture visually with draggable nodes such as `UI`, `API`, `DB`, `AUTH`, `UTIL`, `CSS`, and `CFG`.
+- Connect nodes to express file dependencies.
+- Generate a PRD locally from the graph.
+- Use your own Gemini API key to synthesize code block-by-block in the browser.
+- Export synthesized output as a ZIP.
+- Optionally request an APK build when deployed with the serverless API layer. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js)
 
-## 🛠️ How It Works
+## Current repo structure
 
-1. **Map Your Logic:** Drop nodes onto the canvas (`[UI]`, `[API]`, `[DB]`, `[AUTH]`).
-2. **Wire & Configure:** Connect your dependencies and double-click to add specific AI instructions for each file.
-3. **Generate PRD:** Click `[📋 PRD]` to instantly copy your architecture prompt. (This step is 100% free and local).
-4. **Paste & Build:** Drop that PRD into Claude 3.5 Sonnet or GPT-4o. Your first prompt will pull a real, working app.
+- [`index.html`](https://github.com/via-decide/LogicHub/blob/main/index.html): canonical app UI and client logic.
+- [`manifest.json`](https://github.com/via-decide/LogicHub/blob/main/manifest.json): PWA metadata.
+- [`sw.js`](https://github.com/via-decide/LogicHub/blob/main/sw.js): service worker for install/offline support.
+- [`api/build-apk.js`](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js): optional serverless APK build endpoint.
+- [`api/publish.js`](https://github.com/via-decide/LogicHub/blob/main/api/publish.js): optional serverless publish flow for generated apps. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/manifest.json) [Source](https://github.com/via-decide/LogicHub/blob/main/sw.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish.js)
 
-*Alternative Workflow:* Paste your Gemini API key into the header and click `[⚡ Synth]` to generate the code block-by-block directly in the browser, then hit `[📦 Export]` to download your `.zip` project.
+## Local development
 
-## 🚀 Getting Started (Local Development)
-
-Because LogicHub is 100% Vanilla JS, getting started takes about 3 seconds.
+LogicHub does not require a bundler. For local development, serve the repository as static files so the manifest and service worker work correctly.
 
 ```bash
-# 1. Clone the repository
-git clone [https://github.com/via-decide/LogicHub.git](https://github.com/via-decide/LogicHub.git)
-
-# 2. Navigate into the directory
+git clone https://github.com/via-decide/LogicHub.git
 cd LogicHub
+python -m http.server 8000
+```
 
-# 3. Open index.html in your browser
-# (You can just double-click it, or use a simple server like Live Server or python -m http.server)
+Then open `http://localhost:8000`. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/manifest.json)
 
-🧩 Available Nodes
- * [UI] Component: React/Vue/HTML frontend components.
- * [API] Route: Backend endpoints (Express, FastAPI, etc.).
- * [DB] Schema: Database schemas (SQL, Prisma, Mongoose).
- * [AUTH] Layer: Authentication middleware and logic.
- * [UTIL] Helper: Utility functions and shared logic.
- * [CSS] Styles: Global or scoped styling.
- * [CFG] Config: Environment variables and setup files.
-🤝 Philosophy
-This is the difference between a real tool and a SaaS trap:
- * A tool respects your intelligence.
- * A product respects your money.
- * Subscription slop does neither.
-LogicHub is built for developers who are tired of paying for the privilege of prompting.
-📜 License
-LogicHub is released under the Apache License 2.0. You are free to use it, modify it, and distribute it. See the LICENSE file for more details.
-🌍 About the Builder
-Built completely solo in Kutch, Gujarat, Bharat. Part of the ViaDecide ecosystem.
-#BuildInBharat #OpenSource #SoloFounder
+## Usage flow
 
-***
+1. Add nodes from the sidebar.
+2. Drag nodes to arrange the architecture.
+3. Drag from a node's right port to another node's left port to create dependencies.
+4. Open node config to set filename and generation instructions.
+5. Click **PRD** to inspect the generated architecture brief.
+6. Provide a Gemini API key and click **Synth** to generate code.
+7. Click **Export** to download a ZIP.
+8. Click **APK** only when running behind a deployment that exposes `/api/build-apk`. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js)
 
+## Deployment notes
+
+The GitHub Pages demo is a static deployment. Features that depend on `/api/*` routes require a server environment such as Vercel with the corresponding serverless functions configured. In particular:
+
+- `Synth` works directly in the browser using the user's Gemini API key.
+- `Export` works locally in the browser.
+- `APK` requires `/api/build-apk` plus server-side Android shell tooling.
+- `publish.js` requires server-side environment variables and GitHub access. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish.js)
+
+## Cleanup notes for maintainers
+
+This repository previously contained an older map/feed prototype that no longer matched the shipped UI. The cleanup in this branch keeps the current single-file app as the source of truth and aligns documentation with the code that is actually loaded in production. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html)
+
+## License
+
+Released under the Apache License 2.0. See [`LICENSE`](https://github.com/via-decide/LogicHub/blob/main/LICENSE).
