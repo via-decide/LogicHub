@@ -1,4 +1,6 @@
 # CODEX AGENT RULES — via-decide/decide.engine-tools
+# Place this file at: .codex/instructions.md
+# Codex reads this before every task in this repo.
 
 # Place this file at: .codex/instructions.md
 # Codex reads this before every task in this repo.
@@ -255,6 +257,60 @@ WHEN IN DOUBT
 ════════════════════════════════════════════
 
 Ask before acting. A clarifying question is better than a broken game.
+```
+
+---
+
+**How to activate it — 2 steps:**
+
+**Step 1** — create the file in the repo:
+```
+mkdir -p .codex
+# paste the above into .codex/instructions.md
+```
+
+**Step 2** — commit it:
+```
+git add .codex/instructions.md
+git commit -m "chore: add Codex agent rules to prevent game logic blunders"
+git push
+
+
+New addon rules 
+1. Core Principle: Adherence to Original Instructions
+
+Codex shall strictly adhere to the explicit instructions provided by the user. No changes, interpretations, or optimizations shall be implemented without prior clarification, explicit proposal, and user approval, as outlined in the following rules.
+2. Clarification and Confirmation
+
+Before proceeding with any coding task, Codex must ensure a complete and unambiguous understanding of the instructions.
+2.1 Ambiguity Detection**: If any part of the instructions is unclear, vague, or open to multiple interpretations, Codex must immediately ask for clarification.
+    *   *Example*: "Make it efficient." -> "Could you please specify what aspects of efficiency are most critical (e.g., execution speed, memory usage, network bandwidth, resource consumption) for this task?"
+2.2 Incompleteness Identification**: If crucial information is missing that prevents the successful or complete execution of the task, Codex must identify the missing details and request them.
+    *   *Example*: "Connect to the database." -> "Please provide the database type, host, port, credentials, and database name."
+2.3 Contradiction Resolution**: If instructions appear to contradict each other, Codex must highlight the conflict and ask the user to resolve it.
+    *   *Example*: "Use Python 2.7" and "Utilize f-strings for string formatting." -> "F-strings are a Python 3.6+ feature. Could you clarify whether Python 2.7 or Python 3.6+ is the target environment, or if an alternative string formatting method should be used for Python 2.7?"
+2.4 Complex Instruction Paraphrasing**: For complex or multi-step instructions, Codex may paraphrase its understanding back to the user to confirm alignment before starting work.
+    *   *Example*: "To confirm, you're requesting a Python script that reads data from `input.csv`, filters rows where 'status' is 'active', calculates the sum of 'amount' for these rows, and then writes the result to `summary.txt`?"
+3. Proposal for Improvements or Alternatives
+
+Codex may identify opportunities for improvement, but these must always be presented as proposals.
+3.1 Proposing Best Practices**: If the user's instructions deviate from common best practices (e.g., security, performance, readability, maintainability, idiomatic code), Codex may propose an alternative approach.
+    *   *Example*: "Instead of hardcoding the API key, I recommend storing it in an environment variable for better security. Would you like me to implement that?"
+3.2 Proposing Optimizations**: If a more efficient or robust solution exists than what is directly implied by the instructions, Codex may suggest
+
+Your current Codex agent rules are already very strong — honestly they look like something a senior platform engineer would write to control an autonomous code agent. 🔥
+
+But they can be refined to be safer for AI agents, especially for:
+
+preventing hallucinated refactors
+
+forcing structured reasoning
+
+preventing large rewrites
+
+adding repo-wide auditing ability
+
+integrating bug scanning before edits
 
 ---
 
@@ -304,6 +360,7 @@ READ → ANALYZE → PLAN → CONFIRM → MODIFY → VERIFY
 
 Skipping steps is prohibited.
 
+
 ---
 
 1. CORE PRINCIPLE — STRICT ADHERENCE
@@ -311,6 +368,20 @@ Skipping steps is prohibited.
 Codex must execute instructions exactly as given.
 
 Codex must never:
+
+reinterpret user instructions
+
+change architecture
+
+refactor unrelated code
+
+introduce frameworks
+
+introduce build tools
+
+introduce dependencies
+
+rewrite large files
 
 - reinterpret user instructions
 - change architecture
@@ -324,6 +395,7 @@ unless explicitly instructed by the user.
 
 All edits must be surgical and minimal.
 
+
 ---
 
 2. MANDATORY REPOSITORY ANALYSIS
@@ -331,6 +403,27 @@ All edits must be surgical and minimal.
 Before modifying any file Codex must:
 
 1. Read the entire file.
+
+
+2. Identify:
+
+purpose of the file
+
+dependencies
+
+imported scripts
+
+functions defined
+
+
+
+3. Determine safe insertion points.
+
+
+
+Codex must never edit code blindly.
+
+
 2. Identify:
    - purpose of the file
    - dependencies
@@ -346,11 +439,41 @@ Codex must never edit code blindly.
 
 If instructions are unclear, Codex must pause and ask questions.
 
+Examples:
+
+Ambiguous
+
+Make the game faster
+
+Codex response:
+
+Which aspect should be optimized?
+
+1 execution speed
+2 animation smoothness
+3 network latency
+4 memory usage
+
+
 ---
 
 4. INCOMPLETE INSTRUCTION HANDLING
 
 If required information is missing, Codex must request it.
+
+Example:
+
+Connect to database
+
+Codex response:
+
+Please provide:
+
+• database type
+• host
+• credentials
+• schema
+
 
 ---
 
@@ -358,11 +481,42 @@ If required information is missing, Codex must request it.
 
 If instructions conflict, Codex must stop execution.
 
+Example conflict:
+
+Use vanilla JS
+Add React component
+
+Codex response:
+
+Conflict detected:
+
+React contradicts the repo rule:
+"No frameworks allowed."
+
+Please confirm which direction to follow.
+
+
 ---
 
 6. COMPLEX TASK CONFIRMATION
 
 For multi-step instructions Codex must confirm understanding.
+
+Example response:
+
+Understanding confirmation:
+
+You want:
+
+1 bug scan of the repo
+2 security audit
+3 minimal fixes
+4 no refactoring
+
+Proceed?
+
+Codex must wait for confirmation.
+
 
 Codex must wait for confirmation.
 
@@ -378,6 +532,12 @@ Codex may propose improvements but must never implement them automatically.
 
 Codex must follow these limits:
 
+Rule	Limit
+
+Max lines modified per file	20
+Max files changed per task	5
+Max new functions added	3
+
 | Rule | Limit |
 |------|-------|
 | Max lines modified per file | 20 |
@@ -388,11 +548,31 @@ If more changes are required:
 
 Codex must propose a separate task.
 
+
 ---
 
 9. PROHIBITED ACTIONS
 
 Codex must never:
+
+rewrite entire files
+
+rename files without instruction
+
+delete files
+
+move directories
+
+change architecture
+
+introduce frameworks
+
+introduce package managers
+
+convert scripts to modules
+
+modify protected files listed above
+
 
 - rewrite entire files
 - rename files without instruction
@@ -412,6 +592,17 @@ Before modifying any code Codex must perform a quick scan:
 
 Search for:
 
+undefined variables
+duplicate const
+missing try/catch
+unhandled promise
+DOM reference before load
+broken script order
+invalid JSON
+
+If detected, report them before editing.
+
+
 - undefined variables
 - duplicate const
 - missing try/catch
@@ -430,6 +621,15 @@ Every task must output a structured report.
 
 | File | Change | Lines | Verified |
 |------|--------|------|---------|
+router.js | fixed duplicate const | 112-118 | yes
+index.html | added wallet guard | 44-50 | yes
+
+Also list:
+
+Files skipped
+Reason skipped
+Checklist results
+
 | router.js | fixed duplicate const | 112-118 | yes |
 | index.html | added wallet guard | 44-50 | yes |
 
@@ -449,6 +649,7 @@ RUN REPO AUDIT
 
 This command triggers:
 
+1 repository scan 2 bug detection 3 dependency analysis 4 security checks
 1 repository scan
 2 bug detection
 3 dependency analysis
@@ -457,6 +658,7 @@ This command triggers:
 Output:
 
 CODE_AUDIT_REPORT.md
+
 
 ---
 
@@ -469,6 +671,7 @@ DO NOT MODIFY
 
 Breaking working code is considered critical failure.
 
+
 ---
 
 14. BROWSER ENVIRONMENT ASSUMPTION
@@ -477,6 +680,19 @@ This repository runs browser-only JavaScript.
 
 Codex must never introduce:
 
+process.env
+require()
+node modules
+npm packages
+bundlers
+webpack
+vite
+
+All code must work in:
+
+modern browser
+GitHub Pages
+no build step
 - process.env
 - require()
 - node modules
