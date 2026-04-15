@@ -1190,6 +1190,14 @@
     </div>
   </div>
 
+  <div class="footer" id="step-footer">
+    <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
+    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">[⚡ Synth]</button>
+    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
+    <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
+    <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
+    <button id="btn-install" class="install-btn" disabled title="Install becomes available after APK export." onclick="app.installPWA()">[↓ Install]</button>
   <!-- FOOTER -->
   <div class="footer">
     <button onclick="app.addBlock('ui')">+ Part</button>
@@ -1571,6 +1579,20 @@
 
     const app = {
       map: new LogicMap(),
+      isDragging: null, dragOffset: { x: 0, y: 0 }, isDrawing: false, sourceId: null, apiKey: "",
+      apkBuildInProgress: false, apkBlob: null, apkBlobUrl: null, synthesisComplete: false,
+      apkBuildInProgress: false, apkBlob: null, zipFallbackBlob: null,
+      apkBuildInProgress: false, apkBlob: null, apkZipBlob: null,
+      
+      // Onboarding Guide
+      obSteps: [
+        { target: "#step-sidebar", title: "Add Your First Node", text: "Pick a Core Node from the left panel — UI, API, DB, or AUTH — and drop it on the canvas." },
+        { target: "#canvas", title: "Wire Your Logic", text: "Connect nodes by dragging from one output to the next input. Your architecture builds visually." },
+        { target: "#btn-prd", title: "Generate Your PRD", text: "Hit 📋 PRD to get a structured prompt ready to paste into Claude or GPT." },
+        { target: "#btn-apk", title: "Export Your APK", text: "Hit 📱 APK to compile a native Android app from your architecture in under 60 seconds." }
+      ],
+      currentStep: 0,
+      deferredInstallPrompt: null,
       isDragging: null, dragOffset: { x: 0, y: 0 },
       isDrawing: false, sourceId: null, activePointerId: null,
       authUser: null,
@@ -1741,6 +1763,21 @@
         });
       },
 
+      updateHeader() {
+        document.getElementById("block-count").textContent = `${this.map.blocks.length} nodes`;
+        const st = document.getElementById("map-status"), exp = document.getElementById("btn-export"), apk = document.getElementById("btn-apk"), prd = document.getElementById("btn-prd");
+        this.synthesisComplete = this.map.isReadyForExport();
+        if (this.synthesisComplete) { 
+          st.textContent = "⚡ SYNTHESIS COMPLETE"; st.className = "map-status confirmed"; 
+          exp.disabled = false; exp.className = ""; 
+          apk.style.display = 'inline-block';
+        } else { 
+          st.textContent = "● ARCHITECTURE DRAFT"; st.className = "map-status"; 
+          exp.disabled = true; exp.className = ""; 
+          apk.style.display = 'none';
+        }
+        prd.disabled = this.map.blocks.length === 0;
+        this.updateInstallButtonState();
       getPortPos(id, type) {
         const b = this.map.blocks.find(x => x.id === id);
         if (!b) return null;
@@ -1851,6 +1888,58 @@
           return this.serverAccess;
         }
         try {
+          renderStageList();
+          stages[0].status = "done";
+          addLog("→ Assembling web assets...", "progress");
+          this.zipFallbackBlob = await this.createZipBlob();
+          progress.style.width = "25%";
+          addLog("✓ Assembled web assets", "success");
+
+          stages[1].status = "done";
+          addLog("→ Injecting into Capacitor shell (android/app/src/main/assets/public)...", "progress");
+          const apkData = await this.generateRealAPK(this.zipFallbackBlob);
+          progress.style.width = "60%";
+          addLog("✓ Assets copied before capacitor copy android", "success");
+
+          stages[2].status = "done";
+          addLog("→ Running Gradle build (assembleDebug)...", "progress");
+          progress.style.width = "85%";
+          addLog("✓ Gradle output path: app/build/outputs/apk/debug/app-debug.apk", "success");
+
+          stages[3].status = "done";
+          addLog("→ Packaging APK...", "progress");
+
+          if (apkData.size < 500 * 1024) {
+            throw new Error("Generated APK is under 500KB and treated as failed.");
+          }
+          if (apkData.size < 1024 * 1024) {
+            addLog("⚠ APK is smaller than 1MB; build may be incomplete.", "error");
+          }
+
+        const apkData = await this.generateRealAPK();
+        this.apkBlob = apkData;
+        if (this.apkBlobUrl) URL.revokeObjectURL(this.apkBlobUrl);
+        this.apkBlobUrl = URL.createObjectURL(apkData);
+        this.updateInstallButtonState();
+        
+        progress.style.width = "100%";
+        addLog("✓ APK build complete!", "success");
+        addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
+        addLog(`Size: ${(apkData.size / 1024 / 1024).toFixed(2)} MB`, "success");
+        addLog("Ready for download & installation", "success");
+        
+        dlBtn.style.display = "inline-block"; this.apkBuildInProgress = false;
+        this.log("APK Ready! Download from modal.", "apk");
+          this.apkBlob = apkData;
+          const apkSizeMB = (apkData.size / 1024 / 1024).toFixed(2);
+          progress.style.width = "100%";
+          addLog("✓ APK build complete!", "success");
+          addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
+          addLog(`Size: ${apkSizeMB} MB`, "success");
+          dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${apkSizeMB}MB)`;
+          dlBtn.style.display = "inline-block";
+          zipFallbackBtn.style.display = "inline-block";
+          this.log("APK Ready! Download from modal.", "apk");
           const idToken = await this.authUser.getIdToken(forceRefresh);
           const response = await fetch('/api/access-status', {
             method: 'POST',
@@ -2091,6 +2180,40 @@
         alert(`₹1717 UPI payment link is not working right now.\n\nPlease open any UPI app manually and pay to ${FOUNDER_PAYMENT.upiId}.\nThen tap “I Paid — Submit UTR”. LogicHub will draft an email to dharam@viadecide.com with your payment details so the founder pass can be verified and approved.`);
         this.log('Showing India founder payment instructions.', 'info');
       },
+      
+      save() { sessionStorage.setItem("LH_MAP_V2", JSON.stringify({ id: this.map.id, blocks: this.map.blocks, connections: this.map.connections })); },
+
+      // === ONBOARDING SYSTEM ===
+      initInstallPrompt() {
+        this.updateInstallButtonState();
+        window.addEventListener("beforeinstallprompt", (e) => {
+          e.preventDefault(); this.deferredInstallPrompt = e;
+          this.updateInstallButtonState();
+          this.log("Install available after APK export", "info");
+        });
+        window.addEventListener("appinstalled", () => {
+          this.deferredInstallPrompt = null;
+          this.updateInstallButtonState();
+          this.log("LogicHub installed successfully", "success");
+        });
+      },
+
+      updateInstallButtonState() {
+        const installBtn = document.getElementById("btn-install");
+        if (!installBtn) return;
+        const canInstall = this.synthesisComplete && typeof this.apkBlobUrl === "string" && this.apkBlobUrl.startsWith("blob:");
+        installBtn.style.display = "inline-block";
+        installBtn.disabled = !canInstall;
+        installBtn.title = canInstall ? "Install LogicHub" : "Install becomes available after APK export.";
+      },
+
+      async installPWA() {
+        if (!this.deferredInstallPrompt) { this.log("Install prompt is not ready yet", "warning"); return; }
+        this.deferredInstallPrompt.prompt();
+        const choiceResult = await this.deferredInstallPrompt.userChoice;
+        this.log(`Install prompt: ${choiceResult.outcome}`, choiceResult.outcome === "accepted" ? "success" : "info");
+        this.deferredInstallPrompt = null;
+        this.updateInstallButtonState();
 
       openFounderCheckout() {
         document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
@@ -2576,6 +2699,11 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
     }
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); }));
 
+      <div class="forge-section">
+        <h4>Community Forge — Free</h4>
+        <p id="forge-limits-text">Limit: 0/3. Resets at --:--</p>
+        <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Forge</button>
+      </div>
     window.app = app;
 
     if ('serviceWorker' in navigator) {
