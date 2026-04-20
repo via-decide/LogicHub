@@ -1,0 +1,32 @@
+[
+  {
+    "key": "ai-research-tool",
+    "name": "AI Research Tool",
+    "description": "Gather, compare, and summarize sources with human-in-the-loop review.",
+    "file": "./templates/ai-research-tool.json"
+  },
+  {
+    "key": "data-dashboard",
+    "name": "Data Dashboard",
+    "description": "Ingest data, transform it, and render chart-first KPI dashboards.",
+    "file": "./templates/data-dashboard.json"
+  },
+  {
+    "key": "automation-bot",
+    "name": "Automation Bot",
+    "description": "Trigger repeatable automations across auth, APIs, and persistence.",
+    "file": "./templates/automation-bot.json"
+  },
+  {
+    "key": "simulation-builder",
+    "name": "Simulation Builder",
+    "description": "Build lightweight simulation apps with scenario controls and results.",
+    "file": "./templates/simulation-builder.json"
+  },
+  {
+    "key": "knowledge-explorer",
+    "name": "Knowledge Explorer",
+    "description": "Search and explore structured knowledge maps with reusable nodes.",
+    "file": "./templates/knowledge-explorer.json"
+  }
+]

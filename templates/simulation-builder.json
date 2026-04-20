@@ -1,0 +1,13 @@
+{
+  "key": "simulation-builder",
+  "name": "Simulation Builder",
+  "starterGraph": {
+    "blocks": ["ui", "util", "api", "database", "styles"],
+    "connections": [
+      ["ui", "util"],
+      ["util", "api"],
+      ["api", "database"],
+      ["styles", "ui"]
+    ]
+  }
+}

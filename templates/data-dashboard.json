@@ -1,0 +1,13 @@
+{
+  "key": "data-dashboard",
+  "name": "Data Dashboard",
+  "starterGraph": {
+    "blocks": ["api", "database", "util", "styles", "ui"],
+    "connections": [
+      ["api", "database"],
+      ["database", "util"],
+      ["util", "ui"],
+      ["styles", "ui"]
+    ]
+  }
+}

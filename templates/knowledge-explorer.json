@@ -1,0 +1,13 @@
+{
+  "key": "knowledge-explorer",
+  "name": "Knowledge Explorer",
+  "starterGraph": {
+    "blocks": ["ui", "database", "api", "util", "styles"],
+    "connections": [
+      ["database", "api"],
+      ["api", "util"],
+      ["util", "ui"],
+      ["styles", "ui"]
+    ]
+  }
+}
