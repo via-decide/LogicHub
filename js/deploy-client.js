@@ -52,6 +52,44 @@
     return { bundle, slug: metadata.slug, metadata };
   }
 
+
+  function ensureDeploymentErrorOverlay() {
+    if (global.__logicHubDeploymentOverlayAttached) return;
+    global.__logicHubDeploymentOverlayAttached = true;
+
+    function renderOverlay(message) {
+      if (!global.document || global.document.getElementById('deployment-error-overlay')) return;
+      const overlay = global.document.createElement('div');
+      overlay.id = 'deployment-error-overlay';
+      overlay.setAttribute('role', 'alert');
+      overlay.style.cssText = [
+        'position:fixed','inset:0','z-index:99999','display:flex','align-items:center','justify-content:center',
+        'background:rgba(3,5,8,0.92)','color:#fff','font-family:Inter,system-ui,sans-serif','padding:1rem'
+      ].join(';');
+      overlay.innerHTML = `
+        <div style="max-width:640px;border:1px solid rgba(255,68,68,0.5);border-radius:14px;padding:1rem 1.1rem;background:#0a0c10;box-shadow:0 12px 40px rgba(0,0,0,0.45)">
+          <h2 style="margin:0 0 .5rem;font-size:1.05rem;color:#ff6969">Deployment error</h2>
+          <p style="margin:.25rem 0 .4rem;line-height:1.45">${message || 'An unexpected runtime error occurred while loading this deployment.'}</p>
+          <p style="margin:0;opacity:.85;font-size:.9rem">Check build logs and verify environment variables before retrying deployment.</p>
+        </div>
+      `;
+      global.document.body.appendChild(overlay);
+    }
+
+    global.addEventListener('error', (event) => {
+      const details = event?.error?.message || event?.message || 'Script execution failed during startup.';
+      renderOverlay(details);
+    });
+
+    global.addEventListener('unhandledrejection', (event) => {
+      const reason = event?.reason;
+      const details = typeof reason === 'string' ? reason : (reason?.message || 'Unhandled promise rejection during startup.');
+      renderOverlay(details);
+    });
+  }
+
+  ensureDeploymentErrorOverlay();
+
   global.LogicHubDeployClient = {
     buildPublishBundle,
     validateProjectBundle,

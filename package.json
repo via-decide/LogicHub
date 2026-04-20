@@ -2,6 +2,11 @@
   "name": "logichub",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build": "node ./deploy/health-check.js --mode=build",
+    "dev": "python3 -m http.server 5173",
+    "preview": "python3 -m http.server 4173"
+  },
   "dependencies": {
     "firebase-admin": "^13.4.0"
   }
