@@ -154,6 +154,27 @@
     }
     .lh-empty,
     .lh-footnote { color: var(--muted); font-size: 0.78rem; }
+    .zayvora textarea {
+      width: 100%;
+      min-height: 84px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      padding: 8px;
+      margin-bottom: 8px;
+      font: inherit;
+    }
+    .zayvora button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(78,201,245,0.22);
+      color: var(--text);
+      font-weight: 600;
+      padding: 8px 10px;
+      cursor: pointer;
+      width: 100%;
+    }
     #simulateDeployBtn {
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -185,6 +206,12 @@
     </section>
 
     <aside class="panel">
+      <section class="zayvora">
+        <h3>Zayvora Prompt</h3>
+        <textarea id="zayvoraPrompt" placeholder="Describe the workflow you want generated..."></textarea>
+        <button type="button" id="generateWorkflowBtn">Generate Workflow</button>
+        <p id="zayvoraStatus" class="lh-footnote">Enter a prompt to auto-generate a workflow graph.</p>
+      </section>
       <section>
         <h3>Node Editor</h3>
         <form id="nodeEditorForm" class="editor">
@@ -210,6 +237,9 @@
   <script src="../components/builder/node-editor.jsx"></script>
   <script src="../components/preview/preview-panel.jsx"></script>
   <script src="../components/preview/deployment-panel.jsx"></script>
+  <script src="../integrations/zayvora/zayvora-bridge.js"></script>
+  <script src="../integrations/zayvora/task-interpreter.js"></script>
+  <script src="../integrations/zayvora/workflow-generator.js"></script>
   <script>
     var state = window.LogicHubStudioGraph.createGraphState();
 
@@ -222,6 +252,8 @@
       nodeEditorHelper: document.getElementById('nodeEditorHelper'),
       previewPanel: document.getElementById('previewPanel'),
       deploymentPanel: document.getElementById('deploymentPanel'),
+      zayvoraPrompt: document.getElementById('zayvoraPrompt'),
+      zayvoraStatus: document.getElementById('zayvoraStatus'),
       onStateChange: function () {
         if (context.syncEditor) context.syncEditor();
         window.LogicHubStudioPreview.renderPreview(context);
@@ -232,7 +264,38 @@
     window.LogicHubStudioLibrary.renderLibrary(document.getElementById('componentLibrary'));
     window.LogicHubStudioNodeEditor.setupNodeEditor(context);
     window.LogicHubStudioCanvas.setupBuilderCanvas(context);
+    connectZayvoraGeneration();
     context.onStateChange();
+
+    function loadGeneratedGraph(generated) {
+      context.state.nodes = generated.graph.nodes;
+      context.state.edges = generated.graph.edges;
+      context.state.idCounter = generated.graph.nodes.length;
+      context.state.selectedNodeId = generated.graph.nodes.length ? generated.graph.nodes[0].id : null;
+      context.state.activeLinkSourceId = null;
+      window.LogicHubStudioCanvas.renderCanvasElements(context);
+      context.onStateChange();
+    }
+
+    function connectZayvoraGeneration() {
+      var generateButton = document.getElementById('generateWorkflowBtn');
+      if (!generateButton) return;
+
+      generateButton.addEventListener('click', function () {
+        var promptValue = context.zayvoraPrompt.value.trim();
+        if (!promptValue) {
+          context.zayvoraStatus.textContent = 'Please enter a prompt before generating.';
+          return;
+        }
+
+        var reasoning = window.LogicHubZayvoraBridge.reasonOverPrompt(promptValue);
+        var structuredTask = window.LogicHubTaskInterpreter.interpretReasoning(reasoning);
+        var generated = window.LogicHubWorkflowGenerator.generateWorkflow(structuredTask);
+
+        loadGeneratedGraph(generated);
+        context.zayvoraStatus.textContent = 'Generated workflow for intent "' + reasoning.intent + '" (' + structuredTask.steps.length + ' nodes).';
+      });
+    }
   </script>
 </body>
 </html>
