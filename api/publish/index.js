@@ -1,4 +1,4 @@
-// /api/publish.js (Vercel Serverless Function - GEMINI ENGINE)
+// /api/publish/index.js (Vercel Serverless Function - GEMINI ENGINE)
 
 function toBase64(value) {
   return Buffer.from(value).toString('base64');

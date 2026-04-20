@@ -95,9 +95,9 @@ The shipped app includes a web manifest and a service worker. The service worker
 
 Accepts a posted ZIP payload, injects the generated web assets into an Android shell, runs Capacitor plus Gradle, and returns a base64 APK. Requires server configuration, `APK_SHELL_DIR`, and Android build tooling. [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js)
 
-### `api/publish.js`
+### `api/publish/index.js`
 
-Generates a single-file HTML app from PRD content using Gemini, commits the output into the `via-decide/daxini.space` repository, and returns a live URL. This path requires server-side credentials and is not part of the static GitHub Pages demo. [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish.js)
+Generates a single-file HTML app from PRD content using Gemini, commits the output into the `via-decide/daxini.space` repository, and returns a live URL. This path requires server-side credentials and is not part of the static GitHub Pages demo. [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish/index.js)
 
 ## 9) Non-goals of the current codebase
 

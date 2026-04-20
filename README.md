@@ -28,7 +28,7 @@ LogicHub is a browser-first node canvas for mapping an application architecture,
 - [`manifest.json`](https://github.com/via-decide/LogicHub/blob/main/manifest.json): PWA metadata.
 - [`sw.js`](https://github.com/via-decide/LogicHub/blob/main/sw.js): service worker for install/offline support.
 - [`api/build-apk.js`](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js): optional serverless APK build endpoint.
-- [`api/publish.js`](https://github.com/via-decide/LogicHub/blob/main/api/publish.js): optional serverless publish flow for generated apps. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/manifest.json) [Source](https://github.com/via-decide/LogicHub/blob/main/sw.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish.js)
+- [`api/publish/index.js`](https://github.com/via-decide/LogicHub/blob/main/api/publish/index.js): optional serverless publish flow for generated apps. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/manifest.json) [Source](https://github.com/via-decide/LogicHub/blob/main/sw.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish/index.js)
 
 ## Local development
 
@@ -60,7 +60,7 @@ The GitHub Pages demo is a static deployment. Features that depend on `/api/*` r
 - `Synth` works directly in the browser using the user's Gemini API key.
 - `Export` works locally in the browser.
 - `APK` requires `/api/build-apk` plus server-side Android shell tooling.
-- `publish.js` requires server-side environment variables and GitHub access. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish.js)
+- `api/publish/index.js` requires server-side environment variables and GitHub access. [Source](https://github.com/via-decide/LogicHub/blob/main/index.html) [Source](https://github.com/via-decide/LogicHub/blob/main/api/build-apk.js) [Source](https://github.com/via-decide/LogicHub/blob/main/api/publish/index.js)
 
 ## Cleanup notes for maintainers
 
