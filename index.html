@@ -451,6 +451,121 @@
       line-height: 1.5;
     }
     .helper-strip strong { color: var(--accent); }
+
+    .landing-hero {
+      padding: 0.85rem 1.25rem 0;
+      background: linear-gradient(180deg, rgba(0,229,255,0.08), rgba(255,255,255,0));
+    }
+    .landing-hero-card {
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 18px;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(8,11,16,0.98));
+      display: grid;
+      gap: 0.9rem;
+    }
+    .landing-hero-card h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+    }
+    .landing-hero-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      max-width: 760px;
+    }
+    .primary-actions,
+    .capability-strip,
+    .template-strip,
+    .builder-lanes {
+      display: grid;
+      gap: 0.6rem;
+    }
+    .primary-actions,
+    .capability-strip,
+    .template-strip {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .builder-lanes {
+      padding: 0.65rem 1.25rem 0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .lane-card,
+    .capability-chip,
+    .template-btn,
+    .primary-action-btn {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-primary);
+      padding: 0.68rem 0.75rem;
+      font-size: 0.7rem;
+      text-align: left;
+    }
+    .primary-action-btn,
+    .template-btn {
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    .primary-action-btn:hover,
+    .template-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,255,0.08);
+    }
+    .primary-action-btn.publish-cta {
+      border-color: rgba(46,204,113,0.35);
+      background: rgba(46,204,113,0.12);
+      color: #98f5be;
+    }
+    .capability-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .lane-card h4 { margin: 0 0 0.35rem; font-size: 0.76rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+    .lane-card p { margin: 0; color: var(--text-secondary); font-size: 0.7rem; line-height: 1.5; }
+    .empty-state-guide {
+      margin-top: 0.5rem;
+      display: grid;
+      gap: 0.35rem;
+      pointer-events: auto;
+    }
+    .empty-state-guide strong {
+      color: var(--accent);
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .empty-state-setups {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+    .empty-state-setups button {
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.35);
+      color: var(--text-primary);
+      font-size: 0.62rem;
+      padding: 0.4rem 0.48rem;
+      pointer-events: auto;
+      cursor: pointer;
+      font-family: var(--font-mono);
+    }
+    .empty-state-setups button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
     .onboarding-shell {
       padding: 0.85rem 1.25rem 0;
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
@@ -1035,6 +1150,18 @@
       .thankyou-meta {
         grid-template-columns: 1fr;
       }
+
+      .landing-hero,
+      .builder-lanes {
+        padding: 0.65rem 0.6rem 0;
+      }
+      .primary-actions,
+      .capability-strip,
+      .template-strip,
+      .builder-lanes,
+      .empty-state-setups {
+        grid-template-columns: 1fr;
+      }
       .payment-strip {
         display:flex; flex-direction:column; align-items:flex-start; gap:0.5rem;
         padding:0.65rem 0.6rem;
@@ -1136,6 +1263,42 @@
 
   <div class="helper-strip"><strong>New here?</strong> LogicHub helps you build prompt apps, internal tools, and lightweight workflow software without starting from a blank codebase. Add the main parts you understand and LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
+  <div class="landing-hero">
+    <div class="landing-hero-card">
+      <div>
+        <h2>LOGICHUB</h2>
+        <p>Build prompt apps, workflow tools, and app prototypes.</p>
+      </div>
+      <div class="primary-actions">
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('prompt')">Start with a template</button>
+        <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add parts manually</button>
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('sample')">View a sample app</button>
+        <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">Publish to Daxini.space</button>
+      </div>
+      <div class="capability-strip">
+        <div class="capability-chip">Make App Plan</div>
+        <div class="capability-chip">Download ZIP</div>
+        <div class="capability-chip">Android App</div>
+        <div class="capability-chip">Publish</div>
+        <div class="capability-chip">Install</div>
+      </div>
+      <div class="template-strip">
+        <button class="template-btn" onclick="app.applyStarterSetup('research')">Research tool</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('workflow')">Internal workflow app</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('prompt')">Prompt app</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('mobile')">Simple mobile tool</button>
+      </div>
+      <p><strong>Publish to Daxini.space</strong> creates a public app page and shareable link.</p>
+    </div>
+  </div>
+
+  <div class="builder-lanes">
+    <div class="lane-card"><h4>Left: Available Parts</h4><p>Use Screen, Login, Data, and Logic parts from the left panel.</p></div>
+    <div class="lane-card"><h4>Center: Current App Structure</h4><p>Arrange and connect parts in the center canvas. Node connection behavior is unchanged.</p></div>
+    <div class="lane-card"><h4>Right/Next: Generated Outputs</h4><p>Use Plan, Download ZIP, Android App, Publish, and Install actions after generation.</p></div>
+  </div>
+
+
   <div class="onboarding-shell">
     <div class="onboarding-card">
       <div class="onboarding-kicker">✨ Premium onboarding</div>
@@ -1203,8 +1366,18 @@
         <g id="connections-group"></g>
       </svg>
       <div id="blocks-container"></div>
-      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.25;">
-        <div style="font-size:2rem">⬡</div><div style="font-family:var(--font-mono);font-size:0.7rem;">Add parts to begin</div>
+      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.35; text-align:center; padding:0 1rem;">
+        <div style="font-size:2rem">⬡</div>
+        <div style="font-family:var(--font-mono);font-size:0.74rem;">Add Screen, Login, Data, or Logic to begin</div>
+        <div class="empty-state-guide" id="empty-state-guide">
+          <strong>Suggested one-click setups</strong>
+          <div class="empty-state-setups">
+            <button onclick="app.applyStarterSetup('research')">Research tool setup</button>
+            <button onclick="app.applyStarterSetup('workflow')">Workflow setup</button>
+            <button onclick="app.applyStarterSetup('prompt')">Prompt app setup</button>
+            <button onclick="app.applyStarterSetup('mobile')">Simple mobile setup</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1219,7 +1392,7 @@
     <button id="btn-install" class="install-btn" disabled title="Install becomes available after APK export." onclick="app.installPWA()">[↓ Install]</button>
   <!-- FOOTER -->
   <div class="footer">
-    <button onclick="app.addBlock('ui')">+ Part</button>
+    <button id="btn-add-part" onclick="app.addBlock('ui')">+ Part</button>
     <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
     <button onclick="app.viewPRD()">📋 Plan</button>
     <button id="btn-export" disabled onclick="app.exportZip()">📦 Download ZIP</button>
@@ -1712,6 +1885,21 @@
         const c = document.getElementById("canvas");
         this.map.addBlock(type, c.offsetWidth / 2 - 87 + (Math.random()*40-20), c.offsetHeight / 2 - 45 + (Math.random()*40-20));
         this.render();
+      },
+
+      applyStarterSetup(templateKey) {
+        const templates = {
+          research: ['ui', 'api', 'util'],
+          workflow: ['ui', 'auth', 'database', 'util'],
+          prompt: ['ui', 'util', 'styles'],
+          mobile: ['ui', 'auth', 'config'],
+          sample: ['ui', 'api', 'database', 'auth', 'util', 'styles'],
+        };
+        const sequence = templates[templateKey] || templates.prompt;
+        if (!this.map.blocks.length || confirm('Add this setup to your current app structure?')) {
+          sequence.forEach((type) => this.addBlock(type));
+          this.log(`${templateKey} starter setup added.`, 'success');
+        }
       },
 
       removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Part removed.", "info"); },
