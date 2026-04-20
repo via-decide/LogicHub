@@ -30,10 +30,10 @@
     if (!appName.trim()) return null;
 
     const { bundle, slug, metadata } = global.LogicHubDeployClient.buildPublishBundle(app, appName);
-    const response = await fetch('/api/publish-endpoint', {
+    const response = await fetch('/api/publish-app', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appName, slug, bundle, metadata })
+      body: JSON.stringify({ bundle, metadata: { ...metadata, name: appName, slug } })
     });
 
     const data = await app.readJsonResponse(response, 'Publish');
@@ -48,6 +48,8 @@
   };
 
   document.addEventListener('DOMContentLoaded', function () {
+    const publishBtn = document.getElementById('btn-toolbar-publish');
+    if (publishBtn) publishBtn.textContent = 'Publish to Daxini.space';
     bindTopToolbarButtons();
     syncToolbarButtonState();
   });

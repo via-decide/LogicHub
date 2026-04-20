@@ -7,8 +7,8 @@
   }
 
   function validateProjectBundle(bundle) {
-    const files = bundle && bundle.app ? bundle.app : {};
-    const required = ['index.html', 'app.js', 'style.css', 'manifest.json', 'sw.js', 'metadata.json'];
+    const files = bundle && bundle.build ? bundle.build : {};
+    const required = ['index.html', 'app.js', 'style.css', 'manifest.json', 'metadata.json'];
     const missing = required.filter((name) => !files[name]);
     if (missing.length) throw new Error(`Missing required bundle files: ${missing.join(', ')}`);
     if (!/<html[\s>]/i.test(files['index.html'])) throw new Error('index.html must include an <html> root element.');
@@ -31,20 +31,18 @@
     const metadata = {
       name: appName,
       creator: app.serverAccess?.email || app.authState?.email || 'username',
-      created_from: 'logichub',
-      category: 'tool',
+      origin: 'logichub',
       version: '1.0',
       slug: slugify(appName),
       description: app.map.buildPRD().slice(0, 280)
     };
 
     const bundle = {
-      app: {
+      build: {
         'index.html': files['index.html'] || '<!doctype html><html><body><h1>App</h1></body></html>',
         'app.js': files['app.js'] || '',
         'style.css': files['styles.css'] || files['style.css'] || '',
         'manifest.json': files['manifest.json'] || app.buildDefaultManifest(appName),
-        'sw.js': files['sw.js'] || app.buildDefaultServiceWorker(),
         'metadata.json': JSON.stringify(metadata, null, 2)
       },
       architecture_prd: app.map.buildPRD()
