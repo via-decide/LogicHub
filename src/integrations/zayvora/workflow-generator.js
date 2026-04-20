@@ -27,15 +27,17 @@
   }
 
   function generateWorkflow(structuredTask) {
-    var nodes = mapStepsToNodes(structuredTask);
+    var safeTask = structuredTask || { steps: [] };
+    var nodes = mapStepsToNodes(safeTask);
     var edges = mapNodesToEdges(nodes);
 
     return {
-      task: structuredTask,
+      task: safeTask,
       graph: {
         nodes: nodes,
         edges: edges
-      }
+      },
+      generatedAt: new Date().toISOString()
     };
   }
 
