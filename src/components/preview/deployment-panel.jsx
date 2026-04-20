@@ -3,31 +3,31 @@
 
   function renderDeploymentPanel(context) {
     var panel = context.deploymentPanel;
-    var nodeCount = context.state.nodes.length;
-    var edgeCount = context.state.edges.length;
-    var connectable = nodeCount > 1;
-    var complete = nodeCount > 0 && edgeCount > 0;
+    var graph = { nodes: context.state.nodes, edges: context.state.edges };
+    var parsed = global.LogicHubWorkflowParser.parseGraph(graph);
+    var validation = global.LogicHubExecutionValidator.validatePlan(parsed);
+    var plan = validation.ok ? global.LogicHubNodeCompiler.compile(parsed) : null;
 
     panel.innerHTML = [
       '<ul>',
-      '<li><strong>Nodes:</strong> ' + nodeCount + '</li>',
-      '<li><strong>Connections:</strong> ' + edgeCount + '</li>',
-      '<li><strong>Status:</strong> ' + (complete ? 'Ready for deployment simulation' : 'Needs additional workflow links') + '</li>',
+      '<li><strong>Nodes:</strong> ' + context.state.nodes.length + '</li>',
+      '<li><strong>Connections:</strong> ' + context.state.edges.length + '</li>',
+      '<li><strong>Status:</strong> ' + (validation.ok ? 'Executable' : validation.issues[0]) + '</li>',
       '</ul>',
-      '<button type="button" ' + (connectable ? '' : 'disabled') + ' id="simulateDeployBtn">Simulate Deploy</button>',
-      '<p class="lh-footnote">Simulated deployment packages your visual graph as an execution plan.</p>'
+      '<button type="button" ' + (validation.ok ? '' : 'disabled') + ' id="simulateDeployBtn">Simulate Deploy</button>',
+      '<p class="lh-footnote">Compiles your graph into an execution plan and runs it through the workflow runtime.</p>'
     ].join('');
 
     var simulateButton = panel.querySelector('#simulateDeployBtn');
-    if (simulateButton) {
-      simulateButton.addEventListener('click', function () {
-        simulateButton.textContent = 'Deployment Planned';
-        simulateButton.disabled = true;
+    if (simulateButton) simulateButton.addEventListener('click', function () {
+      simulateButton.textContent = 'Running...'; simulateButton.disabled = true;
+      global.LogicHubWorkflowRuntime.run(plan, context.runtimeHandlers, { source: 'studio' }).then(function (result) {
+        context.lastRuntimeResult = result;
+        simulateButton.textContent = 'Deployment Planned (' + result.logs.length + ' steps)';
+        context.onStateChange();
       });
-    }
+    });
   }
 
-  global.LogicHubStudioDeploy = {
-    renderDeploymentPanel: renderDeploymentPanel
-  };
+  global.LogicHubStudioDeploy = { renderDeploymentPanel: renderDeploymentPanel };
 })(window);
