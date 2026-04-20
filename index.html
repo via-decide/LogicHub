@@ -1270,7 +1270,7 @@
         <p>Build prompt apps, workflow tools, and app prototypes.</p>
       </div>
       <div class="primary-actions">
-        <button class="primary-action-btn" onclick="app.applyStarterSetup('prompt')">Start with a template</button>
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('aiResearchTool')">Create From Template</button>
         <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add parts manually</button>
         <button class="primary-action-btn" onclick="app.applyStarterSetup('sample')">View a sample app</button>
         <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">Publish to Daxini.space</button>
@@ -1283,10 +1283,11 @@
         <div class="capability-chip">Install</div>
       </div>
       <div class="template-strip">
-        <button class="template-btn" onclick="app.applyStarterSetup('research')">Research tool</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('workflow')">Internal workflow app</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('prompt')">Prompt app</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('mobile')">Simple mobile tool</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('aiResearchTool')">AI Research Tool</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('gameSimulation')">Game Simulation</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('dataDashboard')">Data Dashboard</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge Explorer</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('workflowAutomation')">Workflow Automation</button>
       </div>
       <p><strong>Publish to Daxini.space</strong> creates a public app page and shareable link.</p>
     </div>
@@ -1372,10 +1373,11 @@
         <div class="empty-state-guide" id="empty-state-guide">
           <strong>Suggested one-click setups</strong>
           <div class="empty-state-setups">
-            <button onclick="app.applyStarterSetup('research')">Research tool setup</button>
-            <button onclick="app.applyStarterSetup('workflow')">Workflow setup</button>
-            <button onclick="app.applyStarterSetup('prompt')">Prompt app setup</button>
-            <button onclick="app.applyStarterSetup('mobile')">Simple mobile setup</button>
+            <button onclick="app.applyStarterSetup('aiResearchTool')">AI research tool setup</button>
+            <button onclick="app.applyStarterSetup('gameSimulation')">Game simulation setup</button>
+            <button onclick="app.applyStarterSetup('dataDashboard')">Data dashboard setup</button>
+            <button onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge explorer setup</button>
+            <button onclick="app.applyStarterSetup('workflowAutomation')">Workflow automation setup</button>
           </div>
         </div>
       </div>
@@ -1889,13 +1891,14 @@
 
       applyStarterSetup(templateKey) {
         const templates = {
-          research: ['ui', 'api', 'util'],
-          workflow: ['ui', 'auth', 'database', 'util'],
-          prompt: ['ui', 'util', 'styles'],
-          mobile: ['ui', 'auth', 'config'],
+          aiResearchTool: ['ui', 'api', 'database', 'util'],
+          gameSimulation: ['ui', 'api', 'util', 'styles'],
+          dataDashboard: ['ui', 'database', 'api', 'styles'],
+          knowledgeExplorer: ['ui', 'database', 'util', 'styles'],
+          workflowAutomation: ['ui', 'auth', 'database', 'util'],
           sample: ['ui', 'api', 'database', 'auth', 'util', 'styles'],
         };
-        const sequence = templates[templateKey] || templates.prompt;
+        const sequence = templates[templateKey] || templates.aiResearchTool;
         if (!this.map.blocks.length || confirm('Add this setup to your current app structure?')) {
           sequence.forEach((type) => this.addBlock(type));
           this.log(`${templateKey} starter setup added.`, 'success');
