@@ -54,7 +54,21 @@
     };
   }
 
+  function generateWorkflowFromPrompt(prompt) {
+    var reasoning = reasonOverPrompt(prompt);
+    var interpreter = global.LogicHubTaskInterpreter;
+    var generator = global.LogicHubWorkflowGenerator;
+
+    if (!interpreter || !generator) {
+      throw new Error('Zayvora integration dependencies are missing.');
+    }
+
+    var structuredTask = interpreter.interpretReasoning(reasoning);
+    return generator.generateWorkflow(structuredTask);
+  }
+
   global.LogicHubZayvoraBridge = {
-    reasonOverPrompt: reasonOverPrompt
+    reasonOverPrompt: reasonOverPrompt,
+    generateWorkflowFromPrompt: generateWorkflowFromPrompt
   };
 })(window);

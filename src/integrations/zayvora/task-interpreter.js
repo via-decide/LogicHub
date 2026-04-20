@@ -16,20 +16,20 @@
   }
 
   function buildSteps(reasoning) {
-    var actions = uniqueValues(reasoning.entities.actions);
-    var resources = uniqueValues(reasoning.entities.resources);
+    var actions = uniqueValues(reasoning.entities.actions).slice(0, 2);
+    var resources = uniqueValues(reasoning.entities.resources).slice(0, 2);
 
     var steps = [
       { type: 'Trigger', title: 'Prompt Trigger', description: 'Begins workflow from user prompt context.' }
     ];
 
-    if (resources.length) {
+    resources.forEach(function (resource) {
       steps.push({
         type: 'Data',
-        title: 'Load ' + resources[0],
-        description: 'Fetches ' + resources[0] + ' records for execution.'
+        title: 'Load ' + resource,
+        description: 'Fetches ' + resource + ' records for execution.'
       });
-    }
+    });
 
     steps.push({
       type: 'Condition',
@@ -38,10 +38,14 @@
     });
 
     if (actions.length) {
-      steps.push({
-        type: 'Action',
-        title: actions[0].charAt(0).toUpperCase() + actions[0].slice(1) + ' Task',
-        description: 'Executes the first inferred action from prompt reasoning.'
+      actions.forEach(function (action, index) {
+        steps.push({
+          type: 'Action',
+          title: action.charAt(0).toUpperCase() + action.slice(1) + ' Task',
+          description: index === 0
+            ? 'Executes the primary inferred action from prompt reasoning.'
+            : 'Executes additional inferred action from prompt reasoning.'
+        });
       });
     } else {
       steps.push({
