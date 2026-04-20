@@ -26,6 +26,8 @@
   <script src="../components/workflow.js"></script>
   <script src="../components/ecosystem.js"></script>
   <script src="../components/workspace-ui.js"></script>
+  <script src="../js/blueprint-save.js"></script>
+  <script src="../js/blueprint-load.js"></script>
 </head>
 <body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
   <div class="min-h-full">
@@ -78,6 +80,41 @@
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
     });
+
+    if (window.LogicHubBlueprint && window.LogicHubBlueprint.initBlueprintLoad) {
+      window.LogicHubBlueprint.initBlueprintLoad();
+    }
+
+    const saveButton = document.getElementById('saveBlueprintBtn');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => {
+        window.LogicHubBlueprint.saveBlueprint();
+      });
+    }
+
+    const shareButton = document.getElementById('shareBlueprintBtn');
+    if (shareButton) {
+      shareButton.addEventListener('click', () => {
+        window.LogicHubBlueprint.shareBlueprint();
+      });
+    }
+
+    const exportButton = document.getElementById('exportZipBtn');
+    if (exportButton) {
+      exportButton.addEventListener('click', () => {
+        window.LogicHubBlueprint.exportBlueprintJSON();
+      });
+    }
+
+    const generateButton = document.getElementById('generateAppBtn');
+    if (generateButton) {
+      generateButton.addEventListener('click', () => {
+        const status = document.getElementById('blueprintStatus');
+        if (status) {
+          status.textContent = 'Blueprint ready. Generation pipeline can now consume saved architecture JSON.';
+        }
+      });
+    }
   </script>
 </body>
 </html>
