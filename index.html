@@ -1203,6 +1203,42 @@
         }
       }
     }
+
+
+    .deployment-error-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(3, 5, 8, 0.92);
+      z-index: 9999;
+      padding: 1rem;
+    }
+    .deployment-error-overlay.show { display: flex; }
+    .deployment-error-card {
+      width: min(560px, 100%);
+      border: 1px solid rgba(255, 68, 68, 0.45);
+      background: #12090b;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    }
+    .deployment-error-title {
+      margin: 0 0 0.45rem;
+      color: var(--error);
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .deployment-error-body {
+      margin: 0;
+      color: #ffd8d8;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
   </style>
 </head>
 <body>
@@ -1538,6 +1574,14 @@
       <div class="payment-divider"></div>
       <div id="founder-payment-status" class="payment-status-box">No founder payment saved on this device yet.</div>
       <div class="payment-note">Founder payments are manually confirmed for now.</div>
+    </div>
+  </div>
+
+
+  <div id="deployment-error-overlay" class="deployment-error-overlay" role="alert" aria-live="assertive">
+    <div class="deployment-error-card">
+      <h3 class="deployment-error-title">Deployment error</h3>
+      <p id="deployment-error-text" class="deployment-error-body">Check build logs and host runtime configuration.</p>
     </div>
   </div>
 
@@ -2903,11 +2947,28 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
     }
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); }));
 
-      <div class="forge-section">
-        <h4>Community Forge — Free</h4>
-        <p id="forge-limits-text">Limit: 0/3. Resets at --:--</p>
-        <button id="forge-community-btn" class="compile-btn" style="width:100%;" onclick="executeCommunitySynthesis()">Community Forge</button>
-      </div>
+
+    function showDeploymentError(message) {
+      const overlay = document.getElementById('deployment-error-overlay');
+      const text = document.getElementById('deployment-error-text');
+      if (!overlay || !text) return;
+      text.textContent = message || 'Check build logs and host runtime configuration.';
+      overlay.classList.add('show');
+    }
+
+    window.addEventListener('error', event => {
+      const message = event?.error?.message || event?.message || '';
+      if (!message) return;
+      showDeploymentError(`Check build logs: ${message}`);
+    });
+
+    window.addEventListener('unhandledrejection', event => {
+      const reason = event?.reason;
+      const message = typeof reason === 'string' ? reason : reason?.message;
+      if (!message) return;
+      showDeploymentError(`Check build logs: ${message}`);
+    });
+
     window.app = app;
 
     if ('serviceWorker' in navigator) {
