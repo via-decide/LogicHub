@@ -1,0 +1,13 @@
+{
+  "key": "ai-research-tool",
+  "name": "AI Research Tool",
+  "starterGraph": {
+    "blocks": ["ui", "api", "database", "util"],
+    "connections": [
+      ["ui", "api"],
+      ["api", "database"],
+      ["database", "util"],
+      ["util", "ui"]
+    ]
+  }
+}

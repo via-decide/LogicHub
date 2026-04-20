@@ -1,0 +1,13 @@
+{
+  "key": "automation-bot",
+  "name": "Automation Bot",
+  "starterGraph": {
+    "blocks": ["auth", "api", "util", "database", "ui"],
+    "connections": [
+      ["auth", "api"],
+      ["api", "util"],
+      ["util", "database"],
+      ["database", "ui"]
+    ]
+  }
+}
