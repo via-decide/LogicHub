@@ -124,7 +124,19 @@
       border-radius: 4px; color: var(--accent); font-weight: 700;
       flex-shrink: 0; white-space: nowrap;
     }
-    .toolbar { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+    .toolbar { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .toolbar-action {
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 0.45rem 0.62rem;
+      font-size: 0.66rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .toolbar-action:disabled { opacity: 0.45; cursor: not-allowed; }
     .api-input {
       padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px;
       background: var(--bg-primary); color: var(--accent); font-family: var(--font-mono);
@@ -1078,7 +1090,14 @@
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="btn-icon" onclick="alert('Quick help:\n1. Add the main parts you understand, like a screen or sign-in flow.\n2. You do not need separate JS or CSS parts unless you want custom files.\n3. Press Make App to generate the files.\n4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
+      <button id="btn-toolbar-generate" class="toolbar-action">Generate App</button>
+      <button id="btn-toolbar-export" class="toolbar-action" disabled>Export ZIP</button>
+      <button id="btn-toolbar-publish" class="toolbar-action" disabled>Publish</button>
+      <button class="btn-icon" onclick="alert('Quick help:
+1. Add the main parts you understand, like a screen or sign-in flow.
+2. You do not need separate JS or CSS parts unless you want custom files.
+3. Press Make App to generate the files.
+4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
 
@@ -1346,6 +1365,9 @@
       <div class="payment-note">Founder payments are manually confirmed for now.</div>
     </div>
   </div>
+
+  <script src="./js/deploy-client.js"></script>
+  <script src="./js/publish-app.js"></script>
 
   <script>
     const FIREBASE_CONFIG = {
@@ -1791,6 +1813,7 @@
         document.getElementById("btn-export").disabled = !ready;
         document.getElementById("btn-apk").disabled = !ready;
         document.getElementById("btn-publish").disabled = n === 0;
+        if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
         const stat = document.getElementById("map-status");
         if (n === 0) { stat.textContent = "ADD PARTS TO START"; stat.className = "map-status state-idle"; }
         else if (ready) { stat.textContent = "APP READY"; stat.className = "map-status state-complete"; }
@@ -2647,27 +2670,16 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
 
       async publishApp() {
         if (this.map.blocks.length === 0) { alert("Add a few main nodes first. LogicHub can repair common missing JS/CSS files during publishing."); return; }
-        const appName = document.getElementById("forge-app-name").value.trim() || prompt("App name for publishing?", this.getProjectDisplayName()) || "";
-        if (!appName.trim()) return;
 
         const btn = document.getElementById("btn-publish");
         btn.disabled = true;
         this.log("Preparing publish request...", "accent");
 
         try {
-          const repairedFiles = this.collectProjectFiles({ pwa: true });
-          const repairedSummary = Object.keys(repairedFiles).sort().map((name) => `- ${name}`).join('\n');
-          const response = await fetch("/api/publish", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              appName,
-              prdContext: `${this.map.buildPRD()}\n# Auto-repaired package inventory\n${repairedSummary}`,
-              internalPRD: "Return one complete single-file HTML app. Inline any JavaScript or CSS needed. Do not reference missing local files. Make it deployment-ready for non-technical users."
-            })
-          });
-          const data = await this.readJsonResponse(response, "Publish");
-          if (!response.ok || data.error) throw new Error(data.error || `Publish failed with status ${response.status}`);
+          const data = window.LogicHubPublish
+            ? await window.LogicHubPublish.publishCurrentApp(this)
+            : null;
+          if (!data) return;
           this.log("Publish complete.", "success");
           if (data.url) {
             alert(`Published successfully: ${data.url}`);
@@ -2680,6 +2692,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
           alert(`Publish failed: ${err.message}`);
         } finally {
           btn.disabled = this.map.blocks.length === 0;
+          if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
         }
       }
     };
@@ -2713,6 +2726,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
     }
 
     app.init();
+    if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
   </script>
 </body>
 </html>
