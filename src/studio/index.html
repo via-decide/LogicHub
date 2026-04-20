@@ -235,6 +235,10 @@
   <script src="../components/builder/flow-graph.jsx"></script>
   <script src="../components/builder/builder-canvas.jsx"></script>
   <script src="../components/builder/node-editor.jsx"></script>
+  <script src="../engine/workflow/workflow-parser.js"></script>
+  <script src="../engine/workflow/execution-validator.js"></script>
+  <script src="../engine/workflow/node-compiler.js"></script>
+  <script src="../engine/workflow/workflow-runtime.js"></script>
   <script src="../components/preview/preview-panel.jsx"></script>
   <script src="../components/preview/deployment-panel.jsx"></script>
   <script src="../integrations/zayvora/zayvora-bridge.js"></script>
@@ -254,6 +258,12 @@
       deploymentPanel: document.getElementById('deploymentPanel'),
       zayvoraPrompt: document.getElementById('zayvoraPrompt'),
       zayvoraStatus: document.getElementById('zayvoraStatus'),
+      runtimeHandlers: {
+        Research: function (step, payload) { return Object.assign({}, payload, { research: 'gathered:' + step.title }); },
+        'Data Processor': function (step, payload) { return Object.assign({}, payload, { processed: true }); },
+        'UI Generator': function (step, payload) { return Object.assign({}, payload, { ui: 'render-ready' }); },
+        Output: function (step, payload) { return Object.assign({}, payload, { output: payload }); }
+      },
       onStateChange: function () {
         if (context.syncEditor) context.syncEditor();
         window.LogicHubStudioPreview.renderPreview(context);
