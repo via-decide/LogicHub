@@ -28,13 +28,21 @@
 
   function buildPublishBundle(app, appName) {
     const files = app.collectProjectFiles({ pwa: true });
+    const manifest = files['manifest.json'] || app.buildDefaultManifest(appName);
+    let parsedManifest = {};
+    try { parsedManifest = JSON.parse(manifest); } catch (_) { parsedManifest = {}; }
+    const permissions = Array.isArray(parsedManifest.permissions) ? parsedManifest.permissions : ['storage'];
     const metadata = {
       name: appName,
       creator: app.serverAccess?.email || app.authState?.email || 'username',
+      creatorId: app.authUser?.uid || 'guest-local',
       origin: 'logichub',
       version: '1.0',
       slug: slugify(appName),
-      description: app.map.buildPRD().slice(0, 280)
+      description: app.map.buildPRD().slice(0, 280),
+      icon: parsedManifest.icons?.[0]?.src || 'icons/icon-192.png',
+      entryUrl: './index.html',
+      permissions
     };
 
     const bundle = {
@@ -42,7 +50,7 @@
         'index.html': files['index.html'] || '<!doctype html><html><body><h1>App</h1></body></html>',
         'app.js': files['app.js'] || '',
         'style.css': files['styles.css'] || files['style.css'] || '',
-        'manifest.json': files['manifest.json'] || app.buildDefaultManifest(appName),
+        'manifest.json': manifest,
         'metadata.json': JSON.stringify(metadata, null, 2)
       },
       architecture_prd: app.map.buildPRD()

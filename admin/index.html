@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LogicHub Admin</title>
+  <style>body{font-family:Arial,sans-serif;margin:20px}button{margin:4px}pre{background:#111;color:#0f0;padding:10px;overflow:auto}</style>
+</head>
+<body>
+  <h1>LogicHub Admin</h1>
+  <p>Admin-only dashboard for payments, apps, and installs.</p>
+  <input id="secret" placeholder="Admin secret" type="password" />
+  <button onclick="loadDashboard()">Load</button>
+  <h3>Pending Payments</h3><div id="payments"></div>
+  <h3>Apps</h3><div id="apps"></div>
+  <h3>Install Metrics</h3><pre id="metrics">{}</pre>
+<script>
+async function api(method, body) {
+  const secret = document.getElementById('secret').value.trim();
+  const resp = await fetch('/api/admin/dashboard', { method, headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret }, body: body ? JSON.stringify(body) : undefined });
+  return resp.json();
+}
+async function loadDashboard(){
+  const data = await api('GET');
+  const payments = document.getElementById('payments');
+  payments.innerHTML = (data.pendingPayments||[]).map((p)=>`<div><b>${p.orderId}</b> | UTR ${p.utr} | ₹${p.amount} <button onclick="review('${p.id}','approve')">Approve</button><button onclick="review('${p.id}','reject')">Reject</button></div>`).join('') || 'None';
+  const apps = document.getElementById('apps');
+  apps.innerHTML = (data.apps||[]).map((a)=>`<div><b>${a.title||a.id}</b> (${a.app_id||a.id}) installs:${a.installs||0} <button onclick="removeApp('${a.id}')">Remove</button></div>`).join('') || 'None';
+  document.getElementById('metrics').textContent = JSON.stringify(data.installMetrics || {}, null, 2);
+}
+async function review(paymentId, action){ const r = await api('POST',{paymentId,action}); alert(r.message||'Updated'); loadDashboard(); }
+async function removeApp(appId){ const r = await api('POST',{paymentId:appId,action:'remove_app'}); alert(r.message||'Removed'); loadDashboard(); }
+</script>
+</body>
+</html>
