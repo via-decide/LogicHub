@@ -17,21 +17,20 @@
     });
 
     panel.innerHTML = [
-      '<ul>',
-      '<li><strong>Nodes:</strong> ' + context.state.nodes.length + '</li>',
-      '<li><strong>Connections:</strong> ' + context.state.edges.length + '</li>',
-      '<li><strong>Status:</strong> ' + (validation.ok ? 'Executable' : validation.issues[0]) + '</li>',
-      '</ul>',
-      '<button type="button" ' + (validation.ok ? '' : 'disabled') + ' id="simulateDeployBtn">Simulate Deploy</button>',
-      '<p class="lh-footnote">Compiles your graph into an execution plan and runs it through the workflow runtime.</p>',
-      '<hr>',
-      '<h4>Publish to Daxini.space</h4>',
-      '<label class="editor">App ID <input type="text" id="publishAppId" placeholder="support-assistant" value="' + escapeHtml(draft.appId) + '"></label>',
+      '<h4>Publish App</h4>',
+      '<ol>',
+      '<li>App Name</li>',
+      '<li>Description</li>',
+      '<li>Preview</li>',
+      '<li>Deploy</li>',
+      '</ol>',
+      '<label class="editor">App Name <input type="text" id="publishAppId" placeholder="support-assistant" value="' + escapeHtml(draft.appId) + '"></label>',
+      '<label class="editor">Description <textarea id="publishDescription" rows="2" placeholder="What does this app do?">' + escapeHtml(draft.description) + '</textarea></label>',
       '<label class="editor">Creator Passport <input type="text" id="publishCreatorPassport" placeholder="you@passport" value="' + escapeHtml(draft.creatorPassport) + '"></label>',
       '<label class="editor">Version <input type="text" id="publishVersion" placeholder="0.1.0" value="' + escapeHtml(draft.version) + '"></label>',
-      '<label class="editor">Description <textarea id="publishDescription" rows="2" placeholder="What does this app do?">' + escapeHtml(draft.description) + '</textarea></label>',
       '<label class="editor">Tags (comma-separated) <input type="text" id="publishTags" placeholder="automation,support" value="' + escapeHtml(draft.tags) + '"></label>',
-      '<button type="button" ' + (validation.ok ? '' : 'disabled') + ' id="publishMarketplaceBtn">Publish App</button>',
+      '<button type="button" ' + (validation.ok ? '' : 'disabled') + ' id="simulateDeployBtn">Preview</button>',
+      '<button type="button" ' + (validation.ok ? '' : 'disabled') + ' id="publishMarketplaceBtn">Deploy</button>',
       '<p id="publishStatus" class="lh-footnote">' + (context.lastPublishResult ? renderPublishSummary(context.lastPublishResult) : 'Provide metadata and publish your built app to Daxini.space marketplace.') + '</p>'
     ].join('');
 
