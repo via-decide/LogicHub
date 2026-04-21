@@ -7,6 +7,8 @@
       edges: [],
       selectedNodeId: null,
       activeLinkSourceId: null,
+      canvasZoom: 1,
+      justInsertedNodeId: null,
       idCounter: 0
     };
   }

@@ -113,7 +113,7 @@
       fill: none;
       opacity: 0.8;
     }
-    .lh-node {
+    .lh-block {
       position: absolute;
       width: 184px;
       border: 1px solid rgba(78,201,245,0.35);
@@ -124,18 +124,18 @@
       display: grid;
       gap: 7px;
     }
-    .lh-node.is-selected {
+    .lh-block.is-selected {
       border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(78,201,245,0.28);
     }
-    .lh-node header {
+    .lh-content header {
       display: flex;
       justify-content: space-between;
       gap: 8px;
       align-items: center;
     }
-    .lh-node h4 { margin: 0; font-size: 0.86rem; }
-    .lh-node p { margin: 0; color: var(--muted); font-size: 0.75rem; }
+    .lh-content h4 { margin: 0; font-size: 0.86rem; }
+    .lh-content p { margin: 0; color: var(--muted); font-size: 0.75rem; }
     .lh-link-port {
       justify-self: end;
       border: 1px solid var(--border);
@@ -144,18 +144,28 @@
       color: var(--accent);
       cursor: pointer;
     }
-    .lh-mobile-node-actions {
-      display: none;
+     .lh-selection-overlay {
+      position: absolute;
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 6px;
+      min-width: 170px;
+      z-index: 5;
     }
-    .lh-mobile-node-actions button {
+    .lh-selection-overlay button {
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: rgba(78,201,245,0.12);
+      background: rgba(78,201,245,0.16);
       color: var(--text);
       font-size: 0.72rem;
       padding: 6px;
+    }
+    .lh-block.is-entering {
+      animation: lhBlockInsert 220ms ease-out;
+    }
+    @keyframes lhBlockInsert {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .editor label {
       display: grid;
@@ -344,8 +354,7 @@
         display: grid;
       }
       .mobile-onboard.is-open { display: grid; }
-      .lh-node { width: 170px; }
-      .lh-mobile-node-actions { display: grid; }
+      .lh-block { width: 170px; }
     }
   </style>
 </head>
