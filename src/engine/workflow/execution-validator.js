@@ -19,5 +19,37 @@
     return { ok: issues.length === 0, issues: issues };
   }
 
-  global.LogicHubExecutionValidator = { validatePlan: validatePlan };
+  function validateWorkflowModel(model) {
+    var issues = [];
+    var parser = global.LogicHubWorkflowParser;
+    var parsed = parser && parser.parseWorkflow ? parser.parseWorkflow(model) : null;
+    if (!parsed) return { ok: false, issues: ['Workflow parser is unavailable.'] };
+
+    if (!parsed.workflow.trigger) {
+      issues.push('Workflow trigger is required.');
+    } else if (!parsed.hasSupportedTrigger) {
+      issues.push('Unsupported trigger "' + parsed.workflow.trigger + '".');
+    }
+
+    if (!parsed.workflow.actions.length) issues.push('Workflow must include at least one action.');
+
+    parsed.workflow.actions.forEach(function (action, index) {
+      if (parsed.supportedActions.indexOf(action.type) === -1) {
+        issues.push('Unsupported action at index ' + index + ': ' + action.type);
+      }
+      if (action.type === 'condition' && (!action.condition || !Array.isArray(action.then))) {
+        issues.push('Condition action requires "condition" and "then" actions.');
+      }
+      if (action.type === 'loop' && !Array.isArray(action.actions)) {
+        issues.push('Loop action requires nested "actions" array.');
+      }
+    });
+
+    return { ok: issues.length === 0, issues: issues, parsed: parsed.workflow };
+  }
+
+  global.LogicHubExecutionValidator = {
+    validatePlan: validatePlan,
+    validateWorkflowModel: validateWorkflowModel
+  };
 })(window);
