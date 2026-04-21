@@ -105,9 +105,17 @@
   function bindTouchGestures(card, context, nodeId) {
     var touchData = { startX: 0, startY: 0, active: false, dragReady: false, timer: null };
     var lastTapAt = 0;
+    var touchData = { startX: 0, startY: 0, active: false, dragReady: false, timer: null, lastTap: 0 };
     card.addEventListener('touchstart', function (event) {
       if (context.isPreviewMode) return;
       if (!event.touches[0]) return;
+      var now = Date.now();
+      if (now - touchData.lastTap < 260) {
+        context.state.selectedNodeId = nodeId;
+        renderCanvasElements(context);
+        context.onStateChange();
+      }
+      touchData.lastTap = now;
       touchData.active = true;
       touchData.dragReady = false;
       touchData.startX = event.touches[0].clientX;
@@ -179,6 +187,7 @@
   function setupBuilderCanvas(context) {
     var canvas = context.canvas;
     var pinchDistance = 0;
+    var pinchData = { distance: 0 };
 
     canvas.addEventListener('dragover', function (event) {
       event.preventDefault();
@@ -225,10 +234,35 @@
       pinchDistance = 0;
     });
 
+    canvas.addEventListener('touchmove', function (event) {
+      if (event.touches.length !== 2) return;
+      var dx = event.touches[0].clientX - event.touches[1].clientX;
+      var dy = event.touches[0].clientY - event.touches[1].clientY;
+      var distance = Math.sqrt((dx * dx) + (dy * dy));
+      if (!pinchData.distance) {
+        pinchData.distance = distance;
+        return;
+      }
+      var delta = (distance - pinchData.distance) / 300;
+      var nextZoom = Math.max(0.65, Math.min(1.55, (context.state.canvasZoom || 1) + delta));
+      context.state.canvasZoom = nextZoom;
+      context.canvasNodeLayer.style.transformOrigin = 'top left';
+      context.canvasEdgeLayer.style.transformOrigin = 'top left';
+      context.canvasNodeLayer.style.transform = 'scale(' + nextZoom + ')';
+      context.canvasEdgeLayer.style.transform = 'scale(' + nextZoom + ')';
+      pinchData.distance = distance;
+      event.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', function () {
+      pinchData.distance = 0;
+    });
+
     renderCanvasElements(context);
   }
 
   global.LogicHubStudioCanvas = {
+    handleNodeAction: handleNodeAction,
     setupBuilderCanvas: setupBuilderCanvas,
     renderCanvasElements: renderCanvasElements
   };
