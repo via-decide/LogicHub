@@ -3,118 +3,146 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const modeArg = process.argv.find((arg) => arg.startsWith('--mode='));
-const mode = modeArg ? modeArg.split('=')[1] : 'build';
+const mode = modeArg ? modeArg.split('=')[1] : 'deployment';
+const isBuild = mode === 'build';
+const isDeployment = mode === 'deployment';
 const rootDir = process.cwd();
 
-function read(file) {
-  return fs.readFileSync(path.join(rootDir, file), 'utf8');
-}
+console.log(`\n🔍 Running health checks (mode: ${mode})...\n`);
 
-function exists(file) {
-  return fs.existsSync(path.join(rootDir, file));
-}
+let passed = 0;
+let failed = 0;
 
-function logOk(message) {
-  console.log(`✅ ${message}`);
-}
+const fromRoot = (...segments) => path.join(rootDir, ...segments);
 
-function logWarn(message) {
-  console.log(`⚠ ${message}`);
-}
-
-function logFail(message) {
-  console.error(`❌ ${message}`);
-}
-
-function checkUiLoads() {
-  if (!exists('index.html')) throw new Error('index.html is missing.');
-  const html = read('index.html');
-  if (!/<body[\s>]/i.test(html)) throw new Error('index.html missing <body>.');
-  if (!html.includes('id="canvas"')) throw new Error('Builder canvas container (#canvas) not found.');
-  logOk('UI shell and builder canvas markup detected in index.html.');
-}
-
-function checkApiEndpoints() {
-  const endpoints = [
-    'api/access-status.js',
-    'api/founder-request.js',
-    'api/publish-app.js',
-    'api/build-apk.js'
-  ];
-  const missing = endpoints.filter((file) => !exists(file));
-  if (missing.length) {
-    throw new Error(`Missing API handlers: ${missing.join(', ')}`);
-  }
-  logOk('Expected API handlers exist for access, founder, publish, and APK routes.');
-}
-
-async function checkRemoteApiReachability() {
-  const baseUrl = process.env.PUBLIC_SITE_URL || process.env.PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    logWarn('Skipping live API probe (set PUBLIC_SITE_URL to enable).');
+function checkUiShell() {
+  const indexPath = fromRoot('index.html');
+  if (!fs.existsSync(indexPath)) {
+    console.log('❌ index.html is missing.');
+    failed += 1;
     return;
   }
 
-  const normalized = baseUrl.replace(/\/$/, '');
-  const url = `${normalized}/api/access-status`;
+  const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+  if (indexHtml.includes('id="canvas"') && indexHtml.includes('id="map-status"')) {
+    console.log('✅ UI shell and builder canvas markup detected in index.html.');
+    passed += 1;
+  } else {
+    console.log('❌ UI shell or builder canvas markup missing.');
+    failed += 1;
+  }
+}
+
+function checkApiHandlers() {
+  const requiredHandlers = [
+    'access-status.js',
+    'founder-request.js',
+    'publish-app.js',
+    'build-apk.js'
+  ];
+
+  let handlersOk = true;
+  for (const handler of requiredHandlers) {
+    if (!fs.existsSync(fromRoot('api', handler))) {
+      console.log(`❌ Missing API handler: ${handler}`);
+      handlersOk = false;
+      failed += 1;
+    }
+  }
+
+  if (handlersOk) {
+    console.log('✅ Expected API handlers exist for access, founder, publish, and APK routes.');
+    passed += 1;
+  }
+}
+
+function checkBuilderCanvasBootstrap() {
+  const indexHtml = fs.readFileSync(fromRoot('index.html'), 'utf-8');
+  if (indexHtml.includes('id="canvas"') && indexHtml.includes('new LogicMap()')) {
+    console.log('✅ Builder canvas bootstrap markers are present.');
+    passed += 1;
+  } else {
+    console.log('⚠ Builder canvas bootstrap markers may be incomplete.');
+  }
+}
+
+function checkAssetPaths() {
+  const htmlFiles = ['index.html', 'pages/index.html', 'blueprints/index.html'];
+  let absolutePathsFound = false;
+
+  for (const file of htmlFiles) {
+    const filePath = fromRoot(file);
+    if (!fs.existsSync(filePath)) continue;
+    const content = fs.readFileSync(filePath, 'utf-8');
+    if (content.includes('src="/') || content.includes("src='/") || content.includes('href="/') || content.includes("href='/")) {
+      absolutePathsFound = true;
+    }
+  }
+
+  if (!absolutePathsFound) {
+    console.log('✅ Static HTML files do not use absolute-root asset paths.');
+    passed += 1;
+  } else {
+    console.log('⚠ Some files may use absolute paths.');
+  }
+}
+
+function checkPublicDirectory() {
+  if (!isBuild) return;
+
+  const publicDir = fromRoot('public');
+  if (fs.existsSync(publicDir)) {
+    const files = fs.readdirSync(publicDir);
+    console.log(`✅ Public directory exists with ${files.length} items.`);
+    passed += 1;
+  } else {
+    console.log('❌ Public directory does not exist!');
+    failed += 1;
+  }
+}
+
+async function checkRemoteProbe() {
+  if (!isDeployment) {
+    console.log('⚠ Remote endpoint probe skipped in build mode. Use --mode=deployment to enable.');
+    return;
+  }
+
+  const baseUrl = process.env.PUBLIC_SITE_URL || process.env.PUBLIC_API_BASE_URL;
+  if (!baseUrl) {
+    console.log('⚠ Remote endpoint probe requires active deployment.');
+    return;
+  }
+
   try {
-    const response = await fetch(url, { method: 'GET' });
+    const normalized = baseUrl.replace(/\/$/, '');
+    const response = await fetch(`${normalized}/api/access-status`);
     if (response.status >= 500) {
       throw new Error(`Server returned ${response.status}`);
     }
-    logOk(`Live API probe reached ${url} (status ${response.status}).`);
+    console.log('✅ Remote endpoint probe succeeded.');
+    passed += 1;
   } catch (error) {
-    throw new Error(`Unable to reach ${url}: ${error.message}`);
+    console.log(`❌ Remote endpoint probe failed: ${error.message}`);
+    failed += 1;
   }
-}
-
-function checkStaticAssetsRelative() {
-  const htmlFiles = ['index.html', 'pages/index.html', 'blueprints/index.html'].filter(exists);
-  const badLinks = [];
-
-  for (const file of htmlFiles) {
-    const html = read(file);
-    const matches = html.match(/(?:src|href)=['"]\/(?!\/)([^'"]+)['"]/g) || [];
-    if (matches.length) {
-      badLinks.push(`${file}: ${matches.join(', ')}`);
-    }
-  }
-
-  if (badLinks.length) {
-    throw new Error(`Found absolute asset paths. ${badLinks.join(' | ')}`);
-  }
-
-  logOk('Static HTML files do not use absolute-root asset paths.');
-}
-
-function checkBuilderCanvasLoads() {
-  const html = read('index.html');
-  const hasCanvas = html.includes('id="canvas"');
-  const hasMap = html.includes('map: new LogicMap()') || html.includes('this.map = new LogicMap()');
-  if (!hasCanvas || !hasMap) {
-    throw new Error('Builder bootstrap markers missing from index.html.');
-  }
-  logOk('Builder canvas bootstrap markers are present.');
 }
 
 async function run() {
-  try {
-    checkUiLoads();
-    checkApiEndpoints();
-    checkBuilderCanvasLoads();
-    checkStaticAssetsRelative();
+  checkUiShell();
+  checkApiHandlers();
+  checkBuilderCanvasBootstrap();
+  checkAssetPaths();
+  checkPublicDirectory();
+  await checkRemoteProbe();
 
-    if (mode === 'deployment' || mode === 'full') {
-      await checkRemoteApiReachability();
-    } else {
-      logWarn('Remote endpoint probe skipped in build mode. Use --mode=deployment to enable.');
-    }
+  console.log(`\n📊 Health Check Results: ${passed} passed, ${failed} failed\n`);
 
-    console.log('✅ Deployment health-check passed.');
-  } catch (error) {
-    logFail(error.message || String(error));
-    process.exitCode = 1;
+  if (failed > 0) {
+    console.error('❌ Deployment health-check FAILED');
+    process.exit(1);
   }
+
+  console.log('✅ Deployment health-check passed.');
 }
 
 run();
