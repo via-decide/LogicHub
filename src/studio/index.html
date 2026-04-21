@@ -28,6 +28,7 @@
       gap: 12px;
       padding: 12px;
       min-height: 100vh;
+      padding-bottom: 92px;
     }
     .panel {
       background: linear-gradient(160deg, var(--panel-soft), var(--panel));
@@ -55,6 +56,12 @@
       cursor: grab;
     }
     .lh-lib-item span { color: var(--muted); font-size: 0.78rem; }
+    .lh-mobile-tool-card {
+      padding: 12px;
+      border-radius: 12px;
+      min-height: 58px;
+      text-align: left;
+    }
     .workspace {
       position: relative;
       overflow: hidden;
@@ -110,6 +117,19 @@
       background: rgba(78,201,245,0.15);
       color: var(--accent);
       cursor: pointer;
+    }
+    .lh-mobile-node-actions {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .lh-mobile-node-actions button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(78,201,245,0.12);
+      color: var(--text);
+      font-size: 0.72rem;
+      padding: 6px;
     }
     .editor label {
       display: grid;
@@ -184,9 +204,96 @@
       padding: 8px 10px;
       cursor: pointer;
     }
+    .mobile-bottom-bar,
+    .mobile-tool-drawer,
+    .mobile-hint,
+    .mobile-onboard {
+      display: none;
+    }
+    .mobile-tool-drawer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 74px;
+      z-index: 12;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      background: linear-gradient(180deg, #111a2f, #0a0f1c);
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.45);
+      max-height: 55vh;
+      overflow: auto;
+    }
+    .mobile-tool-drawer.is-open { display: block; }
+    .mobile-onboard {
+      position: fixed;
+      inset: 0;
+      z-index: 14;
+      background: rgba(5,9,18,0.86);
+      padding: 20px;
+      place-items: center;
+    }
+    .mobile-onboard article {
+      width: min(420px, 100%);
+      background: linear-gradient(160deg, var(--panel-soft), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .mobile-onboard ol { margin: 8px 0 14px; padding-left: 18px; }
+    .mobile-onboard button,
+    .mobile-bottom-bar button,
+    .mobile-hint button {
+      border: 1px solid var(--border);
+      background: rgba(78,201,245,0.2);
+      color: var(--text);
+      border-radius: 10px;
+      font: inherit;
+      padding: 10px;
+    }
+    .mobile-bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 13;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      background: rgba(8,12,22,0.96);
+      backdrop-filter: blur(8px);
+    }
+    .mobile-bottom-bar button { min-height: 44px; font-size: 0.76rem; }
+    .mobile-bottom-bar button.is-active { border-color: var(--accent); color: var(--accent); }
+    .mobile-hint { margin-bottom: 8px; display: grid; gap: 8px; }
+    .mobile-hint button { width: 100%; }
     @media (max-width: 1100px) {
       .studio { grid-template-columns: 1fr; }
       .workspace { min-height: 55vh; }
+    }
+    @media (max-width: 768px) {
+      .studio {
+        padding: 8px 8px 96px;
+        gap: 8px;
+      }
+      .panel { border-radius: 12px; padding: 10px; }
+      .studio > aside:first-of-type,
+      .studio > aside:last-of-type {
+        display: none;
+      }
+      .workspace {
+        min-height: calc(100vh - 116px);
+      }
+      .workspace h2 { margin-bottom: 6px; }
+      .mobile-bottom-bar,
+      .mobile-hint {
+        display: grid;
+      }
+      .mobile-onboard.is-open { display: grid; }
+      .lh-node { width: 170px; }
+      .lh-mobile-node-actions { display: grid; }
     }
   </style>
 </head>
@@ -199,6 +306,9 @@
 
     <section class="panel workspace">
       <h2>Builder Canvas</h2>
+      <div class="mobile-hint">
+        <button type="button" id="openToolsBtn">➕ Add Block</button>
+      </div>
       <div id="builderCanvas" class="canvas">
         <svg id="edgeLayer" aria-hidden="true"></svg>
         <div id="nodeLayer" class="node-layer"></div>
@@ -230,6 +340,28 @@
       </section>
     </aside>
   </main>
+  <section id="mobileToolDrawer" class="mobile-tool-drawer panel">
+    <h3>Add Block</h3>
+    <section id="mobileComponentLibrary" class="library"></section>
+  </section>
+  <nav class="mobile-bottom-bar" id="mobileBottomBar">
+    <button type="button" data-mobile-action="add">➕ Add</button>
+    <button type="button" data-mobile-action="edit" class="is-active">✏️ Edit</button>
+    <button type="button" data-mobile-action="preview">👁 Preview</button>
+    <button type="button" data-mobile-action="publish">🚀 Publish</button>
+  </nav>
+  <section id="mobileOnboard" class="mobile-onboard">
+    <article>
+      <h3>Welcome to LogicHub</h3>
+      <ol>
+        <li>Tap <strong>Add Block</strong>.</li>
+        <li>Build your page on the canvas.</li>
+        <li>Tap <strong>Preview</strong> to test.</li>
+        <li>Tap <strong>Publish</strong> to deploy.</li>
+      </ol>
+      <button type="button" id="dismissOnboardBtn">Start Building</button>
+    </article>
+  </section>
 
   <script src="../components/library/component-library.jsx"></script>
   <script src="../components/builder/flow-graph.jsx"></script>
@@ -262,6 +394,10 @@
       deploymentPanel: document.getElementById('deploymentPanel'),
       zayvoraPrompt: document.getElementById('zayvoraPrompt'),
       zayvoraStatus: document.getElementById('zayvoraStatus'),
+      mobileToolDrawer: document.getElementById('mobileToolDrawer'),
+      openToolsBtn: document.getElementById('openToolsBtn'),
+      mobileBottomBar: document.getElementById('mobileBottomBar'),
+      mobileOnboard: document.getElementById('mobileOnboard'),
       marketplaceDraft: {
         appId: '',
         creatorPassport: '',
@@ -283,9 +419,20 @@
     };
 
     window.LogicHubStudioLibrary.renderLibrary(document.getElementById('componentLibrary'));
+    window.LogicHubStudioLibrary.renderLibrary(document.getElementById('mobileComponentLibrary'), {
+      mobileCards: true,
+      onItemSelected: function (type) {
+        var node = window.LogicHubStudioGraph.createNode(context.state, type, 28, 40 + (context.state.nodes.length * 56));
+        context.state.selectedNodeId = node.id;
+        if (context.mobileToolDrawer) context.mobileToolDrawer.classList.remove('is-open');
+        window.LogicHubStudioCanvas.renderCanvasElements(context);
+        context.onStateChange();
+      }
+    });
     window.LogicHubStudioNodeEditor.setupNodeEditor(context);
     window.LogicHubStudioCanvas.setupBuilderCanvas(context);
     connectZayvoraGeneration();
+    connectMobileActions();
     context.onStateChange();
 
     function loadGeneratedGraph(generated) {
@@ -316,6 +463,58 @@
         loadGeneratedGraph(generated);
         context.zayvoraStatus.textContent = 'Generated workflow for intent "' + reasoning.intent + '" (' + structuredTask.steps.length + ' nodes).';
       });
+    }
+
+    function connectMobileActions() {
+      if (context.openToolsBtn) {
+        context.openToolsBtn.addEventListener('click', function () {
+          context.mobileToolDrawer.classList.toggle('is-open');
+          activateMobileAction('add');
+        });
+      }
+
+      if (context.mobileBottomBar) {
+        context.mobileBottomBar.addEventListener('click', function (event) {
+          var button = event.target.closest('[data-mobile-action]');
+          if (!button) return;
+          activateMobileAction(button.dataset.mobileAction);
+        });
+      }
+
+      if (context.mobileOnboard && localStorage.getItem('lh-mobile-onboarded') === '1') {
+        context.mobileOnboard.classList.remove('is-open');
+      } else if (context.mobileOnboard) {
+        context.mobileOnboard.classList.add('is-open');
+      }
+
+      var dismiss = document.getElementById('dismissOnboardBtn');
+      if (dismiss) dismiss.addEventListener('click', function () {
+        localStorage.setItem('lh-mobile-onboarded', '1');
+        context.mobileOnboard.classList.remove('is-open');
+      });
+    }
+
+    function activateMobileAction(action) {
+      if (!context.mobileBottomBar) return;
+      Array.prototype.forEach.call(context.mobileBottomBar.querySelectorAll('[data-mobile-action]'), function (button) {
+        button.classList.toggle('is-active', button.dataset.mobileAction === action);
+      });
+
+      if (action === 'add') {
+        context.mobileToolDrawer.classList.add('is-open');
+      } else {
+        context.mobileToolDrawer.classList.remove('is-open');
+      }
+
+      var previewPanelSection = context.previewPanel.closest('section');
+      var publishPanelSection = context.deploymentPanel.closest('section');
+      if (!previewPanelSection || !publishPanelSection) return;
+      previewPanelSection.style.display = action === 'preview' ? 'block' : 'none';
+      publishPanelSection.style.display = action === 'publish' ? 'block' : 'none';
+      if (action === 'edit' || action === 'add') {
+        previewPanelSection.style.display = 'none';
+        publishPanelSection.style.display = 'none';
+      }
     }
   </script>
 </body>

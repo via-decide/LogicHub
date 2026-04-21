@@ -9,12 +9,13 @@
     { type: 'Notification', description: 'Sends user or system alerts.' }
   ];
 
-  function renderLibrary(container) {
+  function renderLibrary(container, options) {
     if (!container) return;
+    options = options || {};
 
     container.innerHTML = COMPONENTS.map(function (component) {
       return [
-        '<button class="lh-lib-item" draggable="true" data-component-type="' + component.type + '">',
+        '<button class="lh-lib-item' + (options.mobileCards ? ' lh-mobile-tool-card' : '') + '" draggable="true" data-component-type="' + component.type + '">',
         '<strong>' + component.type + '</strong>',
         '<span>' + component.description + '</span>',
         '</button>'
@@ -25,6 +26,11 @@
       item.addEventListener('dragstart', function (event) {
         event.dataTransfer.setData('text/plain', item.dataset.componentType);
         event.dataTransfer.effectAllowed = 'copy';
+      });
+      item.addEventListener('click', function () {
+        if (typeof options.onItemSelected === 'function') {
+          options.onItemSelected(item.dataset.componentType);
+        }
       });
     });
   }
