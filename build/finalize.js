@@ -6,7 +6,7 @@ const PUBLIC_DIR = path.join(process.cwd(), 'public');
 
 console.log('\n📋 Finalizing build...');
 
-const requiredEntries = ['index.html', 'api'];
+const requiredEntries = ['index.html', 'api', 'js', 'components'];
 let allPresent = true;
 
 for (const entry of requiredEntries) {

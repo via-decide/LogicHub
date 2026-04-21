@@ -45,6 +45,27 @@ node deploy/health-check.js --mode=deployment
 - Build mode validates UI shell, builder canvas markers, API handler presence, and static path safety.
 - Deployment mode also probes live API reachability when `PUBLIC_SITE_URL` is configured.
 
+## Recover failed Vercel deployments in bulk
+
+1. Add deployment ids or URLs from the failed deployment list into `deploy/deployments-to-recover.txt` (one per line).
+2. Preview commands without execution:
+
+```bash
+npm run recover:deployments
+```
+
+3. Execute redeploys:
+
+```bash
+npm run recover:deployments -- --run
+```
+
+4. Optional custom list file:
+
+```bash
+npm run recover:deployments -- --file=path/to/list.txt --run
+```
+
 ## Troubleshooting
 
 ### Deployment shows blank UI

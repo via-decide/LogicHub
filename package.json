@@ -8,6 +8,7 @@
     "build:vercel": "npm run build:assets && npm run health-check:build && npm run finalize:build",
     "health-check:build": "node ./deploy/health-check.js --mode=build",
     "finalize:build": "node ./build/finalize.js",
+    "recover:deployments": "node ./deploy/recover-deployments.js",
     "dev": "node ./deploy/dev-server.js",
     "start": "node ./api/index.js"
   },

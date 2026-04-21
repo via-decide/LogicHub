@@ -1,0 +1,4 @@
+# Paste one Vercel deployment URL or deployment id per line.
+# Example:
+# dpl_1234567890abcdef
+# my-project-git-main-abc123.vercel.app
