@@ -9,9 +9,23 @@
     async function executeNode(node) {
       if (node.action === 'api' && node.request) {
         var payload = await apiClient(node.request, state.getState());
-        state.set(node.responseKey || (node.id + 'Response'), payload);
+        state.set(node.responsePath || node.responseKey || (node.id + 'Response'), payload);
       }
-      await componentLoader.render(node, { state: state.getState(), setState: state.set });
+
+      if (node.action === 'setState' && node.path) {
+        state.set(node.path, node.value);
+      }
+
+      if (node.action === 'patchState' && node.state) {
+        state.patch(node.state);
+      }
+
+      await componentLoader.render(node, {
+        state: state.getState(),
+        getState: state.get,
+        setState: state.set,
+        updateState: state.patch
+      });
       return state.getState();
     }
 
