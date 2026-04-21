@@ -124,6 +124,13 @@
       font: inherit;
       min-height: 48px;
     }
+    .builder-entry-actions small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.75rem;
+      line-height: 1.3;
+    }
     .panel {
       background: linear-gradient(160deg, var(--panel-soft), var(--panel));
       border: 1px solid var(--border);
@@ -138,6 +145,26 @@
       color: var(--muted);
     }
     .library { display: grid; gap: 8px; }
+    .app-structure {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: rgba(0,0,0,0.12);
+    }
+    .app-structure ul { margin: 6px 0 0 14px; padding: 0; display: grid; gap: 4px; }
+    .app-structure button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 4px 6px;
+      font: inherit;
+    }
+    .app-structure button.is-active { border-color: var(--accent); color: var(--accent); }
+    .lh-lib-category h4 { margin: 0 0 6px; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.03em; text-transform: uppercase; }
     .panel-collapse {
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -312,6 +339,20 @@
     }
     .lh-empty,
     .lh-footnote { color: var(--muted); font-size: 0.78rem; }
+    .canvas-empty {
+      position: absolute;
+      inset: 16px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      display: none;
+      place-content: center;
+      text-align: center;
+      gap: 8px;
+      background: rgba(4,8,16,0.35);
+      z-index: 3;
+    }
+    .canvas-empty.is-visible { display: grid; }
+    .canvas-empty-actions { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
     .zayvora textarea {
       width: 100%;
       min-height: 84px;
@@ -449,7 +490,7 @@
       bottom: 0;
       z-index: 13;
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
       padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
       border-top: 1px solid var(--border);
@@ -516,9 +557,9 @@
       <h1 style="margin:0;">Create App</h1>
       <p class="lh-footnote" style="margin:0;">Manual builder is the foundation. AI and voice accelerate your workflow.</p>
       <div class="builder-entry-actions">
-        <button type="button" id="startManualBuilderBtn">Start Building</button>
-        <button type="button" id="startAIGeneratorBtn">Generate with AI</button>
-        <button type="button" id="startVoiceBuilderBtn">Speak to Build</button>
+        <button type="button" id="startManualBuilderBtn">Start Building<small>Build app manually with components.</small></button>
+        <button type="button" id="startAIGeneratorBtn">Generate with AI<small>Describe your app and generate structure.</small></button>
+        <button type="button" id="startVoiceBuilderBtn">Speak to Build<small>Use voice to generate your app.</small></button>
       </div>
     </article>
   </section>
@@ -550,15 +591,14 @@
   <main class="builder-layout" id="builderLayout">
     <aside class="panel" id="leftPanel">
       <div class="panel-heading">
-        <h2>Components</h2>
+        <h2>App Structure + Components</h2>
         <button type="button" class="panel-collapse" id="collapseLeftBtn">&lt;&lt;</button>
       </div>
-      <div class="panel-tabs">
-        <button type="button" class="panel-tab is-active">Pages</button>
-        <button type="button" class="panel-tab">Components</button>
-        <button type="button" class="panel-tab">Templates</button>
-        <button type="button" class="panel-tab">Assets</button>
-      </div>
+      <section class="app-structure">
+        <h3>App Structure</h3>
+        <div id="appStructureTree" class="lh-footnote">Pages and sections appear as you build.</div>
+      </section>
+      <h3>Components</h3>
       <section id="componentLibrary" class="library"></section>
     </aside>
 
@@ -568,6 +608,14 @@
         <button type="button" id="openToolsBtn">➕ Add Block</button>
       </div>
       <div id="builderCanvas" class="canvas">
+        <section id="canvasEmptyState" class="canvas-empty">
+          <strong>Start by adding a component.</strong>
+          <div class="canvas-empty-actions">
+            <button type="button" data-quick-add="Section">Add Section</button>
+            <button type="button" data-quick-add="Text">Add Text</button>
+            <button type="button" data-quick-add="Button">Add Button</button>
+          </div>
+        </section>
         <svg id="edgeLayer" aria-hidden="true"></svg>
         <div id="nodeLayer" class="node-layer"></div>
       </div>
@@ -613,14 +661,15 @@
   </main>
   <div id="mobileDrawerBackdrop" class="mobile-drawer-backdrop"></div>
   <section id="mobileToolDrawer" class="mobile-tool-drawer panel">
-    <h3>Add Block</h3>
+    <h3>Components</h3>
     <section id="mobileComponentLibrary" class="library"></section>
   </section>
   <nav class="mobile-bottom-bar" id="mobileBottomBar">
-    <button type="button" data-mobile-action="add">➕ Add</button>
-    <button type="button" data-mobile-action="blocks" class="is-active">🧩 Blocks</button>
+    <button type="button" data-mobile-action="structure">🗂 Structure</button>
+    <button type="button" data-mobile-action="components" class="is-active">🧩 Components</button>
+    <button type="button" data-mobile-action="properties">⚙️ Properties</button>
     <button type="button" data-mobile-action="preview">👁 Preview</button>
-    <button type="button" data-mobile-action="publish">🚀 Publish</button>
+    <button type="button" data-mobile-action="publish">🚀 Deploy</button>
   </nav>
   <section id="mobileEditPanel" class="mobile-edit-panel panel">
     <h3>Block Editor</h3>
@@ -716,6 +765,8 @@
       topPublishBtn: document.getElementById('topPublishBtn'),
       topVoiceBtn: document.getElementById('voiceBuilderBtnTop'),
       builderLayout: document.getElementById('builderLayout'),
+      appStructureTree: document.getElementById('appStructureTree'),
+      canvasEmptyState: document.getElementById('canvasEmptyState'),
       collapseLeftBtn: document.getElementById('collapseLeftBtn'),
       collapseRightBtn: document.getElementById('collapseRightBtn'),
       marketplaceDraft: {
@@ -740,6 +791,8 @@
       creationMode: 'manual',
       onStateChange: function () {
         if (context.syncEditor) context.syncEditor();
+        renderAppStructure();
+        renderCanvasGuidance();
         window.LogicHubStudioPreview.renderPreview(context);
         window.LogicHubStudioDeploy.renderDeploymentPanel(context);
       }
@@ -767,6 +820,7 @@
     connectMobileEditorPanel();
     connectPublishWizard();
     connectKeyboardShortcuts();
+    connectQuickAddButtons();
     context.onStateChange();
 
     function loadGeneratedGraph(generated) {
@@ -994,13 +1048,74 @@
       });
     }
 
+    function renderCanvasGuidance() {
+      if (!context.canvasEmptyState) return;
+      context.canvasEmptyState.classList.toggle('is-visible', context.state.nodes.length === 0);
+    }
+
+    function renderAppStructure() {
+      if (!context.appStructureTree) return;
+      if (!context.state.nodes.length) {
+        context.appStructureTree.textContent = 'Pages and sections appear as you build.';
+        return;
+      }
+      var groups = {};
+      context.state.nodes.forEach(function (node) {
+        var key = node.type === 'Section' ? 'Home' : 'Home · Sections';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(node);
+      });
+      var html = ['<ul><li><strong>Pages</strong><ul>'];
+      Object.keys(groups).forEach(function (groupName) {
+        html.push('<li><span>' + groupName + '</span><ul>');
+        groups[groupName].forEach(function (node) {
+          html.push('<li><button type="button" data-structure-node="' + node.id + '" class="' + (node.id === context.state.selectedNodeId ? 'is-active' : '') + '">' + node.title + '</button></li>');
+        });
+        html.push('</ul></li>');
+      });
+      html.push('</ul></li></ul>');
+      context.appStructureTree.innerHTML = html.join('');
+    }
+
+    function connectQuickAddButtons() {
+      if (context.canvasEmptyState) {
+        context.canvasEmptyState.addEventListener('click', function (event) {
+          var quick = event.target.closest('[data-quick-add]');
+          if (!quick) return;
+          var node = window.LogicHubStudioGraph.createNode(context.state, quick.dataset.quickAdd, 44, 58 + (context.state.nodes.length * 54));
+          context.state.selectedNodeId = node.id;
+          window.LogicHubStudioCanvas.renderCanvasElements(context);
+          context.onStateChange();
+        });
+      }
+      if (context.appStructureTree) {
+        context.appStructureTree.addEventListener('click', function (event) {
+          var item = event.target.closest('[data-structure-node]');
+          if (!item) return;
+          context.state.selectedNodeId = item.dataset.structureNode;
+          window.LogicHubStudioCanvas.renderCanvasElements(context);
+          context.onStateChange();
+        });
+      }
+    }
+
     function activateMobileAction(action) {
       if (!context.mobileBottomBar) return;
       Array.prototype.forEach.call(context.mobileBottomBar.querySelectorAll('[data-mobile-action]'), function (button) {
         button.classList.toggle('is-active', button.dataset.mobileAction === action);
       });
 
-      if (action === 'add') {
+      if (action === 'components') {
+        toggleDrawer(true);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.remove('is-open');
+      } else if (action === 'properties') {
+        toggleDrawer(false);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.toggle('is-open', true);
+      } else if (action === 'structure') {
+        toggleDrawer(false);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.remove('is-open');
+        if (context.appStructureTree) context.appStructureTree.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (action === 'add') {
         toggleDrawer(true);
       } else if (action === 'blocks') {
         toggleDrawer(false);
@@ -1016,7 +1131,7 @@
       publishPanelSection.style.display = action === 'publish' ? 'block' : 'none';
       context.isPreviewMode = action === 'preview';
       if (context.canvas) context.canvas.closest('.workspace').classList.toggle('is-preview', !!context.isPreviewMode);
-      if (action === 'blocks' || action === 'add') {
+      if (action === 'blocks' || action === 'add' || action === 'components' || action === 'structure' || action === 'properties') {
         previewPanelSection.style.display = 'none';
         publishPanelSection.style.display = 'none';
       }
