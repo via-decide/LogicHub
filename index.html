@@ -1077,19 +1077,11 @@
         width: 100%;
         height: auto;
         min-height: 52px;
-        flex-direction: row;
-        flex-wrap: nowrap;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         padding: 0.4rem 0.6rem;
-        overflow-x: auto;
-        overflow-y: hidden;
-        gap: 0.4rem;
-        align-items: center;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
+        display: none;
       }
-      .sidebar::-webkit-scrollbar { display: none; }
       .sidebar h3 { display: none; }
       .sidebar-grid {
         display: flex;
@@ -1115,8 +1107,8 @@
       .canvas {
         display: block;
         width: 100%;
-        height: clamp(320px, 54dvh, 560px);
-        min-height: clamp(320px, 54dvh, 560px);
+        height: clamp(380px, 80dvh, 720px);
+        min-height: clamp(380px, 80dvh, 720px);
         overflow: hidden;
         touch-action: pan-y pinch-zoom;
         -webkit-overflow-scrolling: touch;
@@ -1128,7 +1120,7 @@
         position: sticky;
         bottom: 0;
         z-index: 120;
-        grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         padding: 0.45rem 0.6rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
         gap: 0.35rem;
         margin-top: 0;
@@ -1182,7 +1174,7 @@
       .footer button {
         padding: 0.55rem 0.25rem;
         font-size: 0.62rem;
-        min-height: 44px;
+        min-height: 48px;
       }
       input, textarea {
         font-size: 16px;
@@ -1211,7 +1203,7 @@
   <div class="header">
     <div class="header-left">
       <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">AI APP BUILDER</span></div>
-      <div class="map-status state-idle" id="map-status">ADD PARTS TO START</div>
+      <div class="map-status state-idle" id="map-status">ADD SCREEN TO START</div>
       <div class="info-badge" id="block-count">0 parts</div>
     </div>
     <div class="toolbar">
@@ -1223,7 +1215,7 @@
       <button class="btn-icon" onclick="alert('Quick help:
 1. Add the main parts you understand, like a screen or sign-in flow.
 2. You do not need separate JS or CSS parts unless you want custom files.
-3. Press Make App to generate the files.
+3. Open Blocks to generate the files.
 4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
@@ -1256,12 +1248,12 @@
     <div class="logger">
       <div class="log-line" id="log-1">>> SYSTEM BOOTING...</div>
       <div class="log-line" id="log-2">>> READY TO BUILD</div>
-      <div class="log-line success" id="log-3">>> ADD PARTS TO START</div>
+      <div class="log-line success" id="log-3">>> ADD SCREEN TO START</div>
     </div>
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> LogicHub helps you build prompt apps, internal tools, and lightweight workflow software without starting from a blank codebase. Add the main parts you understand and LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
+  <div class="helper-strip"><strong>New here?</strong> Start with the canvas: add your first screen, organize blocks, preview your app, then publish when ready. Advanced deployment options (APK, export, and download package) are now grouped under Publish → Advanced Deployment.</div>
 
   <div class="landing-hero">
     <div class="landing-hero-card">
@@ -1271,16 +1263,15 @@
       </div>
       <div class="primary-actions">
         <button class="primary-action-btn" onclick="app.applyStarterSetup('ai-research-tool')">Create From Template</button>
-        <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add parts manually</button>
+        <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add Screen</button>
         <button class="primary-action-btn" onclick="app.applyStarterSetup('sample')">View a sample app</button>
         <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">Publish to Daxini.space</button>
       </div>
       <div class="capability-strip">
-        <div class="capability-chip">Make App Plan</div>
-        <div class="capability-chip">Download ZIP</div>
-        <div class="capability-chip">Android App</div>
+        <div class="capability-chip">Add Screen</div>
+        <div class="capability-chip">Blocks</div>
+        <div class="capability-chip">Preview</div>
         <div class="capability-chip">Publish</div>
-        <div class="capability-chip">Install</div>
       </div>
       <div class="template-strip" id="template-gallery">
         <button class="template-btn" onclick="app.applyStarterSetup('ai-research-tool')">AI Research Tool</button>
@@ -1296,7 +1287,7 @@
   <div class="builder-lanes">
     <div class="lane-card"><h4>Left: Available Parts</h4><p>Use Screen, Login, Data, and Logic parts from the left panel.</p></div>
     <div class="lane-card"><h4>Center: Current App Structure</h4><p>Arrange and connect parts in the center canvas. Node connection behavior is unchanged.</p></div>
-    <div class="lane-card"><h4>Right/Next: Generated Outputs</h4><p>Use Plan, Download ZIP, Android App, Publish, and Install actions after generation.</p></div>
+    <div class="lane-card"><h4>Right/Next: Share Your App</h4><p>Use Publish for release. Advanced Deployment (APK, Export, Download package) lives inside Publish.</p></div>
   </div>
 
 
@@ -1322,24 +1313,16 @@
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">02</span>
-          <h4>Press Make App</h4>
+          <h4>Open Blocks</h4>
           <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">03</span>
           <h4>Choose your next step</h4>
-          <p>Review the plan, download a ZIP, build the Android app, or publish to the connected community flow when your app is ready.</p>
+          <p>Preview your canvas anytime, then publish when your app is ready. Advanced deployment options stay in Publish.</p>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="payment-strip">
-    <div class="payment-strip-copy">
-      <div><strong>Founder Launch:</strong> Choose <span class="price-chip">India Founder Pass — ₹1717</span> or keep <span class="price-chip">Global Founder Pass — $99</span> visible for international buyers.</div>
-      <div class="limited-note">Founder deal • limited early-access pricing while manual confirmation is active.</div>
-    </div>
-    <button onclick="app.openFounderCheckout()">💳 View Founder Passes</button>
   </div>
 
   <!-- MAIN -->
@@ -1384,23 +1367,21 @@
     </div>
   </div>
 
-  <div class="footer" id="step-footer">
-    <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
-    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">[⚡ Synth]</button>
-    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
-    <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
-    <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
-    <button id="btn-install" class="install-btn" disabled title="Install becomes available after APK export." onclick="app.installPWA()">[↓ Install]</button>
   <!-- FOOTER -->
-  <div class="footer">
-    <button id="btn-add-part" onclick="app.addBlock('ui')">+ Part</button>
-    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
-    <button onclick="app.viewPRD()">📋 Plan</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">📦 Download ZIP</button>
-    <button id="btn-apk" disabled onclick="app.buildApk()">📱 Android App</button>
-    <button id="btn-publish" disabled onclick="app.publishApp()">🌐 Publish</button>
-    <button onclick="app.clearMap()">🗑 Reset</button>
+  <div class="footer" id="step-footer">
+    <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Screen</button>
+    <button id="btn-blocks" onclick="app.toggleBlocksPanel()">🧩 Blocks</button>
+    <button id="btn-preview" onclick="app.viewPRD()">👁 Preview</button>
+    <button id="btn-publish" disabled onclick="app.publishApp()">🚀 Publish</button>
+  </div>
+  <div style="display:none" aria-hidden="true">
+    <button id="btn-synth" class="compile-btn" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
+    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">📋 PRD</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
+    <button id="btn-apk" class="apk-btn" disabled onclick="app.buildApk()">📱 APK</button>
+    <button id="btn-install" class="install-btn" disabled onclick="app.installPWA()">Install</button>
+    <button id="btn-clear" onclick="app.clearMap()">Reset</button>
+    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">Synth</button>
   </div>
 
   <!-- NODE MODAL -->
@@ -1797,6 +1778,15 @@
       templateCatalog: [],
       templateDefinitions: {},
 
+
+      toggleBlocksPanel() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar || window.innerWidth > 680) return;
+        const isOpen = sidebar.style.display === 'block';
+        sidebar.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      },
+
       init() {
         this.setupPointerEvents();
         this.setupViewportSizing();
@@ -2072,10 +2062,10 @@
         document.getElementById("btn-publish").disabled = n === 0;
         if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
         const stat = document.getElementById("map-status");
-        if (n === 0) { stat.textContent = "ADD PARTS TO START"; stat.className = "map-status state-idle"; }
+        if (n === 0) { stat.textContent = "ADD SCREEN TO START"; stat.className = "map-status state-idle"; }
         else if (ready) { stat.textContent = "APP READY"; stat.className = "map-status state-complete"; }
         else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "MAKING APP..."; stat.className = "map-status state-active"; }
-        else { stat.textContent = "READY TO MAKE APP"; stat.className = "map-status state-ready"; }
+        else { stat.textContent = "READY TO PREVIEW"; stat.className = "map-status state-ready"; }
       },
 
       log(msg, type = "info") {
