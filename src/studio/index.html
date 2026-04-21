@@ -22,6 +22,32 @@
       color: var(--text);
       min-height: 100vh;
     }
+    .studio-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,12,22,0.96);
+      backdrop-filter: blur(8px);
+    }
+    .studio-topbar strong { font-size: 1rem; }
+    .studio-topbar .lh-project-name { color: var(--muted); font-size: 0.8rem; }
+    .studio-topbar nav { display: flex; gap: 8px; }
+    .studio-topbar button {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(78,201,245,0.16);
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
+      min-height: 40px;
+    }
     .studio {
       display: grid;
       grid-template-columns: 260px 1fr 320px;
@@ -225,6 +251,31 @@
       overflow: auto;
     }
     .mobile-tool-drawer.is-open { display: block; }
+    .mobile-drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 11;
+      background: rgba(3,6,13,0.42);
+    }
+    .mobile-drawer-backdrop.is-open { display: block; }
+    .mobile-edit-panel {
+      display: none;
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      bottom: 82px;
+      z-index: 12;
+      max-height: 40vh;
+      overflow: auto;
+    }
+    .mobile-edit-panel.is-open { display: block; }
+    .mobile-edit-panel .edit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .mobile-edit-panel .edit-grid button { min-height: 48px; }
     .mobile-onboard {
       position: fixed;
       inset: 0;
@@ -265,7 +316,7 @@
       background: rgba(8,12,22,0.96);
       backdrop-filter: blur(8px);
     }
-    .mobile-bottom-bar button { min-height: 44px; font-size: 0.76rem; }
+    .mobile-bottom-bar button { min-height: 48px; font-size: 0.76rem; }
     .mobile-bottom-bar button.is-active { border-color: var(--accent); color: var(--accent); }
     .mobile-hint { margin-bottom: 8px; display: grid; gap: 8px; }
     .mobile-hint button { width: 100%; }
@@ -274,6 +325,7 @@
       .workspace { min-height: 55vh; }
     }
     @media (max-width: 768px) {
+      .studio-topbar .lh-project-name { display: none; }
       .studio {
         padding: 8px 8px 96px;
         gap: 8px;
@@ -298,6 +350,16 @@
   </style>
 </head>
 <body>
+  <header class="studio-topbar">
+    <div>
+      <strong>LogicHub</strong>
+      <div class="lh-project-name">Project: Mobile Builder</div>
+    </div>
+    <nav>
+      <button type="button" id="topPreviewBtn">👁 Preview</button>
+      <button type="button" id="topPublishBtn">🚀 Publish</button>
+    </nav>
+  </header>
   <main class="studio">
     <aside class="panel">
       <h2>Component Library</h2>
@@ -340,9 +402,17 @@
       </section>
     </aside>
   </main>
+  <div id="mobileDrawerBackdrop" class="mobile-drawer-backdrop"></div>
   <section id="mobileToolDrawer" class="mobile-tool-drawer panel">
     <h3>Add Block</h3>
     <section id="mobileComponentLibrary" class="library"></section>
+  </section>
+  <section id="mobileEditPanel" class="mobile-edit-panel panel">
+    <h3>Block Actions</h3>
+    <div class="edit-grid">
+      <button type="button" data-node-action-trigger="duplicate">Duplicate</button>
+      <button type="button" data-node-action-trigger="delete">Delete</button>
+    </div>
   </section>
   <nav class="mobile-bottom-bar" id="mobileBottomBar">
     <button type="button" data-mobile-action="add">➕ Add</button>
@@ -360,6 +430,18 @@
         <li>Tap <strong>Publish</strong> to deploy.</li>
       </ol>
       <button type="button" id="dismissOnboardBtn">Start Building</button>
+    </article>
+  </section>
+  <section id="mobilePublishWizard" class="mobile-onboard">
+    <article>
+      <h3>Publish App</h3>
+      <label>Name <input type="text" id="wizardAppName" placeholder="my-mobile-app"></label>
+      <label>Description <textarea id="wizardDescription" rows="2" placeholder="What does your app do?"></textarea></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button type="button" id="wizardPreviewBtn">Preview</button>
+        <button type="button" id="wizardDeployBtn">Deploy</button>
+      </div>
+      <button type="button" id="wizardCloseBtn" style="margin-top:8px;width:100%;">Back to Builder</button>
     </article>
   </section>
 
@@ -397,7 +479,12 @@
       mobileToolDrawer: document.getElementById('mobileToolDrawer'),
       openToolsBtn: document.getElementById('openToolsBtn'),
       mobileBottomBar: document.getElementById('mobileBottomBar'),
+      mobileEditPanel: document.getElementById('mobileEditPanel'),
+      mobileDrawerBackdrop: document.getElementById('mobileDrawerBackdrop'),
       mobileOnboard: document.getElementById('mobileOnboard'),
+      mobilePublishWizard: document.getElementById('mobilePublishWizard'),
+      topPreviewBtn: document.getElementById('topPreviewBtn'),
+      topPublishBtn: document.getElementById('topPublishBtn'),
       marketplaceDraft: {
         appId: '',
         creatorPassport: '',
@@ -433,6 +520,7 @@
     window.LogicHubStudioCanvas.setupBuilderCanvas(context);
     connectZayvoraGeneration();
     connectMobileActions();
+    connectPublishWizard();
     context.onStateChange();
 
     function loadGeneratedGraph(generated) {
@@ -468,10 +556,17 @@
     function connectMobileActions() {
       if (context.openToolsBtn) {
         context.openToolsBtn.addEventListener('click', function () {
-          context.mobileToolDrawer.classList.toggle('is-open');
+          toggleDrawer(!context.mobileToolDrawer.classList.contains('is-open'));
           activateMobileAction('add');
         });
       }
+      if (context.mobileDrawerBackdrop) {
+        context.mobileDrawerBackdrop.addEventListener('click', function () {
+          toggleDrawer(false);
+        });
+      }
+      if (context.topPreviewBtn) context.topPreviewBtn.addEventListener('click', function () { activateMobileAction('preview'); });
+      if (context.topPublishBtn) context.topPublishBtn.addEventListener('click', function () { activateMobileAction('publish'); });
 
       if (context.mobileBottomBar) {
         context.mobileBottomBar.addEventListener('click', function (event) {
@@ -501,9 +596,13 @@
       });
 
       if (action === 'add') {
-        context.mobileToolDrawer.classList.add('is-open');
+        toggleDrawer(true);
       } else {
-        context.mobileToolDrawer.classList.remove('is-open');
+        toggleDrawer(false);
+      }
+      if (context.mobileEditPanel) {
+        var selected = !!context.state.selectedNodeId;
+        context.mobileEditPanel.classList.toggle('is-open', selected && action === 'edit');
       }
 
       var previewPanelSection = context.previewPanel.closest('section');
@@ -514,6 +613,41 @@
       if (action === 'edit' || action === 'add') {
         previewPanelSection.style.display = 'none';
         publishPanelSection.style.display = 'none';
+      }
+      if (action === 'publish') {
+        context.mobilePublishWizard.classList.add('is-open');
+      }
+    }
+
+    function toggleDrawer(open) {
+      if (!context.mobileToolDrawer || !context.mobileDrawerBackdrop) return;
+      context.mobileToolDrawer.classList.toggle('is-open', open);
+      context.mobileDrawerBackdrop.classList.toggle('is-open', open);
+    }
+
+    function connectPublishWizard() {
+      var closeBtn = document.getElementById('wizardCloseBtn');
+      var previewBtn = document.getElementById('wizardPreviewBtn');
+      var deployBtn = document.getElementById('wizardDeployBtn');
+      var appName = document.getElementById('wizardAppName');
+      var description = document.getElementById('wizardDescription');
+      if (closeBtn) closeBtn.addEventListener('click', function () { context.mobilePublishWizard.classList.remove('is-open'); });
+      if (previewBtn) previewBtn.addEventListener('click', function () {
+        context.mobilePublishWizard.classList.remove('is-open');
+        activateMobileAction('preview');
+      });
+      if (deployBtn) deployBtn.addEventListener('click', function () {
+        context.marketplaceDraft.appId = appName ? appName.value.trim() : '';
+        context.marketplaceDraft.description = description ? description.value.trim() : '';
+        context.mobilePublishWizard.classList.remove('is-open');
+        activateMobileAction('publish');
+      });
+      if (context.mobileEditPanel) {
+        context.mobileEditPanel.addEventListener('click', function (event) {
+          var trigger = event.target.closest('[data-node-action-trigger]');
+          if (!trigger || !context.state.selectedNodeId) return;
+          window.LogicHubStudioCanvas.handleNodeAction(context, context.state.selectedNodeId, trigger.dataset.nodeActionTrigger);
+        });
       }
     }
   </script>
