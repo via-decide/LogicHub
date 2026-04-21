@@ -22,6 +22,10 @@ const copyTargets = [
 if (!fs.existsSync(PUBLIC_DIR)) {
   fs.mkdirSync(PUBLIC_DIR, { recursive: true });
   console.log('✅ Created public directory');
+} else {
+  fs.rmSync(PUBLIC_DIR, { recursive: true, force: true });
+  fs.mkdirSync(PUBLIC_DIR, { recursive: true });
+  console.log('✅ Reset public directory');
 }
 
 for (const target of copyTargets) {
