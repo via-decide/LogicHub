@@ -468,6 +468,15 @@
         <button type="button" id="generateWorkflowBtn">Generate Workflow</button>
         <p id="zayvoraStatus" class="lh-footnote">Enter a prompt to auto-generate a workflow graph.</p>
       </section>
+      <section class="zayvora">
+        <h3>AI Builder</h3>
+        <textarea id="aiBuilderPrompt" placeholder="Describe your app or use voice..."></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" id="voiceBuilderBtn">🎤 Build with Voice</button>
+          <button type="button" id="aiBuilderGenerateBtn">Generate App Plan</button>
+        </div>
+        <p id="aiBuilderStatus" class="lh-footnote">Speak or type a request to generate pages, components, schema, and workflows.</p>
+      </section>
       <section>
         <h3>Node Editor</h3>
         <form id="nodeEditorForm" class="editor">
@@ -561,6 +570,9 @@
   <script src="../integrations/zayvora/zayvora-bridge.js"></script>
   <script src="../integrations/zayvora/task-interpreter.js"></script>
   <script src="../integrations/zayvora/workflow-generator.js"></script>
+  <script src="../integrations/voice/logicHubVoiceEngine.js"></script>
+  <script src="../integrations/ai-builder/intent-parser.js"></script>
+  <script src="../integrations/ai-builder/app-generator.js"></script>
   <script>
     var state = window.LogicHubStudioGraph.createGraphState();
 
@@ -575,6 +587,8 @@
       deploymentPanel: document.getElementById('deploymentPanel'),
       zayvoraPrompt: document.getElementById('zayvoraPrompt'),
       zayvoraStatus: document.getElementById('zayvoraStatus'),
+      aiBuilderPrompt: document.getElementById('aiBuilderPrompt'),
+      aiBuilderStatus: document.getElementById('aiBuilderStatus'),
       mobileToolDrawer: document.getElementById('mobileToolDrawer'),
       mobileDrawerBackdrop: document.getElementById('mobileDrawerBackdrop'),
       mobileEditPanel: document.getElementById('mobileEditPanel'),
@@ -621,6 +635,7 @@
     window.LogicHubStudioNodeEditor.setupNodeEditor(context);
     window.LogicHubStudioCanvas.setupBuilderCanvas(context);
     connectZayvoraGeneration();
+    connectAIBuilder();
     connectMobileActions();
     connectMobileEditorPanel();
     connectPublishWizard();
@@ -654,6 +669,70 @@
         loadGeneratedGraph(generated);
         context.zayvoraStatus.textContent = 'Generated workflow for intent "' + reasoning.intent + '" (' + structuredTask.steps.length + ' nodes).';
       });
+    }
+
+
+    function connectAIBuilder() {
+      var generateButton = document.getElementById('aiBuilderGenerateBtn');
+      var voiceButton = document.getElementById('voiceBuilderBtn');
+      if (!generateButton || !context.aiBuilderPrompt || !context.aiBuilderStatus) return;
+
+      function runAIBuilderFromPrompt(promptText) {
+        var parser = window.LogicHubAIIntentParser;
+        var generator = window.LogicHubAIAppGenerator;
+        if (!parser || !generator) return;
+
+        var intent = parser.parseIntent(promptText);
+        var plan = generator.buildPlan(intent);
+        var mapped = generator.planToNodes(plan, context.state);
+
+        context.state.nodes = mapped.nodes;
+        context.state.edges = mapped.edges;
+        context.state.idCounter = mapped.nextIdCounter;
+        context.state.selectedNodeId = mapped.nodes[0] ? mapped.nodes[0].id : null;
+
+        localStorage.setItem('lh-ai-plan', JSON.stringify(plan));
+        window.LogicHubStudioCanvas.renderCanvasElements(context);
+        context.onStateChange();
+
+        context.aiBuilderStatus.textContent = 'I created a ' + intent.category + ' app with ' + plan.pages.length + ' pages and ' + plan.workflows.length + ' workflows.';
+        if (typeof window.speechSynthesis !== 'undefined') {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(new SpeechSynthesisUtterance(context.aiBuilderStatus.textContent));
+        }
+      }
+
+      generateButton.addEventListener('click', function () {
+        var promptText = context.aiBuilderPrompt.value.trim();
+        if (!promptText) {
+          context.aiBuilderStatus.textContent = 'Please add a description before generating.';
+          return;
+        }
+        runAIBuilderFromPrompt(promptText);
+      });
+
+      if (voiceButton && window.LogicHubVoiceEngine) {
+        var voiceEngine = window.LogicHubVoiceEngine.createVoiceEngine({
+          onTranscript: function (transcript) {
+            context.aiBuilderPrompt.value = transcript;
+            runAIBuilderFromPrompt(transcript);
+          },
+          onStatus: function (status) {
+            context.aiBuilderStatus.textContent = status === 'listening' ? 'Listening for your builder command...' : 'Voice capture finished.';
+          },
+          onError: function (message) {
+            context.aiBuilderStatus.textContent = 'Voice error: ' + message;
+          }
+        });
+
+        voiceButton.addEventListener('click', function () {
+          if (voiceEngine.listening) {
+            voiceEngine.stop();
+          } else {
+            voiceEngine.start();
+          }
+        });
+      }
     }
 
     function connectMobileActions() {
