@@ -1,14 +1,43 @@
 (function (global) {
   'use strict';
 
+  var INSERT_ANIMATION_MS = 220;
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getVisibleNodes(context) {
+    var viewport = context.canvas.getBoundingClientRect();
+    var zoom = context.state.canvasZoom || 1;
+    var pad = 120;
+    var minX = (-pad) / zoom;
+    var minY = (-pad) / zoom;
+    var maxX = (viewport.width + pad) / zoom;
+    var maxY = (viewport.height + pad) / zoom;
+
+    return context.state.nodes.filter(function (node) {
+      var nodeRight = node.x + 188;
+      var nodeBottom = node.y + 112;
+      return nodeRight >= minX && node.x <= maxX && nodeBottom >= minY && node.y <= maxY;
+    });
+  }
+
   function renderCanvasElements(context) {
     var nodeLayer = context.canvasNodeLayer;
     var edgeLayer = context.canvasEdgeLayer;
+    var visibleNodes = getVisibleNodes(context);
+    var visibleNodeIds = {};
 
     nodeLayer.innerHTML = '';
     edgeLayer.innerHTML = '';
 
+    visibleNodes.forEach(function (node) {
+      visibleNodeIds[node.id] = true;
+    });
+
     context.state.edges.forEach(function (edge) {
+      if (!visibleNodeIds[edge.from] && !visibleNodeIds[edge.to]) return;
       var source = global.LogicHubStudioGraph.getNodeById(context.state, edge.from);
       var target = global.LogicHubStudioGraph.getNodeById(context.state, edge.to);
       if (!source || !target) return;
@@ -24,57 +53,82 @@
       edgeLayer.appendChild(path);
     });
 
-    context.state.nodes.forEach(function (node) {
+    visibleNodes.forEach(function (node) {
       var card = document.createElement('article');
-      card.className = 'lh-node' + (node.id === context.state.selectedNodeId ? ' is-selected' : '');
+      var entering = context.state.justInsertedNodeId === node.id;
+      card.className = 'lh-block' + (node.id === context.state.selectedNodeId ? ' is-selected' : '') + (entering ? ' is-entering' : '');
       card.dataset.nodeId = node.id;
       card.style.left = node.x + 'px';
       card.style.top = node.y + 'px';
       card.innerHTML = [
-        '<header><h4>' + node.title + '</h4><small>' + node.type + '</small></header>',
-        '<p>' + (node.description || 'No description yet') + '</p>',
-        '<div class="lh-mobile-node-actions"><button type="button" data-node-action="duplicate" data-node-id="' + node.id + '">Duplicate</button><button type="button" data-node-action="delete" data-node-id="' + node.id + '">Delete</button></div>',
-        '<button class="lh-link-port" data-link-source="' + node.id + '" title="Start connection">⤳</button>'
+        '<div class="lh-content">',
+        '<header><h4 data-inline-field="title" contenteditable="' + (node.id === context.state.selectedNodeId) + '">' + escapeHtml(node.title) + '</h4><small>' + node.type + '</small></header>',
+        '<p data-inline-field="description" contenteditable="' + (node.id === context.state.selectedNodeId) + '">' + escapeHtml(node.description || 'Tap to add details') + '</p>',
+        '</div>'
       ].join('');
-
-      bindNodeEvents(card, context, node.id);
       nodeLayer.appendChild(card);
     });
+
+    renderSelectionOverlay(context);
+
+    if (context.state.justInsertedNodeId) {
+      var insertedNodeId = context.state.justInsertedNodeId;
+      setTimeout(function () {
+        if (context.state.justInsertedNodeId === insertedNodeId) {
+          context.state.justInsertedNodeId = null;
+          renderCanvasElements(context);
+        }
+      }, INSERT_ANIMATION_MS);
+    }
   }
 
-  function bindNodeEvents(card, context, nodeId) {
-    var dragHandleActive = false;
-    var offsetX = 0;
-    var offsetY = 0;
+  function renderSelectionOverlay(context) {
+    if (!context.state.selectedNodeId) return;
+    var node = global.LogicHubStudioGraph.getNodeById(context.state, context.state.selectedNodeId);
+    if (!node) return;
 
+    var overlay = document.createElement('div');
+    overlay.className = 'lh-selection-overlay';
+    overlay.style.left = node.x + 'px';
+    overlay.style.top = (node.y - 42) + 'px';
+    overlay.innerHTML = '<button type="button" data-node-action="duplicate">Duplicate</button><button type="button" data-node-action="delete">Delete</button>';
+    context.canvasNodeLayer.appendChild(overlay);
+  }
     card.addEventListener('mousedown', function (event) {
       if (context.isPreviewMode) return;
       if (event.target.closest('[data-link-source]')) return;
 
-      dragHandleActive = true;
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function setupInteractionController(context) {
+    var activeTouch = {
+      nodeId: null,
+      startX: 0,
+      startY: 0,
+      moved: false,
+      startAt: 0,
+      dragReady: false,
+      dragTimer: null,
+      pointerOffsetX: 0,
+      pointerOffsetY: 0,
+      lastDY: 0
+    };
+
+    function selectNode(nodeId) {
       context.state.selectedNodeId = nodeId;
-      var node = global.LogicHubStudioGraph.getNodeById(context.state, nodeId);
-      offsetX = event.clientX - node.x;
-      offsetY = event.clientY - node.y;
       renderCanvasElements(context);
       context.onStateChange();
-    });
+    }
 
-    document.addEventListener('mousemove', function (event) {
-      if (!dragHandleActive) return;
-      var node = global.LogicHubStudioGraph.getNodeById(context.state, nodeId);
-      if (!node) return;
-
-      node.x = Math.max(8, event.clientX - offsetX);
-      node.y = Math.max(8, event.clientY - offsetY);
-      renderCanvasElements(context);
-      context.onStateChange();
-    });
-
-    document.addEventListener('mouseup', function () {
-      dragHandleActive = false;
-    });
-
+    context.canvasNodeLayer.addEventListener('click', function (event) {
+      var action = event.target.closest('[data-node-action]');
+      if (action && context.state.selectedNodeId) {
+        handleNodeAction(context, context.state.selectedNodeId, action.dataset.nodeAction);
     card.addEventListener('click', function (event) {
       if (context.isPreviewMode) return;
       var nodeAction = event.target.closest('[data-node-action]');
@@ -89,16 +143,43 @@
         return;
       }
 
-      if (context.state.activeLinkSourceId && context.state.activeLinkSourceId !== nodeId) {
-        global.LogicHubStudioGraph.upsertEdge(context.state, context.state.activeLinkSourceId, nodeId);
-        context.state.activeLinkSourceId = null;
-      }
+      var card = event.target.closest('[data-node-id]');
+      if (!card) return;
+      selectNode(card.dataset.nodeId);
+    });
 
-      context.state.selectedNodeId = nodeId;
-      renderCanvasElements(context);
+    context.canvasNodeLayer.addEventListener('input', function (event) {
+      var field = event.target.closest('[data-inline-field]');
+      var card = event.target.closest('[data-node-id]');
+      if (!field || !card) return;
+      var patch = {};
+      patch[field.dataset.inlineField] = field.textContent.trim();
+      global.LogicHubStudioGraph.updateNode(context.state, card.dataset.nodeId, patch);
       context.onStateChange();
     });
 
+    context.canvasNodeLayer.addEventListener('touchstart', function (event) {
+      var card = event.target.closest('[data-node-id]');
+      if (!card || !event.touches[0]) return;
+      var node = global.LogicHubStudioGraph.getNodeById(context.state, card.dataset.nodeId);
+      if (!node) return;
+      activeTouch.nodeId = node.id;
+      activeTouch.startX = event.touches[0].clientX;
+      activeTouch.startY = event.touches[0].clientY;
+      activeTouch.pointerOffsetX = activeTouch.startX - node.x;
+      activeTouch.pointerOffsetY = activeTouch.startY - node.y;
+      activeTouch.moved = false;
+      activeTouch.startAt = Date.now();
+      activeTouch.dragReady = false;
+      clearTimeout(activeTouch.dragTimer);
+      activeTouch.dragTimer = setTimeout(function () {
+        activeTouch.dragReady = true;
+      }, 420);
+    }, { passive: true });
+
+    context.canvasNodeLayer.addEventListener('touchmove', function (event) {
+      if (!activeTouch.nodeId || !event.touches[0]) return;
+      var node = global.LogicHubStudioGraph.getNodeById(context.state, activeTouch.nodeId);
     bindTouchGestures(card, context, nodeId);
   }
 
@@ -128,21 +209,40 @@
       if (!touchData.active || !event.touches[0]) return;
       var node = global.LogicHubStudioGraph.getNodeById(context.state, nodeId);
       if (!node) return;
-      var dx = event.touches[0].clientX - touchData.startX;
-      var dy = event.touches[0].clientY - touchData.startY;
-      if (touchData.dragReady) {
-        node.x = Math.max(8, node.x + dx);
-        node.y = Math.max(8, node.y + dy);
-      } else if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx)) {
-        moveNodeInList(context.state, nodeId, dy > 0 ? 1 : -1);
+      var x = event.touches[0].clientX;
+      var y = event.touches[0].clientY;
+      var dx = x - activeTouch.startX;
+      var dy = y - activeTouch.startY;
+      activeTouch.lastDY = dy;
+      activeTouch.moved = activeTouch.moved || Math.abs(dx) > 8 || Math.abs(dy) > 8;
+
+      if (activeTouch.dragReady) {
+        node.x = Math.max(8, x - activeTouch.pointerOffsetX);
+        node.y = Math.max(8, y - activeTouch.pointerOffsetY);
+        requestAnimationFrame(function () {
+          renderCanvasElements(context);
+          context.onStateChange();
+        });
+        event.preventDefault();
       }
-      touchData.startX = event.touches[0].clientX;
-      touchData.startY = event.touches[0].clientY;
-      renderCanvasElements(context);
-      context.onStateChange();
-      event.preventDefault();
     }, { passive: false });
 
+    context.canvasNodeLayer.addEventListener('touchend', function () {
+      if (!activeTouch.nodeId) return;
+      var nodeId = activeTouch.nodeId;
+      var duration = Date.now() - activeTouch.startAt;
+
+      if (!activeTouch.moved && duration < 300) {
+        selectNode(nodeId);
+      } else if (!activeTouch.dragReady && activeTouch.moved && Math.abs(activeTouch.lastDY) > 24) {
+        moveNodeInList(context.state, nodeId, activeTouch.lastDY > 0 ? 1 : -1);
+        renderCanvasElements(context);
+        context.onStateChange();
+      }
+
+      clearTimeout(activeTouch.dragTimer);
+      activeTouch.nodeId = null;
+      activeTouch.dragReady = false;
     card.addEventListener('touchend', function () {
       clearTimeout(touchData.timer);
       touchData.active = false;
@@ -160,7 +260,7 @@
   function moveNodeInList(state, nodeId, direction) {
     var idx = state.nodes.findIndex(function (node) { return node.id === nodeId; });
     if (idx < 0) return;
-    var nextIdx = Math.max(0, Math.min(state.nodes.length - 1, idx + direction));
+    var nextIdx = clamp(idx + direction, 0, state.nodes.length - 1);
     if (nextIdx === idx) return;
     var moved = state.nodes.splice(idx, 1)[0];
     state.nodes.splice(nextIdx, 0, moved);
@@ -169,25 +269,44 @@
   function handleNodeAction(context, nodeId, action) {
     var node = global.LogicHubStudioGraph.getNodeById(context.state, nodeId);
     if (!node) return;
+
     if (action === 'delete') {
       context.state.nodes = context.state.nodes.filter(function (item) { return item.id !== nodeId; });
       context.state.edges = context.state.edges.filter(function (edge) { return edge.from !== nodeId && edge.to !== nodeId; });
       context.state.selectedNodeId = context.state.nodes[0] ? context.state.nodes[0].id : null;
     }
+
     if (action === 'duplicate') {
       var clone = global.LogicHubStudioGraph.createNode(context.state, node.type, node.x + 12, node.y + 12);
       clone.title = node.title + ' Copy';
       clone.description = node.description;
       context.state.selectedNodeId = clone.id;
+      context.state.justInsertedNodeId = clone.id;
     }
+
     renderCanvasElements(context);
     context.onStateChange();
+  }
+
+  function setupAutosave(context) {
+    var queued = null;
+    var initialOnStateChange = context.onStateChange;
+    context.onStateChange = function () {
+      initialOnStateChange();
+      clearTimeout(queued);
+      queued = setTimeout(function () {
+        localStorage.setItem('lh-mobile-canvas-draft', JSON.stringify(context.state));
+      }, 180);
+    };
   }
 
   function setupBuilderCanvas(context) {
     var canvas = context.canvas;
     var pinchDistance = 0;
     var pinchData = { distance: 0 };
+
+    setupAutosave(context);
+    setupInteractionController(context);
 
     canvas.addEventListener('dragover', function (event) {
       event.preventDefault();
@@ -201,14 +320,9 @@
       if (!type) return;
 
       var rect = canvas.getBoundingClientRect();
-      var node = global.LogicHubStudioGraph.createNode(
-        context.state,
-        type,
-        event.clientX - rect.left - 92,
-        event.clientY - rect.top - 40
-      );
-
+      var node = global.LogicHubStudioGraph.createNode(context.state, type, event.clientX - rect.left - 92, event.clientY - rect.top - 40);
       context.state.selectedNodeId = node.id;
+      context.state.justInsertedNodeId = node.id;
       renderCanvasElements(context);
       context.onStateChange();
     });
@@ -244,7 +358,7 @@
         return;
       }
       var delta = (distance - pinchData.distance) / 300;
-      var nextZoom = Math.max(0.65, Math.min(1.55, (context.state.canvasZoom || 1) + delta));
+      var nextZoom = clamp((context.state.canvasZoom || 1) + delta, 0.7, 1.5);
       context.state.canvasZoom = nextZoom;
       context.canvasNodeLayer.style.transformOrigin = 'top left';
       context.canvasEdgeLayer.style.transformOrigin = 'top left';
