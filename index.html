@@ -1259,35 +1259,27 @@
     <div class="landing-hero-card">
       <div>
         <h2>LOGICHUB</h2>
-        <p>Build prompt apps, workflow tools, and app prototypes.</p>
+        <p>Simple creator flow: idea → app → publish.</p>
       </div>
       <div class="primary-actions">
-        <button class="primary-action-btn" onclick="app.applyStarterSetup('ai-research-tool')">Create From Template</button>
-        <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add Screen</button>
-        <button class="primary-action-btn" onclick="app.applyStarterSetup('sample')">View a sample app</button>
-        <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">Publish to Daxini.space</button>
+        <button class="primary-action-btn" onclick="app.openCreateAppWizard()">Create App</button>
       </div>
+      <p>Build your app visually in seconds.</p>
       <div class="capability-strip">
-        <div class="capability-chip">Add Screen</div>
-        <div class="capability-chip">Blocks</div>
-        <div class="capability-chip">Preview</div>
-        <div class="capability-chip">Publish</div>
+        <div class="capability-chip">1 Idea</div>
+        <div class="capability-chip">2 Build</div>
+        <div class="capability-chip">3 Preview</div>
+        <div class="capability-chip">4 Publish</div>
       </div>
-      <div class="template-strip" id="template-gallery">
-        <button class="template-btn" onclick="app.applyStarterSetup('ai-research-tool')">AI Research Tool</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('data-dashboard')">Data Dashboard</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('automation-bot')">Automation Bot</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('simulation-builder')">Simulation Builder</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('knowledge-explorer')">Knowledge Explorer</button>
-      </div>
+      <div class="template-strip" id="template-gallery"></div>
       <p><strong>Publish to Daxini.space</strong> creates a public app page and shareable link.</p>
     </div>
   </div>
 
   <div class="builder-lanes">
-    <div class="lane-card"><h4>Left: Available Parts</h4><p>Use Screen, Login, Data, and Logic parts from the left panel.</p></div>
-    <div class="lane-card"><h4>Center: Current App Structure</h4><p>Arrange and connect parts in the center canvas. Node connection behavior is unchanged.</p></div>
-    <div class="lane-card"><h4>Right/Next: Share Your App</h4><p>Use Publish for release. Advanced Deployment (APK, Export, Download package) lives inside Publish.</p></div>
+    <div class="lane-card"><h4>Pages</h4><p>Design your app layout directly on the canvas with reusable blocks.</p></div>
+    <div class="lane-card"><h4>Data</h4><p>Add Data Source: Supabase, REST API, Google Sheets, or Static Data.</p></div>
+    <div class="lane-card"><h4>Logic + Settings</h4><p>Build workflows with triggers/actions, then preview and publish.</p></div>
   </div>
 
 
@@ -1328,18 +1320,18 @@
   <!-- MAIN -->
   <div class="main-container">
     <div class="sidebar" id="sidebar">
-      <h3>Main Parts</h3>
+      <h3>Pages</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('ui')">SCREEN</div>
-        <div class="palette-item" onclick="app.addBlock('api')">LIVE DATA</div>
-        <div class="palette-item" onclick="app.addBlock('database')">SAVED DATA</div>
-        <div class="palette-item" onclick="app.addBlock('auth')">LOGIN</div>
+        <div class="palette-item" onclick="app.addBlock('ui')">TEXT</div>
+        <div class="palette-item" onclick="app.addBlock('api')">IMAGE</div>
+        <div class="palette-item" onclick="app.addBlock('database')">CARD</div>
+        <div class="palette-item" onclick="app.addBlock('auth')">FORM</div>
       </div>
-      <h3>Extra Parts</h3>
+      <h3>Data · Logic · Settings</h3>
       <div class="sidebar-grid">
-        <div class="palette-item" onclick="app.addBlock('util')">APP LOGIC</div>
-        <div class="palette-item" onclick="app.addBlock('styles')">STYLE</div>
-        <div class="palette-item" onclick="app.addBlock('config')">SETTINGS</div>
+        <div class="palette-item" onclick="app.addBlock('util')">BUTTON</div>
+        <div class="palette-item" onclick="app.addBlock('styles')">LIST</div>
+        <div class="palette-item" onclick="app.addBlock('config')">EMBED</div>
       </div>
     </div>
 
@@ -1369,19 +1361,31 @@
 
   <!-- FOOTER -->
   <div class="footer" id="step-footer">
-    <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Screen</button>
-    <button id="btn-blocks" onclick="app.toggleBlocksPanel()">🧩 Blocks</button>
+    <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Block</button>
+    <button id="btn-blocks" onclick="app.toggleBlocksPanel()">📄 Pages</button>
     <button id="btn-preview" onclick="app.viewPRD()">👁 Preview</button>
     <button id="btn-publish" disabled onclick="app.publishApp()">🚀 Publish</button>
   </div>
   <div style="display:none" aria-hidden="true">
-    <button id="btn-synth" class="compile-btn" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
+    <button id="btn-synth" class="compile-btn" onclick="app.synthesizeArchitecture()">⚡ Build</button>
     <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">📋 PRD</button>
     <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
     <button id="btn-apk" class="apk-btn" disabled onclick="app.buildApk()">📱 APK</button>
     <button id="btn-install" class="install-btn" disabled onclick="app.installPWA()">Install</button>
     <button id="btn-clear" onclick="app.clearMap()">Reset</button>
     <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">Synth</button>
+  </div>
+
+  <div class="modal" id="create-app-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('create-app-modal')">✕</button>
+      <div class="modal-header">Create App</div>
+      <div class="form-group"><label>1) App Name</label><input type="text" id="create-app-name" placeholder="My Creator App"></div>
+      <div class="form-group"><label>2) Choose Template</label><select id="create-app-template">
+        <option value="landing">Landing Page</option><option value="data-dashboard">Dashboard</option><option value="automation-bot">Tool</option><option value="simulation-builder">Mobile App</option><option value="blank">Blank</option>
+      </select></div>
+      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.createProjectFromWizard()">3) Create Project</button>
+    </div>
   </div>
 
   <!-- NODE MODAL -->
@@ -1696,15 +1700,15 @@
       }
       addBlock(type, x, y) {
         const typeInfo = {
-          ui: { label: 'Screen', badge: 'SCREEN', filename: 'index.html' },
-          api: { label: 'Live Data', badge: 'DATA', filename: 'api.js' },
-          database: { label: 'Saved Data', badge: 'DATA', filename: 'schema.sql' },
-          auth: { label: 'Login', badge: 'LOGIN', filename: 'auth.js' },
-          util: { label: 'App Logic', badge: 'LOGIC', filename: 'utils.js' },
-          styles: { label: 'Style', badge: 'STYLE', filename: 'styles.css' },
-          config: { label: 'Settings', badge: 'SETUP', filename: 'config.js' }
+          ui: { label: 'Text', badge: 'PAGES', filename: 'index.html' },
+          api: { label: 'Image', badge: 'PAGES', filename: 'api.js' },
+          database: { label: 'Card', badge: 'PAGES', filename: 'schema.sql' },
+          auth: { label: 'Form', badge: 'DATA', filename: 'auth.js' },
+          util: { label: 'Button', badge: 'LOGIC', filename: 'utils.js' },
+          styles: { label: 'List', badge: 'SETTINGS', filename: 'styles.css' },
+          config: { label: 'Embed', badge: 'SETTINGS', filename: 'config.js' }
         };
-        const info = typeInfo[type] || { label: 'App Part', badge: 'PART', filename: 'file.js' };
+        const info = typeInfo[type] || { label: 'Block', badge: 'BLOCK', filename: 'file.js' };
         const b = {
           id: "NODE_" + Math.random().toString(36).substring(7).toUpperCase(),
           type, label: info.label, typeLabel: info.badge,
@@ -1777,6 +1781,26 @@
       serverAccess: { checked: false, paid: false, pending: false, source: 'unknown', plan: 'free' },
       templateCatalog: [],
       templateDefinitions: {},
+
+      openCreateAppWizard() {
+        const appNameInput = document.getElementById('create-app-name');
+        if (appNameInput) appNameInput.value = this.getProjectDisplayName();
+        openModal('create-app-modal');
+      },
+
+      createProjectFromWizard() {
+        const nameInput = document.getElementById('create-app-name');
+        const templateInput = document.getElementById('create-app-template');
+        const appName = nameInput ? nameInput.value.trim() : '';
+        const template = templateInput ? templateInput.value : 'blank';
+        if (appName) document.getElementById('forge-app-name').value = appName;
+        this.map = new LogicMap();
+        if (template !== 'blank' && template !== 'landing') this.applyStarterSetup(template);
+        if (template === 'landing') this.addBlock('ui');
+        this.render();
+        closeModal('create-app-modal');
+        this.log('Project created. Start in Build mode on the canvas.', 'success');
+      },
 
 
       toggleBlocksPanel() {
