@@ -1,0 +1,7 @@
+{
+  "description": "Restaurant ordering app",
+  "pages": ["home", "menu", "cart", "checkout"],
+  "components": [],
+  "data": ["menu_items", "orders"],
+  "workflows": ["add_to_cart", "checkout"]
+}

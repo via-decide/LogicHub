@@ -77,6 +77,39 @@
       min-height: 100vh;
       padding-bottom: 92px;
     }
+    .builder-entry {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      background: rgba(4, 8, 16, 0.92);
+      padding: 20px;
+    }
+    .builder-entry[hidden] { display: none; }
+    .builder-entry-card {
+      width: min(520px, 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(160deg, var(--panel-soft), var(--panel));
+      display: grid;
+      gap: 10px;
+    }
+    .builder-entry-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .builder-entry-actions button {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(78,201,245,0.16);
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+      min-height: 48px;
+    }
     .panel {
       background: linear-gradient(160deg, var(--panel-soft), var(--panel));
       border: 1px solid var(--border);
@@ -425,6 +458,17 @@
   </style>
 </head>
 <body>
+  <section id="builderEntry" class="builder-entry">
+    <article class="builder-entry-card">
+      <h1 style="margin:0;">Create App</h1>
+      <p class="lh-footnote" style="margin:0;">Manual builder is the foundation. AI and voice accelerate your workflow.</p>
+      <div class="builder-entry-actions">
+        <button type="button" id="startManualBuilderBtn">Start Building</button>
+        <button type="button" id="startAIGeneratorBtn">Generate with AI</button>
+        <button type="button" id="startVoiceBuilderBtn">Speak to Build</button>
+      </div>
+    </article>
+  </section>
   <header class="mobile-top-bar">
     <div class="mobile-brand">
       <strong>LogicHub</strong>
@@ -440,6 +484,7 @@
       <div class="lh-project-name">Project: Mobile Builder</div>
     </div>
     <nav>
+      <button type="button" id="askAiBtn">✨ Ask AI</button>
       <button type="button" id="topPreviewBtn">👁 Preview</button>
       <button type="button" id="topPublishBtn">🚀 Publish</button>
     </nav>
@@ -571,6 +616,7 @@
   <script src="../integrations/zayvora/task-interpreter.js"></script>
   <script src="../integrations/zayvora/workflow-generator.js"></script>
   <script src="../integrations/voice/logicHubVoiceEngine.js"></script>
+  <script src="../../ai/voice-engine.js"></script>
   <script src="../integrations/ai-builder/intent-parser.js"></script>
   <script src="../integrations/ai-builder/app-generator.js"></script>
   <script>
@@ -589,6 +635,11 @@
       zayvoraStatus: document.getElementById('zayvoraStatus'),
       aiBuilderPrompt: document.getElementById('aiBuilderPrompt'),
       aiBuilderStatus: document.getElementById('aiBuilderStatus'),
+      askAiBtn: document.getElementById('askAiBtn'),
+      builderEntry: document.getElementById('builderEntry'),
+      startManualBuilderBtn: document.getElementById('startManualBuilderBtn'),
+      startAIGeneratorBtn: document.getElementById('startAIGeneratorBtn'),
+      startVoiceBuilderBtn: document.getElementById('startVoiceBuilderBtn'),
       mobileToolDrawer: document.getElementById('mobileToolDrawer'),
       mobileDrawerBackdrop: document.getElementById('mobileDrawerBackdrop'),
       mobileEditPanel: document.getElementById('mobileEditPanel'),
@@ -614,6 +665,13 @@
         'UI Generator': function (step, payload) { return Object.assign({}, payload, { ui: 'render-ready' }); },
         Output: function (step, payload) { return Object.assign({}, payload, { output: payload }); }
       },
+      project: {
+        pages: [],
+        components: [],
+        data: [],
+        workflows: []
+      },
+      creationMode: 'manual',
       onStateChange: function () {
         if (context.syncEditor) context.syncEditor();
         window.LogicHubStudioPreview.renderPreview(context);
@@ -634,8 +692,10 @@
     });
     window.LogicHubStudioNodeEditor.setupNodeEditor(context);
     window.LogicHubStudioCanvas.setupBuilderCanvas(context);
+    connectCreatorEntry();
     connectZayvoraGeneration();
     connectAIBuilder();
+    connectAskAI();
     connectMobileActions();
     connectMobileEditorPanel();
     connectPublishWizard();
@@ -649,6 +709,42 @@
       context.state.activeLinkSourceId = null;
       window.LogicHubStudioCanvas.renderCanvasElements(context);
       context.onStateChange();
+    }
+
+    function syncProjectStructureFromPlan(plan) {
+      context.project = {
+        pages: (plan.pages || []).slice(),
+        components: (plan.components || []).slice(),
+        data: (plan.dataSchema || []).slice(),
+        workflows: (plan.workflows || []).slice()
+      };
+      localStorage.setItem('lh-project-structure', JSON.stringify(context.project));
+      localStorage.setItem('lh-ai-plan', JSON.stringify({
+        description: plan.intent ? plan.intent.prompt : '',
+        pages: context.project.pages,
+        components: context.project.components,
+        data: context.project.data,
+        workflows: context.project.workflows
+      }));
+    }
+
+    function connectCreatorEntry() {
+      if (!context.builderEntry) return;
+      function closeEntry(mode) {
+        context.creationMode = mode || 'manual';
+        context.builderEntry.setAttribute('hidden', 'hidden');
+        context.aiBuilderStatus.textContent = 'Mode: ' + context.creationMode + '. You can edit everything manually in the canvas.';
+      }
+      if (context.startManualBuilderBtn) context.startManualBuilderBtn.addEventListener('click', function () { closeEntry('manual'); });
+      if (context.startAIGeneratorBtn) context.startAIGeneratorBtn.addEventListener('click', function () {
+        closeEntry('ai');
+        if (context.aiBuilderPrompt) context.aiBuilderPrompt.focus();
+      });
+      if (context.startVoiceBuilderBtn) context.startVoiceBuilderBtn.addEventListener('click', function () {
+        closeEntry('voice');
+        var voiceButton = document.getElementById('voiceBuilderBtn');
+        if (voiceButton) voiceButton.click();
+      });
     }
 
     function connectZayvoraGeneration() {
@@ -690,8 +786,7 @@
         context.state.edges = mapped.edges;
         context.state.idCounter = mapped.nextIdCounter;
         context.state.selectedNodeId = mapped.nodes[0] ? mapped.nodes[0].id : null;
-
-        localStorage.setItem('lh-ai-plan', JSON.stringify(plan));
+        syncProjectStructureFromPlan(plan);
         window.LogicHubStudioCanvas.renderCanvasElements(context);
         context.onStateChange();
 
@@ -711,8 +806,9 @@
         runAIBuilderFromPrompt(promptText);
       });
 
-      if (voiceButton && window.LogicHubVoiceEngine) {
-        var voiceEngine = window.LogicHubVoiceEngine.createVoiceEngine({
+      var voiceFactory = window.LogicHubBuilderVoiceEngine || window.LogicHubVoiceEngine;
+      if (voiceButton && voiceFactory) {
+        var voiceEngine = voiceFactory.createVoiceEngine({
           onTranscript: function (transcript) {
             context.aiBuilderPrompt.value = transcript;
             runAIBuilderFromPrompt(transcript);
@@ -772,6 +868,17 @@
       if (dismiss) dismiss.addEventListener('click', function () {
         localStorage.setItem('lh-mobile-onboarded', '1');
         context.mobileOnboard.classList.remove('is-open');
+      });
+    }
+
+    function connectAskAI() {
+      if (!context.askAiBtn) return;
+      context.askAiBtn.addEventListener('click', function () {
+        var promptText = window.prompt('What should AI change in this project?', 'Add login page');
+        if (!promptText) return;
+        context.aiBuilderPrompt.value = promptText;
+        var generateButton = document.getElementById('aiBuilderGenerateBtn');
+        if (generateButton) generateButton.click();
       });
     }
 
