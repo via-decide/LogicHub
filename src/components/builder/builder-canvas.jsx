@@ -48,6 +48,7 @@
     var offsetY = 0;
 
     card.addEventListener('mousedown', function (event) {
+      if (context.isPreviewMode) return;
       if (event.target.closest('[data-link-source]')) return;
 
       dragHandleActive = true;
@@ -75,6 +76,7 @@
     });
 
     card.addEventListener('click', function (event) {
+      if (context.isPreviewMode) return;
       var nodeAction = event.target.closest('[data-node-action]');
       if (nodeAction) {
         handleNodeAction(context, nodeId, nodeAction.dataset.nodeAction);
@@ -101,8 +103,11 @@
   }
 
   function bindTouchGestures(card, context, nodeId) {
+    var touchData = { startX: 0, startY: 0, active: false, dragReady: false, timer: null };
+    var lastTapAt = 0;
     var touchData = { startX: 0, startY: 0, active: false, dragReady: false, timer: null, lastTap: 0 };
     card.addEventListener('touchstart', function (event) {
+      if (context.isPreviewMode) return;
       if (!event.touches[0]) return;
       var now = Date.now();
       if (now - touchData.lastTap < 260) {
@@ -119,6 +124,7 @@
     }, { passive: true });
 
     card.addEventListener('touchmove', function (event) {
+      if (context.isPreviewMode) return;
       if (!touchData.active || !event.touches[0]) return;
       var node = global.LogicHubStudioGraph.getNodeById(context.state, nodeId);
       if (!node) return;
@@ -141,6 +147,13 @@
       clearTimeout(touchData.timer);
       touchData.active = false;
       touchData.dragReady = false;
+      if (Date.now() - lastTapAt < 300) {
+        context.state.selectedNodeId = nodeId;
+        if (context.nodeEditorForm && context.nodeEditorForm.title) context.nodeEditorForm.title.focus();
+        renderCanvasElements(context);
+        context.onStateChange();
+      }
+      lastTapAt = Date.now();
     });
   }
 
@@ -173,6 +186,7 @@
 
   function setupBuilderCanvas(context) {
     var canvas = context.canvas;
+    var pinchDistance = 0;
     var pinchData = { distance: 0 };
 
     canvas.addEventListener('dragover', function (event) {
@@ -181,6 +195,7 @@
     });
 
     canvas.addEventListener('drop', function (event) {
+      if (context.isPreviewMode) return;
       event.preventDefault();
       var type = event.dataTransfer.getData('text/plain');
       if (!type) return;
@@ -196,6 +211,27 @@
       context.state.selectedNodeId = node.id;
       renderCanvasElements(context);
       context.onStateChange();
+    });
+    canvas.addEventListener('touchmove', function (event) {
+      if (!event.touches || event.touches.length !== 2) return;
+      var dx = event.touches[0].clientX - event.touches[1].clientX;
+      var dy = event.touches[0].clientY - event.touches[1].clientY;
+      var nextDistance = Math.sqrt(dx * dx + dy * dy);
+      if (!pinchDistance) {
+        pinchDistance = nextDistance;
+        return;
+      }
+      var ratio = nextDistance / pinchDistance;
+      var currentScale = Number(canvas.dataset.scale || '1');
+      var nextScale = Math.max(0.75, Math.min(1.8, currentScale * ratio));
+      canvas.dataset.scale = String(nextScale);
+      canvas.style.transform = 'scale(' + nextScale.toFixed(2) + ')';
+      canvas.style.transformOrigin = 'center center';
+      pinchDistance = nextDistance;
+      event.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchend', function () {
+      pinchDistance = 0;
     });
 
     canvas.addEventListener('touchmove', function (event) {
