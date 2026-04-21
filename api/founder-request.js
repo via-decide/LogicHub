@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import { getAdminDb, jsonError, verifyRequestUser } from "./_firebaseAdmin.js";
+import { getAdminDb, jsonError, logRuntimeEvent, verifyRequestUser } from "./_firebaseAdmin.js";
 
 function shouldNotifyFounderReview(order) {
   return Number(order?.amount || 0) === 1717 && String(order?.currency || "INR").toUpperCase() === "INR";
@@ -117,16 +117,36 @@ export default async function handler(req, res) {
     if (!Number.isFinite(amount) || amount <= 0) return jsonError(res, 400, "Invalid amount.");
 
     const requestRef = db.collection("founderRequests").doc(orderId);
+    const paymentRef = db.collection("payments").doc(orderId);
+    const utrLockRef = db.collection("paymentUtrIndex").doc(utr);
     const userRef = db.collection("users").doc(uid);
 
     await db.runTransaction(async (tx) => {
       const existing = await tx.get(requestRef);
+      const existingUtr = await tx.get(utrLockRef);
       if (existing.exists) {
         const existingData = existing.data() || {};
         if (existingData.uid && existingData.uid !== uid) {
           throw new Error("Order id already belongs to another user.");
         }
       }
+      if (existingUtr.exists) {
+        const lockedByOrder = String(existingUtr.data()?.orderId || "").trim();
+        if (lockedByOrder && lockedByOrder !== orderId) {
+          const duplicateError = new Error("UTR already used");
+          duplicateError.statusCode = 409;
+          throw duplicateError;
+        }
+      }
+
+      tx.set(utrLockRef, {
+        utr,
+        uid,
+        orderId,
+        amount,
+        status: "pending",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
 
       tx.set(requestRef, {
         uid,
@@ -138,16 +158,29 @@ export default async function handler(req, res) {
         payment,
         plan,
         upiId,
-        status: "requested",
+        status: "pending",
         source: "logichub_ui",
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tx.set(paymentRef, {
+        orderId,
+        utr,
+        user_id: uid,
+        amount,
+        currency,
+        payment,
+        plan,
+        projectName,
+        status: "pending",
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
 
       tx.set(userRef, {
         uid,
         latestOrderId: orderId,
-        founderRequestStatus: "requested",
+        founderRequestStatus: "pending",
         paymentStatus: "pending",
         plan,
         amount,
@@ -175,6 +208,15 @@ export default async function handler(req, res) {
       : needsManualEmail
         ? "Founder request saved for manual review. Please send the drafted email to dharam@viadecide.com so approval can be completed."
         : "Founder request saved for manual review. Paid access will unlock after approval.";
+    await logRuntimeEvent("payment_attempt", {
+      uid,
+      orderId,
+      amount,
+      currency,
+      payment,
+      plan,
+      status: "pending"
+    });
 
     return res.status(200).json({
       ok: true,
@@ -187,6 +229,17 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("Founder request save failed:", error);
+    await logRuntimeEvent("payment_attempt_error", {
+      message: error?.message || "Founder request save failed.",
+      statusCode: error?.statusCode || 500,
+      userAgent: String(req.headers?.["user-agent"] || "unknown")
+    });
+    if (String(error?.message || "").toLowerCase().includes("utr already used")) {
+      await logRuntimeEvent("suspicious_utr_duplicate", {
+        message: error.message,
+        userAgent: String(req.headers?.["user-agent"] || "unknown")
+      });
+    }
     const statusCode = error.message === "Order id already belongs to another user." ? 409 : (error.statusCode || 500);
     return jsonError(res, statusCode, error.message || "Founder request save failed.");
   }

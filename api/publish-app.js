@@ -1,3 +1,6 @@
+import admin from "firebase-admin";
+import { getAdminDb, logRuntimeEvent } from "./_firebaseAdmin.js";
+
 function toBase64(value) {
   return Buffer.from(value).toString('base64');
 }
@@ -28,6 +31,21 @@ function validateBundle(bundle) {
 
   if (/eval\s*\(|new\s+Function\s*\(/i.test(String(files['index.html']) + '\n' + String(files['app.js']))) {
     throw new Error('Unsafe script execution pattern detected.');
+  }
+}
+
+function validatePublishMetadata(metadata = {}) {
+  const required = ["name", "description", "icon", "entryUrl", "permissions", "creatorId"];
+  const missing = required.filter((key) => {
+    const value = metadata[key];
+    if (Array.isArray(value)) return value.length === 0;
+    return !String(value || "").trim();
+  });
+  if (missing.length) {
+    const error = new Error("missing required app metadata");
+    error.statusCode = 400;
+    error.missing = missing;
+    throw error;
   }
 }
 
@@ -104,14 +122,22 @@ export default async function handler(req, res) {
 
   try {
     validateBundle(bundle);
+    validatePublishMetadata(incomingMetadata);
 
     const slug = normalizeSlug(incomingMetadata.slug || incomingMetadata.name);
     const githubRepo = 'via-decide/daxini.space';
     const githubToken = process.env.GITHUB_TOKEN;
     const files = bundle.build;
 
+    const appId = `app_${Math.floor(100000 + Math.random() * 900000)}`;
     const metadata = {
+      appId,
       name: String(incomingMetadata.name),
+      description: String(incomingMetadata.description),
+      icon: String(incomingMetadata.icon),
+      entryUrl: String(incomingMetadata.entryUrl),
+      permissions: Array.isArray(incomingMetadata.permissions) ? incomingMetadata.permissions : [],
+      creatorId: String(incomingMetadata.creatorId),
       creator: String(incomingMetadata.creator || 'username'),
       origin: 'logichub',
       version: String(incomingMetadata.version || '1.0'),
@@ -147,14 +173,33 @@ export default async function handler(req, res) {
         publishedAt: metadata.publishedAt
       }
     });
+    const db = getAdminDb();
+    await db.collection("apps").doc(appId).set({
+      app_id: appId,
+      creator_id: metadata.creatorId,
+      title: metadata.name,
+      description: metadata.description,
+      entry_url: metadata.entryUrl,
+      icon: metadata.icon,
+      permissions: metadata.permissions,
+      slug,
+      source: "logichub",
+      created_at: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    await logRuntimeEvent("publish_attempt", { appId, slug, creatorId: metadata.creatorId, status: "success" });
 
     return res.status(200).json({
       success: true,
+      appId,
       slug,
       url: metadata.appUrl
     });
   } catch (error) {
     console.error('Publish endpoint error:', error);
-    return res.status(500).json({ error: `Publish failed: ${error.message}` });
+    await logRuntimeEvent("publish_attempt_error", { message: error?.message || "Publish failed." });
+    return res.status(error.statusCode || 500).json({
+      error: error.statusCode === 400 ? error.message : `Publish failed: ${error.message}`,
+      missing: error.missing || []
+    });
   }
 }

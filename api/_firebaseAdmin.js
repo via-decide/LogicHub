@@ -64,3 +64,16 @@ export async function verifyRequestUser(req) {
 export function jsonError(res, statusCode, message, extra = {}) {
   return res.status(statusCode).json({ error: message, ...extra });
 }
+
+export async function logRuntimeEvent(type, payload = {}) {
+  try {
+    const db = getAdminDb();
+    await db.collection("runtimeLogs").add({
+      type: String(type || "event"),
+      payload: payload && typeof payload === "object" ? payload : { value: String(payload || "") },
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (error) {
+    console.error("Runtime log write failed:", error);
+  }
+}
