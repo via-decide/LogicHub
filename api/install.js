@@ -19,6 +19,7 @@ export default async function handler(req, res) {
     const lockId = `${appId}__${deviceId}`;
     const installLockRef = db.collection("appInstallLocks").doc(lockId);
     const installRef = db.collection("app_installs").doc();
+    const appRef = db.collection("apps").doc(appId);
 
     await db.runTransaction(async (tx) => {
       const lockSnap = await tx.get(installLockRef);
@@ -42,12 +43,19 @@ export default async function handler(req, res) {
         timestamp: admin.firestore.Timestamp.fromDate(eventTs),
         created_at: admin.firestore.FieldValue.serverTimestamp()
       });
+
+      tx.set(appRef, {
+        app_id: appId,
+        installs: admin.firestore.FieldValue.increment(1),
+        last_install_at: admin.firestore.Timestamp.fromDate(eventTs),
+        updated_at: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
     });
 
     await logRuntimeEvent("install_event", { app_id: appId, device_id: deviceId, timestamp: ts });
     return res.status(200).json({ ok: true, app_id: appId, device_id: deviceId, timestamp: ts });
   } catch (error) {
-    await logRuntimeEvent("install_event_error", { message: error?.message || "Install save failed." });
+    await logRuntimeEvent("install_event_error", { app_id: req.body?.app_id || "", device_id: req.body?.device_id || "", message: error?.message || "Install save failed." });
     return jsonError(res, error.statusCode || 500, error.message || "Install save failed.");
   }
 }
