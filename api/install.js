@@ -19,6 +19,7 @@ export default async function handler(req, res) {
     const lockId = `${appId}__${deviceId}`;
     const installLockRef = db.collection("appInstallLocks").doc(lockId);
     const installRef = db.collection("app_installs").doc();
+    const appRef = db.collection("apps").doc(appId);
 
     await db.runTransaction(async (tx) => {
       const lockSnap = await tx.get(installLockRef);
@@ -42,6 +43,12 @@ export default async function handler(req, res) {
         timestamp: admin.firestore.Timestamp.fromDate(eventTs),
         created_at: admin.firestore.FieldValue.serverTimestamp()
       });
+
+      tx.set(appRef, {
+        app_id: appId,
+        install_count: admin.firestore.FieldValue.increment(1),
+        updated_at: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
     });
 
     await logRuntimeEvent("install_event", { app_id: appId, device_id: deviceId, timestamp: ts });
