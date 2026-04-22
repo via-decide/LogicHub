@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#030508">
+  <title>LOGICHUB — Product Website Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary:   #030508;
+      --bg-secondary: #0a0c10;
+      --border-color: #222222;
+      --accent:       #00e5ff;
+      --text-primary: #ffffff;
+      --text-secondary: #888899;
+      --font-serif: 'Crimson Text', serif;
+      --font-sans:  'Inter', sans-serif;
+      --font-mono:  'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans);
+      display: flex; flex-direction: column;
+      height: 100vh; overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 1.25rem; border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+    .header-title {
+      font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600;
+      display: flex; align-items: baseline; gap: 0.3rem; text-decoration: none; color: white;
+    }
+    .header-title .sep { color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem; }
+    .header-title .badge { color: var(--accent); font-family: var(--font-mono); font-size: 0.7rem; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; margin-left: 1rem; transition: 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── BUILDER LAYOUT ── */
+    .pb-layout {
+      display: flex; flex: 1; overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .pb-sidebar {
+      width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border-color);
+      display: flex; flex-direction: column; padding: 1rem;
+    }
+    .pb-sidebar-title { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px; }
+    
+    .pb-nav { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+    .pb-nav-item {
+      display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem;
+      background: transparent; border: 1px solid transparent; border-radius: 8px;
+      color: var(--text-secondary); cursor: pointer; text-align: left; transition: 0.2s;
+    }
+    .pb-nav-item:hover { background: rgba(255,255,255,0.02); border-color: var(--border-color); }
+    .pb-nav-item.active { background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.2); color: var(--text-primary); box-shadow: inset 2px 0 0 var(--accent); }
+    .pb-nav-num { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); }
+    .pb-nav-item.active .pb-nav-num { color: var(--accent); }
+    .pb-nav-label { font-size: 0.85rem; font-weight: 500; }
+
+    /* ── MAIN PANEL ── */
+    .pb-main {
+      flex: 1; overflow-y: auto; padding: 3rem 4rem; position: relative;
+    }
+    .pb-panel-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem; }
+    
+    .pb-layer-header h2 { font-size: 1.8rem; margin: 0 0 0.5rem; font-family: var(--font-serif); }
+    .pb-layer-header p { color: var(--text-secondary); margin: 0; font-size: 0.95rem; }
+
+    /* Forms */
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .form-group label { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; }
+    .form-group input, .form-group select {
+      background: var(--bg-primary); border: 1px solid var(--border-color); color: #fff;
+      padding: 0.8rem 1rem; border-radius: 8px; font-family: var(--font-sans); font-size: 0.9rem;
+      outline: none; transition: 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    /* Buttons */
+    .btn-primary { background: var(--accent); color: #000; font-weight: 700; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; transition: 0.2s; }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: 0.2s; }
+    .btn-outline:hover { border-color: var(--text-secondary); }
+
+    .footer-actions { display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html" class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">PRODUCT BUILDER</span></a>
+    <div class="nav-links">
+      <a href="index.html">Node Canvas</a>
+    </div>
+  </div>
+
+  <div class="pb-layout">
+    <aside class="pb-sidebar">
+      <div class="pb-sidebar-title">Architecture Stages</div>
+      <nav class="pb-nav" id="layer-nav">
+        <!-- Rendered by JS -->
+      </nav>
+    </aside>
+
+    <main class="pb-main">
+      <div class="pb-panel-container" id="panel-container">
+        <!-- Rendered by JS -->
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const STAGES = [
+      { id: 'brand', label: 'Brand Engine', desc: 'Define identity, tone, and visual signature.', icon: '🏷️' },
+      { id: 'mood', label: 'Moodboard', desc: 'Curate visual direction and aesthetic cues.', icon: '🎨' },
+      { id: 'sitemap', label: 'Sitemap', desc: 'Structure the information architecture.', icon: '🗺️' },
+      { id: 'sections', label: 'Section Engine', desc: 'Compose each page from functional sections.', icon: '🧱' },
+      { id: 'components', label: 'Component Engine', desc: 'Fine-tune content, layouts, and variants.', icon: '⚙️' },
+      { id: 'build', label: 'Build & Deploy', desc: 'Finalize and launch your sovereign product.', icon: '🚀' }
+    ];
+
+    let currentLayer = 0;
+    const state = {
+      brand: { name: '', tagline: '', style: 'minimal' },
+      sitemap: ['Home', 'About', 'Contact']
+    };
+
+    function init() {
+      renderSidebar();
+      renderPanel();
+    }
+
+    function renderSidebar() {
+      const nav = document.getElementById('layer-nav');
+      nav.innerHTML = STAGES.map((s, i) => `
+        <button class="pb-nav-item ${i === currentLayer ? 'active' : ''}" onclick="switchLayer(${i})">
+          <span class="pb-nav-num">0${i+1}</span>
+          <span class="pb-nav-label">${s.label}</span>
+        </button>
+      `).join('');
+    }
+
+    function switchLayer(idx) {
+      if(idx < 0 || idx >= STAGES.length) return;
+      currentLayer = idx;
+      renderSidebar();
+      renderPanel();
+    }
+
+    function renderPanel() {
+      const stage = STAGES[currentLayer];
+      const container = document.getElementById('panel-container');
+      
+      let content = '';
+      if(stage.id === 'brand') {
+        content = `
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" placeholder="e.g. Daxini Systems" value="${state.brand.name}" onchange="state.brand.name=this.value">
+            </div>
+            <div class="form-group">
+              <label>Tagline</label>
+              <input type="text" placeholder="Sovereign AI Infrastructure" value="${state.brand.tagline}" onchange="state.brand.tagline=this.value">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Design Preset</label>
+            <select onchange="state.brand.style=this.value">
+              <option value="minimal">Minimal / Technical</option>
+              <option value="brutalist">Dark / Brutalist</option>
+              <option value="premium">Premium / Luxury</option>
+            </select>
+          </div>
+        `;
+      } else if(stage.id === 'sitemap') {
+        content = `
+          <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            ${state.sitemap.map(p => `<div style="padding:0.8rem; border-bottom:1px solid var(--border-color);">${p}</div>`).join('')}
+            <button class="btn-outline" style="margin-top:1rem; width:100%;">+ Add Page</button>
+          </div>
+        `;
+      } else {
+        content = `<div style="padding: 4rem 0; text-align:center; color:var(--text-secondary); border: 1px dashed var(--border-color); border-radius:8px;">Configure ${stage.label} settings here.</div>`;
+      }
+
+      container.innerHTML = `
+        <header class="pb-layer-header">
+          <h2>${stage.icon} ${stage.label}</h2>
+          <p>${stage.desc}</p>
+        </header>
+        <div class="pb-layer-content" style="margin-top: 1rem;">
+          ${content}
+        </div>
+        <div class="footer-actions">
+          <button class="btn-outline" onclick="switchLayer(${currentLayer-1})" ${currentLayer === 0 ? 'style="visibility:hidden"' : ''}>Back</button>
+          <button class="btn-primary" onclick="switchLayer(${currentLayer+1})">${currentLayer === STAGES.length-1 ? 'Deploy Site' : 'Continue'}</button>
+        </div>
+      `;
+    }
+
+    init();
+  </script>
+</body>
+</html>
