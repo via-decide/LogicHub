@@ -1,0 +1,22 @@
+{
+  "name": "zayvora-brain",
+  "version": "1.0.0",
+  "description": "Zayvora Brain Orchestration Layer",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5",
+    "tsx": "^4.7.2"
+  }
+}

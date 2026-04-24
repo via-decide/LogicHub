@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogicHub Studio</title>
+  <style>
+    :root {
+      --bg: #06080f;
+      --panel: #0f1320;
+      --panel-soft: #141a2b;
+      --accent: #4ec9f5;
+      --text: #e7ecff;
+      --muted: #91a0c8;
+      --border: rgba(145,160,200,0.25);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top left, #152448 0%, var(--bg) 44%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .mobile-top-bar {
+      display: none;
+    }
+    .studio-topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      min-height: 60px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(8,12,22,0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    .mobile-brand { display: grid; gap: 2px; }
+    .mobile-brand strong { font-size: 0.92rem; }
+    .mobile-brand span { color: var(--muted); font-size: 0.72rem; }
+    .mobile-top-actions { display: flex; gap: 6px; }
+    .mobile-top-actions button {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(78,201,245,0.16);
+      color: var(--text);
+      font-size: 0.73rem;
+      padding: 8px;
+      min-width: 74px;
+    }
+    .studio-topbar strong { font-size: 1rem; }
+    .studio-topbar .lh-project-name { color: var(--muted); font-size: 0.8rem; }
+    .toolbar-left { display: flex; align-items: center; gap: 10px; }
+    .toolbar-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(78,201,245,0.24);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .studio-topbar nav { display: flex; gap: 8px; }
+    .studio-topbar button {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(78,201,245,0.16);
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
+      min-height: 40px;
+    }
+    .builder-layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) 320px;
+      grid-template-rows: 1fr;
+      gap: 12px;
+      padding: 72px 12px 12px;
+      min-height: 100vh;
+    }
+    .builder-layout.left-collapsed { grid-template-columns: 56px minmax(0, 1fr) 320px; }
+    .builder-layout.right-collapsed { grid-template-columns: 260px minmax(0, 1fr) 56px; }
+    .builder-layout.left-collapsed.right-collapsed { grid-template-columns: 56px minmax(0, 1fr) 56px; }
+    .studio {
+      min-height: 100%;
+    }
+    .builder-entry {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      background: rgba(4, 8, 16, 0.92);
+      padding: 20px;
+    }
+    .builder-entry[hidden] { display: none; }
+    .builder-entry-card {
+      width: min(520px, 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(160deg, var(--panel-soft), var(--panel));
+      display: grid;
+      gap: 10px;
+    }
+    .builder-entry-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .builder-entry-actions button {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(78,201,245,0.16);
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+      min-height: 48px;
+    }
+    .builder-entry-actions small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.75rem;
+      line-height: 1.3;
+    }
+    .panel {
+      background: linear-gradient(160deg, var(--panel-soft), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .panel h2, .panel h3 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .library { display: grid; gap: 8px; }
+    .app-structure {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: rgba(0,0,0,0.12);
+    }
+    .app-structure ul { margin: 6px 0 0 14px; padding: 0; display: grid; gap: 4px; }
+    .app-structure button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 4px 6px;
+      font: inherit;
+    }
+    .app-structure button.is-active { border-color: var(--accent); color: var(--accent); }
+    .lh-lib-category h4 { margin: 0 0 6px; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.03em; text-transform: uppercase; }
+    .panel-collapse {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(78,201,245,0.12);
+      color: var(--text);
+      padding: 6px 8px;
+      font: inherit;
+      margin-left: auto;
+    }
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .panel-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .panel-tab {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      font-size: 0.74rem;
+      padding: 6px 8px;
+    }
+    .panel-tab.is-active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .lh-lib-item {
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+      text-align: left;
+      cursor: grab;
+    }
+    .lh-lib-item span { color: var(--muted); font-size: 0.78rem; }
+    .lh-mobile-tool-card {
+      padding: 12px;
+      border-radius: 12px;
+      min-height: 58px;
+      text-align: left;
+    }
+    .workspace {
+      position: relative;
+      overflow: hidden;
+      min-height: 80vh;
+    }
+    .canvas {
+      position: relative;
+      height: 100%;
+      border-radius: 12px;
+      background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .canvas svg,
+    .node-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .lh-edge {
+      stroke: var(--accent);
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.8;
+    }
+    .lh-block {
+      position: absolute;
+      width: 184px;
+      border: 1px solid rgba(78,201,245,0.35);
+      border-radius: 10px;
+      background: #0b0f1a;
+      padding: 10px;
+      cursor: move;
+      display: grid;
+      gap: 7px;
+    }
+    .lh-block.is-selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(78,201,245,0.28);
+    }
+    .lh-content header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+    .lh-content h4 { margin: 0; font-size: 0.86rem; }
+    .lh-content p { margin: 0; color: var(--muted); font-size: 0.75rem; }
+    .lh-link-port {
+      justify-self: end;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(78,201,245,0.15);
+      color: var(--accent);
+      cursor: pointer;
+    }
+     .lh-selection-overlay {
+      position: absolute;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      min-width: 170px;
+      z-index: 5;
+    }
+    .lh-selection-overlay button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(78,201,245,0.16);
+      color: var(--text);
+      font-size: 0.72rem;
+      padding: 6px;
+    }
+    .lh-block.is-entering {
+      animation: lhBlockInsert 220ms ease-out;
+    }
+    @keyframes lhBlockInsert {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .editor label {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .editor input,
+    .editor textarea,
+    .editor select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      padding: 8px;
+      font: inherit;
+    }
+    .lh-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .lh-preview-grid article {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.15);
+    }
+    .lh-preview-grid h5 { margin: 0 0 2px; }
+    pre {
+      margin: 0;
+      max-height: 170px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.72rem;
+      background: rgba(0,0,0,0.2);
+      color: #d9f6ff;
+    }
+    .lh-empty,
+    .lh-footnote { color: var(--muted); font-size: 0.78rem; }
+    .canvas-empty {
+      position: absolute;
+      inset: 16px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      display: none;
+      place-content: center;
+      text-align: center;
+      gap: 8px;
+      background: rgba(4,8,16,0.35);
+      z-index: 3;
+    }
+    .canvas-empty.is-visible { display: grid; }
+    .canvas-empty-actions { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .zayvora textarea {
+      width: 100%;
+      min-height: 84px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      padding: 8px;
+      margin-bottom: 8px;
+      font: inherit;
+    }
+    .zayvora button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(78,201,245,0.22);
+      color: var(--text);
+      font-weight: 600;
+      padding: 8px 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+    #simulateDeployBtn {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(78,201,245,0.22);
+      color: var(--text);
+      font-weight: 600;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+    .mobile-bottom-bar,
+    .mobile-tool-drawer,
+    .mobile-hint,
+    .mobile-onboard,
+    .mobile-edit-panel,
+    .mobile-drawer-backdrop {
+      display: none;
+    }
+    .mobile-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,12,0.52);
+      z-index: 11;
+    }
+    .mobile-drawer-backdrop.is-open { display: block; }
+    .mobile-tool-drawer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 74px;
+      z-index: 12;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      background: linear-gradient(180deg, #111a2f, #0a0f1c);
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.45);
+      max-height: 55vh;
+      overflow: auto;
+    }
+    .mobile-tool-drawer.is-open { display: block; }
+    .mobile-edit-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 84px;
+      z-index: 12;
+      max-height: 40vh;
+      overflow: auto;
+      padding: 10px;
+      border-top: 1px solid var(--border);
+      background: rgba(11,16,28,0.96);
+    }
+    .mobile-edit-panel.is-open { display: block; }
+    .mobile-edit-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mobile-drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 11;
+      background: rgba(3,6,13,0.42);
+    }
+    .mobile-drawer-backdrop.is-open { display: block; }
+    .mobile-edit-panel {
+      display: none;
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      bottom: 82px;
+      z-index: 12;
+      max-height: 40vh;
+      overflow: auto;
+    }
+    .mobile-edit-panel.is-open { display: block; }
+    .mobile-edit-panel .edit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .mobile-edit-panel .edit-grid button { min-height: 48px; }
+    .mobile-onboard {
+      position: fixed;
+      inset: 0;
+      z-index: 14;
+      background: rgba(5,9,18,0.86);
+      padding: 20px;
+      place-items: center;
+    }
+    .mobile-onboard article {
+      width: min(420px, 100%);
+      background: linear-gradient(160deg, var(--panel-soft), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .mobile-onboard ol { margin: 8px 0 14px; padding-left: 18px; }
+    .mobile-onboard button,
+    .mobile-bottom-bar button,
+    .mobile-hint button {
+      border: 1px solid var(--border);
+      background: rgba(78,201,245,0.2);
+      color: var(--text);
+      border-radius: 10px;
+      font: inherit;
+      padding: 10px;
+    }
+    .mobile-bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 13;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      background: rgba(8,12,22,0.96);
+      backdrop-filter: blur(8px);
+    }
+    .mobile-bottom-bar button { min-height: 48px; font-size: 0.76rem; }
+    .mobile-bottom-bar button.is-active { border-color: var(--accent); color: var(--accent); }
+    .mobile-hint { margin-bottom: 8px; display: grid; gap: 8px; }
+    .mobile-hint button { width: 100%; }
+    @media (max-width: 1024px) {
+      .builder-layout {
+        grid-template-columns: 260px minmax(0, 1fr);
+      }
+      .builder-layout > aside:last-of-type { display: none; }
+    }
+    @media (max-width: 768px) {
+      .studio-topbar .lh-project-name { display: none; }
+      .builder-layout {
+        grid-template-columns: 1fr;
+        padding: 8px 8px 96px;
+      }
+      .studio {
+        gap: 8px;
+      }
+      .panel { border-radius: 12px; padding: 10px; }
+      .builder-layout > aside:first-of-type,
+      .builder-layout > aside:last-of-type,
+      .studio-topbar {
+        display: none;
+      }
+      .workspace {
+        min-height: calc(100vh - 116px);
+      }
+      .workspace h2 { margin-bottom: 6px; }
+      .mobile-bottom-bar,
+      .mobile-hint,
+      .mobile-top-bar {
+        display: grid;
+      }
+      .mobile-onboard.is-open { display: grid; }
+      .lh-block { width: 170px; }
+      .lh-node { width: 170px; }
+      .lh-mobile-node-actions { display: grid; }
+      .workspace.is-preview .canvas { opacity: 0.75; }
+      .workspace.is-preview .canvas::after {
+        content: 'Preview Mode';
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 0.7rem;
+        color: var(--muted);
+        background: rgba(0,0,0,0.35);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section id="builderEntry" class="builder-entry">
+    <article class="builder-entry-card">
+      <h1 style="margin:0;">Create App</h1>
+      <p class="lh-footnote" style="margin:0;">Manual builder is the foundation. AI and voice accelerate your workflow.</p>
+      <div class="builder-entry-actions">
+        <button type="button" id="startManualBuilderBtn">Start Building<small>Build app manually with components.</small></button>
+        <button type="button" id="startAIGeneratorBtn">Generate with AI<small>Describe your app and generate structure.</small></button>
+        <button type="button" id="startVoiceBuilderBtn">Speak to Build<small>Use voice to generate your app.</small></button>
+      </div>
+    </article>
+  </section>
+  <header class="mobile-top-bar">
+    <div class="mobile-brand">
+      <strong>LogicHub</strong>
+      <span id="mobileProjectName">Untitled Project</span>
+    </div>
+    <div class="mobile-top-actions">
+      <button type="button" data-mobile-action="preview">👁 Preview</button>
+      <button type="button" data-mobile-action="publish">🚀 Publish</button>
+    </div>
+  </header>
+  <header class="studio-topbar">
+    <div class="toolbar-left">
+      <span class="toolbar-logo">LH</span>
+      <div>
+        <strong>LogicHub</strong>
+        <div class="lh-project-name">Project: Desktop Builder</div>
+      </div>
+    </div>
+    <nav>
+      <button type="button" id="topPreviewBtn">👁 Preview</button>
+      <button type="button" id="topPublishBtn">🚀 Deploy</button>
+      <button type="button" id="askAiBtn">✨ Ask AI</button>
+      <button type="button" id="voiceBuilderBtnTop">🎤</button>
+    </nav>
+  </header>
+  <main class="builder-layout" id="builderLayout">
+    <aside class="panel" id="leftPanel">
+      <div class="panel-heading">
+        <h2>App Structure + Components</h2>
+        <button type="button" class="panel-collapse" id="collapseLeftBtn">&lt;&lt;</button>
+      </div>
+      <section class="app-structure">
+        <h3>App Structure</h3>
+        <div id="appStructureTree" class="lh-footnote">Pages and sections appear as you build.</div>
+      </section>
+      <h3>Components</h3>
+      <section id="componentLibrary" class="library"></section>
+    </aside>
+
+    <section class="panel workspace studio">
+      <h2>Builder Canvas</h2>
+      <div class="mobile-hint">
+        <button type="button" id="openToolsBtn">➕ Add Block</button>
+      </div>
+      <div id="builderCanvas" class="canvas">
+        <section id="canvasEmptyState" class="canvas-empty">
+          <strong>Start by adding a component.</strong>
+          <div class="canvas-empty-actions">
+            <button type="button" data-quick-add="Section">Add Section</button>
+            <button type="button" data-quick-add="Text">Add Text</button>
+            <button type="button" data-quick-add="Button">Add Button</button>
+          </div>
+        </section>
+        <svg id="edgeLayer" aria-hidden="true"></svg>
+        <div id="nodeLayer" class="node-layer"></div>
+      </div>
+    </section>
+
+    <aside class="panel" id="rightPanel">
+      <div class="panel-heading">
+        <h2>Properties</h2>
+        <button type="button" class="panel-collapse" id="collapseRightBtn">&gt;&gt;</button>
+      </div>
+      <section class="zayvora">
+        <h3>Zayvora Prompt</h3>
+        <textarea id="zayvoraPrompt" placeholder="Describe the workflow you want generated..."></textarea>
+        <button type="button" id="generateWorkflowBtn">Generate Workflow</button>
+        <p id="zayvoraStatus" class="lh-footnote">Enter a prompt to auto-generate a workflow graph.</p>
+      </section>
+      <section class="zayvora">
+        <h3>AI Builder</h3>
+        <textarea id="aiBuilderPrompt" placeholder="Describe your app or use voice..."></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" id="voiceBuilderBtn">🎤 Build with Voice</button>
+          <button type="button" id="aiBuilderGenerateBtn">Generate App Plan</button>
+        </div>
+        <p id="aiBuilderStatus" class="lh-footnote">Speak or type a request to generate pages, components, schema, and workflows.</p>
+      </section>
+      <section>
+        <h3>Node Editor</h3>
+        <form id="nodeEditorForm" class="editor">
+          <label>Node Title <input type="text" name="title" disabled></label>
+          <label>Description <textarea name="description" rows="3" disabled></textarea></label>
+        </form>
+        <p id="nodeEditorHelper" class="lh-footnote">Select a node on the canvas to edit its label and details.</p>
+      </section>
+      <section>
+        <h3>Live Preview</h3>
+        <div id="previewPanel"></div>
+      </section>
+      <section>
+        <h3>Deployment Panel</h3>
+        <div id="deploymentPanel"></div>
+      </section>
+    </aside>
+  </main>
+  <div id="mobileDrawerBackdrop" class="mobile-drawer-backdrop"></div>
+  <section id="mobileToolDrawer" class="mobile-tool-drawer panel">
+    <h3>Components</h3>
+    <section id="mobileComponentLibrary" class="library"></section>
+  </section>
+  <nav class="mobile-bottom-bar" id="mobileBottomBar">
+    <button type="button" data-mobile-action="structure">🗂 Structure</button>
+    <button type="button" data-mobile-action="components" class="is-active">🧩 Components</button>
+    <button type="button" data-mobile-action="properties">⚙️ Properties</button>
+    <button type="button" data-mobile-action="preview">👁 Preview</button>
+    <button type="button" data-mobile-action="publish">🚀 Deploy</button>
+  </nav>
+  <section id="mobileEditPanel" class="mobile-edit-panel panel">
+    <h3>Block Editor</h3>
+    <label class="editor">Font Size <input type="range" id="mobileFontSize" min="12" max="36" value="16"></label>
+    <label class="editor">Alignment
+      <select id="mobileAlignment">
+        <option value="left">Left</option>
+        <option value="center">Center</option>
+        <option value="right">Right</option>
+      </select>
+    </label>
+    <div class="mobile-edit-actions">
+      <button type="button" id="mobileDuplicateBtn">Duplicate</button>
+      <button type="button" id="mobileDeleteBtn">Delete</button>
+    </div>
+  </section>
+  <section id="mobileOnboard" class="mobile-onboard">
+    <article>
+      <h3>Welcome to LogicHub</h3>
+      <ol>
+        <li>Tap <strong>Add Block</strong>.</li>
+        <li>Build your page on the canvas.</li>
+        <li>Tap <strong>Preview</strong> to test.</li>
+        <li>Tap <strong>Publish</strong> to deploy.</li>
+      </ol>
+      <button type="button" id="dismissOnboardBtn">Start Building</button>
+    </article>
+  </section>
+  <section id="mobilePublishWizard" class="mobile-onboard">
+    <article>
+      <h3>Publish App</h3>
+      <label>Name <input type="text" id="wizardAppName" placeholder="my-mobile-app"></label>
+      <label>Description <textarea id="wizardDescription" rows="2" placeholder="What does your app do?"></textarea></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button type="button" id="wizardPreviewBtn">Preview</button>
+        <button type="button" id="wizardDeployBtn">Deploy</button>
+      </div>
+      <button type="button" id="wizardCloseBtn" style="margin-top:8px;width:100%;">Back to Builder</button>
+    </article>
+  </section>
+
+  <script src="../components/library/component-library.jsx"></script>
+  <script src="../components/builder/flow-graph.jsx"></script>
+  <script src="../components/builder/builder-canvas.jsx"></script>
+  <script src="../components/builder/node-editor.jsx"></script>
+  <script src="../engine/workflow/workflow-parser.js"></script>
+  <script src="../engine/workflow/execution-validator.js"></script>
+  <script src="../engine/workflow/node-compiler.js"></script>
+  <script src="../engine/workflow/workflow-runtime.js"></script>
+  <script src="../components/preview/preview-panel.jsx"></script>
+  <script src="../components/preview/deployment-panel.jsx"></script>
+  <script src="../deployment/marketplace-adapter.js"></script>
+  <script src="../integrations/marketplace/version-manager.js"></script>
+  <script src="../integrations/marketplace/app-metadata-builder.js"></script>
+  <script src="../integrations/marketplace/marketplace-publisher.js"></script>
+  <script src="../integrations/zayvora/zayvora-bridge.js"></script>
+  <script src="../integrations/zayvora/task-interpreter.js"></script>
+  <script src="../integrations/zayvora/workflow-generator.js"></script>
+  <script src="../integrations/voice/logicHubVoiceEngine.js"></script>
+  <script src="../../ai/voice-engine.js"></script>
+  <script src="../integrations/ai-builder/intent-parser.js"></script>
+  <script src="../integrations/ai-builder/app-generator.js"></script>
+  <script>
+    var state = window.LogicHubStudioGraph.createGraphState();
+
+    var context = {
+      state: state,
+      canvas: document.getElementById('builderCanvas'),
+      canvasEdgeLayer: document.getElementById('edgeLayer'),
+      canvasNodeLayer: document.getElementById('nodeLayer'),
+      nodeEditorForm: document.getElementById('nodeEditorForm'),
+      nodeEditorHelper: document.getElementById('nodeEditorHelper'),
+      previewPanel: document.getElementById('previewPanel'),
+      deploymentPanel: document.getElementById('deploymentPanel'),
+      zayvoraPrompt: document.getElementById('zayvoraPrompt'),
+      zayvoraStatus: document.getElementById('zayvoraStatus'),
+      aiBuilderPrompt: document.getElementById('aiBuilderPrompt'),
+      aiBuilderStatus: document.getElementById('aiBuilderStatus'),
+      askAiBtn: document.getElementById('askAiBtn'),
+      builderEntry: document.getElementById('builderEntry'),
+      startManualBuilderBtn: document.getElementById('startManualBuilderBtn'),
+      startAIGeneratorBtn: document.getElementById('startAIGeneratorBtn'),
+      startVoiceBuilderBtn: document.getElementById('startVoiceBuilderBtn'),
+      mobileToolDrawer: document.getElementById('mobileToolDrawer'),
+      mobileDrawerBackdrop: document.getElementById('mobileDrawerBackdrop'),
+      mobileEditPanel: document.getElementById('mobileEditPanel'),
+      openToolsBtn: document.getElementById('openToolsBtn'),
+      mobileBottomBar: document.getElementById('mobileBottomBar'),
+      mobileOnboard: document.getElementById('mobileOnboard'),
+      mobileProjectName: document.getElementById('mobileProjectName'),
+      mobilePublishWizard: document.getElementById('mobilePublishWizard'),
+      topPreviewBtn: document.getElementById('topPreviewBtn'),
+      topPublishBtn: document.getElementById('topPublishBtn'),
+      topVoiceBtn: document.getElementById('voiceBuilderBtnTop'),
+      builderLayout: document.getElementById('builderLayout'),
+      appStructureTree: document.getElementById('appStructureTree'),
+      canvasEmptyState: document.getElementById('canvasEmptyState'),
+      collapseLeftBtn: document.getElementById('collapseLeftBtn'),
+      collapseRightBtn: document.getElementById('collapseRightBtn'),
+      marketplaceDraft: {
+        appId: '',
+        creatorPassport: '',
+        version: '',
+        description: '',
+        tags: ''
+      },
+      runtimeHandlers: {
+        Research: function (step, payload) { return Object.assign({}, payload, { research: 'gathered:' + step.title }); },
+        'Data Processor': function (step, payload) { return Object.assign({}, payload, { processed: true }); },
+        'UI Generator': function (step, payload) { return Object.assign({}, payload, { ui: 'render-ready' }); },
+        Output: function (step, payload) { return Object.assign({}, payload, { output: payload }); }
+      },
+      project: {
+        pages: [],
+        components: [],
+        data: [],
+        workflows: []
+      },
+      creationMode: 'manual',
+      onStateChange: function () {
+        if (context.syncEditor) context.syncEditor();
+        renderAppStructure();
+        renderCanvasGuidance();
+        window.LogicHubStudioPreview.renderPreview(context);
+        window.LogicHubStudioDeploy.renderDeploymentPanel(context);
+      }
+    };
+
+    window.LogicHubStudioLibrary.renderLibrary(document.getElementById('componentLibrary'));
+    window.LogicHubStudioLibrary.renderLibrary(document.getElementById('mobileComponentLibrary'), {
+      mobileCards: true,
+      onItemSelected: function (type) {
+        var node = window.LogicHubStudioGraph.createNode(context.state, type, 28, 40 + (context.state.nodes.length * 56));
+        context.state.selectedNodeId = node.id;
+        if (context.mobileToolDrawer) context.mobileToolDrawer.classList.remove('is-open');
+        window.LogicHubStudioCanvas.renderCanvasElements(context);
+        context.onStateChange();
+      }
+    });
+    window.LogicHubStudioNodeEditor.setupNodeEditor(context);
+    window.LogicHubStudioCanvas.setupBuilderCanvas(context);
+    connectCreatorEntry();
+    connectZayvoraGeneration();
+    connectAIBuilder();
+    connectAskAI();
+    connectDesktopPanels();
+    connectMobileActions();
+    connectMobileEditorPanel();
+    connectPublishWizard();
+    connectKeyboardShortcuts();
+    connectQuickAddButtons();
+    context.onStateChange();
+
+    function loadGeneratedGraph(generated) {
+      context.state.nodes = generated.graph.nodes;
+      context.state.edges = generated.graph.edges;
+      context.state.idCounter = generated.graph.nodes.length;
+      context.state.selectedNodeId = generated.graph.nodes.length ? generated.graph.nodes[0].id : null;
+      context.state.activeLinkSourceId = null;
+      window.LogicHubStudioCanvas.renderCanvasElements(context);
+      context.onStateChange();
+    }
+
+    function syncProjectStructureFromPlan(plan) {
+      context.project = {
+        pages: (plan.pages || []).slice(),
+        components: (plan.components || []).slice(),
+        data: (plan.dataSchema || []).slice(),
+        workflows: (plan.workflows || []).slice()
+      };
+      localStorage.setItem('lh-project-structure', JSON.stringify(context.project));
+      localStorage.setItem('lh-ai-plan', JSON.stringify({
+        description: plan.intent ? plan.intent.prompt : '',
+        pages: context.project.pages,
+        components: context.project.components,
+        data: context.project.data,
+        workflows: context.project.workflows
+      }));
+    }
+
+    function connectCreatorEntry() {
+      if (!context.builderEntry) return;
+      function closeEntry(mode) {
+        context.creationMode = mode || 'manual';
+        context.builderEntry.setAttribute('hidden', 'hidden');
+        context.aiBuilderStatus.textContent = 'Mode: ' + context.creationMode + '. You can edit everything manually in the canvas.';
+      }
+      if (context.startManualBuilderBtn) context.startManualBuilderBtn.addEventListener('click', function () { closeEntry('manual'); });
+      if (context.startAIGeneratorBtn) context.startAIGeneratorBtn.addEventListener('click', function () {
+        closeEntry('ai');
+        if (context.aiBuilderPrompt) context.aiBuilderPrompt.focus();
+      });
+      if (context.startVoiceBuilderBtn) context.startVoiceBuilderBtn.addEventListener('click', function () {
+        closeEntry('voice');
+        var voiceButton = document.getElementById('voiceBuilderBtn');
+        if (voiceButton) voiceButton.click();
+      });
+    }
+
+    function connectZayvoraGeneration() {
+      var generateButton = document.getElementById('generateWorkflowBtn');
+      if (!generateButton) return;
+
+      generateButton.addEventListener('click', function () {
+        var promptValue = context.zayvoraPrompt.value.trim();
+        if (!promptValue) {
+          context.zayvoraStatus.textContent = 'Please enter a prompt before generating.';
+          return;
+        }
+
+        var reasoning = window.LogicHubZayvoraBridge.reasonOverPrompt(promptValue);
+        var structuredTask = window.LogicHubTaskInterpreter.interpretReasoning(reasoning);
+        var generated = window.LogicHubWorkflowGenerator.generateWorkflow(structuredTask);
+
+        loadGeneratedGraph(generated);
+        context.zayvoraStatus.textContent = 'Generated workflow for intent "' + reasoning.intent + '" (' + structuredTask.steps.length + ' nodes).';
+      });
+    }
+
+
+    function connectAIBuilder() {
+      var generateButton = document.getElementById('aiBuilderGenerateBtn');
+      var voiceButton = document.getElementById('voiceBuilderBtn');
+      if (!generateButton || !context.aiBuilderPrompt || !context.aiBuilderStatus) return;
+
+      function runAIBuilderFromPrompt(promptText) {
+        var parser = window.LogicHubAIIntentParser;
+        var generator = window.LogicHubAIAppGenerator;
+        if (!parser || !generator) return;
+
+        var intent = parser.parseIntent(promptText);
+        var plan = generator.buildPlan(intent);
+        var mapped = generator.planToNodes(plan, context.state);
+
+        context.state.nodes = mapped.nodes;
+        context.state.edges = mapped.edges;
+        context.state.idCounter = mapped.nextIdCounter;
+        context.state.selectedNodeId = mapped.nodes[0] ? mapped.nodes[0].id : null;
+        syncProjectStructureFromPlan(plan);
+        window.LogicHubStudioCanvas.renderCanvasElements(context);
+        context.onStateChange();
+
+        context.aiBuilderStatus.textContent = 'I created a ' + intent.category + ' app with ' + plan.pages.length + ' pages and ' + plan.workflows.length + ' workflows.';
+        if (typeof window.speechSynthesis !== 'undefined') {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(new SpeechSynthesisUtterance(context.aiBuilderStatus.textContent));
+        }
+      }
+
+      generateButton.addEventListener('click', function () {
+        var promptText = context.aiBuilderPrompt.value.trim();
+        if (!promptText) {
+          context.aiBuilderStatus.textContent = 'Please add a description before generating.';
+          return;
+        }
+        runAIBuilderFromPrompt(promptText);
+      });
+
+      var voiceFactory = window.LogicHubBuilderVoiceEngine || window.LogicHubVoiceEngine;
+      if (voiceButton && voiceFactory) {
+        var voiceEngine = voiceFactory.createVoiceEngine({
+          onTranscript: function (transcript) {
+            context.aiBuilderPrompt.value = transcript;
+            runAIBuilderFromPrompt(transcript);
+          },
+          onStatus: function (status) {
+            context.aiBuilderStatus.textContent = status === 'listening' ? 'Listening for your builder command...' : 'Voice capture finished.';
+          },
+          onError: function (message) {
+            context.aiBuilderStatus.textContent = 'Voice error: ' + message;
+          }
+        });
+
+        voiceButton.addEventListener('click', function () {
+          if (voiceEngine.listening) {
+            voiceEngine.stop();
+          } else {
+            voiceEngine.start();
+          }
+        });
+      }
+    }
+
+    function connectMobileActions() {
+      if (context.openToolsBtn) {
+        context.openToolsBtn.addEventListener('click', function () {
+          toggleDrawer(!context.mobileToolDrawer.classList.contains('is-open'));
+          activateMobileAction('add');
+        });
+      }
+      if (context.mobileDrawerBackdrop) {
+        context.mobileDrawerBackdrop.addEventListener('click', function () {
+          toggleDrawer(false);
+        });
+      }
+      if (context.topPreviewBtn) context.topPreviewBtn.addEventListener('click', function () { activateMobileAction('preview'); });
+      if (context.topPublishBtn) context.topPublishBtn.addEventListener('click', function () { activateMobileAction('publish'); });
+
+      if (context.mobileBottomBar) {
+        context.mobileBottomBar.addEventListener('click', function (event) {
+          var button = event.target.closest('[data-mobile-action]');
+          if (!button) return;
+          activateMobileAction(button.dataset.mobileAction);
+        });
+      }
+
+      if (context.mobileOnboard && localStorage.getItem('lh-mobile-onboarded') === '1') {
+        context.mobileOnboard.classList.remove('is-open');
+      } else if (context.mobileOnboard) {
+        context.mobileOnboard.classList.add('is-open');
+      }
+
+      var dismiss = document.getElementById('dismissOnboardBtn');
+      if (dismiss) dismiss.addEventListener('click', function () {
+        localStorage.setItem('lh-mobile-onboarded', '1');
+        context.mobileOnboard.classList.remove('is-open');
+      });
+    }
+
+    function connectAskAI() {
+      if (!context.askAiBtn) return;
+      context.askAiBtn.addEventListener('click', function () {
+        var promptText = window.prompt('What should AI change in this project?', 'Add login page');
+        if (!promptText) return;
+        context.aiBuilderPrompt.value = promptText;
+        var generateButton = document.getElementById('aiBuilderGenerateBtn');
+        if (generateButton) generateButton.click();
+      });
+    }
+
+    function connectDesktopPanels() {
+      if (context.topVoiceBtn) {
+        context.topVoiceBtn.addEventListener('click', function () {
+          var voiceBtn = document.getElementById('voiceBuilderBtn');
+          if (voiceBtn) voiceBtn.click();
+        });
+      }
+      if (!context.builderLayout) return;
+      if (context.collapseLeftBtn) {
+        context.collapseLeftBtn.addEventListener('click', function () {
+          context.builderLayout.classList.toggle('left-collapsed');
+        });
+      }
+      if (context.collapseRightBtn) {
+        context.collapseRightBtn.addEventListener('click', function () {
+          context.builderLayout.classList.toggle('right-collapsed');
+        });
+      }
+    }
+
+    function connectKeyboardShortcuts() {
+      document.addEventListener('keydown', function (event) {
+        var activeTag = document.activeElement ? document.activeElement.tagName : '';
+        var typing = /INPUT|TEXTAREA|SELECT/.test(activeTag) || (document.activeElement && document.activeElement.isContentEditable);
+
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+          event.preventDefault();
+          localStorage.setItem('lh-mobile-canvas-draft', JSON.stringify(context.state));
+          context.aiBuilderStatus.textContent = 'Draft saved.';
+          return;
+        }
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+          event.preventDefault();
+          context.aiBuilderStatus.textContent = 'Undo shortcut is reserved for timeline history.';
+          return;
+        }
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd' && context.state.selectedNodeId) {
+          event.preventDefault();
+          window.LogicHubStudioCanvas.handleNodeAction(context, context.state.selectedNodeId, 'duplicate');
+          return;
+        }
+        if (!typing && event.key === 'Delete' && context.state.selectedNodeId) {
+          event.preventDefault();
+          window.LogicHubStudioCanvas.handleNodeAction(context, context.state.selectedNodeId, 'delete');
+        }
+      });
+    }
+
+    function renderCanvasGuidance() {
+      if (!context.canvasEmptyState) return;
+      context.canvasEmptyState.classList.toggle('is-visible', context.state.nodes.length === 0);
+    }
+
+    function renderAppStructure() {
+      if (!context.appStructureTree) return;
+      if (!context.state.nodes.length) {
+        context.appStructureTree.textContent = 'Pages and sections appear as you build.';
+        return;
+      }
+      var groups = {};
+      context.state.nodes.forEach(function (node) {
+        var key = node.type === 'Section' ? 'Home' : 'Home · Sections';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(node);
+      });
+      var html = ['<ul><li><strong>Pages</strong><ul>'];
+      Object.keys(groups).forEach(function (groupName) {
+        html.push('<li><span>' + groupName + '</span><ul>');
+        groups[groupName].forEach(function (node) {
+          html.push('<li><button type="button" data-structure-node="' + node.id + '" class="' + (node.id === context.state.selectedNodeId ? 'is-active' : '') + '">' + node.title + '</button></li>');
+        });
+        html.push('</ul></li>');
+      });
+      html.push('</ul></li></ul>');
+      context.appStructureTree.innerHTML = html.join('');
+    }
+
+    function connectQuickAddButtons() {
+      if (context.canvasEmptyState) {
+        context.canvasEmptyState.addEventListener('click', function (event) {
+          var quick = event.target.closest('[data-quick-add]');
+          if (!quick) return;
+          var node = window.LogicHubStudioGraph.createNode(context.state, quick.dataset.quickAdd, 44, 58 + (context.state.nodes.length * 54));
+          context.state.selectedNodeId = node.id;
+          window.LogicHubStudioCanvas.renderCanvasElements(context);
+          context.onStateChange();
+        });
+      }
+      if (context.appStructureTree) {
+        context.appStructureTree.addEventListener('click', function (event) {
+          var item = event.target.closest('[data-structure-node]');
+          if (!item) return;
+          context.state.selectedNodeId = item.dataset.structureNode;
+          window.LogicHubStudioCanvas.renderCanvasElements(context);
+          context.onStateChange();
+        });
+      }
+    }
+
+    function activateMobileAction(action) {
+      if (!context.mobileBottomBar) return;
+      Array.prototype.forEach.call(context.mobileBottomBar.querySelectorAll('[data-mobile-action]'), function (button) {
+        button.classList.toggle('is-active', button.dataset.mobileAction === action);
+      });
+
+      if (action === 'components') {
+        toggleDrawer(true);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.remove('is-open');
+      } else if (action === 'properties') {
+        toggleDrawer(false);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.toggle('is-open', true);
+      } else if (action === 'structure') {
+        toggleDrawer(false);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.remove('is-open');
+        if (context.appStructureTree) context.appStructureTree.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (action === 'add') {
+        toggleDrawer(true);
+      } else if (action === 'blocks') {
+        toggleDrawer(false);
+        if (context.mobileEditPanel) context.mobileEditPanel.classList.toggle('is-open', !!context.state.selectedNodeId);
+      } else {
+        toggleDrawer(false);
+      }
+
+      var previewPanelSection = context.previewPanel.closest('section');
+      var publishPanelSection = context.deploymentPanel.closest('section');
+      if (!previewPanelSection || !publishPanelSection) return;
+      previewPanelSection.style.display = action === 'preview' ? 'block' : 'none';
+      publishPanelSection.style.display = action === 'publish' ? 'block' : 'none';
+      context.isPreviewMode = action === 'preview';
+      if (context.canvas) context.canvas.closest('.workspace').classList.toggle('is-preview', !!context.isPreviewMode);
+      if (action === 'blocks' || action === 'add' || action === 'components' || action === 'structure' || action === 'properties') {
+        previewPanelSection.style.display = 'none';
+        publishPanelSection.style.display = 'none';
+      }
+      if (action === 'publish') {
+        context.mobilePublishWizard.classList.add('is-open');
+      }
+    }
+
+    function toggleDrawer(open) {
+      if (!context.mobileToolDrawer || !context.mobileDrawerBackdrop) return;
+      context.mobileToolDrawer.classList.toggle('is-open', open);
+      context.mobileDrawerBackdrop.classList.toggle('is-open', open);
+    }
+
+    function connectPublishWizard() {
+      var closeBtn = document.getElementById('wizardCloseBtn');
+      var previewBtn = document.getElementById('wizardPreviewBtn');
+      var deployBtn = document.getElementById('wizardDeployBtn');
+      var appName = document.getElementById('wizardAppName');
+      var description = document.getElementById('wizardDescription');
+      if (closeBtn) closeBtn.addEventListener('click', function () { context.mobilePublishWizard.classList.remove('is-open'); });
+      if (previewBtn) previewBtn.addEventListener('click', function () {
+        context.mobilePublishWizard.classList.remove('is-open');
+        activateMobileAction('preview');
+      });
+      if (deployBtn) deployBtn.addEventListener('click', function () {
+        context.marketplaceDraft.appId = appName ? appName.value.trim() : '';
+        context.marketplaceDraft.description = description ? description.value.trim() : '';
+        context.mobilePublishWizard.classList.remove('is-open');
+        activateMobileAction('publish');
+      });
+    }
+
+    function connectMobileEditorPanel() {
+      var duplicateBtn = document.getElementById('mobileDuplicateBtn');
+      var deleteBtn = document.getElementById('mobileDeleteBtn');
+      if (duplicateBtn) duplicateBtn.addEventListener('click', function () {
+        var selected = context.state.selectedNodeId;
+        if (!selected) return;
+        var node = window.LogicHubStudioGraph.getNodeById(context.state, selected);
+        if (!node) return;
+        var clone = window.LogicHubStudioGraph.createNode(context.state, node.type, node.x + 14, node.y + 14);
+        clone.title = node.title + ' Copy';
+        clone.description = node.description;
+        context.state.selectedNodeId = clone.id;
+        window.LogicHubStudioCanvas.renderCanvasElements(context);
+        context.onStateChange();
+      });
+      if (deleteBtn) deleteBtn.addEventListener('click', function () {
+        var selected = context.state.selectedNodeId;
+        if (!selected) return;
+        context.state.nodes = context.state.nodes.filter(function (node) { return node.id !== selected; });
+        context.state.edges = context.state.edges.filter(function (edge) { return edge.from !== selected && edge.to !== selected; });
+        context.state.selectedNodeId = context.state.nodes[0] ? context.state.nodes[0].id : null;
+        window.LogicHubStudioCanvas.renderCanvasElements(context);
+        context.onStateChange();
+      });
+    }
+  </script>
+</body>
+</html>

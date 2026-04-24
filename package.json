@@ -1,18 +1,18 @@
 {
-  "name": "logichub",
+  "name": "logic-hub",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "description": "Viral App Distribution Engine",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "build": "npm run build:assets && npm run build:vercel",
-    "build:assets": "node ./build/copy-static.js",
-    "build:vercel": "npm run build:assets && npm run health-check:build && npm run finalize:build",
-    "health-check:build": "node ./deploy/health-check.js --mode=build",
-    "finalize:build": "node ./build/finalize.js",
-    "recover:deployments": "node ./deploy/recover-deployments.js",
-    "dev": "node ./deploy/dev-server.js",
-    "start": "node ./api/index.js"
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present"
   },
-  "dependencies": {
-    "firebase-admin": "^13.4.0"
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }
