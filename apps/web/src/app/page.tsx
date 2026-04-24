@@ -32,16 +32,23 @@ export default function Home() {
 
   useEffect(() => {
     fetchApps();
-    // Simulate activity feed
-    const interval = setInterval(() => {
-      const msgs = [
-        "🔥 Someone just dropped a new app!",
-        "🚀 50+ downloads in the last hour for 'Zayvora-Tools'",
-        "📦 New repo analyzed: git-history-llm",
-        "✨ Viral loop active: 100+ shares today"
-      ];
-      setActivities(prev => [msgs[Math.floor(Math.random() * msgs.length)], ...prev].slice(0, 5));
-    }, 10000);
+    // Fetch live activity from Redis feed
+    const fetchActivity = async () => {
+      try {
+        const res = await fetch("http://localhost:4001/activity");
+        const data = await res.json();
+        const msgs = data.map((item: any) => 
+          item.type === "download" 
+            ? `🔥 Someone downloaded "${item.app}"` 
+            : `🚀 New app dropped: "${item.app}"`
+        );
+        setActivities(msgs);
+      } catch (err) {
+        console.error("Failed to fetch activity", err);
+      }
+    };
+
+    const interval = setInterval(fetchActivity, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -81,10 +88,13 @@ export default function Home() {
       if (submitRes.ok) {
         setRepoUrl("");
         fetchApps();
-        setActivities(prev => [`✨ New app successfully dropped: ${aiData.title}`, ...prev]);
+      } else {
+        const errorData = await submitRes.json();
+        alert(errorData.error || "Submission failed");
       }
     } catch (err) {
       console.error("Submission failed", err);
+      alert("System overload. Please try again in a few minutes.");
     } finally {
       setIsAnalyzing(false);
     }
