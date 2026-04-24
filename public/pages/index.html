@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logichub — Thinking Layer Before Coding</title>
+  <meta name="description" content="Logichub is the planning engine before coding: Idea → Logichub → Zayvora → Daxini.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="../components/hero.js"></script>
+  <script src="../components/features.js"></script>
+  <script src="../components/workflow.js"></script>
+  <script src="../components/ecosystem.js"></script>
+  <script src="../components/workspace-ui.js"></script>
+  <script src="../js/blueprint-save.js"></script>
+  <script src="../js/blueprint-load.js"></script>
+</head>
+<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
+  <div class="min-h-full">
+    <header class="sticky top-0 z-20 border-b border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="font-semibold tracking-wide">LOGICHUB</div>
+        <button id="themeToggle" class="text-xs px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700">Toggle Theme</button>
+      </div>
+    </header>
+
+    <main id="app" class="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10"></main>
+  </div>
+
+  <script>
+    const c = window.LogicHubComponents;
+    const app = document.getElementById('app');
+
+    app.innerHTML = [
+      c.heroSection(),
+      c.featureGrid(),
+      c.workflowSteps(),
+      `
+      <section class="py-14">
+        <h2 class="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-white">Generated Output Preview</h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">Logichub produces structured code scaffolds your team can extend instantly.</p>
+        <div class="mt-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-emerald-300 p-6 font-mono text-sm">
+/project<br>
+&nbsp;&nbsp;app.js<br>
+&nbsp;&nbsp;style.css<br>
+&nbsp;&nbsp;manifest.json<br>
+&nbsp;&nbsp;sw.js
+        </div>
+      </section>
+      `,
+      c.ecosystemDiagram(),
+      c.workspaceCanvas(),
+      `
+      <section class="py-14">
+        <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-cyan-600 to-violet-700 text-white p-8 md:p-12">
+          <h2 class="text-3xl md:text-4xl font-semibold">Start Planning Your System</h2>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button class="px-5 py-3 rounded-xl bg-white text-slate-900 font-semibold" onclick="location.href='../index.html'">Open Logichub Workspace</button>
+            <button class="px-5 py-3 rounded-xl border border-white/60 font-semibold">Explore Zayvora</button>
+          </div>
+        </div>
+      </section>
+      `
+    ].join('');
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    if (window.LogicHubBlueprint && window.LogicHubBlueprint.initBlueprintLoad) {
+      window.LogicHubBlueprint.initBlueprintLoad();
+    }
+
+    const saveButton = document.getElementById('saveBlueprintBtn');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => {
+        window.LogicHubBlueprint.saveBlueprint();
+      });
+    }
+
+    const shareButton = document.getElementById('shareBlueprintBtn');
+    if (shareButton) {
+      shareButton.addEventListener('click', () => {
+        window.LogicHubBlueprint.shareBlueprint();
+      });
+    }
+
+    const exportButton = document.getElementById('exportZipBtn');
+    if (exportButton) {
+      exportButton.addEventListener('click', () => {
+        window.LogicHubBlueprint.exportBlueprintJSON();
+      });
+    }
+
+    const generateButton = document.getElementById('generateAppBtn');
+    if (generateButton) {
+      generateButton.addEventListener('click', () => {
+        const status = document.getElementById('blueprintStatus');
+        if (status) {
+          status.textContent = 'Blueprint ready. Generation pipeline can now consume saved architecture JSON.';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

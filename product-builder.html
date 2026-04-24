@@ -168,6 +168,12 @@
     }
 
     function switchLayer(idx) {
+      if(idx === STAGES.length) {
+        if(confirm("Architecture finalized. Transition to LogicHub Synthesis Workspace?")) {
+          location.href = 'index.html';
+        }
+        return;
+      }
       if(idx < 0 || idx >= STAGES.length) return;
       currentLayer = idx;
       renderSidebar();
