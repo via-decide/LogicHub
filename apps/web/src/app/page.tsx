@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+export const runtime = "edge";
+
 interface AppItem {
   id: string;
   name: string;
