@@ -406,3 +406,7 @@ If any of these files appear,
 Codex must immediately delete them.
 
 The repository runs in a browser environment only.
+
+
+## Zayvora bootstrap marker
+- Control files initialized for Zayvora execution pipeline.
