@@ -734,6 +734,16 @@
   <script src="../integrations/ai-builder/app-generator.js"></script>
   <script>
     var state = window.LogicHubStudioGraph.createGraphState();
+    var flowEngine = null;
+    import('../../core/engine.js').then(function (engine) {
+      flowEngine = engine;
+      engine.addNode({ id: 'node1', execute: function (data) { return data + ' processed'; } });
+      engine.addNode({ id: 'node2', execute: function (data) { return data; } });
+      engine.addNode({ id: 'node3', execute: function (data) { return data; } });
+      engine.connect('node1', 'node2'); engine.connect('node2', 'node3');
+      state.memory = engine.state.memory; state.engine = engine.state;
+      state.runFlow = function () { var result = engine.run('input data'); engine.state.memory.lastResult = result; (engine.state.memory.logs = engine.state.memory.logs || []).push('OUTPUT: ' + result); console.log('OUTPUT:', result); return result; };
+    });
 
     var context = {
       state: state,
@@ -821,6 +831,8 @@
     connectPublishWizard();
     connectKeyboardShortcuts();
     connectQuickAddButtons();
+    var runFlowBtn = document.getElementById('runWorkflowBtn');
+    if (runFlowBtn) runFlowBtn.addEventListener('click', function () { if (state.runFlow) state.runFlow(); });
     context.onStateChange();
 
     function loadGeneratedGraph(generated) {
