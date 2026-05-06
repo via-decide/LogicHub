@@ -1,0 +1,8 @@
+apps/api
+apps/ai-service
+apps/zayvora-brain
+packages/infra
+packages/db
+node_modules
+dist
+.next
