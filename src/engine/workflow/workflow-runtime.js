@@ -125,9 +125,14 @@
     var config = withDefaultOptions(options);
     var context = { payload: payload || {}, state: config.state };
     var logs = [];
-    return runSequence((workflow && workflow.actions) || [], context, config, logs, false)
-      .then(function () {
-        return { ok: true, state: config.state, logs: logs };
+    var actions = (workflow && workflow.actions) || [];
+    var engine = global.LogicHubZayvoraExecution;
+    var useZayvora = global.FEATURE_ZAYVORA !== false && engine && engine.runZayvoraPipeline;
+    var execution = useZayvora
+      ? engine.runZayvoraPipeline(actions, engine.zContext, function (action) { return runAction(action, context, config, logs, false); })
+      : runSequence(actions, context, config, logs, false);
+    return execution.then(function () {
+        return { ok: true, state: config.state, logs: logs, zContext: useZayvora ? engine.zContext : null };
       })
       .catch(function (error) {
         return { ok: false, state: config.state, logs: logs, error: error && error.message ? error.message : String(error) };
