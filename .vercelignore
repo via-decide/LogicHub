@@ -1,8 +1,6 @@
-apps/api
-apps/ai-service
-apps/zayvora-brain
-packages/infra
-packages/db
+api
+apps
+packages
 node_modules
-dist
-.next
+*.md
+vercel.json.sovereign_bak
