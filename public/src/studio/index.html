@@ -732,8 +732,17 @@
   <script src="../../ai/voice-engine.js"></script>
   <script src="../integrations/ai-builder/intent-parser.js"></script>
   <script src="../integrations/ai-builder/app-generator.js"></script>
+  <script src="../../core/engine.js"></script>
   <script>
     var state = window.LogicHubStudioGraph.createGraphState();
+    var flowEngine = window.LogicHubFlowEngine;
+    function syncFlowEngine() {
+      flowEngine.reset();
+      state.nodes.forEach(function (node) { flowEngine.addNode({ id: node.id, execute: function (data) { return data; } }); });
+      state.edges.forEach(function (edge) { flowEngine.connect(edge.from, edge.to); });
+    }
+    state.memory = flowEngine.state.memory; state.engine = flowEngine.state;
+    state.runFlow = function () { syncFlowEngine(); var result = flowEngine.run('input data'); flowEngine.state.memory.lastResult = result; (flowEngine.state.memory.logs = flowEngine.state.memory.logs || []).push('OUTPUT: ' + result); console.log('OUTPUT:', result); return result; };
 
     var context = {
       state: state,
@@ -821,6 +830,8 @@
     connectPublishWizard();
     connectKeyboardShortcuts();
     connectQuickAddButtons();
+    var runFlowBtn = document.getElementById('runWorkflowBtn');
+    if (runFlowBtn) runFlowBtn.addEventListener('click', function () { if (state.runFlow) state.runFlow(); });
     context.onStateChange();
 
     function loadGeneratedGraph(generated) {
