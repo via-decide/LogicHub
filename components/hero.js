@@ -8,8 +8,8 @@
             <h1 class="mt-3 text-4xl md:text-5xl font-semibold leading-tight text-slate-900 dark:text-white">The Thinking Layer Before Coding</h1>
             <p class="mt-5 text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-xl">Plan systems, design architecture, and generate working app structures before writing code.</p>
             <div class="mt-8 flex flex-wrap gap-3">
-              <button class="px-5 py-3 rounded-xl bg-cyan-600 text-white font-medium hover:bg-cyan-500 transition">Start Planning</button>
-              <button class="px-5 py-3 rounded-xl bg-slate-900 text-white dark:bg-slate-700 font-medium hover:bg-slate-700">Open Workspace</button>
+              <button class="px-5 py-3 rounded-xl bg-cyan-600 text-white font-medium hover:bg-cyan-500 transition" onclick="location.href='../index.html'">Start Planning</button>
+              <button class="px-5 py-3 rounded-xl bg-slate-900 text-white dark:bg-slate-700 font-medium hover:bg-slate-700" onclick="location.href='../index.html'">Open Workspace</button>
               <button class="px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium">See Example</button>
             </div>
           </div>
