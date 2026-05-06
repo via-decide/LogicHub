@@ -77,7 +77,12 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html, body { margin: 0; padding: 0; height: 100%; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      scroll-behavior: smooth;
+    }
 
     body {
       background: var(--bg-primary);
@@ -85,8 +90,9 @@
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
-      height: 100dvh;
-      overflow: hidden;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      overflow-y: auto;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -407,7 +413,14 @@
     .log-line.error { color: var(--error); }
 
     /* ── MAIN LAYOUT ── */
-    .main-container { display: flex; flex: 1; overflow: hidden; position: relative; min-height: 0; }
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      min-height: 700px;
+      height: 85vh;
+    }
     
     /* ── SIDEBAR ── */
     .sidebar { width: 190px; padding: 0.9rem; border-right: 1px solid var(--border-color); background: var(--bg-secondary); overflow-y: auto; z-index: 50; display: flex; flex-direction: column; gap: 1rem; flex-shrink: 0; }

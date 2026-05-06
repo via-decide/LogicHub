@@ -1,12 +1,4 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-  "buildCommand": "npm run build:vercel",
-  "installCommand": "npm install",
-  "framework": "nextjs",
-  "outputDirectory": "apps/web/.next"
+  "cleanUrls": true
 }
