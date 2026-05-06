@@ -47,8 +47,7 @@
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <!-- Auth: Aporaksha JWT (sovereign) -->
 
   <style>
     :root {
@@ -1607,19 +1606,28 @@
   <script src="./js/publish-app.js"></script>
 
   <script>
-    const FIREBASE_CONFIG = {
-      apiKey: 'AIzaSyA5yyW_s2AJiCloPU5_q7wVTdB9okb95Pk',
-      authDomain: 'logichub-app.firebaseapp.com',
-      projectId: 'logichub-app',
-      storageBucket: 'logichub-app.firebasestorage.app',
-      messagingSenderId: '4875740341'
-    };
+    const APORAKSHA_AUTH_URL = 'https://aporaksha.com/api';
+    const AUTH_TOKEN_KEY = 'lh_aporaksha_token';
+    const AUTH_REFRESH_KEY = 'lh_aporaksha_refresh';
+    const AUTH_USER_KEY = 'lh_aporaksha_user';
     const APP_SESSION_LIMIT = 10;
     const FREE_FORGE_LIMIT = 3;
     const FREE_FORGE_WINDOW_MS = 5 * 60 * 60 * 1000;
     const FREE_FORGE_USAGE_KEY = 'lh_forge_usage_v2';
     const AUTH_TIMEOUT_MS = 5000;
     const AUTH_ERROR_LOG_KEY = 'lh_auth_error_logs';
+
+    function getStoredToken() { return localStorage.getItem(AUTH_TOKEN_KEY); }
+    function getStoredRefresh() { return localStorage.getItem(AUTH_REFRESH_KEY); }
+    function storeTokens(access, refresh) {
+      localStorage.setItem(AUTH_TOKEN_KEY, access);
+      if (refresh) localStorage.setItem(AUTH_REFRESH_KEY, refresh);
+    }
+    function clearStoredTokens() {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_REFRESH_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
+    }
 
     function getStoredFounderOrders() {
       try {
@@ -2477,47 +2485,81 @@
       async initFirebaseAuth() {
         this.authState = 'connecting';
         this.authResolved = false;
-        const timeout = setTimeout(() => {
-          if (!this.authResolved) {
-            this.authState = 'guest';
-            this.authUser = { uid: 'guest-local', isAnonymous: true };
-            this.serverAccess = { checked: true, paid: false, pending: false, source: 'guest_timeout', plan: 'free' };
-            this.updateAuthUI();
-            this.log('Auth timeout (5s). Fallback to guest session.', 'info');
-          }
-        }, AUTH_TIMEOUT_MS);
-        if (!window.firebase?.initializeApp || !window.firebase?.auth) {
-          clearTimeout(timeout);
-          this.authResolved = true;
-          this.authState = 'guest';
-          this.log('Firebase auth scripts not available. Using local guest mode.', 'info');
-          this.updateAuthUI();
-          return;
-        }
         try {
-          if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-          const auth = firebase.auth();
-          auth.onAuthStateChanged(async (user) => {
+          const existingToken = getStoredToken();
+          if (existingToken) {
+            const saved = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || '{}');
+            this.authUser = { uid: saved.uid || 'user', email: saved.email || null, isAnonymous: false, getIdToken: async () => existingToken };
+            this.authState = 'authenticated';
             this.authResolved = true;
-            clearTimeout(timeout);
-            this.authUser = user || { uid: 'guest-local', isAnonymous: true };
-            this.authState = user ? 'authenticated' : 'guest';
-            this.updateAuthUI();
-            await this.refreshServerAccessStatus();
-          });
-          if (!auth.currentUser) await auth.signInAnonymously();
-          this.log('Auth ready for all users.', 'success');
+            this.log('Auth: restored session (Aporaksha JWT)', 'success');
+          } else {
+            this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
+            this.authState = 'guest';
+            this.authResolved = true;
+            this.log('Auth: guest mode (no saved token)', 'info');
+          }
         } catch (error) {
-          clearTimeout(timeout);
+          this.authState = 'guest';
           this.authResolved = true;
-          this.authState = 'error';
-          this.authUser = { uid: 'guest-local', isAnonymous: true };
-          this.serverAccess = { checked: true, paid: false, pending: false, source: 'error', plan: 'free', error: error.message };
-          this.saveAuthErrorLog(error.message);
-          this.updateAuthUI();
-          updateForgeLimitUI();
-          this.log(`Auth fallback: ${error.message}`, 'info');
+          this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
+          this.log(`Auth init: ${error.message}`, 'info');
         }
+        this.updateAuthUI();
+        await this.refreshServerAccessStatus();
+        updateForgeLimitUI();
+      },
+
+      async aporaksha_login(email, password) {
+        this.authState = 'connecting';
+        this.updateAuthUI();
+        try {
+          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await resp.json();
+          if (!resp.ok || data.error) throw new Error(data.error || 'Login failed');
+          storeTokens(data.accessToken, data.refreshToken);
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify({ email, uid: data.userId || email }));
+          this.authUser = { uid: data.userId || email, email, isAnonymous: false, getIdToken: async () => getStoredToken() };
+          this.authState = 'authenticated';
+          this.log(`Auth: logged in as ${email}`, 'success');
+        } catch (error) {
+          this.authState = 'error';
+          this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
+          this.log(`Auth error: ${error.message}`, 'error');
+        }
+        this.updateAuthUI();
+        await this.refreshServerAccessStatus();
+      },
+
+      async aporaksha_signup(email, password) {
+        try {
+          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await resp.json();
+          if (!resp.ok || data.error) throw new Error(data.error || data.message || 'Signup failed');
+          this.log(`Signup success: ${email}. Please log in.`, 'success');
+          return data;
+        } catch (error) {
+          this.log(`Signup error: ${error.message}`, 'error');
+          throw error;
+        }
+      },
+
+      aporaksha_logout() {
+        clearStoredTokens();
+        this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
+        this.authState = 'guest';
+        this.serverAccess = { checked: true, paid: false, pending: false, source: 'logout', plan: 'free' };
+        this.updateAuthUI();
+        updateForgeLimitUI();
+        this.log('Logged out.', 'info');
       },
 
       retryAuthConnection() {
@@ -2527,12 +2569,12 @@
       },
 
       async syncFounderRequestToServer(order) {
-        if (!this.authUser?.getIdToken) throw new Error('Auth is still connecting. Please try again in a moment.');
-        const idToken = await this.authUser.getIdToken(true);
+        const token = getStoredToken();
+        if (!token) throw new Error('Not authenticated. Please log in first.');
         const response = await fetch('/api/founder-request', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-          body: JSON.stringify({ idToken, order })
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ order })
         });
         const data = await this.readJsonResponse(response, 'Founder request');
         if (!response.ok || data.error) throw new Error(data.error || `Founder request failed with status ${response.status}`);
