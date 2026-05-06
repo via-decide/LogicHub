@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run build:vercel",
-  "installCommand": "npm install",
-  "framework": "nextjs",
-  "rootDirectory": "apps/web"
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
