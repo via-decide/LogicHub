@@ -743,6 +743,22 @@
     }
     state.memory = flowEngine.state.memory; state.engine = flowEngine.state;
     state.runFlow = function () { syncFlowEngine(); var result = flowEngine.run('input data'); flowEngine.state.memory.lastResult = result; (flowEngine.state.memory.logs = flowEngine.state.memory.logs || []).push('OUTPUT: ' + result); console.log('OUTPUT:', result); return result; };
+    flowEngine.addNode({ id: 'node1', execute: function (data) { return data + ' processed'; } });
+    flowEngine.addNode({ id: 'node2', execute: function (data) { return data; } });
+    flowEngine.addNode({ id: 'node3', execute: function (data) { return data; } });
+    flowEngine.connect('node1', 'node2'); flowEngine.connect('node2', 'node3');
+    state.memory = flowEngine.state.memory; state.engine = flowEngine.state;
+    state.runFlow = function () { var result = flowEngine.run('input data'); flowEngine.state.memory.lastResult = result; (flowEngine.state.memory.logs = flowEngine.state.memory.logs || []).push('OUTPUT: ' + result); console.log('OUTPUT:', result); return result; };
+    var flowEngine = null;
+    import('../../core/engine.js').then(function (engine) {
+      flowEngine = engine;
+      engine.addNode({ id: 'node1', execute: function (data) { return data + ' processed'; } });
+      engine.addNode({ id: 'node2', execute: function (data) { return data; } });
+      engine.addNode({ id: 'node3', execute: function (data) { return data; } });
+      engine.connect('node1', 'node2'); engine.connect('node2', 'node3');
+      state.memory = engine.state.memory; state.engine = engine.state;
+      state.runFlow = function () { var result = engine.run('input data'); engine.state.memory.lastResult = result; (engine.state.memory.logs = engine.state.memory.logs || []).push('OUTPUT: ' + result); console.log('OUTPUT:', result); return result; };
+    });
 
     var context = {
       state: state,
