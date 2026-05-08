@@ -2272,68 +2272,18 @@
       },
 
       async refreshServerAccessStatus(forceRefresh = false) {
-        if (!this.authUser?.getIdToken) {
+        const token = await this.authUser?.getIdToken(forceRefresh);
+        if (!token) {
           this.serverAccess = { checked: true, paid: false, pending: false, source: 'guest', plan: 'free' };
           this.updateAuthUI();
           return this.serverAccess;
         }
         try {
-          renderStageList();
-          stages[0].status = "done";
-          addLog("→ Assembling web assets...", "progress");
-          this.zipFallbackBlob = await this.createZipBlob();
-          progress.style.width = "25%";
-          addLog("✓ Assembled web assets", "success");
-
-          stages[1].status = "done";
-          addLog("→ Injecting into Capacitor shell (android/app/src/main/assets/public)...", "progress");
-          const apkData = await this.generateRealAPK(this.zipFallbackBlob);
-          progress.style.width = "60%";
-          addLog("✓ Assets copied before capacitor copy android", "success");
-
-          stages[2].status = "done";
-          addLog("→ Running Gradle build (assembleDebug)...", "progress");
-          progress.style.width = "85%";
-          addLog("✓ Gradle output path: app/build/outputs/apk/debug/app-debug.apk", "success");
-
-          stages[3].status = "done";
-          addLog("→ Packaging APK...", "progress");
-
-          if (apkData.size < 500 * 1024) {
-            throw new Error("Generated APK is under 500KB and treated as failed.");
-          }
-          if (apkData.size < 1024 * 1024) {
-            addLog("⚠ APK is smaller than 1MB; build may be incomplete.", "error");
-          }
-
-        this.apkBlob = apkData;
-        if (this.apkBlobUrl) URL.revokeObjectURL(this.apkBlobUrl);
-        this.apkBlobUrl = URL.createObjectURL(apkData);
-        this.updateInstallButtonState();
-        
-        progress.style.width = "100%";
-        addLog("✓ APK build complete!", "success");
-        addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
-        addLog(`Size: ${(apkData.size / 1024 / 1024).toFixed(2)} MB`, "success");
-        addLog("Ready for download & installation", "success");
-        
-        dlBtn.style.display = "inline-block"; this.apkBuildInProgress = false;
-        this.log("APK Ready! Download from modal.", "apk");
-          this.apkBlob = apkData;
-          const apkSizeMB = (apkData.size / 1024 / 1024).toFixed(2);
-          progress.style.width = "100%";
-          addLog("✓ APK build complete!", "success");
-          addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
-          addLog(`Size: ${apkSizeMB} MB`, "success");
-          dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${apkSizeMB}MB)`;
-          dlBtn.style.display = "inline-block";
-          zipFallbackBtn.style.display = "inline-block";
-          this.log("APK Ready! Download from modal.", "apk");
-          const idToken = await this.authUser.getIdToken(forceRefresh);
+          // Check access status via Aporaksha or LogicHub API
           const response = await fetch('/api/access-status', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-            body: JSON.stringify({ idToken })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ token })
           });
           const data = await this.readJsonResponse(response, 'Access status');
           if (!response.ok || data.error) throw new Error(data.error || `Access status failed with status ${response.status}`);
@@ -2343,7 +2293,7 @@
           this.log(`Access check fallback: ${error.message}`, 'info');
         }
         this.updateAuthUI();
-        updateForgeLimitUI();
+        if (typeof updateForgeLimitUI === 'function') updateForgeLimitUI();
         return this.serverAccess;
       },
 
@@ -2514,10 +2464,10 @@
         this.authState = 'connecting';
         this.updateAuthUI();
         try {
-          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth/login`, {
+          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ action: 'login', email, password })
           });
           const data = await resp.json();
           if (!resp.ok || data.error) throw new Error(data.error || 'Login failed');
@@ -2537,10 +2487,10 @@
 
       async aporaksha_signup(email, password) {
         try {
-          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth/signup`, {
+          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ action: 'signup', email, password })
           });
           const data = await resp.json();
           if (!resp.ok || data.error) throw new Error(data.error || data.message || 'Signup failed');
