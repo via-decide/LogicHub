@@ -30,7 +30,7 @@
     if (!appName.trim()) return null;
 
     const { bundle, slug, metadata } = global.LogicHubDeployClient.buildPublishBundle(app, appName);
-    const response = await fetch('/api/publish-app', {
+    const response = await fetch(`${window.SOVEREIGN_API_URL}/publish-app`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bundle, metadata: { ...metadata, name: appName, slug } })
