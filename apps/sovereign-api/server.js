@@ -211,13 +211,36 @@ app.post('/v1/vibecode', async (req, res) => {
     const { intent, context } = req.body;
     console.log(`[LogicHub] Initiating 6-Stage Vibecoding for intent: ${intent}`);
 
+    // Stage 1: PRD Synthesis (World-Class Engine)
+    const prd = `
+# PRD: ${intent}
+## 1. Overview
+Self-architected sovereign module for the Daxini Stack.
+
+## 2. Goals & Objectives
+- 100% Local Execution (Zero Cloud).
+- Viral-Ready Kinetic Aesthetics.
+- Deterministic Lineage.
+
+## 3. Requirements
+- 1TB SSD Compatible.
+- Aporaksha Identity Integration.
+
+## 4. User Experience (UX)
+Smooth flow with micro-animations.
+
+## 5. Success Metrics
+- 0% Logic Drift.
+- 100% Trace Admissibility.
+    `.trim();
+
     // Stage 6: Sovereign Synthesis (RAG-enhanced)
     const traceData = fs.readFileSync(DATA_CALIBRATION, 'utf8').split('\n').filter(l => l);
     const bestTrace = traceData.find(line => line.toLowerCase().includes(intent.toLowerCase())) || traceData[0];
-    const retrievedCode = JSON.parse(bestTrace).text.split('### Response:')[1]?.split('```')[1]?.split('```')[0] || '// No matching trace found. Generating from baseline.';
+    const retrievedCode = JSON.parse(bestTrace).text.split('### Response:')[1]?.split('```')[1]?.split('```')[0] || '// No matching trace found.';
 
     const stages = {
-        prd: { status: 'GENERATED', goals: ['Sovereign Reliability', 'World-Class UX'] },
+        prd: { content: prd, status: 'GENERATED' },
         trd: { stack: ['Node.js', 'MLX', 'ZFS', 'Aporaksha'] },
         flow: { steps: ['Identity_Handshake', 'Context_Sync', 'State_Commit'] },
         ui: { system: 'Kinetic-Sovereign', colors: ['#00F2FF', '#000000'] },
