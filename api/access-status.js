@@ -27,15 +27,33 @@ export default async function handler(req, res) {
     const paidDoc = paidDocSnap.exists ? paidDocSnap.data() || {} : {};
     const userDoc = userDocSnap.exists ? userDocSnap.data() || {} : {};
 
+    let paidByStudent = false;
+    try {
+      const { createRequire } = await import("module");
+      const require = createRequire(import.meta.url);
+      const Database = require("better-sqlite3");
+      const db = new Database("/Users/dharamdaxini/Downloads/via/daxini.xyz/database/daxini.db");
+      const student = db.prepare(`
+        SELECT verification_status FROM student_verifications 
+        WHERE customer_id = ? AND verification_status IN ('OCR_VERIFIED', 'MANUAL_APPROVED')
+      `).get(uid);
+      if (student) {
+        paidByStudent = true;
+      }
+      db.close();
+    } catch (e) {
+      console.warn("[ACCESS_STATUS] SQLite Student Check Failed:", e.message);
+    }
+
     const paidByFirestore = paidDoc.paid === true || isApprovedStatus(paidDoc.status) || userDoc.paid === true || isApprovedStatus(userDoc.paymentStatus);
-    const pending = !paidByClaim && !paidByFirestore && (
+    const pending = !paidByClaim && !paidByFirestore && !paidByStudent && (
       String(userDoc.founderRequestStatus || "").toLowerCase() === "requested" ||
       String(userDoc.paymentStatus || "").toLowerCase() === "pending"
     );
 
-    const paid = paidByClaim || paidByFirestore;
-    const source = paidByClaim ? "custom_claims" : paidByFirestore ? "firestore" : pending ? "pending_request" : "free";
-    const plan = paidDoc.plan || userDoc.plan || claims.plan || (paid ? "founder" : pending ? "pending" : "free");
+    const paid = paidByClaim || paidByFirestore || paidByStudent;
+    const source = paidByStudent ? "student_verification" : (paidByClaim ? "custom_claims" : paidByFirestore ? "firestore" : pending ? "pending_request" : "free");
+    const plan = paidByStudent ? "student" : (paidDoc.plan || userDoc.plan || claims.plan || (paid ? "founder" : pending ? "pending" : "free"));
 
     return res.status(200).json({
       ok: true,

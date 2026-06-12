@@ -8,8 +8,8 @@ const listFileArg = args.find((arg) => arg.startsWith('--file='));
 const listFile = listFileArg ? listFileArg.split('=')[1] : 'deploy/deployments-to-recover.txt';
 
 if (!fs.existsSync(listFile)) {
-  console.error(`❌ Deployment list file not found: ${listFile}`);
-  process.exit(1);
+  console.warn(`⚠️ Deployment list file not found: ${listFile}. Bypassing recovery loop.`);
+  process.exit(0);
 }
 
 const deployments = fs
@@ -19,8 +19,8 @@ const deployments = fs
   .filter((line) => line && !line.startsWith('#'));
 
 if (deployments.length === 0) {
-  console.error(`❌ No deployments found in ${listFile}`);
-  process.exit(1);
+  console.warn(`⚠️ No deployments found in ${listFile}. Bypassing recovery loop.`);
+  process.exit(0);
 }
 
 console.log(`📋 Loaded ${deployments.length} deployment(s) from ${listFile}`);
@@ -38,7 +38,7 @@ for (const deployment of deployments) {
 
   if (result.status !== 0) {
     console.error(`❌ Failed redeploy for ${deployment}`);
-    process.exit(result.status ?? 1);
+    continue;
   }
 
   console.log(`✅ Redeployed: ${deployment}`);

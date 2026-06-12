@@ -777,7 +777,7 @@
       try {
         const stored = sessionStorage.getItem('lh_gh_user');
         if (stored) ghUser = JSON.parse(stored);
-      } catch (_) {}
+      } catch(_){ console.warn("VIA Cockpit: Handled silent error", _); }
       updateGhUI();
     }
 

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogicHub App Templates — Production-Ready Visual Scaffolds</title>
+  <meta name="description" content="Access ready-to-compile templates: CRM, Inventory, POS, School management, Hospital portal, Portfolio site, Blog engine, E-Commerce, Chat node, and AI Assistant.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          },
+          colors: {
+            saffron: '#ff671f',
+            cyanAccent: '#00e5ff',
+            slateDark: '#030508',
+            slateCard: '#0a0c10'
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="/assets/js/sovereign-analytics.js" defer></script>
+  <style>
+    .glass-card {
+      background: rgba(10, 12, 16, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .neon-border:hover {
+      border-color: #00e5ff;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#030508] text-slate-100 antialiased flex flex-col justify-between">
+  <div>
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-20 border-b border-slate-800 bg-[#030508]/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="font-bold tracking-wide text-white hover:text-cyanAccent transition">LOGICHUB</a>
+          <span class="text-xs px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-mono">SOVEREIGN LAYER</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+          <a href="how-it-works.html" class="hover:text-cyanAccent transition">How it Works</a>
+          <a href="apk-builder.html" class="hover:text-cyanAccent transition">APK Builder</a>
+          <a href="pricing.html" class="hover:text-cyanAccent transition">Pricing</a>
+          <a href="templates.html" class="text-cyanAccent">Templates</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <button onclick="location.href='../index.html'" class="text-xs px-4 py-2 rounded-lg bg-cyanAccent text-black font-semibold hover:bg-white transition">Workspace</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
+      <!-- Intro Section -->
+      <div class="text-center mb-16">
+        <p class="text-xs tracking-[0.2em] uppercase text-cyanAccent font-semibold">BOILERPLATE BLUEPRINTS</p>
+        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold leading-tight text-white tracking-tight">
+          Ecosystem Template Library
+        </h1>
+        <p class="mt-5 text-lg text-slate-400 max-w-2xl mx-auto">
+          Start building instantly with standard layouts compiled and verified for offline-first runtimes. Pick a visual template below to load directly in LogicHub.
+        </p>
+      </div>
+
+      <!-- Templates Grid (10 templates) -->
+      <section class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16" id="templates-grid">
+        
+        <!-- Template 1: CRM -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">CRM Dashboard</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">2.1s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Customer Relationship Management</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Manage client records, track interactions, and visualize user activities offline.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, style.css, manifest.json
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 2: Inventory -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Inventory Tracker</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">1.8s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Stock & Inventory Controller</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Audit stock entries, monitor incoming goods, and map QR scanning actions offline.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, schema.sql, sw.js
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 3: POS -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Retail POS</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">3.0s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Point of Sale Terminal</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Process storefront transactions, record checkout items, and print offline invoices.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, style.css, sw.js, assets/
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 4: School -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">School Portal</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">2.5s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">School & Academy Management</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Track student directories, grades, classes, and local messaging threads.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, database.js, manifest.json
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 5: Hospital -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Hospital Hub</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">2.8s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Patient Record Manager</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Securely track medical history entries, doctor schedules, and ward allocation stats.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, aporaksha-rules.json, sw.js
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 6: Portfolio -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Portfolio</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">1.2s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Developer Personal Site</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Showcase projects, resume files, and links. Ultra-light, highly indexable SEO schema.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: index.html, style.css, manifest.json
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 7: Blog -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Blog Engine</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">1.5s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Markdown Blog Publisher</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Render posts from local markdown folder structures. Perfect for fast, static publishing.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, posts/, index.html, sw.js
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 8: E-Commerce -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">E-Commerce</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">3.2s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Offline Store & Checkout</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Catalog browsing, cart persistence, offline invoice generation, and local cache.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, catalog.json, cart.js, sw.js
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 9: Chat -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Decentralized Chat</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">2.4s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Peer-to-Peer Chat Node</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Encrypted messaging server leveraging WebSockets or WebRTC locally on the mesh node.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, chat-relay.js, sw.js
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+        <!-- Template 10: AI Assistant -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-xs font-mono text-cyanAccent">Local AI Node</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 font-mono">4.5s compile</span>
+            </div>
+            <h3 class="text-lg font-bold text-white">Local LLM Chat Interface</h3>
+            <p class="mt-2 text-xs text-slate-400">
+              Chat interface routing prompts to the central MLX Inference server on port 3000.
+            </p>
+            <div class="mt-4 p-2 bg-slate-950/80 rounded border border-slate-900 font-mono text-[10px] text-emerald-400">
+              files: app.js, ai-client.js, style.css, sw.js
+            </div>
+          </div>
+          <button class="mt-6 w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 font-medium text-xs">Load Blueprint</button>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Daxini Ecosystem Unified Footer -->
+  <footer class="daxini-unified-footer" style="margin-top: 4rem; padding: 3rem 2rem; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(18, 20, 26, 0.4); text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 1.5rem;">
+        <div style="font-weight: 800; font-size: 1.25rem; color: #fff; letter-spacing: -0.5px;">
+          DAXINI ECOSYSTEM
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.85rem; color: #8b90a6;">
+          <a href="https://daxini.xyz" style="transition: color 0.2s;">daxini.xyz</a>
+          <a href="https://daxini.xyz/ecosystem" style="transition: color 0.2s;">ecosystem</a>
+          <a href="https://daxini.xyz/zayvora" style="transition: color 0.2s;">zayvora</a>
+          <a href="http://localhost:7001" style="transition: color 0.2s; color: #00e5ff;">logichub</a>
+          <a href="http://localhost:7004" style="transition: color 0.2s;">daxini.space</a>
+          <a href="http://localhost:7002" style="transition: color 0.2s;">aporaksha</a>
+          <a href="http://localhost:7003" style="transition: color 0.2s;">hanuman.solutions</a>
+          <a href="http://localhost:7006" style="transition: color 0.2s;">printbydd store</a>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.75rem; color: #8b90a6;">
+        <span>© 2026 Dharam Daxini. All rights reserved. Sovereign Local-First AI Mesh.</span>
+        <span>Designed for Complete local autonomy. Hashing logs daily.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

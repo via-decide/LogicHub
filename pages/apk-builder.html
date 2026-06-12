@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APK Builder — Package Native Android Apps Offline</title>
+  <meta name="description" content="LogicHub's local APK Builder leverages local Gradle compilers and self-healing tools to compile complete Android packages from plans. Zero SaaS reliance.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          },
+          colors: {
+            saffron: '#ff671f',
+            cyanAccent: '#00e5ff',
+            slateDark: '#030508',
+            slateCard: '#0a0c10'
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="/assets/js/sovereign-analytics.js" defer></script>
+  <style>
+    .glass-card {
+      background: rgba(10, 12, 16, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .neon-border:hover {
+      border-color: #00e5ff;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#030508] text-slate-100 antialiased flex flex-col justify-between">
+  <div>
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-20 border-b border-slate-800 bg-[#030508]/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="font-bold tracking-wide text-white hover:text-cyanAccent transition">LOGICHUB</a>
+          <span class="text-xs px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-mono">SOVEREIGN LAYER</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+          <a href="how-it-works.html" class="hover:text-cyanAccent transition">How it Works</a>
+          <a href="apk-builder.html" class="text-cyanAccent">APK Builder</a>
+          <a href="pricing.html" class="hover:text-cyanAccent transition">Pricing</a>
+          <a href="templates.html" class="hover:text-cyanAccent transition">Templates</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <button onclick="location.href='../index.html'" class="text-xs px-4 py-2 rounded-lg bg-cyanAccent text-black font-semibold hover:bg-white transition">Workspace</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
+      <!-- Hero Section -->
+      <div class="text-center mb-16">
+        <p class="text-xs tracking-[0.2em] uppercase text-cyanAccent font-semibold">LOCAL COMPILATION NODE</p>
+        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold leading-tight text-white tracking-tight">
+          Offline APK Builder Engine
+        </h1>
+        <p class="mt-5 text-lg text-slate-400 max-w-2xl mx-auto">
+          Convert visual plans into optimized Android APK installers instantly on your local Mac Mini. Absolute privacy, Zero SDK setup overhead, and Offline-first execution.
+        </p>
+      </div>
+
+      <!-- Core Features Grid -->
+      <section class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16" id="apk-features">
+        
+        <!-- Auth Card -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300">
+          <div class="w-12 h-12 rounded-xl bg-cyanAccent/10 flex items-center justify-center text-cyanAccent text-xl font-bold mb-4">🔑</div>
+          <h3 class="text-lg font-bold text-white">Sovereign Auth</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Out-of-the-box local authentication powered by Aporaksha JWT layer. Secure session management without external database calls.
+          </p>
+        </div>
+
+        <!-- Payments Card -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">💳</div>
+          <h3 class="text-lg font-bold text-white">Local-First Payments</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Embedded offline processing nodes. Designed for peer-to-peer validation, local store invoicing, and custom billing modules.
+          </p>
+        </div>
+
+        <!-- Storage Card -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xl font-bold mb-4">💾</div>
+          <h3 class="text-lg font-bold text-white">Secure Data Storage</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Local SQLite or JSON structures integrated directly into the compiled APK shell. Privacy-native, offline-encrypted.
+          </p>
+        </div>
+
+        <!-- Push Notifications Card -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-xl font-bold mb-4">🔔</div>
+          <h3 class="text-lg font-bold text-white">Mesh Notifications</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Offline push communication framework leveraging the local Daxini mesh nodes. Run notifications without Firebase Cloud Messaging.
+          </p>
+        </div>
+
+        <!-- Offline Mode Card -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300">
+          <div class="w-12 h-12 rounded-xl bg-cyanAccent/10 flex items-center justify-center text-cyanAccent text-xl font-bold mb-4">✈️</div>
+          <h3 class="text-lg font-bold text-white">100% Offline Autonomy</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Every app built is fully offline-native. It executes logic, queries its database, and stores session metrics locally.
+          </p>
+        </div>
+
+        <!-- Self-Healing Code Card -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 hover:border-cyanAccent transition duration-300">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🔧</div>
+          <h3 class="text-lg font-bold text-white">Self-Healing Runtime</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            LogicHub automatically tests compile targets, detects dependency mismatches, and repairs syntax/assets prior to APK assembly.
+          </p>
+        </div>
+
+      </section>
+
+      <!-- How APK Compiler Nodes Work -->
+      <section class="py-12 border-t border-slate-800">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <h2 class="text-2xl font-bold text-white">The Local Compiling Mechanics</h2>
+            <p class="mt-4 text-sm text-slate-400 leading-relaxed">
+              When you hit "Forge" or trigger the APK build pipeline, the local server passes your design variables to the **apk-builder** service running inside PM2. 
+            </p>
+            <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+              The builder extracts a pre-configured, optimized webview boilerplate, generates assets, compiles client-side Javascript, and fires a headless Gradle build process mapping your Android SDK packages.
+            </p>
+            <ul class="mt-6 space-y-2 text-sm font-mono text-cyanAccent">
+              <li>✓ Uses local Java runtime environment (JDK 17)</li>
+              <li>✓ Zero compile network requests to external servers</li>
+              <li>✓ Output is a signed release APK ready for sideloading</li>
+            </ul>
+          </div>
+          <div class="glass-card p-6 rounded-2xl font-mono text-xs text-slate-300 border-slate-800">
+            <p class="text-slate-500">// Local Gradle script initialized</p>
+            <p class="text-slate-300">app-builder: fetching boilerplate template...</p>
+            <p class="text-slate-300">app-builder: injecting Aporaksha security configs...</p>
+            <p class="text-slate-300">app-builder: injecting local assets...</p>
+            <p class="text-slate-300">gradle daemon: starting build task ':app:assembleRelease'</p>
+            <div class="my-4 h-2 bg-slate-900 rounded overflow-hidden">
+              <div class="h-full bg-cyanAccent animate-pulse" style="width: 75%"></div>
+            </div>
+            <p class="text-emerald-400 font-bold">✓ Build Successful in 7.42 seconds.</p>
+            <p class="text-emerald-400">✓ Output: /Downloads/via/build/app-release.apk</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Daxini Ecosystem Unified Footer -->
+  <footer class="daxini-unified-footer" style="margin-top: 4rem; padding: 3rem 2rem; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(18, 20, 26, 0.4); text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 1.5rem;">
+        <div style="font-weight: 800; font-size: 1.25rem; color: #fff; letter-spacing: -0.5px;">
+          DAXINI ECOSYSTEM
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.85rem; color: #8b90a6;">
+          <a href="https://daxini.xyz" style="transition: color 0.2s;">daxini.xyz</a>
+          <a href="https://daxini.xyz/ecosystem" style="transition: color 0.2s;">ecosystem</a>
+          <a href="https://daxini.xyz/zayvora" style="transition: color 0.2s;">zayvora</a>
+          <a href="http://localhost:7001" style="transition: color 0.2s; color: #00e5ff;">logichub</a>
+          <a href="http://localhost:7004" style="transition: color 0.2s;">daxini.space</a>
+          <a href="http://localhost:7002" style="transition: color 0.2s;">aporaksha</a>
+          <a href="http://localhost:7003" style="transition: color 0.2s;">hanuman.solutions</a>
+          <a href="http://localhost:7006" style="transition: color 0.2s;">printbydd store</a>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.75rem; color: #8b90a6;">
+        <span>© 2026 Dharam Daxini. All rights reserved. Sovereign Local-First AI Mesh.</span>
+        <span>Designed for Complete local autonomy. Hashing logs daily.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

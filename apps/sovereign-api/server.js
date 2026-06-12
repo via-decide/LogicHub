@@ -39,6 +39,23 @@ app.post('/api/publish-app', wrap(publishApp));
 const ZAYVORA_URL = 'http://localhost:3000/v1/trace/log';
 const VAULT_DIR = '/Users/dharamdaxini/Downloads/via/zayvora/cea/CEA-0000/training_vault';
 
+const SYSTEM_ARCHITECTURE_GUIDE = `
+SOVEREIGN SUBSTRATE PRIMITIVES:
+1. AuthorityFabric: Use the SINGLETON pattern via AuthorityFabric.getInstance(). NEVER use 'new AuthorityFabric()'.
+   - registerProfile(subjectId), escalateTrust(subjectId, level)
+2. ManifestEngine: Use the SINGLETON pattern via ManifestEngine.getInstance(). NEVER use 'new ManifestEngine()'.
+   - initialize(subjectId, type), append(op), snapshot(label)
+3. ToolStorage: Use STATIC methods ONLY (ToolStorage.save/load). 
+4. Zero-Cloud Policy: No external CDNs, no useState for kernel state, no fetch() to non-local URLs.
+5. Lineage Headers: Mandatory CEA-0000 header in all synthesized files.
+
+DAXINI CODING STANDARD (DCS) v1.0.0:
+1. ZERO-CHATTER: Output ONLY raw data/code. No conversational prefixes.
+2. SCRIPT-TAG DOMINANCE: No ESM import/export in browser tools.
+3. TOOLSTORAGE API: Use ToolStorage.save(key, val) and ToolStorage.load(key).
+4. OPERATOR SOP: For T1+ tasks, generate task.md first.
+`;
+
 async function findBestTrace(prompt) {
   try {
     const files = fs.readdirSync(VAULT_DIR).filter(f => f.endsWith('.json'));
@@ -105,6 +122,8 @@ app.post('/api/zayvora/plan', async (req, res) => {
       
       ${traceContext}
       
+      ${SYSTEM_ARCHITECTURE_GUIDE}
+      
       1. PRD (Product Requirements)
       2. TRD (Technical Stack)
       3. App Flow (User Journey)
@@ -112,18 +131,23 @@ app.post('/api/zayvora/plan', async (req, res) => {
       5. Backend Schema (ERD)
       
       Format as JSON with keys: prd, trd, flow, ui, schema.
+      
+      STRICT REQUIREMENT: 
+      - ZERO CHATTER.
+      - If this is a T1, T2, or T3 task, initialize a task.md manifest using the SOP Template.
+      
       Context: ${JSON.stringify(architecture)}`;
 
-      const response = await fetch('http://localhost:11434/api/generate', {
+      const response = await fetch('http://localhost:8080/v1/chat/completions', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'zayvora:axiom',
-          prompt: `${systemPrompt}\n\nUser Request: ${prompt}`,
-          format: 'json',
+          messages: [{ role: 'user', content: `${systemPrompt}\n\nUser Request: ${prompt}` }],
           stream: false
         })
       });
-      return await response.json();
+      const data = await response.json();
+      return { response: data.choices[0].message.content };
     });
 
     const artifacts = JSON.parse(result.response);
@@ -148,21 +172,49 @@ app.post('/api/zayvora/synthesize', async (req, res) => {
       TECH STACK: ${artifacts?.trd || 'Vanilla JS'}
       SCHEMA: ${artifacts?.schema || 'None'}
       
+      ${SYSTEM_ARCHITECTURE_GUIDE}
+      
+      STRICT REQUIREMENT: ZERO CHATTER. NO MARKDOWN WRAPPERS.
+      
       Instructions: ${prompt}`;
 
-      const response = await fetch('http://localhost:11434/api/generate', {
+      const response = await fetch('http://localhost:8080/v1/chat/completions', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'zayvora:praxis',
-          prompt: fullPrompt,
+          messages: [{ role: 'user', content: fullPrompt }],
           stream: false
         })
       });
-      return await response.json();
+      const data = await response.json();
+      return { response: data.choices[0].message.content };
     });
 
     let code = result.response?.trim() || "";
-    if (code.startsWith("```")) code = code.split('\n').slice(1, -1).join('\n');
+    
+    // --- DAXINI AGGRESSIVE CLEANSE ---
+    // If there is a code block, we ignore EVERYTHING else.
+    if (code.includes("```")) {
+      const match = code.match(/```(?:\w+)?\s*([\s\S]+?)\s*```/);
+      if (match) {
+        code = match[1].trim();
+      }
+    } else {
+      // If no code block, strip common chatter prefixes
+      const chatterPrefixes = [
+        "Here is the code:", "Here is the improved code:", "Here is the updated code:",
+        "Sure!", "Certainly!", "I have updated", "This version", "Here is the raw code"
+      ];
+      chatterPrefixes.forEach(prefix => {
+        if (code.toLowerCase().includes(prefix.toLowerCase())) {
+          // If the prefix is found, try to take everything AFTER it
+          const index = code.toLowerCase().indexOf(prefix.toLowerCase()) + prefix.length;
+          code = code.substring(index).trim();
+          if (code.startsWith(":") || code.startsWith(".")) code = code.substring(1).trim();
+        }
+      });
+    }
+    // --- END FORCE-CLEANSE ---
 
     // LOG TO ZAYVORA FOR TRAINING
     await logToZayvora(prompt, result.response, { ...artifacts, code, filename });
@@ -177,17 +229,33 @@ app.post('/api/zayvora/synthesize', async (req, res) => {
 app.post('/api/zayvora/verify', async (req, res) => {
   const { code, filename } = req.body;
   try {
-    const response = await fetch('http://localhost:11434/api/generate', {
+    const response = await fetch('http://localhost:8080/v1/chat/completions', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'zayvora-engineer:latest',
-        prompt: `System: You are Zayvora Engineer. Perform a diagnostic pass on this code. If you find issues (cloud dependencies, protocol mismatches), fix them. Output ONLY the improved code.\nFile: ${filename}\nCode:\n${code}`,
+        messages: [{ role: 'user', content: `System: You are Zayvora Engineer. Perform a diagnostic pass on this code. If you find issues (cloud dependencies, protocol mismatches), fix them. Output ONLY the improved code.\nFile: ${filename}\nCode:\n${code}` }],
         stream: false
       })
     });
     const data = await response.json();
-    let cleaned = data.response.trim();
-    if (cleaned.startsWith("```")) cleaned = cleaned.split('\n').slice(1, -1).join('\n');
+    let cleaned = data.choices[0].message.content.trim();
+    
+    // --- DAXINI FORCE-CLEANSE LAYER ---
+    const chatterPrefixes = [
+      "Here is the code:", "Here is the improved code:", "Here is the updated code:",
+      "Sure!", "Certainly!", "I have updated", "This version"
+    ];
+    chatterPrefixes.forEach(prefix => {
+      if (cleaned.toLowerCase().startsWith(prefix.toLowerCase())) {
+        cleaned = cleaned.substring(prefix.length).trim();
+      }
+    });
+
+    if (cleaned.includes("```")) {
+      const match = cleaned.match(/```(?:\w+)?\n([\s\S]+?)\n```/);
+      if (match) cleaned = match[1].trim();
+    }
+    // --- END FORCE-CLEANSE ---
     
     // LOG VERIFIED CODE AS IMPROVED DATA
     await logToZayvora(`Verification of ${filename}`, data.response, { code: cleaned, original: code });

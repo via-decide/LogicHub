@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogicHub // Full-Stack Design Process</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: { 950: '#030508' },
+            accent: '#00e5ff'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui']
+          }
+        }
+      }
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+    .step-number {
+      background: linear-gradient(135deg, #00e5ff, #7000ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .code-glow {
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 antialiased font-sans">
+  <div class="min-h-full">
+    <header class="sticky top-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-violet-600 flex items-center justify-center font-black text-slate-950">L</div>
+          <span class="font-bold tracking-tighter text-xl">LOGICHUB</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+          <a href="../index.html" class="hover:text-white transition-colors">Workspace</a>
+          <a href="#" class="text-white">Design Process</a>
+          <a href="#" class="hover:text-white transition-colors">Zayvora SDK</a>
+        </nav>
+        <button onclick="location.href='../index.html'" class="px-4 py-2 rounded-full bg-white text-slate-950 text-sm font-bold hover:bg-accent transition-all">Launch Engine</button>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-16 md:py-24">
+      <div class="text-center mb-20">
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+          Six Stages of <span class="step-number text-transparent bg-clip-text">Sovereign Synthesis</span>
+        </h1>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">
+          LogicHub doesn't just code. It architecturally evolves your idea through a canonical 6-stage pipeline powered by the Zayvora substrate.
+        </p>
+      </div>
+
+      <div class="space-y-32">
+        <!-- Step 1: PRD -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <span class="step-number text-5xl font-black mb-4 block">01</span>
+            <h2 class="text-3xl font-bold mb-4">Product Requirements (PRD)</h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              We define the core objectives, user stories, and success metrics. Every requirement is stored as an immutable lineage node in the Zayvora graph.
+            </p>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-accent"></div> Goal Alignment & Constraints</li>
+              <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-accent"></div> User Personas & Intent Mapping</li>
+              <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-accent"></div> Success Metric Definitions</li>
+            </ul>
+          </div>
+          <div class="glass-card rounded-2xl p-6 font-mono text-[0.7rem] overflow-hidden border-accent/20">
+            <div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-2">
+              <div class="w-2 h-2 rounded-full bg-red-500"></div>
+              <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+              <div class="w-2 h-2 rounded-full bg-green-500"></div>
+              <span class="text-slate-500 ml-2">architecture_prd.md</span>
+            </div>
+            <div class="text-slate-300">
+              <span class="text-accent"># PRD: VIBE_KWM8W</span><br><br>
+              <span class="text-violet-400">## 1. Overview</span><br>
+              Autonomous task orchestrator with local-first persistence.<br><br>
+              <span class="text-violet-400">## 2. Success Metrics</span><br>
+              - <span class="text-emerald-400">Latency:</span> &lt; 200ms per agent reasoning step.<br>
+              - <span class="text-emerald-400">Sovereignty:</span> 100% offline verification.<br><br>
+              <span class="text-violet-400">## 3. Core Requirements</span><br>
+              - AES-256 encrypted local vault.<br>
+              - PWA support with background sync.<br>
+              - Zayvora-hardened plugin runtime.
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 2: TRD -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="order-2 md:order-1 glass-card rounded-2xl p-8 border-violet-500/20">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div class="text-[0.6rem] uppercase tracking-widest text-slate-500 mb-1">Frontend</div>
+                <div class="font-bold text-xs text-accent">NEXT.JS / TAILWIND</div>
+              </div>
+              <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div class="text-[0.6rem] uppercase tracking-widest text-slate-500 mb-1">Runtime</div>
+                <div class="font-bold text-xs text-violet-400">EDGE / WASM</div>
+              </div>
+              <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div class="text-[0.6rem] uppercase tracking-widest text-slate-500 mb-1">Database</div>
+                <div class="font-bold text-xs text-emerald-400">PGLITE / LOCAL</div>
+              </div>
+              <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div class="text-[0.6rem] uppercase tracking-widest text-slate-500 mb-1">Security</div>
+                <div class="font-bold text-xs text-rose-400">ZAYVORA CEA-0000</div>
+              </div>
+            </div>
+          </div>
+          <div class="order-1 md:order-2">
+            <span class="step-number text-5xl font-black mb-4 block">02</span>
+            <h2 class="text-3xl font-bold mb-4">Tech Requirements (TRD)</h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              We select the optimal stack for sovereignty. No cloud lock-in. We prioritize local-first databases and edge runtimes.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[0.65rem] font-bold">NEXT.JS</span>
+              <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[0.65rem] font-bold text-emerald-400">PGLITE</span>
+              <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[0.65rem] font-bold text-accent">TAILWIND</span>
+              <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[0.65rem] font-bold text-violet-400">CEA-0000</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 3: App Flow -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <span class="step-number text-5xl font-black mb-4 block">03</span>
+            <h2 class="text-3xl font-bold mb-4">User Journey Flow</h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              LogicHub maps the complete user experience from entry to conversion. Wireframes are auto-composed into a visual navigation manifest.
+            </p>
+            <div class="space-y-4">
+              <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center text-accent text-xs">1</div>
+                <span class="text-sm font-medium">Splash Screen (Intent Collection)</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400 text-xs">2</div>
+                <span class="text-sm font-medium">Sovereign Passport Auth (Aporaksha)</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">3</div>
+                <span class="text-sm font-medium">Core Workspace Interface</span>
+              </div>
+            </div>
+          </div>
+          <div class="relative group">
+            <div class="absolute inset-0 bg-accent/20 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+            <div class="glass-card rounded-2xl p-2 relative">
+               <img src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&q=80&w=1000" alt="Wireframe Preview" class="rounded-xl grayscale hover:grayscale-0 transition-all duration-700 opacity-50">
+               <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="px-4 py-2 rounded-lg bg-slate-900/80 backdrop-blur border border-white/10 text-[0.65rem] tracking-widest font-black uppercase">Visual Manifest v1.0</div>
+               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 4: UI Brief -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="order-2 md:order-1 glass-card rounded-2xl p-8 border-accent/20">
+            <div class="flex items-center justify-between mb-8">
+               <div class="flex gap-2">
+                 <div class="w-6 h-6 rounded bg-slate-950 border border-white/20"></div>
+                 <div class="w-6 h-6 rounded bg-accent"></div>
+                 <div class="w-6 h-6 rounded bg-violet-600"></div>
+                 <div class="w-6 h-6 rounded bg-emerald-500"></div>
+               </div>
+               <div class="text-[0.6rem] font-bold tracking-tighter uppercase text-slate-500">Design System V1</div>
+            </div>
+            <div class="space-y-4">
+               <div class="h-4 w-full bg-white/5 rounded"></div>
+               <div class="h-4 w-3/4 bg-white/5 rounded"></div>
+               <div class="grid grid-cols-3 gap-2">
+                  <div class="h-10 rounded-lg bg-accent/10 border border-accent/20"></div>
+                  <div class="h-10 rounded-lg bg-white/5 border border-white/10"></div>
+                  <div class="h-10 rounded-lg bg-white/5 border border-white/10"></div>
+               </div>
+            </div>
+          </div>
+          <div class="order-1 md:order-2">
+            <span class="step-number text-5xl font-black mb-4 block">04</span>
+            <h2 class="text-3xl font-bold mb-4">UI/UX Design Brief</h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              High-performance aesthetics out of the box. We generate the color tokens, typography scales, and component libraries automatically.
+            </p>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+               <div class="p-3 rounded-lg border border-white/5"><span class="text-slate-500">Font:</span> Inter</div>
+               <div class="p-3 rounded-lg border border-white/5"><span class="text-slate-500">Grid:</span> 8pt System</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 5: Backend Schema -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <span class="step-number text-5xl font-black mb-4 block">05</span>
+            <h2 class="text-3xl font-bold mb-4">Backend Schema (ERD)</h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              We architect the data relationships. Users, Objects, and Lineage are mapped to ensure zero semantic drift and perfect portability.
+            </p>
+            <button class="text-accent text-sm font-bold flex items-center gap-2 hover:gap-3 transition-all">
+              Inspect Data Model <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div class="glass-card rounded-2xl p-6 font-mono text-[0.6rem] border-emerald-500/20">
+             <div class="text-slate-500 mb-4 uppercase tracking-widest text-[0.55rem]">Relational Map // sovereign_vault.sql</div>
+             <div class="space-y-4">
+                <div class="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                   <span class="text-emerald-400">TABLE users {</span><br>
+                   &nbsp;&nbsp;id UUID [PK],<br>
+                   &nbsp;&nbsp;passport_hash STRING,<br>
+                   &nbsp;&nbsp;created_at TIMESTAMP<br>
+                   <span class="text-emerald-400">}</span>
+                </div>
+                <div class="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                   <span class="text-emerald-400">TABLE nodes {</span><br>
+                   &nbsp;&nbsp;id UUID [PK],<br>
+                   &nbsp;&nbsp;parent_id UUID [FK],<br>
+                   &nbsp;&nbsp;content_hash BLOB<br>
+                   <span class="text-emerald-400">}</span>
+                </div>
+             </div>
+          </div>
+        </section>
+
+        <!-- Step 6: Code -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="order-2 md:order-1 relative">
+             <div class="absolute -inset-4 bg-gradient-to-r from-accent to-violet-600 rounded-3xl blur opacity-10 animate-pulse"></div>
+             <div class="glass-card rounded-2xl p-6 font-mono text-[0.65rem] border-white/10 relative overflow-hidden h-64">
+                <div class="text-slate-400 mb-2">// ZAYVORA HARDENED PIPELINE</div>
+                <div class="text-emerald-400 animate-pulse">
+                   export const SovereignRuntime = (config) => {<br>
+                   &nbsp;&nbsp;const { lineage, authority } = config;<br><br>
+                   &nbsp;&nbsp;return lineage.evolve({<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;type: 'synthesis_step',<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;content: authority.sign(payload)<br>
+                   &nbsp;&nbsp;});<br>
+                   };
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-950 to-transparent"></div>
+             </div>
+          </div>
+          <div class="order-1 md:order-2">
+            <span class="step-number text-5xl font-black mb-4 block">06</span>
+            <h2 class="text-3xl font-bold mb-4">Sovereign Code Synthesis</h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              The final output. Production-ready code, hardened by the Zayvora Engineer. Single-file, zero-cloud dependency, totally unstoppable.
+            </p>
+            <div class="flex items-center gap-3">
+               <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+               </div>
+               <span class="text-xs font-black tracking-widest text-emerald-400 uppercase">Verification Passed</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="mt-40 text-center">
+        <div class="inline-block p-1 rounded-2xl bg-gradient-to-r from-accent to-violet-600 mb-8">
+           <button onclick="location.href='../index.html'" class="px-8 py-4 rounded-xl bg-slate-950 text-white font-bold hover:bg-transparent hover:text-slate-950 transition-all text-xl">
+             Start Your Synthesis Now
+           </button>
+        </div>
+        <p class="text-slate-500 text-sm italic">LogicHub is the thinking layer before coding.</p>
+      </div>
+    </main>
+
+    <footer class="border-t border-white/5 py-12 text-center text-slate-500 text-xs">
+       &copy; 2026 DAXINI / APORAKSHA STACK. ALL RIGHTS RESERVED.
+    </footer>
+  </div>
+</body>
+</html>

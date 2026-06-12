@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogicHub Pricing — Static Sovereign License Options</title>
+  <meta name="description" content="LogicHub license models. Free onboarding, Pro Developer tiers, and team compilation passes. Single 20% flat marketplace distribution fee.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          },
+          colors: {
+            saffron: '#ff671f',
+            cyanAccent: '#00e5ff',
+            slateDark: '#030508',
+            slateCard: '#0a0c10'
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="/assets/js/sovereign-analytics.js" defer></script>
+  <style>
+    .glass-card {
+      background: rgba(10, 12, 16, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .neon-border:hover {
+      border-color: #00e5ff;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+    }
+  </style>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const healthUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000/api/health'
+        : '/api/health';
+      fetch(healthUrl)
+        .then(res => res.json())
+        .then(data => {
+          if (data.client_country === 'IN') {
+            const main = document.querySelector('main');
+            const banner = document.createElement('div');
+            banner.className = 'glass-card p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-center mb-8';
+            banner.innerHTML = `
+              <p class="text-sm text-slate-300">
+                🇮🇳 <strong>SaaS Subscription Blocked</strong>: Indian regions are restricted to free, local-first compiling on the Zayvora workstation.
+                For cloud upgrades, please verify your academic student ID on the VIA portal.
+              </p>
+            `;
+            main.insertBefore(banner, main.firstChild);
+
+            const buttons = document.querySelectorAll('#pricing-plans button');
+            buttons.forEach((btn, index) => {
+              if (index > 0) {
+                btn.disabled = true;
+                btn.className = 'mt-8 w-full py-2.5 rounded-lg bg-slate-800 text-slate-500 cursor-not-allowed font-medium text-xs';
+                btn.textContent = 'Restricted in India';
+                btn.onclick = (e) => { e.preventDefault(); };
+              }
+            });
+          }
+        })
+        .catch(err => console.warn('Could not check location restrictions:', err));
+    });
+  </script>
+</head>
+<body class="h-full bg-[#030508] text-slate-100 antialiased flex flex-col justify-between">
+  <div>
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-20 border-b border-slate-800 bg-[#030508]/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="font-bold tracking-wide text-white hover:text-cyanAccent transition">LOGICHUB</a>
+          <span class="text-xs px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-mono">SOVEREIGN LAYER</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+          <a href="how-it-works.html" class="hover:text-cyanAccent transition">How it Works</a>
+          <a href="apk-builder.html" class="hover:text-cyanAccent transition">APK Builder</a>
+          <a href="pricing.html" class="text-cyanAccent">Pricing</a>
+          <a href="templates.html" class="hover:text-cyanAccent transition">Templates</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <button onclick="location.href='../index.html'" class="text-xs px-4 py-2 rounded-lg bg-cyanAccent text-black font-semibold hover:bg-white transition">Workspace</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
+      <!-- Intro Section -->
+      <div class="text-center mb-16">
+        <p class="text-xs tracking-[0.2em] uppercase text-cyanAccent font-semibold">LICENSE TIERS</p>
+        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold leading-tight text-white tracking-tight">
+          Sovereign Pricing Models
+        </h1>
+        <p class="mt-5 text-lg text-slate-400 max-w-2xl mx-auto">
+          Choose the access model that aligns with your development speed. All plans execute 100% locally on your own infrastructure node.
+        </p>
+      </div>
+
+      <!-- Pricing Plans Grid -->
+      <section class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch mb-16" id="pricing-plans">
+        
+        <!-- Plan 1: Free -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 flex flex-col justify-between hover:border-slate-700 transition duration-300">
+          <div>
+            <span class="text-xs font-mono text-slate-500 uppercase tracking-wider">Tier 01</span>
+            <h3 class="text-xl font-bold text-white mt-1">Free Onboarding</h3>
+            <p class="mt-2 text-xs text-slate-400">Explore the canvas layout builder and architecture nodes.</p>
+            <div class="mt-6 text-3xl font-extrabold text-white">₹0</div>
+            <div class="text-xs text-slate-500 mt-1">Free Sandbox forever</div>
+            
+            <ul class="mt-8 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2">✓ 10 apps per sandbox session</li>
+              <li class="flex items-center gap-2">✓ Visual layout planning</li>
+              <li class="flex items-center gap-2">✓ Standard UI widgets</li>
+            </ul>
+          </div>
+          <button class="mt-8 w-full py-2.5 rounded-lg border border-slate-700 hover:border-white transition font-medium text-xs" onclick="location.href='../index.html'">Start Free</button>
+        </div>
+
+        <!-- Plan 2: Pro -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 flex flex-col justify-between hover:border-slate-700 transition duration-300">
+          <div>
+            <span class="text-xs font-mono text-purple-400 uppercase tracking-wider">Tier 02</span>
+            <h3 class="text-xl font-bold text-white mt-1">Pro Developer</h3>
+            <p class="mt-2 text-xs text-slate-400">Create complex logic workflows and scaffold multi-file apps.</p>
+            <div class="mt-6 text-3xl font-extrabold text-white">₹499</div>
+            <div class="text-xs text-slate-500 mt-1">per month / billed locally</div>
+            
+            <ul class="mt-8 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2">✓ Unlimited app models</li>
+              <li class="flex items-center gap-2">✓ Self-healing syntax engines</li>
+              <li class="flex items-center gap-2">✓ Unified custom variables</li>
+              <li class="flex items-center gap-2">✓ Advanced export zip files</li>
+            </ul>
+          </div>
+          <button class="mt-8 w-full py-2.5 rounded-lg border border-slate-700 hover:border-white transition font-medium text-xs">Upgrade to Pro</button>
+        </div>
+
+        <!-- Plan 3: Builder (Recommended) -->
+        <div class="glass-card p-6 rounded-2xl border border-cyanAccent flex flex-col justify-between relative shadow-lg shadow-cyanAccent/5 hover:shadow-cyanAccent/10 transition duration-300">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-cyanAccent text-black text-[10px] font-mono font-bold tracking-wider uppercase">Best Value</div>
+          <div>
+            <span class="text-xs font-mono text-cyanAccent uppercase tracking-wider">Tier 03</span>
+            <h3 class="text-xl font-bold text-white mt-1">Builder Pass</h3>
+            <p class="mt-2 text-xs text-slate-400 font-medium">Access local SDK compilers to generate complete offline APKs.</p>
+            <div class="mt-6 text-3xl font-extrabold text-white">₹1,999</div>
+            <div class="text-xs text-slate-400 mt-1">per month / flat local node</div>
+            
+            <ul class="mt-8 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2 text-cyanAccent font-medium">✓ Local Gradle APK Compilation</li>
+              <li class="flex items-center gap-2">✓ Native API modules (Auth, SQL)</li>
+              <li class="flex items-center gap-2">✓ Live sync to Daxini Space</li>
+              <li class="flex items-center gap-2">✓ Custom UI template library</li>
+            </ul>
+          </div>
+          <button class="mt-8 w-full py-2.5 rounded-lg bg-cyanAccent text-black hover:bg-white transition font-bold text-xs shadow-md shadow-cyanAccent/10">Activate Builder</button>
+        </div>
+
+        <!-- Plan 4: Team -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 flex flex-col justify-between hover:border-slate-700 transition duration-300">
+          <div>
+            <span class="text-xs font-mono text-amber-500 uppercase tracking-wider">Tier 04</span>
+            <h3 class="text-xl font-bold text-white mt-1">Team Node</h3>
+            <p class="mt-2 text-xs text-slate-400">Deploy a dedicated local network build pipeline for larger agencies.</p>
+            <div class="mt-6 text-3xl font-extrabold text-white">₹9,999</div>
+            <div class="text-xs text-slate-500 mt-1">per month / multi-developer</div>
+            
+            <ul class="mt-8 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2">✓ Multi-agent task managers</li>
+              <li class="flex items-center gap-2">✓ Parallel Gradle threads</li>
+              <li class="flex items-center gap-2">✓ Custom source mappings</li>
+              <li class="flex items-center gap-2">✓ Priority bug-checking engines</li>
+            </ul>
+          </div>
+          <button class="mt-8 w-full py-2.5 rounded-lg border border-slate-700 hover:border-white transition font-medium text-xs">License Team Node</button>
+        </div>
+
+      </section>
+
+      <!-- Platform Fee Section -->
+      <section class="py-10 border-t border-slate-800 text-center max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold text-white mb-3">Simple Commercial Distribution Model</h2>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          For apps distributed commercially inside Daxini Space, we operate a simple, transparent **flat 20% platform fee** on premium transactions and subscriptions processed. No hidden hosting bandwidth metrics, no API call limits, and zero SaaS cloud bills.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Daxini Ecosystem Unified Footer -->
+  <footer class="daxini-unified-footer" style="margin-top: 4rem; padding: 3rem 2rem; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(18, 20, 26, 0.4); text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 1.5rem;">
+        <div style="font-weight: 800; font-size: 1.25rem; color: #fff; letter-spacing: -0.5px;">
+          DAXINI ECOSYSTEM
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.85rem; color: #8b90a6;">
+          <a href="https://daxini.xyz" style="transition: color 0.2s;">daxini.xyz</a>
+          <a href="https://daxini.xyz/ecosystem" style="transition: color 0.2s;">ecosystem</a>
+          <a href="https://daxini.xyz/zayvora" style="transition: color 0.2s;">zayvora</a>
+          <a href="http://localhost:7001" style="transition: color 0.2s; color: #00e5ff;">logichub</a>
+          <a href="http://localhost:7004" style="transition: color 0.2s;">daxini.space</a>
+          <a href="http://localhost:7002" style="transition: color 0.2s;">aporaksha</a>
+          <a href="http://localhost:7003" style="transition: color 0.2s;">hanuman.solutions</a>
+          <a href="http://localhost:7006" style="transition: color 0.2s;">printbydd store</a>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.75rem; color: #8b90a6;">
+        <span>© 2026 Dharam Daxini. All rights reserved. Sovereign Local-First AI Mesh.</span>
+        <span>Designed for Complete local autonomy. Hashing logs daily.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

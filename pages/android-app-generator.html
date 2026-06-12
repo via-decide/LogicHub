@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android App Generator — Instant Native Packaging</title>
+  <meta name="description" content="Compile static web layouts into fully-functional native Android installation packages. LogicHub executes 100% locally with zero cloud bills.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          },
+          colors: {
+            saffron: '#ff671f',
+            cyanAccent: '#00e5ff',
+            slateDark: '#030508',
+            slateCard: '#0a0c10'
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="/assets/js/sovereign-analytics.js" defer></script>
+  <style>
+    .glass-card {
+      background: rgba(10, 12, 16, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#030508] text-slate-100 antialiased flex flex-col justify-between">
+  <div>
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-20 border-b border-slate-800 bg-[#030508]/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="font-bold tracking-wide text-white hover:text-cyanAccent transition">LOGICHUB</a>
+          <span class="text-xs px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-mono">SOVEREIGN LAYER</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+          <a href="how-it-works.html" class="hover:text-cyanAccent transition">How it Works</a>
+          <a href="apk-builder.html" class="hover:text-cyanAccent transition">APK Builder</a>
+          <a href="pricing.html" class="hover:text-cyanAccent transition">Pricing</a>
+          <a href="templates.html" class="hover:text-cyanAccent transition">Templates</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <button onclick="location.href='../index.html'" class="text-xs px-4 py-2 rounded-lg bg-cyanAccent text-black font-semibold hover:bg-white transition">Workspace</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 md:px-6 py-12 md:py-16">
+      
+      <!-- H1 Definition -->
+      <section class="mb-12" id="definition-section">
+        <p class="text-xs tracking-[0.2em] uppercase text-cyanAccent font-semibold font-mono">SEO TOPIC: GRADLE PACKAGE</p>
+        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          Android App Generator
+        </h1>
+        <p class="mt-6 text-base text-slate-300 leading-relaxed">
+          LogicHub's Android app generator operates directly on your local system node. By leveraging standard webview wrappers and self-healing assets, it bundles HTML, CSS, and Javascript elements into fully-functional native Android packages. Skip complex developer studio downloads and compile apps inside a simple visual canvas.
+        </p>
+      </section>
+
+      <!-- How It Works Section -->
+      <section class="py-8 border-t border-slate-800" id="how-it-works-section">
+        <h2 class="text-2xl font-bold text-white mb-4">How It Works</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="glass-card p-5 rounded-xl">
+            <div class="text-sm font-mono text-cyanAccent">01 / Setup</div>
+            <h3 class="text-base font-bold text-white mt-2">Asset Scaffolder</h3>
+            <p class="mt-2 text-xs text-slate-400">LogicHub generates assets, web manifests, icons, and service workers automatically.</p>
+          </div>
+          <div class="glass-card p-5 rounded-xl">
+            <div class="text-sm font-mono text-cyanAccent">02 / Diagnostic</div>
+            <h3 class="text-base font-bold text-white mt-2">Self-Repair</h3>
+            <p class="mt-2 text-xs text-slate-400">Local diagnostics scan structural files, fixing layout bugs and warning flags prior to compile.</p>
+          </div>
+          <div class="glass-card p-5 rounded-xl">
+            <div class="text-sm font-mono text-cyanAccent">03 / Output</div>
+            <h3 class="text-base font-bold text-white mt-2">APK Release</h3>
+            <p class="mt-2 text-xs text-slate-400">Headless Gradle compiles binary schemas into a ready-to-sideload Android APK.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture Section -->
+      <section class="py-8 border-t border-slate-800" id="architecture-section">
+        <h2 class="text-2xl font-bold text-white mb-4">Ecosystem Compilation Architecture</h2>
+        <div class="glass-card p-6 rounded-2xl">
+          <p class="text-sm text-slate-300 leading-relaxed mb-4">
+            The offline build stack utilizes standard local commands:
+          </p>
+          <div class="p-4 bg-slate-950/80 rounded border border-slate-900 font-mono text-xs text-cyanAccent">
+            [LogicHub Schema] → [Boilerplate Wrapper] → [Local JDK 17 Compiler] → [Gradle Build Daemon] → [Android APK]
+          </div>
+          <p class="mt-4 text-xs text-slate-400 leading-relaxed">
+            By running completely on-device, this generator works 100% offline, keeping intellectual property entirely secure within Dharam Daxini's local server environment.
+          </p>
+        </div>
+      </section>
+
+      <!-- FAQ Section -->
+      <section class="py-8 border-t border-slate-800" id="faq-section">
+        <h2 class="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+        <div class="space-y-6">
+          <div class="border-b border-slate-800 pb-4">
+            <h3 class="text-base font-semibold text-white">What Android SDK versions are supported?</h3>
+            <p class="mt-2 text-xs text-slate-400">By default, our local compiler compiles with target SDK 34 (Android 14) and matches a minimum SDK 26 (Android 8.0) for broad backward compatibility.</p>
+          </div>
+          <div class="border-b border-slate-800 pb-4">
+            <h3 class="text-base font-semibold text-white">Can I publish these apps to the Google Play Store?</h3>
+            <p class="mt-2 text-xs text-slate-400">Yes. The output package is a standard Android release package. You can sign it using your developer credentials and upload it directly to Google Play.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Daxini Ecosystem Unified Footer -->
+  <footer class="daxini-unified-footer" style="margin-top: 4rem; padding: 3rem 2rem; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(18, 20, 26, 0.4); text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 1.5rem;">
+        <div style="font-weight: 800; font-size: 1.25rem; color: #fff; letter-spacing: -0.5px;">
+          DAXINI ECOSYSTEM
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.85rem; color: #8b90a6;">
+          <a href="https://daxini.xyz" style="transition: color 0.2s;">daxini.xyz</a>
+          <a href="https://daxini.xyz/ecosystem" style="transition: color 0.2s;">ecosystem</a>
+          <a href="https://daxini.xyz/zayvora" style="transition: color 0.2s;">zayvora</a>
+          <a href="http://localhost:7001" style="transition: color 0.2s; color: #00e5ff;">logichub</a>
+          <a href="http://localhost:7004" style="transition: color 0.2s;">daxini.space</a>
+          <a href="http://localhost:7002" style="transition: color 0.2s;">aporaksha</a>
+          <a href="http://localhost:7003" style="transition: color 0.2s;">hanuman.solutions</a>
+          <a href="http://localhost:7006" style="transition: color 0.2s;">printbydd store</a>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.75rem; color: #8b90a6;">
+        <span>© 2026 Dharam Daxini. All rights reserved. Sovereign Local-First AI Mesh.</span>
+        <span>Designed for Complete local autonomy. Hashing logs daily.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
