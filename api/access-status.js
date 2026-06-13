@@ -27,15 +27,31 @@ export default async function handler(req, res) {
     const paidDoc = paidDocSnap.exists ? paidDocSnap.data() || {} : {};
     const userDoc = userDocSnap.exists ? userDocSnap.data() || {} : {};
 
+    let paidByStudent = false;
+    try {
+      const gatewayUrl = process.env.GATEWAY_URL || "https://daxini.xyz";
+      const res = await fetch(`${gatewayUrl}/api/verify/student/status?userId=${encodeURIComponent(uid)}&t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.verified) {
+          paidByStudent = true;
+        }
+      }
+    } catch (e) {
+      console.warn("[ACCESS_STATUS] Gateway Student Check Failed:", e.message);
+    }
+
     const paidByFirestore = paidDoc.paid === true || isApprovedStatus(paidDoc.status) || userDoc.paid === true || isApprovedStatus(userDoc.paymentStatus);
-    const pending = !paidByClaim && !paidByFirestore && (
+    const pending = !paidByClaim && !paidByFirestore && !paidByStudent && (
       String(userDoc.founderRequestStatus || "").toLowerCase() === "requested" ||
       String(userDoc.paymentStatus || "").toLowerCase() === "pending"
     );
 
-    const paid = paidByClaim || paidByFirestore;
-    const source = paidByClaim ? "custom_claims" : paidByFirestore ? "firestore" : pending ? "pending_request" : "free";
-    const plan = paidDoc.plan || userDoc.plan || claims.plan || (paid ? "founder" : pending ? "pending" : "free");
+    const paid = paidByClaim || paidByFirestore || paidByStudent;
+    const source = paidByStudent ? "student_verification" : (paidByClaim ? "custom_claims" : paidByFirestore ? "firestore" : pending ? "pending_request" : "free");
+    const plan = paidByStudent ? "student" : (paidDoc.plan || userDoc.plan || claims.plan || (paid ? "founder" : pending ? "pending" : "free"));
 
     return res.status(200).json({
       ok: true,

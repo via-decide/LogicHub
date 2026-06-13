@@ -4,3 +4,15 @@ dist
 .env
 *.log
 .DS_Store
+.vercel
+
+# NPM Security & Token Protection
+.env
+.env.*
+.npmrc
+secrets.json
+*.pem
+*.key
+config.json
+credentials.json
+via-auth-secrets.json

@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Builder {
+  id              String    @id @default(uuid())
+  ecosystem_uid   String    @unique
+  projects        Project[]
+  apiUsage        Int       @default(0)
+  createdAt       DateTime  @default(now())
+}
+
+model Project {
+  id              String    @id @default(uuid())
+  builderId       String
+  name            String
+  package         String?
+  sourceType      SourceType // APK, ZIP, GITHUB, SCRATCH
+  status          String     // ANALYZING, IDLE, UPGRADING, PUBLISHED
+  versions        Version[]
+  memoryContext   String     @db.Text // Accumulated Zayvora knowledge
+  builder         Builder    @relation(fields: [builderId], references: [id])
+}
+
+model Version {
+  id              String    @id @default(uuid())
+  projectId       String
+  versionCode     Int
+  versionName     String
+  architectureMap Json
+  dependencyGraph Json
+  featureMap      Json
+  riskScore       Int?
+  published       Boolean   @default(false)
+  daxiniSpaceUrl  String?
+  createdAt       DateTime  @default(now())
+  project         Project   @relation(fields: [projectId], references: [id])
+}
+
+model MarketplaceAnalytics {
+  id              String    @id @default(uuid())
+  versionId       String    @unique
+  revenue         Float     @default(0)
+  downloads       Int       @default(0)
+  discoveryScore  Float     @default(0)
+  conversionRate  Float     @default(0)
+}
+
+enum SourceType {
+  APK
+  ZIP
+  GITHUB
+  SCRATCH
+}
