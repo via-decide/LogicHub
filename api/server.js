@@ -4,6 +4,11 @@ import { PrismaClient } from '@prisma/client';
 import { ApkEngine } from '../src/ingestion/apk-engine.js';
 import { ZipEngine } from '../src/ingestion/zip-engine.js';
 import { GitHubEngine } from '../src/ingestion/github-engine.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+
+const execAsync = promisify(exec);
 
 // Native Aporaksha Auth via via-auth-sdk mapping concept
 // Since this is the backend, we intercept the JWT/ecosystem_uid manually
@@ -14,7 +19,7 @@ app.use(cors());
 app.use(express.json({ limit: '500mb' }));
 
 /**
- * Middleware: Verify ViaAuthSDK JWT/ecosystem_uid
+ * Middleware: Verify ViaAuthSDK JWT/ecosystem_uid securely against Aporaksha IdP
  */
 const requireAuth = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -25,6 +30,27 @@ const requireAuth = async (req, res, next) => {
   }
 
   try {
+    // Secure verification via Aporaksha IdP
+    const verifyRes = await fetch('https://aporaksha.com/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ action: 'validate' })
+    });
+
+    if (!verifyRes.ok) {
+      const errData = await verifyRes.json();
+      return res.status(403).json({ error: 'Invalid identity', details: errData });
+    }
+
+    const { valid, ecosystem_uid: verifiedUid } = await verifyRes.json();
+
+    if (!valid || verifiedUid !== ecosystemUid) {
+      return res.status(403).json({ error: 'Identity verification failed' });
+    }
+
     // Upsert builder into local Postgres using ecosystem_uid
     const builder = await prisma.builder.upsert({
       where: { ecosystem_uid: ecosystemUid },
@@ -35,7 +61,8 @@ const requireAuth = async (req, res, next) => {
     req.builder = builder;
     next();
   } catch (e) {
-    res.status(403).json({ error: 'Invalid identity' });
+    console.error('[Auth] Verification Error:', e);
+    res.status(500).json({ error: 'Internal Identity Error' });
   }
 };
 
@@ -101,6 +128,15 @@ app.post('/api/v1/project/upgrade', requireAuth, async (req, res) => {
 
   // Dispatch to Zayvora Python Engine + Worker
   console.log(`[API] Queuing Zayvora Upgrade for ${projectId} with prompt: ${prompt}`);
+  
+  // Wire directly to the local Python engine (bundle_zay.py) as requested
+  try {
+    const pyPath = path.resolve(__dirname, '../../daxini.space/bundle_zay.py');
+    const { stdout } = await execAsync(`python3 ${pyPath}`);
+    console.log('[Zayvora Engine] Executed local python backend bundle_zay.py:', stdout.trim());
+  } catch (e) {
+    console.error('[Zayvora Engine] Failed to execute bundle_zay.py:', e.message);
+  }
 
   res.json({ success: true, projectId, status: 'UPGRADING' });
 });
