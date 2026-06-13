@@ -29,20 +29,18 @@ export default async function handler(req, res) {
 
     let paidByStudent = false;
     try {
-      const { createRequire } = await import("module");
-      const require = createRequire(import.meta.url);
-      const Database = require("better-sqlite3");
-      const db = new Database("/Users/dharamdaxini/Downloads/via/daxini.xyz/database/daxini.db");
-      const student = db.prepare(`
-        SELECT verification_status FROM student_verifications 
-        WHERE customer_id = ? AND verification_status IN ('OCR_VERIFIED', 'MANUAL_APPROVED')
-      `).get(uid);
-      if (student) {
-        paidByStudent = true;
+      const gatewayUrl = process.env.GATEWAY_URL || "https://daxini.xyz";
+      const res = await fetch(`${gatewayUrl}/api/verify/student/status?userId=${encodeURIComponent(uid)}&t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.verified) {
+          paidByStudent = true;
+        }
       }
-      db.close();
     } catch (e) {
-      console.warn("[ACCESS_STATUS] SQLite Student Check Failed:", e.message);
+      console.warn("[ACCESS_STATUS] Gateway Student Check Failed:", e.message);
     }
 
     const paidByFirestore = paidDoc.paid === true || isApprovedStatus(paidDoc.status) || userDoc.paid === true || isApprovedStatus(userDoc.paymentStatus);
