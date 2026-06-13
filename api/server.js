@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json({ limit: '500mb' }));
 
 /**
- * Middleware: Verify ViaAuthSDK JWT/ecosystem_uid
+ * Middleware: Verify ViaAuthSDK JWT/ecosystem_uid securely against Aporaksha IdP
  */
 const requireAuth = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -25,6 +25,27 @@ const requireAuth = async (req, res, next) => {
   }
 
   try {
+    // Secure verification via Aporaksha IdP
+    const verifyRes = await fetch('https://aporaksha.com/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ action: 'validate' })
+    });
+
+    if (!verifyRes.ok) {
+      const errData = await verifyRes.json();
+      return res.status(403).json({ error: 'Invalid identity', details: errData });
+    }
+
+    const { valid, ecosystem_uid: verifiedUid } = await verifyRes.json();
+
+    if (!valid || verifiedUid !== ecosystemUid) {
+      return res.status(403).json({ error: 'Identity verification failed' });
+    }
+
     // Upsert builder into local Postgres using ecosystem_uid
     const builder = await prisma.builder.upsert({
       where: { ecosystem_uid: ecosystemUid },
@@ -35,7 +56,8 @@ const requireAuth = async (req, res, next) => {
     req.builder = builder;
     next();
   } catch (e) {
-    res.status(403).json({ error: 'Invalid identity' });
+    console.error('[Auth] Verification Error:', e);
+    res.status(500).json({ error: 'Internal Identity Error' });
   }
 };
 

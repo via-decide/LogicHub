@@ -3266,8 +3266,24 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       });
     }
 
-    app.init();
-    if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
+    // SSO Integration
+    import('https://aporaksha.com/sdk.js').then(({ ViaAuthSDK }) => {
+      window.viaAuth = new ViaAuthSDK({ appId: 'logichub' });
+      window.viaAuth.handleRedirectCallback();
+      
+      const session = window.viaAuth.getSession();
+      if (!session) {
+        console.log('No session found. Redirecting to Aporaksha IdP for SSO...');
+        window.viaAuth.redirectToApp('https://aporaksha.com/passport', 'login', window.location.href);
+      } else {
+        app.init();
+        if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
+      }
+    }).catch(err => {
+      console.error('Failed to load ViaAuthSDK from Aporaksha:', err);
+      app.init();
+      if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
+    });
   </script>
 </body>
 </html>
