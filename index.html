@@ -2426,10 +2426,7 @@
           return;
         }
         card.className = 'premium-experience-card';
-        let upgradeSection = `<div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">India Founder Pass: ₹1717 with manual UPI payment and approval review.</div>`;
-        if (window.clientCountry === 'IN') {
-          upgradeSection = `<div class="premium-action-row"><button class="premium-action-btn secondary" disabled style="opacity:0.6;cursor:not-allowed;">🚫 SaaS Billing Restricted (India)</button><button class="premium-action-btn primary" onclick="alert('India users: Use the VIA app at http://localhost:7005 to upload your institutional ID card and bypass payment verification.')">🎓 Verify Student ID</button></div><div class="premium-support-note">SaaS subscriptions are disabled for India under SaaS Spec v8. Work local-first or use Student Verification to bypass.</div>`;
-        }
+        let upgradeSection = `<div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 View Pricing Tiers</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">Geofencing Active: Tiers customized for ${window.clientCountry}</div>`;
         card.innerHTML = `<div class="premium-experience-head"><div><h3>Free workspace ready — upgrade when you want the founder path.</h3><p>Free users keep the current builder flow, while paid founder accounts swap this panel into a premium welcome state with clearer status, unlimited Forge messaging, and premium tool shortcuts.</p></div><span class="premium-state-badge free">⚡ free workspace</span></div><div class="premium-state-grid"><div class="premium-mini-card"><div class="premium-kpi">3 / 5h</div><h4>Current Forge window</h4><p>You can keep building with the free rolling Forge window and session app allowance today.</p></div><div class="premium-mini-card"><h4>Founder unlocks</h4><ul class="premium-feature-list"><li>Paid user welcome banner with founder status.</li><li>Unlimited Forge badge and premium modal copy.</li><li>Cleaner pending and approved founder screens.</li></ul></div><div class="premium-mini-card"><h4>Upgrade path</h4>${upgradeSection}</div></div>`;
       },
 
@@ -2700,18 +2697,30 @@
         this.updateInstallButtonState();
       },
 
-      openFounderCheckout() {
-        if (window.clientCountry === 'IN') {
-          alert("SaaS Billing Blocked: Subscription billing is restricted in India under SaaS Spec v8. Please compile locally on your workstation for free, or verify your academic student ID on the VIA app.");
-          return;
+      async openFounderCheckout() {
+        try {
+          const res = await fetch('/api/eligibility');
+          const data = await res.json();
+          if (data.models && data.models.includes('UPI_LIFETIME_ONLY')) {
+            // India pricing
+            document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
+            document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
+            document.getElementById('founder-price-inr').textContent = `₹1717`;
+            document.getElementById('founder-utr-panel').style.display = 'none';
+            document.getElementById('founder-utr').value = '';
+            this.renderFounderStatus();
+            openModal('founder-modal');
+          } else {
+            // Global pricing
+            alert(`Global SaaS Subscription Available: \n\n$29/month - LogicHub Builder SaaS\n$20/month - Zayvora Pro SaaS\n\n(Stripe Integration Pending)`);
+            // Show founder modal with USD for now
+            document.getElementById('founder-price-inr').textContent = `$29`;
+            openModal('founder-modal');
+          }
+        } catch(e) {
+          console.error(e);
+          openModal('founder-modal');
         }
-        document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
-        document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
-        document.getElementById('founder-price-inr').textContent = `₹${Number(FOUNDER_PAYMENT.inrAmount).toLocaleString('en-IN')}`;
-        document.getElementById('founder-utr-panel').style.display = 'none';
-        document.getElementById('founder-utr').value = '';
-        this.renderFounderStatus();
-        openModal('founder-modal');
       },
 
       copyFounderUpi() {
