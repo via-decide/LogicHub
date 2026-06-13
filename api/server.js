@@ -4,6 +4,11 @@ import { PrismaClient } from '@prisma/client';
 import { ApkEngine } from '../src/ingestion/apk-engine.js';
 import { ZipEngine } from '../src/ingestion/zip-engine.js';
 import { GitHubEngine } from '../src/ingestion/github-engine.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+
+const execAsync = promisify(exec);
 
 // Native Aporaksha Auth via via-auth-sdk mapping concept
 // Since this is the backend, we intercept the JWT/ecosystem_uid manually
@@ -123,6 +128,15 @@ app.post('/api/v1/project/upgrade', requireAuth, async (req, res) => {
 
   // Dispatch to Zayvora Python Engine + Worker
   console.log(`[API] Queuing Zayvora Upgrade for ${projectId} with prompt: ${prompt}`);
+  
+  // Wire directly to the local Python engine (bundle_zay.py) as requested
+  try {
+    const pyPath = path.resolve(__dirname, '../../daxini.space/bundle_zay.py');
+    const { stdout } = await execAsync(`python3 ${pyPath}`);
+    console.log('[Zayvora Engine] Executed local python backend bundle_zay.py:', stdout.trim());
+  } catch (e) {
+    console.error('[Zayvora Engine] Failed to execute bundle_zay.py:', e.message);
+  }
 
   res.json({ success: true, projectId, status: 'UPGRADING' });
 });
