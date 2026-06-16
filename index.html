@@ -1219,6 +1219,301 @@
         }
       }
     }
+
+    /* ═══════════════════════════════════════════════════════════
+       PROGRESSIVE DISCLOSURE SYSTEM
+       Canvas is root. Everything else orbits and appears on demand.
+    ═══════════════════════════════════════════════════════════ */
+
+    /* ── Body: no scroll on desktop (canvas fills viewport) ── */
+    @media (min-width: 681px) {
+      body { overflow: hidden; }
+    }
+
+    /* ── Main container fills ALL remaining space ── */
+    .main-container {
+      flex: 1;
+      min-height: 0;
+      height: auto;
+    }
+
+    /* ── Hide all marketing sections from the layout flow ── */
+    .premium-experience-shell,
+    .landing-hero,
+    .builder-lanes,
+    .onboarding-shell,
+    .helper-strip,
+    .daxini-unified-footer,
+    .payment-strip {
+      display: none !important;
+    }
+
+    /* ── Start Building CTA (inside canvas hint) ── */
+    .start-building-cta {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      pointer-events: auto;
+    }
+    .start-building-btn {
+      position: relative;
+      padding: 0.9rem 2.5rem;
+      background: linear-gradient(135deg, var(--accent), #00b8cc);
+      color: #030508;
+      font-family: var(--font-mono);
+      font-weight: 900;
+      font-size: 0.88rem;
+      letter-spacing: 0.08em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: cta-pulse 2.5s ease-in-out infinite;
+    }
+    .start-building-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 28px rgba(0,229,255,0.5);
+      animation: none;
+    }
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.3); }
+      50%       { box-shadow: 0 0 0 12px rgba(0,229,255,0); }
+    }
+    .start-building-hint {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Disclosure Overlay ── */
+    .disclosure-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(3,5,8,0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: overlay-in 0.22s ease;
+    }
+    .disclosure-overlay.active { display: flex; }
+    @keyframes overlay-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .disclosure-tray {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .disclosure-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .disclosure-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .disclosure-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-secondary);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .disclosure-close:hover { border-color: var(--error); color: var(--error); }
+    .disclosure-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+    }
+    .disclosure-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(18,22,30,0.98), rgba(8,11,16,0.98));
+      cursor: pointer;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .disclosure-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,229,255,0.12);
+    }
+    .disclosure-card-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+    .disclosure-card-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .disclosure-card-sub {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* ── Slide-over panels (used for What/How/Templates/Publish/Ecosystem) ── */
+    .slide-panel {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(480px, 100vw);
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-bright);
+      z-index: 4000;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: -16px 0 48px rgba(0,0,0,0.45);
+      animation: panel-slide-in 0.25s ease;
+    }
+    .slide-panel.active { display: flex; }
+    @keyframes panel-slide-in {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(0); }
+    }
+    .slide-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 1.25rem 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      background: var(--bg-secondary);
+      z-index: 2;
+    }
+    .slide-panel-title {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .slide-panel-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-secondary);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .slide-panel-close:hover { border-color: var(--error); color: var(--error); }
+    .slide-panel-body {
+      padding: 1.25rem;
+      flex: 1;
+    }
+
+    /* ── Auth strip compact (hides premium card, shows inline) ── */
+    #premium-card-inline {
+      display: none;
+      padding: 0.55rem 1.25rem;
+      background: linear-gradient(90deg, rgba(0,229,255,0.06), rgba(255,103,31,0.04));
+      border-bottom: 1px solid rgba(0,229,255,0.12);
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      color: var(--text-secondary);
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    #premium-card-inline.visible { display: flex; }
+    #premium-card-inline .premium-inline-badge {
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.64rem;
+    }
+    #premium-card-inline .premium-inline-badge.paid {
+      background: rgba(46,204,113,0.15);
+      border: 1px solid rgba(46,204,113,0.3);
+      color: var(--success);
+    }
+    #premium-card-inline .premium-inline-badge.pending {
+      background: rgba(255,153,0,0.12);
+      border: 1px solid rgba(255,153,0,0.25);
+      color: var(--saffron);
+    }
+    #premium-card-inline .premium-inline-badge.free {
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.2);
+      color: var(--accent);
+    }
+
+    /* ── SEO Shadow Layer ── */
+    .seo-shadow {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 680px) {
+      .disclosure-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .disclosure-tray {
+        max-height: 85dvh;
+        overflow-y: auto;
+      }
+      .slide-panel {
+        top: auto;
+        border-left: none;
+        border-top: 1px solid var(--border-bright);
+        height: 85dvh;
+        width: 100vw;
+        animation: panel-slide-up 0.25s ease;
+      }
+      @keyframes panel-slide-up {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+      }
+    }
   </style>
 </head>
 <body>
@@ -1259,7 +1554,14 @@
     <button type="button" style="margin-left:10px;" onclick="app.retryAuthConnection()">Retry Connection</button>
   </div>
 
-  <div class="premium-experience-shell">
+  <!-- Premium card is now an inline strip (compact, product-feel) -->
+  <div id="premium-card-inline">
+    <span id="premium-inline-status">Checking access…</span>
+    <span class="premium-inline-badge free" id="premium-inline-badge">FREE</span>
+    <span style="margin-left:auto; cursor:pointer; color:var(--accent);" onclick="openDisclosurePanel('founder')" title="Upgrade">⚡ Upgrade</span>
+  </div>
+  <!-- Original premium-experience-card kept hidden for JS compatibility -->
+  <div class="premium-experience-shell" style="display:none !important;">
     <div class="premium-experience-card" id="premium-experience-card">
       <div class="premium-experience-head">
         <div>
@@ -1281,7 +1583,7 @@
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> Start with the canvas: add your first screen, organize blocks, preview your app, then publish when ready. Advanced deployment options (APK, export, and download package) are now grouped under Publish → Advanced Deployment.</div>
+  <!-- helper-strip moved to disclosure panel -->
 
   <div class="landing-hero">
     <div class="landing-hero-card">
@@ -1415,17 +1717,25 @@
         <g id="connections-group"></g>
       </svg>
       <div id="blocks-container"></div>
-      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.35; text-align:center; padding:0 1rem;">
-        <div style="font-size:2rem">⬡</div>
-        <div style="font-family:var(--font-mono);font-size:0.74rem;">Add Screen, Login, Data, or Logic to begin</div>
-        <div class="empty-state-guide" id="empty-state-guide">
-          <strong>Suggested one-click setups</strong>
+      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:1; text-align:center; padding:0 1rem;">
+        <div style="font-size:2.5rem; opacity:0.25;">⬡</div>
+        <div style="font-family:var(--font-mono);font-size:0.74rem; color:var(--text-secondary); opacity:0.5; margin-bottom:0.5rem;">Canvas Workspace</div>
+
+        <!-- START BUILDING CTA -->
+        <div class="start-building-cta">
+          <button id="start-building-btn" class="start-building-btn" onclick="openDisclosureOverlay()">▶ Start Building</button>
+          <div class="start-building-hint">Already know what to do? Use the footer buttons below ↓</div>
+        </div>
+
+        <!-- Existing quick-setups (shown after first block added, hidden until then) -->
+        <div class="empty-state-guide" id="empty-state-guide" style="display:none; pointer-events:auto; margin-top:1rem;">
+          <strong>Quick setups</strong>
           <div class="empty-state-setups">
-            <button onclick="app.applyStarterSetup('ai-research-tool')">AI research tool setup</button>
-            <button onclick="app.applyStarterSetup('simulation-builder')">Simulation builder setup</button>
-            <button onclick="app.applyStarterSetup('data-dashboard')">Data dashboard setup</button>
-            <button onclick="app.applyStarterSetup('knowledge-explorer')">Knowledge explorer setup</button>
-            <button onclick="app.applyStarterSetup('automation-bot')">Automation bot setup</button>
+            <button onclick="app.applyStarterSetup('ai-research-tool')">AI research tool</button>
+            <button onclick="app.applyStarterSetup('simulation-builder')">Simulation builder</button>
+            <button onclick="app.applyStarterSetup('data-dashboard')">Data dashboard</button>
+            <button onclick="app.applyStarterSetup('knowledge-explorer')">Knowledge explorer</button>
+            <button onclick="app.applyStarterSetup('automation-bot')">Automation bot</button>
           </div>
         </div>
       </div>
@@ -1646,6 +1956,209 @@
       <div id="founder-payment-status" class="payment-status-box">No founder payment saved on this device yet.</div>
       <div class="payment-note">Founder payments are manually confirmed for now.</div>
     </div>
+  </div>
+
+  <!-- ═══ PROGRESSIVE DISCLOSURE OVERLAY ═══════════════════════════════════ -->
+
+  <!-- Overlay backdrop + card tray -->
+  <div class="disclosure-overlay" id="disclosure-overlay" onclick="onDisclosureOverlayClick(event)">
+    <div class="disclosure-tray">
+      <div class="disclosure-header">
+        <div class="disclosure-title">What do you want to do?</div>
+        <button class="disclosure-close" onclick="closeDisclosureOverlay()" title="Close (Esc)">✕</button>
+      </div>
+      <div class="disclosure-cards">
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('what')">
+          <div class="disclosure-card-icon">🏗️</div>
+          <div class="disclosure-card-label">What can LogicHub build?</div>
+          <div class="disclosure-card-sub">Prompt apps, APK prototypes, workflow tools, publishable web apps.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('how')">
+          <div class="disclosure-card-icon">⚙️</div>
+          <div class="disclosure-card-label">See How It Works</div>
+          <div class="disclosure-card-sub">Pages → Data → Logic → Preview → Publish. The full 3-step build flow.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('templates')">
+          <div class="disclosure-card-icon">📐</div>
+          <div class="disclosure-card-label">Templates</div>
+          <div class="disclosure-card-sub">Start from a starter setup: AI tool, dashboard, bot, or explorer.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('publish')">
+          <div class="disclosure-card-icon">🚀</div>
+          <div class="disclosure-card-label">Publish &amp; APK</div>
+          <div class="disclosure-card-sub">Publish to Daxini.Space or export a native Android APK installer.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosureFounder()">
+          <div class="disclosure-card-icon">⚡</div>
+          <div class="disclosure-card-label">Founder Access</div>
+          <div class="disclosure-card-sub">Unlock unlimited forges. India ₹1717 · Global $99 founder pass.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('ecosystem')">
+          <div class="disclosure-card-icon">🌌</div>
+          <div class="disclosure-card-label">Explore Ecosystem</div>
+          <div class="disclosure-card-sub">Daxini.Space, Zayvora, Aporaksha, and more.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: What can LogicHub build? ── -->
+  <div class="slide-panel" id="panel-what">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">🏗️ What can LogicHub build?</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('what')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2 style="margin:0 0 0.4rem; font-family:var(--font-serif); font-size:1.6rem; font-weight:800; background:linear-gradient(135deg,#fff,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Build Android Apps With AI</h2>
+          <p style="margin:0; color:var(--accent); font-family:var(--font-mono); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px;">Publish Instantly To Daxini Space</p>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.85rem; line-height:1.65; margin-bottom:1.25rem;">Turn ideas into prompt apps, workflow tools, and native Android-ready APK installers — fully locally. Zero cloud bills, automatic file repairs.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; border:1px solid rgba(255,255,255,0.05); border-radius:12px; background:rgba(0,0,0,0.3); font-family:var(--font-mono); font-size:0.72rem; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+        <span style="color:var(--accent); font-weight:700;">💡 1. Idea Input</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#a78bfa; font-weight:700;">🏗️ 2. LogicHub</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#34d399; font-weight:700;">📱 3. APK Compiler</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#fbbf24; font-weight:700;">🌌 4. Daxini Space</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.65rem; margin-bottom:1.5rem;">
+        <div class="capability-chip">Interactive Visualizer</div>
+        <div class="capability-chip">Gradle APK Generator</div>
+        <div class="capability-chip">Self-Healing Configs</div>
+        <div class="capability-chip">Space Distribution</div>
+      </div>
+      <button class="primary-action-btn publish-cta" onclick="closeDisclosurePanel('what'); app.openCreateAppWizard();" style="width:100%; padding:1rem; font-size:0.82rem;">→ Start Building Now</button>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: How It Works ── -->
+  <div class="slide-panel" id="panel-how">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">⚙️ How It Works</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('how')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <div style="display:grid; gap:0.75rem; margin-bottom:1.25rem;">
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">01</span>
+          <h4>Pick the parts you understand</h4>
+          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">02</span>
+          <h4>Open Blocks → Generate</h4>
+          <p>LogicHub fills in missing runtime files automatically. No need to create every JS or asset file by hand.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">03</span>
+          <h4>Preview → Publish</h4>
+          <p>Preview your canvas anytime, then publish when ready. Export ZIP or build Android APK from the same screen.</p>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; margin-bottom:1.25rem;">
+        <div class="lane-card"><h4>Pages</h4><p>Design layout directly on the canvas with reusable blocks.</p></div>
+        <div class="lane-card"><h4>Data</h4><p>Supabase, REST API, Google Sheets, or Static Data sources.</p></div>
+        <div class="lane-card"><h4>Logic</h4><p>Build workflows with triggers/actions, then preview and publish.</p></div>
+      </div>
+      <button class="primary-action-btn" onclick="closeDisclosurePanel('how'); closeDisclosureOverlay();" style="width:100%; padding:0.9rem;">→ Go to Canvas</button>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: Templates ── -->
+  <div class="slide-panel" id="panel-templates">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">📐 Templates</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('templates')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <p style="color:var(--text-secondary); font-size:0.78rem; margin-bottom:1rem;">Pick a starter setup and jump straight into the canvas, pre-wired.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem;">
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('ai-research-tool');">🔬 AI Research Tool</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('simulation-builder');">🧪 Simulation Builder</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('data-dashboard');">📊 Data Dashboard</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('knowledge-explorer');">🧭 Knowledge Explorer</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('automation-bot');">🤖 Automation Bot</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.openCreateAppWizard();">✨ Custom App…</button>
+      </div>
+      <div id="panel-template-gallery" style="margin-top:1.25rem;"></div>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: Publish ── -->
+  <div class="slide-panel" id="panel-publish">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">🚀 Publish &amp; APK</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('publish')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <p style="color:var(--text-secondary); font-size:0.82rem; line-height:1.65; margin-bottom:1.25rem;">After building on the canvas, choose how to ship your app.</p>
+      <div style="display:grid; gap:0.65rem;">
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">🌌</span>
+          <h4>Publish to Daxini.Space</h4>
+          <p>One-click publish your web app to the Daxini marketplace. Discoverable immediately.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.publishApp();" class="primary-action-btn" style="margin-top:0.5rem;">→ Publish App</button>
+        </div>
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">📱</span>
+          <h4>Export Android APK</h4>
+          <p>Compile a native Android-ready APK installer from your canvas design. No code signing required.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.buildApk();" class="primary-action-btn" style="margin-top:0.5rem;">→ Build APK</button>
+        </div>
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">📦</span>
+          <h4>Export ZIP</h4>
+          <p>Download a full ZIP of your generated app files for self-hosting or custom deployment.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.exportZip();" class="primary-action-btn" style="margin-top:0.5rem;">→ Export ZIP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: Ecosystem ── -->
+  <div class="slide-panel" id="panel-ecosystem">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">🌌 Daxini Ecosystem</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('ecosystem')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <div style="display:grid; gap:0.55rem;">
+        <a href="https://daxini.space" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🌌 Daxini.Space — App Marketplace</a>
+        <a href="https://daxini.xyz" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🪐 Daxini.xyz — Creator Hub</a>
+        <a href="https://daxini.xyz/zayvora" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">⚡ Zayvora — Sovereign AI Engine</a>
+        <a href="https://aporaksha.com" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🧿 Aporaksha — Identity Layer</a>
+        <a href="https://hanuman.solutions" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🕉️ Hanuman Solutions</a>
+        <a href="https://store.viadecide.com/printbydd" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🖨️ PrintByDD Store</a>
+      </div>
+      <div style="margin-top:1.25rem; font-size:0.68rem; color:var(--text-secondary); text-align:center; line-height:1.6;">
+        © 2026 Dharam Daxini · Sovereign Local-First AI Mesh
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SEO SHADOW LAYER — off-screen, indexed by crawlers ══════════════ -->
+  <div class="seo-shadow" aria-hidden="false">
+    <h1>LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes</h1>
+    <h2>Build Android Apps With AI</h2>
+    <p>Turn ideas into prompt apps, workflow tools, and native Android-ready APK installers fully locally. Zero cloud bills, automatic file repairs. Publish instantly to Daxini Space.</p>
+    <p>LogicHub is an AI app builder for non-technical users. Plan visually on a canvas workspace. Generate files. Export ZIPs. Publish apps. Package Android-ready prototypes.</p>
+    <h3>How It Works</h3>
+    <p>Step 1: Pick the parts you understand — Screen, Login, Data, Style, or Settings. Step 2: Open Blocks. LogicHub fills in missing runtime files automatically. Step 3: Preview anytime. Publish when ready. Advanced deployment in Publish.</p>
+    <h3>Builder Lanes</h3>
+    <p>Pages: Design your app layout on the canvas with reusable blocks. Data: Add Supabase, REST API, Google Sheets, or Static Data. Logic: Build workflows with triggers and actions.</p>
+    <h3>Capabilities</h3>
+    <p>Interactive Visualizer · Gradle APK Generator · Self-Healing Configs · Space Distribution · Prompt apps · Workflow tools · Publish or export · India Founder Pass ₹1717 · Global Founder Pass $99</p>
   </div>
 
   <script src="./js/deploy-client.js"></script>
@@ -3300,6 +3813,125 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       app.init();
       if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
     });
+    // ═══════════════════════════════════════════════════════════════════
+    //  PROGRESSIVE DISCLOSURE SYSTEM — JS Controller
+    // ═══════════════════════════════════════════════════════════════════
+
+    function openDisclosureOverlay() {
+      document.getElementById('disclosure-overlay').classList.add('active');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeDisclosureOverlay() {
+      document.getElementById('disclosure-overlay').classList.remove('active');
+      document.body.classList.remove('modal-open');
+    }
+
+    function onDisclosureOverlayClick(e) {
+      // Close if user clicks the backdrop (not the tray itself)
+      if (e.target === document.getElementById('disclosure-overlay')) {
+        closeDisclosureOverlay();
+      }
+    }
+
+    function openDisclosurePanel(panelId) {
+      // Close overlay first, then open the slide panel
+      closeDisclosureOverlay();
+      const el = document.getElementById('panel-' + panelId);
+      if (el) {
+        el.classList.add('active');
+        document.body.classList.add('modal-open');
+      }
+    }
+
+    function closeDisclosurePanel(panelId) {
+      const el = document.getElementById('panel-' + panelId);
+      if (el) {
+        el.classList.remove('active');
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    function openDisclosureFounder() {
+      closeDisclosureOverlay();
+      openModal('founder-modal');
+    }
+
+    // Escape key dismisses overlay and open panels
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      ['disclosure-overlay'].forEach(id => {
+        document.getElementById(id)?.classList.remove('active');
+      });
+      ['what','how','templates','publish','ecosystem'].forEach(id => {
+        document.getElementById('panel-' + id)?.classList.remove('active');
+      });
+      document.body.classList.remove('modal-open');
+    });
+
+    // ── Canvas hint visibility manager ──
+    // Hide the "Start Building" CTA once the user has blocks on canvas.
+    // Show the quick-setup buttons instead (existing UX for returning users).
+    function syncCanvasHint() {
+      const hasBlocks = window.app && window.app.map && window.app.map.blocks.length > 0;
+      const hint = document.getElementById('canvas-hint');
+      const cta = document.querySelector('.start-building-cta');
+      const quickSetups = document.getElementById('empty-state-guide');
+
+      if (!hint) return;
+
+      if (hasBlocks) {
+        hint.style.display = 'none';  // hide hint entirely once canvas is populated
+      } else {
+        hint.style.display = 'flex';
+        hint.style.opacity = '1';
+        if (cta) cta.style.display = 'flex';
+        if (quickSetups) quickSetups.style.display = 'none';
+      }
+    }
+
+    // Patch app.render to also sync the canvas hint
+    (function patchAppRender() {
+      const _ready = setInterval(() => {
+        if (!window.app || typeof window.app.render !== 'function') return;
+        clearInterval(_ready);
+        const originalRender = window.app.render.bind(window.app);
+        window.app.render = function(...args) {
+          const result = originalRender(...args);
+          syncCanvasHint();
+          return result;
+        };
+      }, 100);
+    })();
+
+    // ── Premium inline strip — synced with existing auth state ──
+    // Reads from the existing premium-experience-card state after auth resolves.
+    function syncPremiumInlineStrip() {
+      const card = document.getElementById('premium-experience-card');
+      const inline = document.getElementById('premium-card-inline');
+      const statusEl = document.getElementById('premium-inline-status');
+      const badgeEl = document.getElementById('premium-inline-badge');
+      if (!card || !inline) return;
+
+      const isPaid    = card.classList.contains('paid');
+      const isPending = card.classList.contains('pending');
+
+      inline.classList.add('visible');
+      badgeEl.className = 'premium-inline-badge ' + (isPaid ? 'paid' : isPending ? 'pending' : 'free');
+      badgeEl.textContent = isPaid ? 'FOUNDER' : isPending ? 'PENDING' : 'FREE';
+
+      const h3 = card.querySelector('h3');
+      if (statusEl && h3) statusEl.textContent = h3.textContent;
+    }
+
+    // Observe the premium-experience-card for class changes (set by existing JS)
+    const _premiumObserver = new MutationObserver(syncPremiumInlineStrip);
+    const _premiumCard = document.getElementById('premium-experience-card');
+    if (_premiumCard) {
+      _premiumObserver.observe(_premiumCard, { attributes: true, childList: true, subtree: true });
+    }
+
   </script>
+
 </body>
 </html>
