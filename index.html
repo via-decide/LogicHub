@@ -12,6 +12,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#030508">
   <title>LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
   <meta name="description" content="LogicHub is an AI app builder for non-technical users. Turn ideas into prompt apps, workflow tools, publishable web apps, ZIP exports, and Android-ready prototypes from a visual plan.">
   <link rel="canonical" href="https://logichub.app/">
   <meta property="og:type" content="website">
@@ -1957,6 +1959,10 @@
           <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
           <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
           <div class="payment-note">Note: Checkout will be blocked at the network level for users outside supported regions.</div>
+          <div class="payment-amount">$99 <span class="payment-muted">Global Checkout</span></div>
+          <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
+          <button class="payment-wide-btn secondary" type="button" onclick="window.open('https://wa.me/919723897662?text=Hi%20Dharam%2C%20I%20want%20the%20Global%20Founder%20Pass%20for%20LogicHub%20%28%2499%29','_blank')">💬 Message to Buy — $99</button>
+          <div class="payment-note">Best use: landing page pricing, founder outreach, and global waitlist conversations.</div>
         </div>
       </div>
 
@@ -2223,6 +2229,7 @@
   <script>
     const APORAKSHA_AUTH_URL = 'https://aporaksha.com/api';
     window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'https://logichub.app/api' : 'https://api.logichub.app/api';
+    window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080/api' : 'https://daxini.xyz/zayvora/api';
     const AUTH_TOKEN_KEY = 'lh_aporaksha_token';
     const AUTH_REFRESH_KEY = 'lh_aporaksha_refresh';
     const AUTH_USER_KEY = 'lh_aporaksha_user';
@@ -3501,6 +3508,8 @@ ${snippet}`;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeName}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
 </head>
@@ -4080,5 +4089,88 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
 
   </script>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       DAXINI.SPACE ↔ LOGICHUB.APP postMessage Bridge
+       Allows daxini.space to communicate with this page when embedded.
+       Origin-guarded: only trusts messages from daxini.space.
+       ═══════════════════════════════════════════════════════════════ -->
+  <script>
+  (function() {
+    const DAXINI_ORIGINS = new Set([
+      'https://daxini.space',
+      'https://www.daxini.space',
+      'http://localhost:8080',
+      'http://localhost:5173'
+    ]);
+
+    window.addEventListener('message', function(event) {
+      if (!DAXINI_ORIGINS.has(event.origin)) return;
+
+      const { type, requestId } = event.data || {};
+
+      function reply(replyType, data) {
+        if (event.source) {
+          event.source.postMessage({ type: replyType, requestId, data }, event.origin);
+        }
+      }
+
+      switch (type) {
+        case 'ZAYVORA_PING':
+          reply('ZAYVORA_READY', {
+            version: '1.0',
+            app: 'logichub',
+            title: document.title,
+            url: window.location.href
+          });
+          break;
+
+        case 'ZAYVORA_GET_META':
+          reply('ZAYVORA_META', {
+            title: document.title,
+            url: window.location.href,
+            mapId: window.app?.map?.id || null
+          });
+          break;
+
+        case 'ZAYVORA_EXECUTE':
+          if (window.app && window.app.map) {
+             const payload = event.data.payload;
+             if (payload?.prompt) {
+                // If it's a prompt, simulate dropping a new block and triggering Zayvora
+                const block = {
+                  id: 'blk_' + Math.random().toString(36).substr(2, 9),
+                  x: 100, y: 100,
+                  type: 'process',
+                  prompt: payload.prompt,
+                  filename: 'auto_generated.js',
+                  status: 'PENDING',
+                  dependsOn: []
+                };
+                window.app.map.blocks.push(block);
+                window.app.render();
+                window.app.synthesizeArchitecture();
+                reply('ZAYVORA_RESULT', { status: 'started', blockId: block.id });
+             }
+          }
+          break;
+
+        default:
+          break;
+      }
+    });
+
+    /* Announce readiness to parent frame (daxini.space) on load */
+    if (window.parent !== window) {
+      window.addEventListener('load', function() {
+        try {
+          window.parent.postMessage(
+            { type: 'ZAYVORA_READY', data: { version: '1.0', app: 'logichub', title: document.title } },
+            'https://daxini.space'
+          );
+        } catch (_) {}
+      });
+    }
+  })();
+  </script>
 </body>
 </html>
