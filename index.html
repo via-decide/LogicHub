@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <script>
-    if (!localStorage.getItem('logichub_onboarded') && window.location.pathname === '/') {
-      window.location.replace('/onboarding.html');
-    } else if (!localStorage.getItem('logichub_onboarded') && window.location.pathname.endsWith('index.html')) {
-      window.location.replace('onboarding.html');
+    if (localStorage.getItem('onboarding_complete') !== 'true') {
+      if (window.location.pathname === '/' || window.location.pathname.endsWith('index.html')) {
+        window.location.replace('onboarding.html');
+      }
     }
   </script>
   <meta charset="UTF-8">
@@ -1611,9 +1611,9 @@
         <div style="display:inline-block; font-family:var(--font-mono); font-size:10px; color:var(--accent); border:1px solid rgba(0,229,255,0.2); padding:4px 12px; border-radius:999px; margin-bottom:16px;">
           LOGICHUB ARTIFACT ENGINE
         </div>
-        <h2 style="font-family: var(--font-serif); font-size: 3.5rem; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 1rem; line-height: 1.1; background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Build Software You Own</h2>
+        <h2 style="font-family: var(--font-serif); font-size: 3.5rem; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 1rem; line-height: 1.1; background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Describe an App.<br/>Own the Software.</h2>
         <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem;">
-          Generate prompt apps, workflows, and Android-ready prototypes fully locally. <br/><strong>GitHub stores code. LogicHub evolves applications.</strong>
+          Generate complete software artifacts including architecture, source structure, APKs, version history, and deployment packages.
         </p>
         <button class="primary-action-btn" style="margin-bottom: 2.5rem; padding: 12px 24px; font-size: 1.05rem;" onclick="window.location.href='onboarding.html'">
           ▶ See a 60-second artifact generation demo
@@ -1648,10 +1648,13 @@
     </div>
   </div>
 
-  <div class="builder-lanes">
-    <div class="lane-card"><h4>Pages</h4><p>Design your app layout directly on the canvas with reusable blocks.</p></div>
-    <div class="lane-card"><h4>Data</h4><p>Add Data Source: Supabase, REST API, Google Sheets, or Static Data.</p></div>
-    <div class="lane-card"><h4>Logic + Settings</h4><p>Build workflows with triggers/actions, then preview and publish.</p></div>
+  <div class="builder-lanes" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 40px; display: grid;">
+    <div class="lane-card"><h4>Inventory Management</h4><p>Track assets, manage stock, barcode scanning, and supply chain reporting.</p></div>
+    <div class="lane-card"><h4>CRM & Sales</h4><p>Lead tracking, pipeline funnels, client communications, and deal velocity.</p></div>
+    <div class="lane-card"><h4>Inspection System</h4><p>Field audits, safety checks, photo uploads, and compliance checklists.</p></div>
+    <div class="lane-card"><h4>Restaurant Operations</h4><p>Table management, order routing, kitchen displays, and digital menus.</p></div>
+    <div class="lane-card"><h4>School Management</h4><p>Student attendance, gradebooks, parent portals, and fee processing.</p></div>
+    <div class="lane-card"><h4>Internal Business Tools</h4><p>Custom admin panels, dashboard metrics, and secure employee workflows.</p></div>
   </div>
 
 
@@ -1681,21 +1684,21 @@
         </div>
       </div>
 
-      <div class="onboarding-grid">
+      <div class="onboarding-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="onboarding-step">
           <span class="onboarding-step-number">01</span>
-          <h4>Analyze the APK</h4>
-          <p>LogicHub breaks down compiled binaries to extract the core logic, UI patterns, and data architecture.</p>
+          <h4>Architecture & PRD</h4>
+          <p>LogicHub generates the foundational Product Requirements Document and technical architecture choices.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">02</span>
-          <h4>Diff and Evolve</h4>
-          <p>Compare v1 against the generated v2. See exactly how the artifact evolves before compiling the next build.</p>
+          <h4>App Flow & Source</h4>
+          <p>Complete source code structure, logic workflows, and UI state management are compiled locally.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">03</span>
-          <h4>Publish to Daxini Space</h4>
-          <p>Distribute the generated artifact to the marketplace and track engagement using native metrics.</p>
+          <h4>APK & Versioning</h4>
+          <p>Build an Android-ready APK alongside complete version history, ready to publish on Daxini Space.</p>
         </div>
       </div>
     </div>
