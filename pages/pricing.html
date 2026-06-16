@@ -93,30 +93,36 @@
               buttons[3].textContent = 'Not Available in India';
             }
           } else {
-            // GLOBAL: Show Razorpay SaaS
+            // GLOBAL: Show Razorpay SaaS with Geofence Note
             const buttons = document.querySelectorAll('#pricing-plans button');
+            
+            const restrictHTML = `<div class="mt-8 mb-2 text-center text-[10px] font-bold text-cyanAccent uppercase tracking-wide">Available in: 🇮🇳 IN | 🇱🇺 LU | 🇯🇵 JP</div>`;
+
             if(buttons[1]) {
+              buttons[1].insertAdjacentHTML('beforebegin', restrictHTML);
               buttons[1].onclick = (e) => { 
                 e.preventDefault(); 
-                alert('Redirecting to Razorpay SaaS Checkout for Pro Developer ($20/mo)...');
+                alert('Redirecting to Razorpay SaaS Checkout for Pro Developer ($20/mo)... Checkout will be blocked at network level if outside IN, LU, JP.');
               };
               buttons[1].textContent = 'Subscribe via Razorpay ($20/mo)';
               const cardPrice = buttons[1].parentElement.querySelector('.text-3xl');
               if (cardPrice) cardPrice.textContent = '$20';
             }
             if(buttons[2]) {
+              buttons[2].insertAdjacentHTML('beforebegin', restrictHTML);
               buttons[2].onclick = (e) => { 
                 e.preventDefault(); 
-                alert('Redirecting to Razorpay SaaS Checkout for Builder Pass ($29/mo)...');
+                alert('Redirecting to Razorpay SaaS Checkout for Builder Pass ($29/mo)... Checkout will be blocked at network level if outside IN, LU, JP.');
               };
               buttons[2].textContent = 'Subscribe via Razorpay ($29/mo)';
               const cardPrice = buttons[2].parentElement.querySelector('.text-3xl');
               if (cardPrice) cardPrice.textContent = '$29';
             }
             if(buttons[3]) {
+              buttons[3].insertAdjacentHTML('beforebegin', restrictHTML);
               buttons[3].onclick = (e) => { 
                 e.preventDefault(); 
-                alert('Redirecting to Razorpay SaaS Checkout for Team Node ($499/mo)...');
+                alert('Redirecting to Razorpay SaaS Checkout for Team Node ($499/mo)... Checkout will be blocked at network level if outside IN, LU, JP.');
               };
               buttons[3].textContent = 'Subscribe via Razorpay ($499/mo)';
               const cardPrice = buttons[3].parentElement.querySelector('.text-3xl');
