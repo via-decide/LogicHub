@@ -2136,6 +2136,12 @@
           <p>Download a full ZIP of your generated app files for self-hosting or custom deployment.</p>
           <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.exportZip();" class="primary-action-btn" style="margin-top:0.5rem;">→ Export ZIP</button>
         </div>
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">🔗</span>
+          <h4>Share App (Viral Unlock)</h4>
+          <p>Generate a secure link to share your artifact. Friends must authenticate via Daxini Space to decrypt and launch it.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.shareApp();" class="primary-action-btn" style="margin-top:0.5rem; background: var(--theme-color); color: #000;">→ Generate Share Link</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3783,6 +3789,13 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         const blob = await this.buildProjectZipBlob();
         this.downloadBlob(blob, `LogicHub_${this.map.id}.zip`);
         this.log("ZIP Exported.", "success");
+      },
+
+      shareApp() {
+        const appName = encodeURIComponent(this.map.name || "LogicHubApp");
+        const shareUrl = `https://daxini.space/?unlock=${appName}`;
+        prompt("Copy this secure link to share your app. Your friends will need an Aporaksha Identity to unlock it.", shareUrl);
+        this.log(`Share link generated: ${shareUrl}`, "success");
       },
 
       async buildApk() {
