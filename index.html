@@ -47,6 +47,7 @@
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="/assets/js/sovereign-analytics.js" defer></script>
+  <script src="/ecosystem-nav.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Auth: Aporaksha JWT (sovereign) -->
 
@@ -1586,43 +1587,42 @@
   <!-- helper-strip moved to disclosure panel -->
 
   <div class="landing-hero">
-    <div class="landing-hero-card">
+    <div class="landing-hero-card" style="text-align:center; padding: 40px 20px;">
       <div>
-        <h2 style="font-family: var(--font-serif); font-size: 2.25rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 0.5rem; background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Build Android Apps With AI</h2>
-        <p style="color: var(--accent); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem;">Publish Instantly To Daxini Space</p>
-        <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); max-width: 600px;">
-          Turn ideas into prompt apps, workflow tools, and native Android-ready APK installers fully locally. Zero cloud bills, automatic file repairs.
+        <div style="display:inline-block; font-family:var(--font-mono); font-size:10px; color:var(--accent); border:1px solid rgba(0,229,255,0.2); padding:4px 12px; border-radius:999px; margin-bottom:16px;">
+          LOGICHUB ARTIFACT ENGINE
+        </div>
+        <h2 style="font-family: var(--font-serif); font-size: 3.5rem; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 1rem; line-height: 1.1; background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Build Software You Own</h2>
+        <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem;">
+          Generate prompt apps, workflows, and Android-ready prototypes fully locally. <br/><strong>GitHub stores code. LogicHub evolves applications.</strong>
         </p>
       </div>
 
-      <!-- Pipeline flow diagram -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin: 1.5rem 0; padding:1.2rem; border:1px solid rgba(255,255,255,0.05); border-radius:12px; background:rgba(0,0,0,0.3); font-family:var(--font-mono); font-size:0.75rem; width:100%; max-width:600px; box-shadow: inset 0 0 20px rgba(0,0,0,0.4);">
-        <span style="color:var(--accent); font-weight:700;">💡 1. Idea Input</span>
+      <!-- Lifecycle Visualization Pipeline -->
+      <div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; margin: 0 auto 2.5rem; padding:1.5rem; border:1px solid rgba(255,255,255,0.05); border-radius:12px; background:rgba(0,0,0,0.3); font-family:var(--font-mono); font-size:0.8rem; width:100%; max-width:800px;">
+        <span style="color:#fff; font-weight:600;">APK</span>
         <span style="color:var(--text-secondary);">→</span>
-        <span style="color:#a78bfa; font-weight:700;">🏗️ 2. LogicHub</span>
+        <span style="color:#a78bfa; font-weight:600;">Analyze</span>
         <span style="color:var(--text-secondary);">→</span>
-        <span style="color:#34d399; font-weight:700;">📱 3. APK Compiler</span>
+        <span style="color:var(--accent); font-weight:600;">Diff</span>
         <span style="color:var(--text-secondary);">→</span>
-        <span style="color:#fbbf24; font-weight:700;">🌌 4. Daxini Space</span>
+        <span style="color:#34d399; font-weight:600;">Generate v2</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#34d399; font-weight:600;">Generate v3</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#fbbf24; font-weight:600;">Publish</span>
       </div>
 
-      <!-- Social proof stats counter -->
-      <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--success); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <div class="primary-actions" style="margin-bottom: 2rem; display:flex; justify-content:center; gap:16px;">
+        <button class="primary-action-btn publish-cta" onclick="app.openCreateAppWizard()" style="padding: 0.8rem 1.5rem; font-size: 0.9rem;">Upload APK</button>
+        <button class="primary-action-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; font-size: 0.9rem; color:#fff;">Upload ZIP</button>
+        <button class="primary-action-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; font-size: 0.9rem; color:#fff;">Import GitHub</button>
+      </div>
+
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--success); display: flex; align-items: center; justify-content:center; gap: 0.5rem;">
         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow: 0 0 8px var(--success);"></span>
-        <span>⚡ 1,248 APK builds compiled locally this week with 0% cloud failure rate</span>
+        <span>Next Step: Secure ownership via Aporaksha</span>
       </div>
-
-      <div class="primary-actions" style="margin-bottom: 1.5rem;">
-        <button class="primary-action-btn publish-cta" onclick="app.openCreateAppWizard()" style="padding: 1rem 2rem; font-size: 0.85rem; letter-spacing: 1px;">Start Building App</button>
-      </div>
-
-      <div class="capability-strip" style="width:100%; max-width:600px;">
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Interactive Visualizer</div>
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Gradle APK Generator</div>
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Self-Healing Configs</div>
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Space Distribution</div>
-      </div>
-      <div class="template-strip" id="template-gallery" style="margin-top: 1.5rem;"></div>
     </div>
   </div>
 
@@ -1635,33 +1635,45 @@
 
   <div class="onboarding-shell">
     <div class="onboarding-card">
-      <div class="onboarding-kicker">✨ Premium onboarding</div>
+      <div class="onboarding-kicker">✨ Artifact Generation Engine</div>
       <div class="onboarding-header">
         <div>
-          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">LogicHub is an AI app builder for prompt apps, workflow tools, and Android-ready prototypes</h1>
-          <p>This reframes LogicHub clearly for search and AI discovery while keeping the existing guide and every existing action exactly where users already expect them. It is designed for non-technical users who want to plan, generate, export, publish, and iterate fast.</p>
+          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">Evolution-Driven Architecture</h1>
+          <p>LogicHub builds complete, auditable software blueprints. Import an existing APK to analyze its structure, diff the changes, and generate the next version automatically.</p>
         </div>
         <div class="onboarding-meta">
-          <span class="meta-chip">Prompt apps</span>
-          <span class="meta-chip">Workflow tools</span>
-          <span class="meta-chip">Publish or export</span>
+          <span class="meta-chip">App Evolution</span>
+          <span class="meta-chip">APK Generation</span>
+          <span class="meta-chip">Architecture Scoring</span>
         </div>
       </div>
+      
+      <!-- App Intelligence Score Mockup -->
+      <div style="margin: 20px 0; padding: 20px; border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 12px; background: rgba(0, 0, 0, 0.4);">
+        <h4 style="margin-top: 0; color: var(--accent); font-family: var(--font-mono); font-size: 11px;">APP INTELLIGENCE SCORE</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-top: 12px;">
+          <div><div style="font-size: 24px; font-weight: 700; color: var(--success);">94/100</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Architecture</div></div>
+          <div><div style="font-size: 24px; font-weight: 700; color: var(--success);">A+</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Security</div></div>
+          <div><div style="font-size: 24px; font-weight: 700; color: #f59e0b;">High</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Upgrade Potential</div></div>
+          <div><div style="font-size: 24px; font-weight: 700; color: var(--success);">Low</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Technical Debt</div></div>
+        </div>
+      </div>
+
       <div class="onboarding-grid">
         <div class="onboarding-step">
           <span class="onboarding-step-number">01</span>
-          <h4>Pick the parts you understand</h4>
-          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+          <h4>Analyze the APK</h4>
+          <p>LogicHub breaks down compiled binaries to extract the core logic, UI patterns, and data architecture.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">02</span>
-          <h4>Open Blocks</h4>
-          <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
+          <h4>Diff and Evolve</h4>
+          <p>Compare v1 against the generated v2. See exactly how the artifact evolves before compiling the next build.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">03</span>
-          <h4>Choose your next step</h4>
-          <p>Preview your canvas anytime, then publish when your app is ready. Advanced deployment options stay in Publish.</p>
+          <h4>Publish to Daxini Space</h4>
+          <p>Distribute the generated artifact to the marketplace and track engagement using native metrics.</p>
         </div>
       </div>
     </div>
