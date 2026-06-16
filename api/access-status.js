@@ -1,4 +1,5 @@
 import { getAdminAuth, getAdminDb, jsonError, verifyRequestUser } from "./_firebaseAdmin.js";
+import { trackEvent, trackReturningUser, ANALYTICS_EVENTS } from "./_analyticsService.js";
 
 function isApprovedStatus(value) {
   return ["active", "approved", "confirmed", "paid", "pro"].includes(String(value || "").toLowerCase());
@@ -59,6 +60,19 @@ export default async function handler(req, res) {
     const paid = paidByClaim || paidByFirestore || paidByStudent;
     const source = paidByStudent ? "student_verification" : (paidByClaim ? "custom_claims" : paidByFirestore ? "firestore" : pending ? "pending_request" : "free");
     const plan = paidByStudent ? "student" : (paidDoc.plan || userDoc.plan || claims.plan || (paid ? "founder" : pending ? "pending" : "free"));
+
+    const isNewUser = !userDocSnap.exists;
+
+    // Analytics: signup_count on first-ever verified access
+    if (isNewUser) {
+      await trackEvent(ANALYTICS_EVENTS.SIGNUP_COUNT, {
+        userId: uid,
+        metadata: { plan, source },
+      });
+    }
+
+    // Analytics: returning_users check (24 h gate is inside helper)
+    await trackReturningUser(uid);
 
     return res.status(200).json({
       ok: true,

@@ -1917,10 +1917,10 @@
         });
       },
 
-      addBlock(type) {
+      addBlock(type, customX, customY) {
         const c = document.getElementById("canvas");
-        const x = c.offsetWidth / 2 - 87 + (Math.random()*40-20);
-        const y = c.offsetHeight / 2 - 45 + (Math.random()*40-20);
+        const x = customX !== undefined ? customX : c.offsetWidth / 2 - 87 + (Math.random()*40-20);
+        const y = customY !== undefined ? customY : c.offsetHeight / 2 - 45 + (Math.random()*40-20);
         const block = this.map.addBlock(type, x, y);
         this.render();
         return block;
@@ -1967,8 +1967,15 @@
         const starterGraph = template?.starterGraph;
         if (!starterGraph || !Array.isArray(starterGraph.blocks)) return false;
         const createdByType = {};
+        
+        const c = document.getElementById("canvas");
+        const totalWidth = starterGraph.blocks.length * 180;
+        let startX = Math.max(20, (c.offsetWidth - totalWidth) / 2);
+        const startY = Math.max(20, c.offsetHeight / 2 - 45);
+
         starterGraph.blocks.forEach((type) => {
-          const created = this.addBlock(type);
+          const created = this.addBlock(type, startX, startY);
+          startX += 180;
           if (!createdByType[type]) createdByType[type] = [];
           createdByType[type].push(created);
         });

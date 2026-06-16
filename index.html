@@ -1376,11 +1376,11 @@
           <a href="https://daxini.xyz" style="transition: color 0.2s;">daxini.xyz</a>
           <a href="https://daxini.xyz/ecosystem" style="transition: color 0.2s;">ecosystem</a>
           <a href="https://daxini.xyz/zayvora" style="transition: color 0.2s;">zayvora</a>
-          <a href="http://localhost:7001" style="transition: color 0.2s;">logichub</a>
-          <a href="http://localhost:7004" style="transition: color 0.2s;">daxini.space</a>
-          <a href="http://localhost:7002" style="transition: color 0.2s;">aporaksha</a>
-          <a href="http://localhost:7003" style="transition: color 0.2s;">hanuman.solutions</a>
-          <a href="http://localhost:7006" style="transition: color 0.2s;">printbydd store</a>
+          <a href="https://logichub.app" style="transition: color 0.2s;">logichub</a>
+          <a href="https://daxini.space" style="transition: color 0.2s;">daxini.space</a>
+          <a href="https://aporaksha.com" style="transition: color 0.2s;">aporaksha</a>
+          <a href="https://hanuman.solutions" style="transition: color 0.2s;">hanuman.solutions</a>
+          <a href="https://store.viadecide.com/printbydd" style="transition: color 0.2s;">printbydd store</a>
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: #8b90a6;">
@@ -1653,7 +1653,7 @@
 
   <script>
     const APORAKSHA_AUTH_URL = 'https://aporaksha.com/api';
-    window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'http://localhost:7001/api' : 'https://api.logichub.app/api';
+    window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'https://logichub.app/api' : 'https://api.logichub.app/api';
     const AUTH_TOKEN_KEY = 'lh_aporaksha_token';
     const AUTH_REFRESH_KEY = 'lh_aporaksha_refresh';
     const AUTH_USER_KEY = 'lh_aporaksha_user';
@@ -2057,10 +2057,10 @@
         });
       },
 
-      addBlock(type) {
+      addBlock(type, customX, customY) {
         const c = document.getElementById("canvas");
-        const x = c.offsetWidth / 2 - 87 + (Math.random()*40-20);
-        const y = c.offsetHeight / 2 - 45 + (Math.random()*40-20);
+        const x = customX !== undefined ? customX : c.offsetWidth / 2 - 87 + (Math.random()*40-20);
+        const y = customY !== undefined ? customY : c.offsetHeight / 2 - 45 + (Math.random()*40-20);
         const block = this.map.addBlock(type, x, y);
         this.render();
         return block;
@@ -2107,8 +2107,15 @@
         const starterGraph = template?.starterGraph;
         if (!starterGraph || !Array.isArray(starterGraph.blocks)) return false;
         const createdByType = {};
+        
+        const c = document.getElementById("canvas");
+        const totalWidth = starterGraph.blocks.length * 180;
+        let startX = Math.max(20, (c.offsetWidth - totalWidth) / 2);
+        const startY = Math.max(20, c.offsetHeight / 2 - 45);
+
         starterGraph.blocks.forEach((type) => {
-          const created = this.addBlock(type);
+          const created = this.addBlock(type, startX, startY);
+          startX += 180;
           if (!createdByType[type]) createdByType[type] = [];
           createdByType[type].push(created);
         });

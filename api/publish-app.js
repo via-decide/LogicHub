@@ -1,5 +1,6 @@
 import admin from "firebase-admin";
 import { getAdminDb, logRuntimeEvent } from "./_firebaseAdmin.js";
+import { trackEvent, ANALYTICS_EVENTS } from "./_analyticsService.js";
 
 function toBase64(value) {
   return Buffer.from(value).toString('base64');
@@ -194,6 +195,11 @@ export default async function handler(req, res) {
       created_at: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
     await logRuntimeEvent("publish_attempt", { appId, slug, creatorId: metadata.creatorId, status: "success" });
+    await trackEvent(ANALYTICS_EVENTS.PUBLISH_CLICKED, {
+      userId: metadata.creatorId,
+      projectId: appId,
+      metadata: { slug, appName: metadata.name },
+    });
 
     return res.status(200).json({
       success: true,

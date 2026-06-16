@@ -1,0 +1,13 @@
+node_modules/
+.git/
+.env
+.env.*
+.codex/
+artifacts/
+logs/
+*.log
+*.zip
+*.tgz
+cloudflared
+cloudflared.tgz
+.vercel/
