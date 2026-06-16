@@ -1521,6 +1521,18 @@
         from { transform: translateY(100%); }
         to   { transform: translateY(0); }
       }
+    }    /* PROGRESSIVE DISCLOSURE STATES */
+    .post-activation {
+      display: none !important;
+    }
+    body.user-activated .post-activation {
+      display: flex !important;
+    }
+    body.user-activated .post-activation.inline {
+      display: inline-block !important;
+    }
+    body.user-activated .post-activation.block {
+      display: block !important;
     }
   </style>
 </head>
@@ -1536,7 +1548,7 @@
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="toolbar-action viral-btn" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
+      <button class="toolbar-action viral-btn post-activation" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
       <button id="btn-toolbar-generate" class="toolbar-action">Generate App</button>
       <button id="btn-toolbar-export" class="toolbar-action" disabled>Export ZIP</button>
       <button id="btn-toolbar-publish" class="toolbar-action" disabled>Publish</button>
@@ -1566,7 +1578,7 @@
   <div id="premium-card-inline">
     <span id="premium-inline-status">Checking access…</span>
     <span class="premium-inline-badge free" id="premium-inline-badge">FREE</span>
-    <span style="margin-left:auto; cursor:pointer; color:var(--accent);" onclick="openDisclosurePanel('founder')" title="Upgrade">⚡ Upgrade</span>
+    <span class="post-activation inline" style="margin-left:auto; cursor:pointer; color:var(--accent);" onclick="openDisclosurePanel('founder')" title="Upgrade">⚡ Upgrade</span>
   </div>
   <!-- Original premium-experience-card kept hidden for JS compatibility -->
   <div class="premium-experience-shell" style="display:none !important;">
@@ -1603,6 +1615,9 @@
         <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem;">
           Generate prompt apps, workflows, and Android-ready prototypes fully locally. <br/><strong>GitHub stores code. LogicHub evolves applications.</strong>
         </p>
+        <button class="primary-action-btn" style="margin-bottom: 2.5rem; padding: 12px 24px; font-size: 1.05rem;" onclick="window.location.href='onboarding.html'">
+          ▶ See a 60-second artifact generation demo
+        </button>
       </div>
 
       <!-- Lifecycle Visualization Pipeline -->
@@ -2020,7 +2035,7 @@
           <div class="disclosure-card-sub">Unlock unlimited forges. India ₹1717 · Global $99 founder pass.</div>
         </div>
 
-        <div class="disclosure-card" onclick="openDisclosurePanel('ecosystem')">
+        <div class="disclosure-card post-activation block" onclick="openDisclosurePanel('ecosystem')">
           <div class="disclosure-card-icon">🌌</div>
           <div class="disclosure-card-label">Explore Ecosystem</div>
           <div class="disclosure-card-sub">Daxini.Space, Zayvora, Aporaksha, and more.</div>
