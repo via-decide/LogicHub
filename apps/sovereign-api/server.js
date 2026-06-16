@@ -202,43 +202,82 @@ app.post('/api/zayvora/synthesize', async (req, res) => {
       
       Instructions: ${prompt}`;
 
-      const response = await fetch('http://localhost:8080/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: fullPrompt }],
-          stream: false
-        })
-      });
-      const data = await response.json();
-      return { response: data.choices[0].message.content };
+      const OLLAMA_URL = process.env.LAB_NODE_URL || 'http://localhost:11434/v1/chat/completions';
+      const MODEL = 'daxini2404/zayvora:engineer';
+      
+      let attempt = 0;
+      const MAX_ATTEMPTS = 2;
+      let finalCode = "";
+      let lastError = null;
+      let currentPrompt = fullPrompt;
+
+      while (attempt < MAX_ATTEMPTS) {
+        attempt++;
+        const response = await fetch(OLLAMA_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [{ role: 'user', content: currentPrompt }],
+            stream: false
+          })
+        });
+        
+        if (!response.ok) {
+           throw new Error(`Ollama API returned ${response.status}`);
+        }
+        
+        const data = await response.json();
+        let code = data.choices[0]?.message?.content || "";
+        
+        // --- DAXINI AGGRESSIVE CLEANSE (Now handling agentic thought blocks) ---
+        // Strip <thought>...</thought> or [Cockpit]...[/Cockpit]
+        code = code.replace(/<thought>[\s\S]*?<\/thought>/gi, '');
+        code = code.replace(/\[Cockpit\][\s\S]*?\[\/Cockpit\]/gi, '');
+        
+        if (code.includes("```")) {
+          const match = code.match(/```(?:\w+)?\s*([\s\S]+?)\s*```/);
+          if (match) code = match[1].trim();
+        } else {
+          const chatterPrefixes = ["Here is the code:", "Here is the improved code:", "Sure!", "Certainly!", "Here is the raw code"];
+          chatterPrefixes.forEach(prefix => {
+            if (code.toLowerCase().includes(prefix.toLowerCase())) {
+              const index = code.toLowerCase().indexOf(prefix.toLowerCase()) + prefix.length;
+              code = code.substring(index).trim();
+              if (code.startsWith(":") || code.startsWith(".")) code = code.substring(1).trim();
+            }
+          });
+        }
+        code = code.trim();
+        
+        // --- COCKPIT v0.3 SUPERVISOR LOOP ---
+        // Basic Syntax/Closure Verification
+        const openBraces = (code.match(/\{/g) || []).length;
+        const closeBraces = (code.match(/\}/g) || []).length;
+        
+        if (openBraces !== closeBraces) {
+           lastError = `Syntax Error: Unmatched braces (${openBraces} open, ${closeBraces} closed).`;
+           currentPrompt = fullPrompt + `\n\n[Cockpit Supervisor]: Your previous output failed syntax verification: ${lastError}. Please fix the code and return the fully complete raw code.`;
+           continue; // Re-prompt
+        }
+        
+        if (!code || code.length < 10) {
+           lastError = "Verification Failed: Output too short or missing.";
+           currentPrompt = fullPrompt + `\n\n[Cockpit Supervisor]: Your previous output was blank. Output ONLY raw code.`;
+           continue;
+        }
+
+        finalCode = code;
+        break; // Verification passed
+      }
+      
+      if (!finalCode) {
+         finalCode = `// Synthesis failed after ${MAX_ATTEMPTS} attempts. Last error: ${lastError}`;
+      }
+      return { response: finalCode };
     });
 
-    let code = result.response?.trim() || "";
-    
-    // --- DAXINI AGGRESSIVE CLEANSE ---
-    // If there is a code block, we ignore EVERYTHING else.
-    if (code.includes("```")) {
-      const match = code.match(/```(?:\w+)?\s*([\s\S]+?)\s*```/);
-      if (match) {
-        code = match[1].trim();
-      }
-    } else {
-      // If no code block, strip common chatter prefixes
-      const chatterPrefixes = [
-        "Here is the code:", "Here is the improved code:", "Here is the updated code:",
-        "Sure!", "Certainly!", "I have updated", "This version", "Here is the raw code"
-      ];
-      chatterPrefixes.forEach(prefix => {
-        if (code.toLowerCase().includes(prefix.toLowerCase())) {
-          // If the prefix is found, try to take everything AFTER it
-          const index = code.toLowerCase().indexOf(prefix.toLowerCase()) + prefix.length;
-          code = code.substring(index).trim();
-          if (code.startsWith(":") || code.startsWith(".")) code = code.substring(1).trim();
-        }
-      });
-    }
-    // --- END FORCE-CLEANSE ---
+    let code = result.response;
 
     // LOG TO ZAYVORA FOR TRAINING
     await logToZayvora(prompt, result.response, { ...artifacts, code, filename });
