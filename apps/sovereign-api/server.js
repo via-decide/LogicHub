@@ -103,7 +103,7 @@ async function logToZayvora(task, trace, artifacts) {
   }
 }
 
-// Phase 1: Planning (Axiom) - ALCHEMIST LOGIC (TRACE-AUGMENTED)
+// Phase 1: Planning (Axiom) - ARTIFACT GENERATION ENGINE
 app.post('/api/zayvora/plan', async (req, res) => {
   const { prompt, architecture } = req.body;
   
@@ -113,28 +113,40 @@ app.post('/api/zayvora/plan', async (req, res) => {
     ? `HISTORICAL TRACE (Use this as a world-class template):\nTask: ${historicalTrace.task}\nCode: ${historicalTrace.artifacts?.code}\nPRD: ${JSON.stringify(historicalTrace.artifacts?.prd)}`
     : 'No historical trace found. Reason from first principles.';
 
-  const key = crypto.createHash('sha256').update(`axiom:${prompt}:${JSON.stringify(architecture)}`).digest('hex');
+  const key = crypto.createHash('sha256').update(`axiom_v2:${prompt}:${JSON.stringify(architecture)}`).digest('hex');
 
   try {
     const result = await zayvoraCoalescer.coalesce(key, async () => {
       const systemPrompt = `You are Zayvora Axiom, the Master Architect. 
-      Generate a complete 5-stage Design Document for this app.
+      Generate a COMPLETE APPLICATION ARTIFACT (Software Blueprint) for this app.
       
       ${traceContext}
       
       ${SYSTEM_ARCHITECTURE_GUIDE}
       
-      1. PRD (Product Requirements)
-      2. TRD (Technical Stack)
-      3. App Flow (User Journey)
-      4. UI/UX Brief (Design Tokens)
-      5. Backend Schema (ERD)
+      You must construct a complete project model with the following 14 sections. 
+      Format as STRICT JSON with the EXACT keys below:
       
-      Format as JSON with keys: prd, trd, flow, ui, schema.
+      {
+        "summary": { "name": "", "goal": "", "problem": "", "target_users": "", "value_prop": "", "constraints": "" },
+        "prd": { "features": [], "user_stories": [], "acceptance_criteria": [], "success_metrics": [], "edge_cases": [] },
+        "trd": { "frontend": "", "backend": "", "database": "", "auth": "", "apis": [], "deployment": "" },
+        "architecture": { "client": "", "api_layer": "", "services": "", "db": "", "integrations": "" },
+        "data_model": [ { "entity": "", "fields": [], "relationships": [] } ],
+        "app_flow": { "onboarding": [], "navigation": [], "state_transitions": [], "success_paths": [], "failure_paths": [] },
+        "ui_system": { "colors": [], "typography": "", "components": [], "screens": [] },
+        "source_tree": { "structure": {} },
+        "implementation_plan": [ { "step": "", "description": "", "dependencies": [] } ],
+        "code_preview": [ { "filename": "", "code": "representative snippets" } ],
+        "version_package": { "manifest": "project.logic.json structure" },
+        "export_package": { "contents": ["APK", "ZIP", "Git Repository", "project.logic.json"] },
+        "risk_analysis": { "technical": [], "scalability": [], "security": [] },
+        "continuation_prompt": "A prompt that can be pasted into Claude/Gemini/Cursor to continue development from this state."
+      }
       
       STRICT REQUIREMENT: 
-      - ZERO CHATTER.
-      - If this is a T1, T2, or T3 task, initialize a task.md manifest using the SOP Template.
+      - ZERO CHATTER. Output ONLY valid JSON.
+      - DO NOT wrap the output in \`\`\`json markdown blocks.
       
       Context: ${JSON.stringify(architecture)}`;
 
@@ -150,10 +162,22 @@ app.post('/api/zayvora/plan', async (req, res) => {
       return { response: data.choices[0].message.content };
     });
 
-    const artifacts = JSON.parse(result.response);
+    let rawJson = result.response;
+    
+    // Aggressive JSON cleansing (strip markdown ticks if the model ignores instructions)
+    if (rawJson.includes('\`\`\`')) {
+      const match = rawJson.match(/\`\`\`(?:json)?\s*([\s\S]+?)\s*\`\`\`/);
+      if (match) {
+        rawJson = match[1].trim();
+      }
+    }
+    rawJson = rawJson.trim();
+
+    const artifacts = JSON.parse(rawJson);
     res.json({ artifacts, reused_trace: !!historicalTrace });
   } catch (err) {
-    res.status(500).json({ error: 'Axiom planning failed' });
+    console.error('[Axiom Error]', err);
+    res.status(500).json({ error: 'Axiom planning failed', details: err.message });
   }
 });
 

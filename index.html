@@ -1746,6 +1746,7 @@
   <div class="footer" id="step-footer">
     <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Block</button>
     <button id="btn-blocks" onclick="app.toggleBlocksPanel()">📄 Pages</button>
+    <button id="btn-blueprint" onclick="app.viewBlueprint()" style="display:none; color: var(--accent); border-color: var(--accent);">📐 Blueprint</button>
     <button id="btn-preview" onclick="app.viewPRD()">👁 Preview</button>
     <button id="btn-publish" disabled onclick="app.publishApp()">🚀 Publish</button>
   </div>
@@ -2144,6 +2145,17 @@
       <div style="margin-top:1.25rem; font-size:0.68rem; color:var(--text-secondary); text-align:center; line-height:1.6;">
         © 2026 Dharam Daxini · Sovereign Local-First AI Mesh
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ BLUEPRINT ARTIFACT VIEWER ══════════════ -->
+  <div class="slide-panel" id="panel-blueprint" style="width: 600px; max-width: 95vw;">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">📐 Software Blueprint</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('blueprint')">✕</button>
+    </div>
+    <div class="slide-panel-body" id="blueprint-content">
+      <p style="color:var(--text-secondary); text-align:center;">Generate a project to view its blueprint artifact.</p>
     </div>
   </div>
 
@@ -2811,6 +2823,55 @@
         const ta = document.getElementById("prd-output"); ta.select();
         navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand("copy"));
         this.log("PRD copied.", "success"); closeModal("prd-modal");
+      },
+
+      viewBlueprint() {
+        if (!this.map.projectArtifacts || Object.keys(this.map.projectArtifacts).length === 0) {
+          alert("Generate a project first to view its blueprint.");
+          return;
+        }
+        
+        const bp = this.map.projectArtifacts;
+        let html = `<div style="text-align: left; font-size: 0.85rem; line-height: 1.5;">`;
+        
+        // Summary
+        if (bp.summary) {
+          html += `<h3 style="margin-top:0;">Project: ${this.escapeHtml(bp.summary.name || 'Untitled')}</h3>`;
+          html += `<p><strong>Goal:</strong> ${this.escapeHtml(bp.summary.goal || '')}</p>`;
+        }
+        
+        // Continuation Prompt
+        if (bp.continuation_prompt) {
+          html += `<div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin: 1rem 0;">
+            <div style="font-size: 0.75rem; color: var(--accent); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold;">Continuation Prompt (Paste in Cursor/Claude)</div>
+            <code style="display: block; white-space: pre-wrap; font-family: monospace; color: #ccc;">${this.escapeHtml(bp.continuation_prompt)}</code>
+            <button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent); this.innerText='Copied!'; setTimeout(() => this.innerText='Copy Prompt', 2000);" style="margin-top: 0.75rem; background: var(--bg-card); color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Copy Prompt</button>
+          </div>`;
+        }
+        
+        // Architecture
+        if (bp.architecture) {
+          html += `<h4 style="margin-bottom:0.5rem; color: var(--text-primary);">Architecture</h4><ul style="padding-left: 1.25rem; margin-bottom: 1rem; color: var(--text-secondary);">`;
+          Object.entries(bp.architecture).forEach(([k, v]) => {
+            html += `<li><strong style="color: #fff;">${k}:</strong> ${this.escapeHtml(String(v))}</li>`;
+          });
+          html += `</ul>`;
+        }
+        
+        // Schema
+        if (bp.data_model && bp.data_model.length > 0) {
+          html += `<h4 style="margin-bottom:0.5rem; color: var(--text-primary);">Data Model</h4>`;
+          bp.data_model.forEach(model => {
+            html += `<div style="margin-bottom: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-weight: bold; color: var(--accent); margin-bottom: 0.25rem;">${this.escapeHtml(model.entity)}</div>
+              <div style="color: var(--text-secondary); font-size: 0.8rem;">Fields: ${this.escapeHtml((model.fields || []).join(', '))}</div>
+            </div>`;
+          });
+        }
+        
+        html += `</div>`;
+        document.getElementById('blueprint-content').innerHTML = html;
+        openDisclosurePanel('blueprint');
       },
 
       getFounderOrders() {
@@ -3584,8 +3645,8 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         document.getElementById("btn-synth").disabled = true;
         let success = true;
         try {
-          // Phase 1: Zayvora Planning (Axiom)
-          this.log("Phase 1: Zayvora Axiom generating PRD...", "accent");
+          // Phase 1: Artifact Generation Engine (Axiom)
+          this.log("Phase 1: Generating Software Blueprint Artifacts...", "accent");
           let zayvoraPrd = "";
           try {
             const planResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/plan`, {
@@ -3594,11 +3655,25 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
               body: JSON.stringify({ prompt: "Synthesize this app", architecture: this.map.blocks })
             });
             const planData = await planResp.json();
-            zayvoraPrd = planData.prd || "";
+            
+            // Store the full 14-section blueprint
+            this.map.projectArtifacts = planData.artifacts || {};
+            
+            // Extract just the PRD section for the synthesis phase if needed
+            zayvoraPrd = typeof planData.artifacts?.prd === 'object' 
+              ? JSON.stringify(planData.artifacts.prd, null, 2) 
+              : planData.artifacts?.prd || "";
+              
             this.map.lastZayvoraPrd = zayvoraPrd;
-            if (zayvoraPrd) this.log("✓ Zayvora PRD Generated.", "success");
+            if (Object.keys(this.map.projectArtifacts).length > 0) {
+              this.log("✓ Software Blueprint Artifact Generated.", "success");
+              // Show Blueprint button in UI if it exists
+              const bpBtn = document.getElementById('btn-blueprint');
+              if (bpBtn) bpBtn.style.display = 'inline-block';
+            }
           } catch (e) {
-            this.log("⚠ Zayvora Axiom unavailable. Falling back to basic prompt.", "info");
+            console.error(e);
+            this.log("⚠ Blueprint Engine unavailable. Falling back to basic prompt.", "info");
           }
 
           for (let b of this.map.blocks) {
@@ -3657,7 +3732,28 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         const zip = new JSZip();
         const files = this.collectProjectFiles({ pwa: true });
         Object.entries(files).forEach(([fileName, code]) => zip.file(fileName, code));
-        zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
+        
+        // Build the comprehensive 14-section version package
+        const projectLogic = {
+          version: "1.0.0",
+          generatedAt: new Date().toISOString(),
+          project_state: {
+            id: this.map.id,
+            blocks: this.map.blocks.map(b => ({ id: b.id, type: b.type, filename: b.filename, dependsOn: b.dependsOn }))
+          },
+          artifacts: this.map.projectArtifacts || {},
+          legacy_prd: this.map.buildPRD()
+        };
+        
+        zip.file("project.logic.json", JSON.stringify(projectLogic, null, 2));
+        
+        // Keep the markdown PRD for backward compatibility or easy reading
+        if (projectLogic.artifacts.prd) {
+          zip.file("ARCHITECTURE_PRD.md", JSON.stringify(projectLogic.artifacts.prd, null, 2));
+        } else {
+          zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
+        }
+        
         return zip.generateAsync({ type: "blob" });
       },
 
