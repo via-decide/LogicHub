@@ -21,6 +21,12 @@ export default async function handler(req, res) {
 
   // Validate geofence context
   const country = req.headers['x-vercel-ip-country'] || req.headers['cf-ipcountry'] || 'US';
+  
+  const ALLOWED_COUNTRIES = ['IN', 'LU', 'JP'];
+  if (!ALLOWED_COUNTRIES.includes(country)) {
+    return res.status(403).json({ error: 'This product is currently available only in India, Luxembourg, and Japan.' });
+  }
+
   const isIndia = country === 'IN';
 
   // Security: Prevent global SaaS bypass from Indian IPs

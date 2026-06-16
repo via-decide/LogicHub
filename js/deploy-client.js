@@ -45,15 +45,28 @@
       permissions
     };
 
+    const projectLogic = {
+      version: "1.0.0",
+      generatedAt: new Date().toISOString(),
+      project_state: {
+        id: app.map.id,
+        blocks: app.map.blocks.map(b => ({ id: b.id, type: b.type, filename: b.filename, dependsOn: b.dependsOn }))
+      },
+      artifacts: app.map.projectArtifacts || {},
+      legacy_prd: app.map.buildPRD()
+    };
+
     const bundle = {
       build: {
         'index.html': files['index.html'] || '<!doctype html><html><body><h1>App</h1></body></html>',
         'app.js': files['app.js'] || '',
         'style.css': files['styles.css'] || files['style.css'] || '',
         'manifest.json': manifest,
-        'metadata.json': JSON.stringify(metadata, null, 2)
+        'metadata.json': JSON.stringify(metadata, null, 2),
+        'project.logic.json': JSON.stringify(projectLogic, null, 2)
       },
-      architecture_prd: app.map.buildPRD()
+      architecture_prd: app.map.buildPRD(),
+      project_artifacts: app.map.projectArtifacts || {}
     };
 
     validateProjectBundle(bundle);

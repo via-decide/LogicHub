@@ -1,0 +1,97 @@
+{
+  "analytics_version": "v1",
+  "description": "LogicHub workflow telemetry — canonical lifecycle event specification",
+  "firestore_collections": {
+    "analyticsEvents": {
+      "purpose": "Immutable event log — one document per fired event",
+      "schema": {
+        "id":            "auto-generated Firestore document ID",
+        "event_name":    "string — one of the canonical event names below",
+        "user_id":       "string — Firebase uid or ecosystem_uid",
+        "project_id":    "string | null",
+        "session_id":    "string | null",
+        "metadata_json": "object — arbitrary structured event context",
+        "date_key":      "string — ISO date YYYY-MM-DD for fast range queries",
+        "created_at":    "Firestore ServerTimestamp"
+      }
+    },
+    "analyticsDailyCounts": {
+      "purpose": "Mutable daily counter — one document per calendar day, one field per event",
+      "schema": {
+        "date_key":      "string — document ID, format YYYY-MM-DD",
+        "last_updated":  "Firestore ServerTimestamp",
+        "<event_name>":  "integer — incremented atomically via FieldValue.increment(1)"
+      }
+    }
+  },
+  "events": [
+    {
+      "name":    "signup_count",
+      "trigger": "First verified access-status check for a new user (userDocSnap.exists === false)",
+      "hook":    "api/access-status.js → trackEvent(ANALYTICS_EVENTS.SIGNUP_COUNT)",
+      "example_metadata": { "plan": "free", "source": "firestore" }
+    },
+    {
+      "name":    "project_created",
+      "trigger": "POST /api/v1/project/analyze — prisma.project.create() succeeds",
+      "hook":    "api/server.js → trackEvent(ANALYTICS_EVENTS.PROJECT_CREATED)",
+      "example_metadata": { "sourceType": "APK" }
+    },
+    {
+      "name":    "apk_uploaded",
+      "trigger": "POST /api/v1/project/analyze with sourceType: 'APK'",
+      "hook":    "api/server.js → trackEvent(ANALYTICS_EVENTS.APK_UPLOADED)",
+      "example_metadata": { "sourceType": "APK" }
+    },
+    {
+      "name":    "zip_uploaded",
+      "trigger": "POST /api/v1/project/analyze with sourceType: 'ZIP'",
+      "hook":    "api/server.js → trackEvent(ANALYTICS_EVENTS.ZIP_UPLOADED)",
+      "example_metadata": { "sourceType": "ZIP" }
+    },
+    {
+      "name":    "github_imported",
+      "trigger": "POST /api/v1/project/analyze with sourceType: 'GITHUB'",
+      "hook":    "api/server.js → trackEvent(ANALYTICS_EVENTS.GITHUB_IMPORTED)",
+      "example_metadata": { "sourceType": "GITHUB" }
+    },
+    {
+      "name":    "publish_clicked",
+      "trigger": "POST /api/publish-app — full publish pipeline succeeds",
+      "hook":    "api/publish-app.js → trackEvent(ANALYTICS_EVENTS.PUBLISH_CLICKED)",
+      "example_metadata": { "slug": "my-app", "appName": "My App" }
+    },
+    {
+      "name":    "returning_users",
+      "trigger": "user.last_seen_at < now - 24h, checked on every access-status call",
+      "hook":    "api/access-status.js → trackReturningUser(uid)",
+      "example_metadata": {}
+    }
+  ],
+  "funnel": [
+    "Visitor (external traffic — Cloudflare / Hanuman metrics)",
+    "signup_count",
+    "project_created",
+    "apk_uploaded | zip_uploaded | github_imported",
+    "publish_clicked"
+  ],
+  "conversion_metrics": {
+    "signup_rate":          "signup_count / total_unique_visitors",
+    "project_creation_rate": "project_created / signup_count",
+    "import_rate":          "(apk_uploaded + zip_uploaded + github_imported) / project_created",
+    "publish_rate":         "publish_clicked / project_created",
+    "retention_rate":       "returning_users / signup_count"
+  },
+  "api_endpoint": {
+    "path":   "POST /api/analytics/event",
+    "file":   "api/analytics-event.js",
+    "payload": {
+      "event":     "string (required)",
+      "userId":    "string (required)",
+      "projectId": "string (optional)",
+      "sessionId": "string (optional)",
+      "metadata":  "object (optional)"
+    },
+    "response": { "ok": true, "event": "event_name" }
+  }
+}

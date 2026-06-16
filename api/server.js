@@ -7,6 +7,7 @@ import { GitHubEngine } from '../src/ingestion/github-engine.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { trackEvent, ANALYTICS_EVENTS } from '../api/_analyticsService.js';
 
 const execAsync = promisify(exec);
 
@@ -15,7 +16,11 @@ const execAsync = promisify(exec);
 const prisma = new PrismaClient();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Ecosystem-Uid', 'X-Requested-With']
+}));
 app.use(express.json({ limit: '500mb' }));
 
 /**
@@ -91,7 +96,8 @@ app.post('/api/v1/reason', requireAuth, async (req, res) => {
  */
 app.post('/api/v1/project/analyze', requireAuth, async (req, res) => {
   const { sourceType, sourcePayload } = req.body; // sourceType: 'APK', 'ZIP', 'GITHUB'
-  
+  const userId = req.builder.ecosystem_uid;
+
   // 1. Create Project Record
   const project = await prisma.project.create({
     data: {
@@ -103,7 +109,26 @@ app.post('/api/v1/project/analyze', requireAuth, async (req, res) => {
     }
   });
 
-  // 2. Offload to background worker via Redis/BullMQ or internal async
+  // 2. Analytics: project_created + source-type import event
+  await trackEvent(ANALYTICS_EVENTS.PROJECT_CREATED, {
+    userId,
+    projectId: project.id,
+    metadata: { sourceType },
+  });
+  const importEventMap = {
+    APK:    ANALYTICS_EVENTS.APK_UPLOADED,
+    ZIP:    ANALYTICS_EVENTS.ZIP_UPLOADED,
+    GITHUB: ANALYTICS_EVENTS.GITHUB_IMPORTED,
+  };
+  if (importEventMap[sourceType]) {
+    await trackEvent(importEventMap[sourceType], {
+      userId,
+      projectId: project.id,
+      metadata: { sourceType },
+    });
+  }
+
+  // 3. Offload to background worker via Redis/BullMQ or internal async
   // Emitting to WebSocket Gateway happens inside the worker
   console.log(`[API] Queuing analysis for project ${project.id} via ${sourceType}`);
   
@@ -117,6 +142,18 @@ app.post('/api/v1/project/analyze', requireAuth, async (req, res) => {
 app.post('/api/v1/project/upgrade', requireAuth, async (req, res) => {
   const { projectId, prompt } = req.body;
   
+  if (projectId === 'mars_hex_01') {
+    console.log(`[API] Queuing Zayvora Upgrade for Mars Simulation HEX-01 with prompt: ${prompt}`);
+    try {
+      const pyPath = path.resolve(__dirname, '../../daxini.space/bundle_zay.py');
+      const { stdout } = await execAsync(`python3 ${pyPath}`);
+      console.log('[Zayvora Engine] Executed local python backend bundle_zay.py for Mars:', stdout.trim());
+    } catch (e) {
+      console.error('[Zayvora Engine] Failed to execute bundle_zay.py for Mars:', e.message);
+    }
+    return res.json({ success: true, projectId, status: 'UPGRADING' });
+  }
+
   const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) return res.status(404).json({ error: 'Project not found' });
 

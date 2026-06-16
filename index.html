@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    if (localStorage.getItem('onboarding_complete') !== 'true') {
+      if (window.location.pathname === '/' || window.location.pathname.endsWith('index.html')) {
+        window.location.replace('onboarding.html');
+      }
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#030508">
@@ -49,6 +56,7 @@
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="/assets/js/sovereign-analytics.js" defer></script>
+  <script src="/ecosystem-nav.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Auth: Aporaksha JWT (sovereign) -->
 
@@ -1221,6 +1229,313 @@
         }
       }
     }
+
+    /* ═══════════════════════════════════════════════════════════
+       PROGRESSIVE DISCLOSURE SYSTEM
+       Canvas is root. Everything else orbits and appears on demand.
+    ═══════════════════════════════════════════════════════════ */
+
+    /* ── Body: no scroll on desktop (canvas fills viewport) ── */
+    @media (min-width: 681px) {
+      body { overflow: hidden; }
+    }
+
+    /* ── Main container fills ALL remaining space ── */
+    .main-container {
+      flex: 1;
+      min-height: 0;
+      height: auto;
+    }
+
+    /* ── Hide all marketing sections from the layout flow ── */
+    .premium-experience-shell,
+    .landing-hero,
+    .builder-lanes,
+    .onboarding-shell,
+    .helper-strip,
+    .daxini-unified-footer,
+    .payment-strip {
+      display: none !important;
+    }
+
+    /* ── Start Building CTA (inside canvas hint) ── */
+    .start-building-cta {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      pointer-events: auto;
+    }
+    .start-building-btn {
+      position: relative;
+      padding: 0.9rem 2.5rem;
+      background: linear-gradient(135deg, var(--accent), #00b8cc);
+      color: #030508;
+      font-family: var(--font-mono);
+      font-weight: 900;
+      font-size: 0.88rem;
+      letter-spacing: 0.08em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: cta-pulse 2.5s ease-in-out infinite;
+    }
+    .start-building-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 28px rgba(0,229,255,0.5);
+      animation: none;
+    }
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.3); }
+      50%       { box-shadow: 0 0 0 12px rgba(0,229,255,0); }
+    }
+    .start-building-hint {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Disclosure Overlay ── */
+    .disclosure-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(3,5,8,0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: overlay-in 0.22s ease;
+    }
+    .disclosure-overlay.active { display: flex; }
+    @keyframes overlay-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .disclosure-tray {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .disclosure-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .disclosure-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .disclosure-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-secondary);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .disclosure-close:hover { border-color: var(--error); color: var(--error); }
+    .disclosure-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+    }
+    .disclosure-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(18,22,30,0.98), rgba(8,11,16,0.98));
+      cursor: pointer;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .disclosure-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,229,255,0.12);
+    }
+    .disclosure-card-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+    .disclosure-card-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .disclosure-card-sub {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* ── Slide-over panels (used for What/How/Templates/Publish/Ecosystem) ── */
+    .slide-panel {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(480px, 100vw);
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-bright);
+      z-index: 4000;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: -16px 0 48px rgba(0,0,0,0.45);
+      animation: panel-slide-in 0.25s ease;
+    }
+    .slide-panel.active { display: flex; }
+    @keyframes panel-slide-in {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(0); }
+    }
+    .slide-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 1.25rem 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      background: var(--bg-secondary);
+      z-index: 2;
+    }
+    .slide-panel-title {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .slide-panel-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-secondary);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .slide-panel-close:hover { border-color: var(--error); color: var(--error); }
+    .slide-panel-body {
+      padding: 1.25rem;
+      flex: 1;
+    }
+
+    /* ── Auth strip compact (hides premium card, shows inline) ── */
+    #premium-card-inline {
+      display: none;
+      padding: 0.55rem 1.25rem;
+      background: linear-gradient(90deg, rgba(0,229,255,0.06), rgba(255,103,31,0.04));
+      border-bottom: 1px solid rgba(0,229,255,0.12);
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      color: var(--text-secondary);
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    #premium-card-inline.visible { display: flex; }
+    #premium-card-inline .premium-inline-badge {
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.64rem;
+    }
+    #premium-card-inline .premium-inline-badge.paid {
+      background: rgba(46,204,113,0.15);
+      border: 1px solid rgba(46,204,113,0.3);
+      color: var(--success);
+    }
+    #premium-card-inline .premium-inline-badge.pending {
+      background: rgba(255,153,0,0.12);
+      border: 1px solid rgba(255,153,0,0.25);
+      color: var(--saffron);
+    }
+    #premium-card-inline .premium-inline-badge.free {
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.2);
+      color: var(--accent);
+    }
+
+    /* ── SEO Shadow Layer ── */
+    .seo-shadow {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 680px) {
+      .disclosure-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .disclosure-tray {
+        max-height: 85dvh;
+        overflow-y: auto;
+      }
+      .slide-panel {
+        top: auto;
+        border-left: none;
+        border-top: 1px solid var(--border-bright);
+        height: 85dvh;
+        width: 100vw;
+        animation: panel-slide-up 0.25s ease;
+      }
+      @keyframes panel-slide-up {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+      }
+    }    /* PROGRESSIVE DISCLOSURE STATES */
+    .post-activation {
+      display: none !important;
+    }
+    body.user-activated .post-activation {
+      display: flex !important;
+    }
+    body.user-activated .post-activation.inline {
+      display: inline-block !important;
+    }
+    body.user-activated .post-activation.block {
+      display: block !important;
+    }
   </style>
 </head>
 <body>
@@ -1235,7 +1550,7 @@
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="toolbar-action viral-btn" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
+      <button class="toolbar-action viral-btn post-activation" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
       <button id="btn-toolbar-generate" class="toolbar-action">Generate App</button>
       <button id="btn-toolbar-export" class="toolbar-action" disabled>Export ZIP</button>
       <button id="btn-toolbar-publish" class="toolbar-action" disabled>Publish</button>
@@ -1261,7 +1576,14 @@
     <button type="button" style="margin-left:10px;" onclick="app.retryAuthConnection()">Retry Connection</button>
   </div>
 
-  <div class="premium-experience-shell">
+  <!-- Premium card is now an inline strip (compact, product-feel) -->
+  <div id="premium-card-inline">
+    <span id="premium-inline-status">Checking access…</span>
+    <span class="premium-inline-badge free" id="premium-inline-badge">FREE</span>
+    <span class="post-activation inline" style="margin-left:auto; cursor:pointer; color:var(--accent);" onclick="openDisclosurePanel('founder')" title="Upgrade">⚡ Upgrade</span>
+  </div>
+  <!-- Original premium-experience-card kept hidden for JS compatibility -->
+  <div class="premium-experience-shell" style="display:none !important;">
     <div class="premium-experience-card" id="premium-experience-card">
       <div class="premium-experience-head">
         <div>
@@ -1283,85 +1605,102 @@
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> Start with the canvas: add your first screen, organize blocks, preview your app, then publish when ready. Advanced deployment options (APK, export, and download package) are now grouped under Publish → Advanced Deployment.</div>
+  <!-- helper-strip moved to disclosure panel -->
 
   <div class="landing-hero">
-    <div class="landing-hero-card">
+    <div class="landing-hero-card" style="text-align:center; padding: 40px 20px;">
       <div>
-        <h2 style="font-family: var(--font-serif); font-size: 2.25rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 0.5rem; background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Build Android Apps With AI</h2>
-        <p style="color: var(--accent); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem;">Publish Instantly To Daxini Space</p>
-        <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); max-width: 600px;">
-          Turn ideas into prompt apps, workflow tools, and native Android-ready APK installers fully locally. Zero cloud bills, automatic file repairs.
+        <div style="display:inline-block; font-family:var(--font-mono); font-size:10px; color:var(--accent); border:1px solid rgba(0,229,255,0.2); padding:4px 12px; border-radius:999px; margin-bottom:16px;">
+          LOGICHUB ARTIFACT ENGINE
+        </div>
+        <h2 style="font-family: var(--font-serif); font-size: 3.5rem; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 1rem; line-height: 1.1; background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Describe an App.<br/>Own the Software.</h2>
+        <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem;">
+          Generate complete software artifacts including architecture, source structure, APKs, version history, and deployment packages.
         </p>
+        <button class="primary-action-btn" style="margin-bottom: 2.5rem; padding: 12px 24px; font-size: 1.05rem;" onclick="window.location.href='onboarding.html'">
+          ▶ See a 60-second artifact generation demo
+        </button>
       </div>
 
-      <!-- Pipeline flow diagram -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin: 1.5rem 0; padding:1.2rem; border:1px solid rgba(255,255,255,0.05); border-radius:12px; background:rgba(0,0,0,0.3); font-family:var(--font-mono); font-size:0.75rem; width:100%; max-width:600px; box-shadow: inset 0 0 20px rgba(0,0,0,0.4);">
-        <span style="color:var(--accent); font-weight:700;">💡 1. Idea Input</span>
+      <!-- Lifecycle Visualization Pipeline -->
+      <div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; margin: 0 auto 2.5rem; padding:1.5rem; border:1px solid rgba(255,255,255,0.05); border-radius:12px; background:rgba(0,0,0,0.3); font-family:var(--font-mono); font-size:0.8rem; width:100%; max-width:800px;">
+        <span style="color:#fff; font-weight:600;">APK</span>
         <span style="color:var(--text-secondary);">→</span>
-        <span style="color:#a78bfa; font-weight:700;">🏗️ 2. LogicHub</span>
+        <span style="color:#a78bfa; font-weight:600;">Analyze</span>
         <span style="color:var(--text-secondary);">→</span>
-        <span style="color:#34d399; font-weight:700;">📱 3. APK Compiler</span>
+        <span style="color:var(--accent); font-weight:600;">Diff</span>
         <span style="color:var(--text-secondary);">→</span>
-        <span style="color:#fbbf24; font-weight:700;">🌌 4. Daxini Space</span>
+        <span style="color:#34d399; font-weight:600;">Generate v2</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#34d399; font-weight:600;">Generate v3</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#fbbf24; font-weight:600;">Publish</span>
       </div>
 
-      <!-- Social proof stats counter -->
-      <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--success); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <div class="primary-actions" style="margin-bottom: 2rem; display:flex; justify-content:center; gap:16px;">
+        <button class="primary-action-btn publish-cta" onclick="app.openCreateAppWizard()" style="padding: 0.8rem 1.5rem; font-size: 0.9rem;">Upload APK</button>
+        <button class="primary-action-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; font-size: 0.9rem; color:#fff;">Upload ZIP</button>
+        <button class="primary-action-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; font-size: 0.9rem; color:#fff;">Import GitHub</button>
+      </div>
+
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--success); display: flex; align-items: center; justify-content:center; gap: 0.5rem;">
         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow: 0 0 8px var(--success);"></span>
-        <span>⚡ 1,248 APK builds compiled locally this week with 0% cloud failure rate</span>
+        <span>Next Step: Secure ownership via Aporaksha</span>
       </div>
-
-      <div class="primary-actions" style="margin-bottom: 1.5rem;">
-        <button class="primary-action-btn publish-cta" onclick="app.openCreateAppWizard()" style="padding: 1rem 2rem; font-size: 0.85rem; letter-spacing: 1px;">Start Building App</button>
-      </div>
-
-      <div class="capability-strip" style="width:100%; max-width:600px;">
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Interactive Visualizer</div>
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Gradle APK Generator</div>
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Self-Healing Configs</div>
-        <div class="capability-chip" style="font-size:0.68rem; padding: 0.5rem;">Space Distribution</div>
-      </div>
-      <div class="template-strip" id="template-gallery" style="margin-top: 1.5rem;"></div>
     </div>
   </div>
 
-  <div class="builder-lanes">
-    <div class="lane-card"><h4>Pages</h4><p>Design your app layout directly on the canvas with reusable blocks.</p></div>
-    <div class="lane-card"><h4>Data</h4><p>Add Data Source: Supabase, REST API, Google Sheets, or Static Data.</p></div>
-    <div class="lane-card"><h4>Logic + Settings</h4><p>Build workflows with triggers/actions, then preview and publish.</p></div>
+  <div class="builder-lanes" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 40px; display: grid;">
+    <div class="lane-card"><h4>Inventory Management</h4><p>Track assets, manage stock, barcode scanning, and supply chain reporting.</p></div>
+    <div class="lane-card"><h4>CRM & Sales</h4><p>Lead tracking, pipeline funnels, client communications, and deal velocity.</p></div>
+    <div class="lane-card"><h4>Inspection System</h4><p>Field audits, safety checks, photo uploads, and compliance checklists.</p></div>
+    <div class="lane-card"><h4>Restaurant Operations</h4><p>Table management, order routing, kitchen displays, and digital menus.</p></div>
+    <div class="lane-card"><h4>School Management</h4><p>Student attendance, gradebooks, parent portals, and fee processing.</p></div>
+    <div class="lane-card"><h4>Internal Business Tools</h4><p>Custom admin panels, dashboard metrics, and secure employee workflows.</p></div>
   </div>
 
 
   <div class="onboarding-shell">
     <div class="onboarding-card">
-      <div class="onboarding-kicker">✨ Premium onboarding</div>
+      <div class="onboarding-kicker">✨ Artifact Generation Engine</div>
       <div class="onboarding-header">
         <div>
-          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">LogicHub is an AI app builder for prompt apps, workflow tools, and Android-ready prototypes</h1>
-          <p>This reframes LogicHub clearly for search and AI discovery while keeping the existing guide and every existing action exactly where users already expect them. It is designed for non-technical users who want to plan, generate, export, publish, and iterate fast.</p>
+          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">Evolution-Driven Architecture</h1>
+          <p>LogicHub builds complete, auditable software blueprints. Import an existing APK to analyze its structure, diff the changes, and generate the next version automatically.</p>
         </div>
         <div class="onboarding-meta">
-          <span class="meta-chip">Prompt apps</span>
-          <span class="meta-chip">Workflow tools</span>
-          <span class="meta-chip">Publish or export</span>
+          <span class="meta-chip">App Evolution</span>
+          <span class="meta-chip">APK Generation</span>
+          <span class="meta-chip">Architecture Scoring</span>
         </div>
       </div>
-      <div class="onboarding-grid">
+      
+      <!-- App Intelligence Score Mockup -->
+      <div style="margin: 20px 0; padding: 20px; border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 12px; background: rgba(0, 0, 0, 0.4);">
+        <h4 style="margin-top: 0; color: var(--accent); font-family: var(--font-mono); font-size: 11px;">APP INTELLIGENCE SCORE</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-top: 12px;">
+          <div><div style="font-size: 24px; font-weight: 700; color: var(--success);">94/100</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Architecture</div></div>
+          <div><div style="font-size: 24px; font-weight: 700; color: var(--success);">A+</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Security</div></div>
+          <div><div style="font-size: 24px; font-weight: 700; color: #f59e0b;">High</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Upgrade Potential</div></div>
+          <div><div style="font-size: 24px; font-weight: 700; color: var(--success);">Low</div><div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Technical Debt</div></div>
+        </div>
+      </div>
+
+      <div class="onboarding-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="onboarding-step">
           <span class="onboarding-step-number">01</span>
-          <h4>Pick the parts you understand</h4>
-          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+          <h4>Architecture & PRD</h4>
+          <p>LogicHub generates the foundational Product Requirements Document and technical architecture choices.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">02</span>
-          <h4>Open Blocks</h4>
-          <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
+          <h4>App Flow & Source</h4>
+          <p>Complete source code structure, logic workflows, and UI state management are compiled locally.</p>
         </div>
         <div class="onboarding-step">
           <span class="onboarding-step-number">03</span>
-          <h4>Choose your next step</h4>
-          <p>Preview your canvas anytime, then publish when your app is ready. Advanced deployment options stay in Publish.</p>
+          <h4>APK & Versioning</h4>
+          <p>Build an Android-ready APK alongside complete version history, ready to publish on Daxini Space.</p>
         </div>
       </div>
     </div>
@@ -1378,11 +1717,11 @@
           <a href="https://daxini.xyz" style="transition: color 0.2s;">daxini.xyz</a>
           <a href="https://daxini.xyz/ecosystem" style="transition: color 0.2s;">ecosystem</a>
           <a href="https://daxini.xyz/zayvora" style="transition: color 0.2s;">zayvora</a>
-          <a href="http://localhost:7001" style="transition: color 0.2s;">logichub</a>
-          <a href="http://localhost:7004" style="transition: color 0.2s;">daxini.space</a>
-          <a href="http://localhost:7002" style="transition: color 0.2s;">aporaksha</a>
-          <a href="http://localhost:7003" style="transition: color 0.2s;">hanuman.solutions</a>
-          <a href="http://localhost:7006" style="transition: color 0.2s;">printbydd store</a>
+          <a href="https://logichub.app" style="transition: color 0.2s;">logichub</a>
+          <a href="https://daxini.space" style="transition: color 0.2s;">daxini.space</a>
+          <a href="https://aporaksha.com" style="transition: color 0.2s;">aporaksha</a>
+          <a href="https://hanuman.solutions" style="transition: color 0.2s;">hanuman.solutions</a>
+          <a href="https://store.viadecide.com/printbydd" style="transition: color 0.2s;">printbydd store</a>
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: #8b90a6;">
@@ -1417,17 +1756,25 @@
         <g id="connections-group"></g>
       </svg>
       <div id="blocks-container"></div>
-      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.35; text-align:center; padding:0 1rem;">
-        <div style="font-size:2rem">⬡</div>
-        <div style="font-family:var(--font-mono);font-size:0.74rem;">Add Screen, Login, Data, or Logic to begin</div>
-        <div class="empty-state-guide" id="empty-state-guide">
-          <strong>Suggested one-click setups</strong>
+      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:1; text-align:center; padding:0 1rem;">
+        <div style="font-size:2.5rem; opacity:0.25;">⬡</div>
+        <div style="font-family:var(--font-mono);font-size:0.74rem; color:var(--text-secondary); opacity:0.5; margin-bottom:0.5rem;">Canvas Workspace</div>
+
+        <!-- START BUILDING CTA -->
+        <div class="start-building-cta">
+          <button id="start-building-btn" class="start-building-btn" onclick="openDisclosureOverlay()">▶ Start Building</button>
+          <div class="start-building-hint">Already know what to do? Use the footer buttons below ↓</div>
+        </div>
+
+        <!-- Existing quick-setups (shown after first block added, hidden until then) -->
+        <div class="empty-state-guide" id="empty-state-guide" style="display:none; pointer-events:auto; margin-top:1rem;">
+          <strong>Quick setups</strong>
           <div class="empty-state-setups">
-            <button onclick="app.applyStarterSetup('ai-research-tool')">AI research tool setup</button>
-            <button onclick="app.applyStarterSetup('simulation-builder')">Simulation builder setup</button>
-            <button onclick="app.applyStarterSetup('data-dashboard')">Data dashboard setup</button>
-            <button onclick="app.applyStarterSetup('knowledge-explorer')">Knowledge explorer setup</button>
-            <button onclick="app.applyStarterSetup('automation-bot')">Automation bot setup</button>
+            <button onclick="app.applyStarterSetup('ai-research-tool')">AI research tool</button>
+            <button onclick="app.applyStarterSetup('simulation-builder')">Simulation builder</button>
+            <button onclick="app.applyStarterSetup('data-dashboard')">Data dashboard</button>
+            <button onclick="app.applyStarterSetup('knowledge-explorer')">Knowledge explorer</button>
+            <button onclick="app.applyStarterSetup('automation-bot')">Automation bot</button>
           </div>
         </div>
       </div>
@@ -1438,6 +1785,7 @@
   <div class="footer" id="step-footer">
     <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Block</button>
     <button id="btn-blocks" onclick="app.toggleBlocksPanel()">📄 Pages</button>
+    <button id="btn-blueprint" onclick="app.viewBlueprint()" style="display:none; color: var(--accent); border-color: var(--accent);">📐 Blueprint</button>
     <button id="btn-preview" onclick="app.viewPRD()">👁 Preview</button>
     <button id="btn-publish" disabled onclick="app.publishApp()">🚀 Publish</button>
   </div>
@@ -1606,6 +1954,11 @@
               <span class="tier-badge">Razorpay next</span>
             </div>
           </div>
+          <div class="payment-amount">$99 <span class="payment-muted">Razorpay coming soon</span></div>
+          <p style="font-weight: 600; color: var(--accent); margin: 0.5rem 0;">Available in: 🇮🇳 India | 🇱🇺 Luxembourg | 🇯🇵 Japan</p>
+          <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
+          <button class="payment-wide-btn secondary" type="button" onclick="alert('Razorpay checkout is the next integration. Keep $99 visible for now.')">💸 Razorpay Coming Soon</button>
+          <div class="payment-note">Note: Checkout will be blocked at the network level for users outside supported regions.</div>
           <div class="payment-amount">$99 <span class="payment-muted">Global Checkout</span></div>
           <p>Keep this visible for international buyers so the founder offer is already positioned before checkout is connected.</p>
           <button class="payment-wide-btn secondary" type="button" onclick="window.open('https://wa.me/919723897662?text=Hi%20Dharam%2C%20I%20want%20the%20Global%20Founder%20Pass%20for%20LogicHub%20%28%2499%29','_blank')">💬 Message to Buy — $99</button>
@@ -1650,11 +2003,232 @@
     </div>
   </div>
 
+  <!-- ═══ PROGRESSIVE DISCLOSURE OVERLAY ═══════════════════════════════════ -->
+
+  <!-- Overlay backdrop + card tray -->
+  <div class="disclosure-overlay" id="disclosure-overlay" onclick="onDisclosureOverlayClick(event)">
+    <div class="disclosure-tray">
+      <div class="disclosure-header">
+        <div class="disclosure-title">What do you want to do?</div>
+        <button class="disclosure-close" onclick="closeDisclosureOverlay()" title="Close (Esc)">✕</button>
+      </div>
+      <div class="disclosure-cards">
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('what')">
+          <div class="disclosure-card-icon">🏗️</div>
+          <div class="disclosure-card-label">What can LogicHub build?</div>
+          <div class="disclosure-card-sub">Prompt apps, APK prototypes, workflow tools, publishable web apps.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('how')">
+          <div class="disclosure-card-icon">⚙️</div>
+          <div class="disclosure-card-label">See How It Works</div>
+          <div class="disclosure-card-sub">Pages → Data → Logic → Preview → Publish. The full 3-step build flow.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('templates')">
+          <div class="disclosure-card-icon">📐</div>
+          <div class="disclosure-card-label">Templates</div>
+          <div class="disclosure-card-sub">Start from a starter setup: AI tool, dashboard, bot, or explorer.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosurePanel('publish')">
+          <div class="disclosure-card-icon">🚀</div>
+          <div class="disclosure-card-label">Publish &amp; APK</div>
+          <div class="disclosure-card-sub">Publish to Daxini.Space or export a native Android APK installer.</div>
+        </div>
+
+        <div class="disclosure-card" onclick="openDisclosureFounder()">
+          <div class="disclosure-card-icon">⚡</div>
+          <div class="disclosure-card-label">Founder Access</div>
+          <div class="disclosure-card-sub">Unlock unlimited forges. India ₹1717 · Global $99 founder pass.</div>
+        </div>
+
+        <div class="disclosure-card post-activation block" onclick="openDisclosurePanel('ecosystem')">
+          <div class="disclosure-card-icon">🌌</div>
+          <div class="disclosure-card-label">Explore Ecosystem</div>
+          <div class="disclosure-card-sub">Daxini.Space, Zayvora, Aporaksha, and more.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: What can LogicHub build? ── -->
+  <div class="slide-panel" id="panel-what">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">🏗️ What can LogicHub build?</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('what')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2 style="margin:0 0 0.4rem; font-family:var(--font-serif); font-size:1.6rem; font-weight:800; background:linear-gradient(135deg,#fff,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Build Android Apps With AI</h2>
+          <p style="margin:0; color:var(--accent); font-family:var(--font-mono); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px;">Publish Instantly To Daxini Space</p>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.85rem; line-height:1.65; margin-bottom:1.25rem;">Turn ideas into prompt apps, workflow tools, and native Android-ready APK installers — fully locally. Zero cloud bills, automatic file repairs.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; border:1px solid rgba(255,255,255,0.05); border-radius:12px; background:rgba(0,0,0,0.3); font-family:var(--font-mono); font-size:0.72rem; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+        <span style="color:var(--accent); font-weight:700;">💡 1. Idea Input</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#a78bfa; font-weight:700;">🏗️ 2. LogicHub</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#34d399; font-weight:700;">📱 3. APK Compiler</span>
+        <span style="color:var(--text-secondary);">→</span>
+        <span style="color:#fbbf24; font-weight:700;">🌌 4. Daxini Space</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.65rem; margin-bottom:1.5rem;">
+        <div class="capability-chip">Interactive Visualizer</div>
+        <div class="capability-chip">Gradle APK Generator</div>
+        <div class="capability-chip">Self-Healing Configs</div>
+        <div class="capability-chip">Space Distribution</div>
+      </div>
+      <button class="primary-action-btn publish-cta" onclick="closeDisclosurePanel('what'); app.openCreateAppWizard();" style="width:100%; padding:1rem; font-size:0.82rem;">→ Start Building Now</button>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: How It Works ── -->
+  <div class="slide-panel" id="panel-how">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">⚙️ How It Works</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('how')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <div style="display:grid; gap:0.75rem; margin-bottom:1.25rem;">
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">01</span>
+          <h4>Pick the parts you understand</h4>
+          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">02</span>
+          <h4>Open Blocks → Generate</h4>
+          <p>LogicHub fills in missing runtime files automatically. No need to create every JS or asset file by hand.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">03</span>
+          <h4>Preview → Publish</h4>
+          <p>Preview your canvas anytime, then publish when ready. Export ZIP or build Android APK from the same screen.</p>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; margin-bottom:1.25rem;">
+        <div class="lane-card"><h4>Pages</h4><p>Design layout directly on the canvas with reusable blocks.</p></div>
+        <div class="lane-card"><h4>Data</h4><p>Supabase, REST API, Google Sheets, or Static Data sources.</p></div>
+        <div class="lane-card"><h4>Logic</h4><p>Build workflows with triggers/actions, then preview and publish.</p></div>
+      </div>
+      <button class="primary-action-btn" onclick="closeDisclosurePanel('how'); closeDisclosureOverlay();" style="width:100%; padding:0.9rem;">→ Go to Canvas</button>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: Templates ── -->
+  <div class="slide-panel" id="panel-templates">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">📐 Templates</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('templates')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <p style="color:var(--text-secondary); font-size:0.78rem; margin-bottom:1rem;">Pick a starter setup and jump straight into the canvas, pre-wired.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem;">
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('ai-research-tool');">🔬 AI Research Tool</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('simulation-builder');">🧪 Simulation Builder</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('data-dashboard');">📊 Data Dashboard</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('knowledge-explorer');">🧭 Knowledge Explorer</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.applyStarterSetup('automation-bot');">🤖 Automation Bot</button>
+        <button class="primary-action-btn" onclick="closeDisclosurePanel('templates'); closeDisclosureOverlay(); app.openCreateAppWizard();">✨ Custom App…</button>
+      </div>
+      <div id="panel-template-gallery" style="margin-top:1.25rem;"></div>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: Publish ── -->
+  <div class="slide-panel" id="panel-publish">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">🚀 Publish &amp; APK</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('publish')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <p style="color:var(--text-secondary); font-size:0.82rem; line-height:1.65; margin-bottom:1.25rem;">After building on the canvas, choose how to ship your app.</p>
+      <div style="display:grid; gap:0.65rem;">
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">🌌</span>
+          <h4>Publish to Daxini.Space</h4>
+          <p>One-click publish your web app to the Daxini marketplace. Discoverable immediately.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.publishApp();" class="primary-action-btn" style="margin-top:0.5rem;">→ Publish App</button>
+        </div>
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">📱</span>
+          <h4>Export Android APK</h4>
+          <p>Compile a native Android-ready APK installer from your canvas design. No code signing required.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.buildApk();" class="primary-action-btn" style="margin-top:0.5rem;">→ Build APK</button>
+        </div>
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">📦</span>
+          <h4>Export ZIP</h4>
+          <p>Download a full ZIP of your generated app files for self-hosting or custom deployment.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.exportZip();" class="primary-action-btn" style="margin-top:0.5rem;">→ Export ZIP</button>
+        </div>
+        <div class="onboarding-step">
+          <span style="font-size:1.3rem;">🔗</span>
+          <h4>Share App (Viral Unlock)</h4>
+          <p>Generate a secure link to share your artifact. Friends must authenticate via Daxini Space to decrypt and launch it.</p>
+          <button onclick="closeDisclosurePanel('publish'); closeDisclosureOverlay(); app.shareApp();" class="primary-action-btn" style="margin-top:0.5rem; background: var(--theme-color); color: #000;">→ Generate Share Link</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slide Panel: Ecosystem ── -->
+  <div class="slide-panel" id="panel-ecosystem">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">🌌 Daxini Ecosystem</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('ecosystem')">✕</button>
+    </div>
+    <div class="slide-panel-body">
+      <div style="display:grid; gap:0.55rem;">
+        <a href="https://daxini.space" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🌌 Daxini.Space — App Marketplace</a>
+        <a href="https://daxini.xyz" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🪐 Daxini.xyz — Creator Hub</a>
+        <a href="https://daxini.xyz/zayvora" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">⚡ Zayvora — Sovereign AI Engine</a>
+        <a href="https://aporaksha.com" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🧿 Aporaksha — Identity Layer</a>
+        <a href="https://hanuman.solutions" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🕉️ Hanuman Solutions</a>
+        <a href="https://store.viadecide.com/printbydd" target="_blank" class="primary-action-btn" style="display:block; text-align:center; text-decoration:none;">🖨️ PrintByDD Store</a>
+      </div>
+      <div style="margin-top:1.25rem; font-size:0.68rem; color:var(--text-secondary); text-align:center; line-height:1.6;">
+        © 2026 Dharam Daxini · Sovereign Local-First AI Mesh
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BLUEPRINT ARTIFACT VIEWER ══════════════ -->
+  <div class="slide-panel" id="panel-blueprint" style="width: 600px; max-width: 95vw;">
+    <div class="slide-panel-header">
+      <div class="slide-panel-title">📐 Software Blueprint</div>
+      <button class="slide-panel-close" onclick="closeDisclosurePanel('blueprint')">✕</button>
+    </div>
+    <div class="slide-panel-body" id="blueprint-content">
+      <p style="color:var(--text-secondary); text-align:center;">Generate a project to view its blueprint artifact.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SEO SHADOW LAYER — off-screen, indexed by crawlers ══════════════ -->
+  <div class="seo-shadow" aria-hidden="false">
+    <h1>LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes</h1>
+    <h2>Build Android Apps With AI</h2>
+    <p>Turn ideas into prompt apps, workflow tools, and native Android-ready APK installers fully locally. Zero cloud bills, automatic file repairs. Publish instantly to Daxini Space.</p>
+    <p>LogicHub is an AI app builder for non-technical users. Plan visually on a canvas workspace. Generate files. Export ZIPs. Publish apps. Package Android-ready prototypes.</p>
+    <h3>How It Works</h3>
+    <p>Step 1: Pick the parts you understand — Screen, Login, Data, Style, or Settings. Step 2: Open Blocks. LogicHub fills in missing runtime files automatically. Step 3: Preview anytime. Publish when ready. Advanced deployment in Publish.</p>
+    <h3>Builder Lanes</h3>
+    <p>Pages: Design your app layout on the canvas with reusable blocks. Data: Add Supabase, REST API, Google Sheets, or Static Data. Logic: Build workflows with triggers and actions.</p>
+    <h3>Capabilities</h3>
+    <p>Interactive Visualizer · Gradle APK Generator · Self-Healing Configs · Space Distribution · Prompt apps · Workflow tools · Publish or export · India Founder Pass ₹1717 · Global Founder Pass $99</p>
+  </div>
+
   <script src="./js/deploy-client.js"></script>
   <script src="./js/publish-app.js"></script>
 
   <script>
     const APORAKSHA_AUTH_URL = 'https://aporaksha.com/api';
+    window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'https://logichub.app/api' : 'https://api.logichub.app/api';
     window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080/api' : 'https://daxini.xyz/zayvora/api';
     const AUTH_TOKEN_KEY = 'lh_aporaksha_token';
     const AUTH_REFRESH_KEY = 'lh_aporaksha_refresh';
@@ -2059,10 +2633,10 @@
         });
       },
 
-      addBlock(type) {
+      addBlock(type, customX, customY) {
         const c = document.getElementById("canvas");
-        const x = c.offsetWidth / 2 - 87 + (Math.random()*40-20);
-        const y = c.offsetHeight / 2 - 45 + (Math.random()*40-20);
+        const x = customX !== undefined ? customX : c.offsetWidth / 2 - 87 + (Math.random()*40-20);
+        const y = customY !== undefined ? customY : c.offsetHeight / 2 - 45 + (Math.random()*40-20);
         const block = this.map.addBlock(type, x, y);
         this.render();
         return block;
@@ -2109,8 +2683,15 @@
         const starterGraph = template?.starterGraph;
         if (!starterGraph || !Array.isArray(starterGraph.blocks)) return false;
         const createdByType = {};
+        
+        const c = document.getElementById("canvas");
+        const totalWidth = starterGraph.blocks.length * 180;
+        let startX = Math.max(20, (c.offsetWidth - totalWidth) / 2);
+        const startY = Math.max(20, c.offsetHeight / 2 - 45);
+
         starterGraph.blocks.forEach((type) => {
-          const created = this.addBlock(type);
+          const created = this.addBlock(type, startX, startY);
+          startX += 180;
           if (!createdByType[type]) createdByType[type] = [];
           createdByType[type].push(created);
         });
@@ -2293,6 +2874,55 @@
         const ta = document.getElementById("prd-output"); ta.select();
         navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand("copy"));
         this.log("PRD copied.", "success"); closeModal("prd-modal");
+      },
+
+      viewBlueprint() {
+        if (!this.map.projectArtifacts || Object.keys(this.map.projectArtifacts).length === 0) {
+          alert("Generate a project first to view its blueprint.");
+          return;
+        }
+        
+        const bp = this.map.projectArtifacts;
+        let html = `<div style="text-align: left; font-size: 0.85rem; line-height: 1.5;">`;
+        
+        // Summary
+        if (bp.summary) {
+          html += `<h3 style="margin-top:0;">Project: ${this.escapeHtml(bp.summary.name || 'Untitled')}</h3>`;
+          html += `<p><strong>Goal:</strong> ${this.escapeHtml(bp.summary.goal || '')}</p>`;
+        }
+        
+        // Continuation Prompt
+        if (bp.continuation_prompt) {
+          html += `<div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin: 1rem 0;">
+            <div style="font-size: 0.75rem; color: var(--accent); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold;">Continuation Prompt (Paste in Cursor/Claude)</div>
+            <code style="display: block; white-space: pre-wrap; font-family: monospace; color: #ccc;">${this.escapeHtml(bp.continuation_prompt)}</code>
+            <button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent); this.innerText='Copied!'; setTimeout(() => this.innerText='Copy Prompt', 2000);" style="margin-top: 0.75rem; background: var(--bg-card); color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Copy Prompt</button>
+          </div>`;
+        }
+        
+        // Architecture
+        if (bp.architecture) {
+          html += `<h4 style="margin-bottom:0.5rem; color: var(--text-primary);">Architecture</h4><ul style="padding-left: 1.25rem; margin-bottom: 1rem; color: var(--text-secondary);">`;
+          Object.entries(bp.architecture).forEach(([k, v]) => {
+            html += `<li><strong style="color: #fff;">${k}:</strong> ${this.escapeHtml(String(v))}</li>`;
+          });
+          html += `</ul>`;
+        }
+        
+        // Schema
+        if (bp.data_model && bp.data_model.length > 0) {
+          html += `<h4 style="margin-bottom:0.5rem; color: var(--text-primary);">Data Model</h4>`;
+          bp.data_model.forEach(model => {
+            html += `<div style="margin-bottom: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-weight: bold; color: var(--accent); margin-bottom: 0.25rem;">${this.escapeHtml(model.entity)}</div>
+              <div style="color: var(--text-secondary); font-size: 0.8rem;">Fields: ${this.escapeHtml((model.fields || []).join(', '))}</div>
+            </div>`;
+          });
+        }
+        
+        html += `</div>`;
+        document.getElementById('blueprint-content').innerHTML = html;
+        openDisclosurePanel('blueprint');
       },
 
       getFounderOrders() {
@@ -3068,8 +3698,8 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         document.getElementById("btn-synth").disabled = true;
         let success = true;
         try {
-          // Phase 1: Zayvora Planning (Axiom)
-          this.log("Phase 1: Zayvora Axiom generating PRD...", "accent");
+          // Phase 1: Artifact Generation Engine (Axiom)
+          this.log("Phase 1: Generating Software Blueprint Artifacts...", "accent");
           let zayvoraPrd = "";
           try {
             const planResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/plan`, {
@@ -3078,11 +3708,25 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
               body: JSON.stringify({ prompt: "Synthesize this app", architecture: this.map.blocks })
             });
             const planData = await planResp.json();
-            zayvoraPrd = planData.prd || "";
+            
+            // Store the full 14-section blueprint
+            this.map.projectArtifacts = planData.artifacts || {};
+            
+            // Extract just the PRD section for the synthesis phase if needed
+            zayvoraPrd = typeof planData.artifacts?.prd === 'object' 
+              ? JSON.stringify(planData.artifacts.prd, null, 2) 
+              : planData.artifacts?.prd || "";
+              
             this.map.lastZayvoraPrd = zayvoraPrd;
-            if (zayvoraPrd) this.log("✓ Zayvora PRD Generated.", "success");
+            if (Object.keys(this.map.projectArtifacts).length > 0) {
+              this.log("✓ Software Blueprint Artifact Generated.", "success");
+              // Show Blueprint button in UI if it exists
+              const bpBtn = document.getElementById('btn-blueprint');
+              if (bpBtn) bpBtn.style.display = 'inline-block';
+            }
           } catch (e) {
-            this.log("⚠ Zayvora Axiom unavailable. Falling back to basic prompt.", "info");
+            console.error(e);
+            this.log("⚠ Blueprint Engine unavailable. Falling back to basic prompt.", "info");
           }
 
           for (let b of this.map.blocks) {
@@ -3141,7 +3785,28 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         const zip = new JSZip();
         const files = this.collectProjectFiles({ pwa: true });
         Object.entries(files).forEach(([fileName, code]) => zip.file(fileName, code));
-        zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
+        
+        // Build the comprehensive 14-section version package
+        const projectLogic = {
+          version: "1.0.0",
+          generatedAt: new Date().toISOString(),
+          project_state: {
+            id: this.map.id,
+            blocks: this.map.blocks.map(b => ({ id: b.id, type: b.type, filename: b.filename, dependsOn: b.dependsOn }))
+          },
+          artifacts: this.map.projectArtifacts || {},
+          legacy_prd: this.map.buildPRD()
+        };
+        
+        zip.file("project.logic.json", JSON.stringify(projectLogic, null, 2));
+        
+        // Keep the markdown PRD for backward compatibility or easy reading
+        if (projectLogic.artifacts.prd) {
+          zip.file("ARCHITECTURE_PRD.md", JSON.stringify(projectLogic.artifacts.prd, null, 2));
+        } else {
+          zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
+        }
+        
         return zip.generateAsync({ type: "blob" });
       },
 
@@ -3158,6 +3823,13 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         const blob = await this.buildProjectZipBlob();
         this.downloadBlob(blob, `LogicHub_${this.map.id}.zip`);
         this.log("ZIP Exported.", "success");
+      },
+
+      shareApp() {
+        const appName = encodeURIComponent(this.map.name || "LogicHubApp");
+        const shareUrl = `https://daxini.space/?unlock=${appName}`;
+        prompt("Copy this secure link to share your app. Your friends will need an Aporaksha Identity to unlock it.", shareUrl);
+        this.log(`Share link generated: ${shareUrl}`, "success");
       },
 
       async buildApk() {
@@ -3297,6 +3969,124 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       app.init();
       if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
     });
+    // ═══════════════════════════════════════════════════════════════════
+    //  PROGRESSIVE DISCLOSURE SYSTEM — JS Controller
+    // ═══════════════════════════════════════════════════════════════════
+
+    function openDisclosureOverlay() {
+      document.getElementById('disclosure-overlay').classList.add('active');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeDisclosureOverlay() {
+      document.getElementById('disclosure-overlay').classList.remove('active');
+      document.body.classList.remove('modal-open');
+    }
+
+    function onDisclosureOverlayClick(e) {
+      // Close if user clicks the backdrop (not the tray itself)
+      if (e.target === document.getElementById('disclosure-overlay')) {
+        closeDisclosureOverlay();
+      }
+    }
+
+    function openDisclosurePanel(panelId) {
+      // Close overlay first, then open the slide panel
+      closeDisclosureOverlay();
+      const el = document.getElementById('panel-' + panelId);
+      if (el) {
+        el.classList.add('active');
+        document.body.classList.add('modal-open');
+      }
+    }
+
+    function closeDisclosurePanel(panelId) {
+      const el = document.getElementById('panel-' + panelId);
+      if (el) {
+        el.classList.remove('active');
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    function openDisclosureFounder() {
+      closeDisclosureOverlay();
+      openModal('founder-modal');
+    }
+
+    // Escape key dismisses overlay and open panels
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      ['disclosure-overlay'].forEach(id => {
+        document.getElementById(id)?.classList.remove('active');
+      });
+      ['what','how','templates','publish','ecosystem'].forEach(id => {
+        document.getElementById('panel-' + id)?.classList.remove('active');
+      });
+      document.body.classList.remove('modal-open');
+    });
+
+    // ── Canvas hint visibility manager ──
+    // Hide the "Start Building" CTA once the user has blocks on canvas.
+    // Show the quick-setup buttons instead (existing UX for returning users).
+    function syncCanvasHint() {
+      const hasBlocks = window.app && window.app.map && window.app.map.blocks.length > 0;
+      const hint = document.getElementById('canvas-hint');
+      const cta = document.querySelector('.start-building-cta');
+      const quickSetups = document.getElementById('empty-state-guide');
+
+      if (!hint) return;
+
+      if (hasBlocks) {
+        hint.style.display = 'none';  // hide hint entirely once canvas is populated
+      } else {
+        hint.style.display = 'flex';
+        hint.style.opacity = '1';
+        if (cta) cta.style.display = 'flex';
+        if (quickSetups) quickSetups.style.display = 'none';
+      }
+    }
+
+    // Patch app.render to also sync the canvas hint
+    (function patchAppRender() {
+      const _ready = setInterval(() => {
+        if (!window.app || typeof window.app.render !== 'function') return;
+        clearInterval(_ready);
+        const originalRender = window.app.render.bind(window.app);
+        window.app.render = function(...args) {
+          const result = originalRender(...args);
+          syncCanvasHint();
+          return result;
+        };
+      }, 100);
+    })();
+
+    // ── Premium inline strip — synced with existing auth state ──
+    // Reads from the existing premium-experience-card state after auth resolves.
+    function syncPremiumInlineStrip() {
+      const card = document.getElementById('premium-experience-card');
+      const inline = document.getElementById('premium-card-inline');
+      const statusEl = document.getElementById('premium-inline-status');
+      const badgeEl = document.getElementById('premium-inline-badge');
+      if (!card || !inline) return;
+
+      const isPaid    = card.classList.contains('paid');
+      const isPending = card.classList.contains('pending');
+
+      inline.classList.add('visible');
+      badgeEl.className = 'premium-inline-badge ' + (isPaid ? 'paid' : isPending ? 'pending' : 'free');
+      badgeEl.textContent = isPaid ? 'FOUNDER' : isPending ? 'PENDING' : 'FREE';
+
+      const h3 = card.querySelector('h3');
+      if (statusEl && h3) statusEl.textContent = h3.textContent;
+    }
+
+    // Observe the premium-experience-card for class changes (set by existing JS)
+    const _premiumObserver = new MutationObserver(syncPremiumInlineStrip);
+    const _premiumCard = document.getElementById('premium-experience-card');
+    if (_premiumCard) {
+      _premiumObserver.observe(_premiumCard, { attributes: true, childList: true, subtree: true });
+    }
+
   </script>
 
   <!-- ═══════════════════════════════════════════════════════════════

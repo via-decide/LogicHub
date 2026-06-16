@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogicHub - Onboarding</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #707070;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --accent-dim: rgba(59, 130, 246, 0.1);
+            --border: #2a2a2a;
+            --border-light: #363636;
+            --success: #10b981;
+            --success-dim: rgba(16, 185, 129, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .onboarding-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .screen {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            gap: 1.5rem;
+        }
+
+        .screen-content {
+            width: 100%;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        @media (min-width: 1200px) {
+            .screen {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 3rem 4rem;
+                gap: 4rem;
+            }
+
+            .screen-content {
+                max-width: none;
+                flex: 1;
+                text-align: left;
+            }
+
+            .screen-preview {
+                flex: 1;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+                border-radius: 12px;
+                border: 1px solid var(--border-light);
+                padding: 2rem;
+                min-height: 500px;
+            }
+
+            .screen:nth-child(1) .screen-preview,
+            .screen:nth-child(2) .screen-preview,
+            .screen:nth-child(5) .screen-preview,
+            .screen:nth-child(8) .screen-preview {
+                order: 2;
+            }
+
+            .screen:nth-child(1) .screen-content,
+            .screen:nth-child(2) .screen-content,
+            .screen:nth-child(5) .screen-content,
+            .screen:nth-child(8) .screen-content {
+                order: 1;
+            }
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .subheading {
+            font-size: clamp(0.95rem, 4vw, 1.1rem);
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        @media (max-width: 1199px) {
+            .subheading {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        .generation-timeline {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 1200px) {
+            .generation-timeline {
+                margin: 0;
+            }
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item.complete {
+            opacity: 1;
+        }
+
+        .timeline-item.active {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        .timeline-label {
+            flex: 1;
+        }
+
+        .timeline-icon {
+            font-size: 1rem;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .timeline-item.active .timeline-icon {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .app-carousel {
+            position: relative;
+            height: 500px;
+            width: 100%;
+        }
+
+        .mock-app-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            aspect-ratio: 9 / 16;
+            max-width: 280px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            margin: 0 auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .mock-app-frame.active {
+            opacity: 1;
+        }
+
+        .app-type-label {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .mock-app-frame.active ~ .app-type-label,
+        .app-type-label.active {
+            opacity: 1;
+        }
+
+        .mock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mock-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .mock-menu {
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        .mock-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mock-item {
+            background: var(--bg-tertiary);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border-left: 2px solid var(--accent);
+        }
+
+        .mock-item-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .mock-item-desc {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .mock-action {
+            padding: 0.75rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        .start-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .start-options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .start-option {
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+
+        .start-option:hover {
+            border-color: var(--accent);
+            background-color: var(--accent-dim);
+        }
+
+        .start-option.active {
+            border-color: var(--accent);
+            background-color: var(--accent-dim);
+        }
+
+        .start-option-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .start-option-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .start-option-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .cost-breakdown {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin: 1.5rem 0;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cost-row:last-child {
+            border-bottom: none;
+        }
+
+        .cost-label {
+            color: var(--text-secondary);
+        }
+
+        .cost-value {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .cost-total {
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .cost-disclaimer {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .breakdown-list {
+            text-align: left;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin: 1.5rem 0;
+        }
+
+        .breakdown-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-icon {
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+            color: #ef4444;
+        }
+
+        .breakdown-text {
+            color: var(--text-secondary);
+        }
+
+        .own-forever-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ecosystem-flow-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            width: 100%;
+        }
+
+        .flow-stage {
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .flow-stage-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-stage-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .flow-stage-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .pipeline-collapsible {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .pipeline-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-header:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .pipeline-toggle {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .pipeline-toggle.expanded {
+            transform: rotate(180deg);
+        }
+
+        .pipeline-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .pipeline-content.expanded {
+            max-height: 500px;
+        }
+
+        .pipeline-stages {
+            padding: 0 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .pipeline-stage {
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            border-left: 2px solid var(--accent);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pipeline-stage-name {
+            font-weight: 500;
+        }
+
+        .pipeline-stage-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .artifact-package {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .package-tree {
+            text-align: left;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .package-item {
+            padding: 0.25rem 0;
+        }
+
+        .package-folder {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .package-file {
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .activation-assets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+            width: 100%;
+        }
+
+        @media (min-width: 1200px) {
+            .activation-assets {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .asset-item {
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-left: 3px solid var(--success);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .asset-icon {
+            font-size: 1.25rem;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .cta-button {
+            padding: 0.875rem 2rem;
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(0.95rem, 3vw, 1rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .cta-button:hover {
+            background-color: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        .cta-button:active {
+            transform: translateY(0);
+        }
+
+        .progress {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .progress-dot.active {
+            background-color: var(--accent);
+            transform: scale(1.3);
+        }
+
+        .skip-button {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+
+        .skip-button:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 640px) {
+            .screen {
+                padding: 1.5rem 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.35rem;
+            }
+
+            .progress {
+                bottom: 1.5rem;
+            }
+
+            .skip-button {
+                top: 1.5rem;
+                right: 1.5rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="skip-button" onclick="completeOnboarding()">Skip</button>
+
+    <div class="onboarding-container">
+        <!-- Screen 0: Animated Demo Generation -->
+        <div class="screen active" data-screen="0">
+            <div class="screen-content">
+                <h1>Describe an App. We'll Generate It.</h1>
+                <p class="subheading">LogicHub transforms ideas into complete, ownable software artifacts.</p>
+                
+                <div style="background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: 1.5rem 0; text-align: left;">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 500;">Example Prompt:</div>
+                    <div style="font-size: 0.9rem; color: var(--text-primary); font-style: italic; padding: 0.75rem; background-color: var(--bg-primary); border-radius: 6px; border-left: 2px solid var(--accent);">
+                        "Create an inventory management app. Track items, quantity, location. Add photos. Export to CSV."
+                    </div>
+                </div>
+
+                <button class="cta-button" onclick="goToScreen(1)">See Generation</button>
+            </div>
+            <div class="screen-preview">
+                <div class="generation-timeline" id="generationTimeline">
+                    <div class="timeline-item" data-index="0">
+                        <div class="timeline-label">PRD Generated</div>
+                        <div class="timeline-icon">📄</div>
+                    </div>
+                    <div class="timeline-item" data-index="1">
+                        <div class="timeline-label">Architecture Designed</div>
+                        <div class="timeline-icon">🏗</div>
+                    </div>
+                    <div class="timeline-item" data-index="2">
+                        <div class="timeline-label">Data Schema Created</div>
+                        <div class="timeline-icon">🗄</div>
+                    </div>
+                    <div class="timeline-item" data-index="3">
+                        <div class="timeline-label">UI Components Built</div>
+                        <div class="timeline-icon">🎨</div>
+                    </div>
+                    <div class="timeline-item" data-index="4">
+                        <div class="timeline-label">APK Generated</div>
+                        <div class="timeline-icon">📱</div>
+                    </div>
+                    <div style="padding-top: 1rem; border-top: 1px solid var(--border); margin-top: 1rem; font-size: 0.85rem; color: var(--success); display: none;" id="timeline-complete">
+                        ✓ Complete artifact ready
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 1: What You Get + Rotating App Previews -->
+        <div class="screen" data-screen="1">
+            <div class="screen-content">
+                <h2>Here's What You Own</h2>
+                <p class="subheading">Every generated artifact is a complete software package.</p>
+                
+                <div class="activation-assets">
+                    <div class="asset-item">
+                        <div class="asset-icon">✓</div>
+                        PRD
+                    </div>
+                    <div class="asset-item">
+                        <div class="asset-icon">✓</div>
+                        Architecture
+                    </div>
+                    <div class="asset-item">
+                        <div class="asset-icon">✓</div>
+                        App Flow
+                    </div>
+                    <div class="asset-item">
+                        <div class="asset-icon">✓</div>
+                        APK
+                    </div>
+                    <div class="asset-item">
+                        <div class="asset-icon">✓</div>
+                        ZIP
+                    </div>
+                    <div class="asset-item">
+                        <div class="asset-icon">✓</div>
+                        Version History
+                    </div>
+                </div>
+
+                <button class="cta-button" onclick="goToScreen(2)">Continue</button>
+            </div>
+            <div class="screen-preview">
+                <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <div class="app-type-label active" id="appTypeLabel">Inventory App</div>
+                    <div class="app-carousel" id="appCarousel">
+                        <div class="mock-app-frame active" id="app0">
+                            <div class="mock-header">
+                                <div class="mock-title">Inventory</div>
+                                <div class="mock-menu">⋮</div>
+                            </div>
+                            <div class="mock-content">
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Screwdrivers</div>
+                                    <div class="mock-item-desc">Qty: 47 | Shelf A2</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Bolts</div>
+                                    <div class="mock-item-desc">Qty: 156 | Shelf B1</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Hinges</div>
+                                    <div class="mock-item-desc">Qty: 32 | Shelf C3</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">+ Add Item</div>
+                                    <div class="mock-item-desc">New entry</div>
+                                </div>
+                            </div>
+                            <div class="mock-action">Export CSV</div>
+                        </div>
+
+                        <div class="mock-app-frame" id="app1">
+                            <div class="mock-header">
+                                <div class="mock-title">Contacts</div>
+                                <div class="mock-menu">⋮</div>
+                            </div>
+                            <div class="mock-content">
+                                <div class="mock-item">
+                                    <div class="mock-item-title">John Acme Inc</div>
+                                    <div class="mock-item-desc">Active | $50K/yr</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Sarah Corp</div>
+                                    <div class="mock-item-desc">Active | $32K/yr</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Mike Startup</div>
+                                    <div class="mock-item-desc">Lead | $8K/yr</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">+ Add Contact</div>
+                                    <div class="mock-item-desc">New entry</div>
+                                </div>
+                            </div>
+                            <div class="mock-action">Export List</div>
+                        </div>
+
+                        <div class="mock-app-frame" id="app2">
+                            <div class="mock-header">
+                                <div class="mock-title">Inspections</div>
+                                <div class="mock-menu">⋮</div>
+                            </div>
+                            <div class="mock-content">
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Site A Review</div>
+                                    <div class="mock-item-desc">In Progress | 75%</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Site B Safety</div>
+                                    <div class="mock-item-desc">Complete | Jun 15</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">Site C Audit</div>
+                                    <div class="mock-item-desc">Scheduled | Jun 20</div>
+                                </div>
+                                <div class="mock-item">
+                                    <div class="mock-item-title">+ New Inspection</div>
+                                    <div class="mock-item-desc">Start check</div>
+                                </div>
+                            </div>
+                            <div class="mock-action">Photo Gallery</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Start Options -->
+        <div class="screen" data-screen="2">
+            <div class="screen-content">
+                <h2>Git For Apps</h2>
+                <p class="subheading">Generate, version, modify, regenerate.</p>
+                
+                <div class="start-options">
+                    <div class="start-option active" onclick="selectStartOption(0, event)">
+                        <div class="start-option-icon">✨</div>
+                        <div class="start-option-title">Start New</div>
+                        <div class="start-option-desc">Describe your idea</div>
+                    </div>
+                    <div class="start-option" onclick="selectStartOption(1, event)">
+                        <div class="start-option-icon">📦</div>
+                        <div class="start-option-title">Upload Existing</div>
+                        <div class="start-option-desc">Modify your ZIP</div>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 1rem; text-align: left;">Upload your existing ZIP package to regenerate, modify, or evolve.</p>
+                <button class="cta-button" style="display: block;" onclick="goToScreen(3)">Next</button>
+            </div>
+            <div class="screen-preview">
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent);">⚡</div>
+                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; text-align: left;">
+                        <div style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Version Control for Software</strong></div>
+                        <div>✓ Generate → Version</div>
+                        <div>✓ Modify → Regenerate</div>
+                        <div>✓ Upload your code anytime</div>
+                        <div style="margin-top: 1rem; color: var(--success); font-weight: 600;">Never locked in</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Your AI + Cost -->
+        <div class="screen" data-screen="3">
+            <div class="screen-content">
+                <h2>Bring Your Own AI</h2>
+                <p class="subheading">You control inference. You control cost.</p>
+                
+                <div class="start-options">
+                    <div class="start-option" style="cursor: default; opacity: 0.8;">
+                        <div class="start-option-icon">🔑</div>
+                        <div class="start-option-title">Zayvora (Local)</div>
+                        <div class="start-option-desc">Local Node Model</div>
+                    </div>
+                    <div class="start-option" style="cursor: default; opacity: 0.8;">
+                        <div class="start-option-icon">🔑</div>
+                        <div class="start-option-title">Claude / Gemini</div>
+                        <div class="start-option-desc">Your API key</div>
+                    </div>
+                </div>
+
+                <button class="cta-button" style="display: block;" onclick="goToScreen(4)">Next</button>
+            </div>
+            <div class="screen-preview">
+                <div style="width: 100%; padding: 0;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 1rem;">Typical Generation Cost</div>
+                    <div class="cost-breakdown">
+                        <div class="cost-row">
+                            <span class="cost-label">Input Tokens</span>
+                            <span class="cost-value">~$0.50</span>
+                        </div>
+                        <div class="cost-row">
+                            <span class="cost-label">Output Tokens</span>
+                            <span class="cost-value">~$1.50</span>
+                        </div>
+                        <div class="cost-row">
+                            <span class="cost-label">LogicHub Fee</span>
+                            <span class="cost-value">$0.00</span>
+                        </div>
+                        <div class="cost-total">
+                            <span>Typical Total</span>
+                            <span>$1–5</span>
+                        </div>
+                        <div class="cost-disclaimer">
+                            Varies by model, prompt complexity, and artifact size. You only pay for what you use. (Free with local Zayvora node).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Pipeline (Collapsible) -->
+        <div class="screen" data-screen="4">
+            <div class="screen-content">
+                <h2>How LogicHub Works</h2>
+                <p class="subheading">Six stages from intent to artifact.</p>
+                
+                <div class="pipeline-collapsible">
+                    <div class="pipeline-header" onclick="togglePipeline()">
+                        <span>Learn the generation stages</span>
+                        <span class="pipeline-toggle" id="pipelineToggle">▼</span>
+                    </div>
+                    <div class="pipeline-content" id="pipelineContent">
+                        <div class="pipeline-stages">
+                            <div class="pipeline-stage">
+                                <div>
+                                    <div class="pipeline-stage-name">Intent</div>
+                                    <div class="pipeline-stage-desc">Scope captured</div>
+                                </div>
+                            </div>
+                            <div class="pipeline-stage">
+                                <div>
+                                    <div class="pipeline-stage-name">PRD</div>
+                                    <div class="pipeline-stage-desc">Requirements defined</div>
+                                </div>
+                            </div>
+                            <div class="pipeline-stage">
+                                <div>
+                                    <div class="pipeline-stage-name">Technical Design</div>
+                                    <div class="pipeline-stage-desc">Tech stack chosen</div>
+                                </div>
+                            </div>
+                            <div class="pipeline-stage">
+                                <div>
+                                    <div class="pipeline-stage-name">Schema</div>
+                                    <div class="pipeline-stage-desc">Database designed</div>
+                                </div>
+                            </div>
+                            <div class="pipeline-stage">
+                                <div>
+                                    <div class="pipeline-stage-name">Implementation</div>
+                                    <div class="pipeline-stage-desc">Code generated</div>
+                                </div>
+                            </div>
+                            <div class="pipeline-stage" style="border-left-color: var(--success);">
+                                <div>
+                                    <div class="pipeline-stage-name" style="color: var(--success);">Artifact</div>
+                                    <div class="pipeline-stage-desc">Your software</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="cta-button" onclick="goToScreen(5)">Continue</button>
+            </div>
+            <div class="screen-preview">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent);">⚙</div>
+                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; text-align: left;">
+                        <div style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Each Stage Builds On</strong></div>
+                        <div style="margin-bottom: 0.5rem;">Intent defines scope</div>
+                        <div style="margin-bottom: 0.5rem;">PRD specifies features</div>
+                        <div style="margin-bottom: 0.5rem;">Design chooses technology</div>
+                        <div style="margin-bottom: 0.5rem;">Schema designs data</div>
+                        <div style="margin-bottom: 1rem;">Implementation generates code</div>
+                        <div style="color: var(--success); font-weight: 600; padding-top: 1rem; border-top: 1px solid var(--border-light);">Complete artifact ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: Why Different -->
+        <div class="screen" data-screen="5">
+            <div class="screen-content">
+                <h2>Why LogicHub is Different</h2>
+                <p class="subheading">Complete software ownership vs locked outputs.</p>
+                
+                <div style="text-align: left; margin: 1.5rem 0;">
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Typical AI Builder</div>
+                        <div class="breakdown-list" style="margin: 0;">
+                            <div class="breakdown-item">
+                                <div class="breakdown-icon">✗</div>
+                                <div class="breakdown-text">Prompt → Output</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-icon">✗</div>
+                                <div class="breakdown-text">No version history</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-icon">✗</div>
+                                <div class="breakdown-text">No source structure</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-icon">✗</div>
+                                <div class="breakdown-text">Start over each time</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-weight: 600; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">LogicHub</div>
+                        <div style="background: var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
+                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Complete artifact</div>
+                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Full version history</div>
+                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Project structure</div>
+                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Modify and regenerate</div>
+                        </div>
+                        <div class="own-forever-badge">Own Forever</div>
+                    </div>
+                </div>
+
+                <button class="cta-button" onclick="goToScreen(6)">Next</button>
+            </div>
+            <div class="screen-preview">
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--success);">🔐</div>
+                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; text-align: left;">
+                        <div style="margin-bottom: 1rem;"><strong style="color: var(--text-primary); font-size: 1rem;">Your Software</strong></div>
+                        <div>Complete source code</div>
+                        <div>Architecture docs</div>
+                        <div>Deployable APK</div>
+                        <div>Full history</div>
+                        <div style="margin-top: 1rem; color: var(--success); font-weight: 600;">You own everything</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 6: Ecosystem -->
+        <div class="screen" data-screen="6">
+            <div class="screen-content">
+                <h2>Build. Verify. Publish. Distribute.</h2>
+                <p class="subheading">The complete software lifecycle.</p>
+                
+                <div class="ecosystem-flow-visual">
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">1</div>
+                        <div class="flow-stage-label">Build</div>
+                        <div class="flow-stage-desc">Generate your artifact in LogicHub</div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">2</div>
+                        <div class="flow-stage-label">Verify</div>
+                        <div class="flow-stage-desc">Sign with Aporaksha identity</div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">3</div>
+                        <div class="flow-stage-label">Publish</div>
+                        <div class="flow-stage-desc">Distribute on Daxini Space</div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">4</div>
+                        <div class="flow-stage-label">Distribute</div>
+                        <div class="flow-stage-desc">Sell, license, or deploy via Zayvora</div>
+                    </div>
+                </div>
+
+                <button class="cta-button" onclick="goToScreen(7)">Next</button>
+            </div>
+            <div class="screen-preview">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 1.5rem; color: var(--accent);">→ → → →</div>
+                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 2; text-align: left;">
+                        <div style="margin-bottom: 1rem;"><strong style="color: var(--accent); font-size: 1rem;">One Connected Ecosystem</strong></div>
+                        <div>You build in LogicHub</div>
+                        <div>You sign with Aporaksha</div>
+                        <div>You publish on Daxini Space</div>
+                        <div style="margin-top: 1rem; color: var(--success); font-weight: 600;">You distribute through Zayvora</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 7: Artifact Package -->
+        <div class="screen" data-screen="7">
+            <div class="screen-content">
+                <h2>Your Complete Artifact</h2>
+                <p class="subheading">Download, modify, share, publish.</p>
+                
+                <button class="cta-button" onclick="goToScreen(8)">Final Step</button>
+            </div>
+            <div class="screen-preview">
+                <div style="width: 100%; padding: 0;">
+                    <div class="artifact-package">
+                        <div class="package-tree">
+                            <div class="package-item package-folder">your-app.zip</div>
+                            <div class="package-item package-file">├── architecture.json</div>
+                            <div class="package-item package-file">├── app-flow.md</div>
+                            <div class="package-item package-file">├── prd.md</div>
+                            <div class="package-item package-file">├── apk/</div>
+                            <div class="package-item package-file">│   ├── MainActivity.kt</div>
+                            <div class="package-item package-file">│   └── build.gradle</div>
+                            <div class="package-item package-file">├── ui-system/</div>
+                            <div class="package-item package-file">│   └── components.json</div>
+                            <div class="package-item package-file">├── source/</div>
+                            <div class="package-item package-file">│   └── [all source code]</div>
+                            <div class="package-item package-file">└── versions/</div>
+                            <div class="package-item package-file">    ├── v1.0.0/</div>
+                            <div class="package-item package-file">    └── v1.1.0-draft/</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 8: Complete -->
+        <div class="screen" data-screen="8">
+            <div class="screen-content">
+                <h2>Ready to Build</h2>
+                <p class="subheading">You are entering the Sovereign Workspace.</p>
+                <div style="margin: 2rem 0;">
+                    <button class="cta-button primary" onclick="completeOnboarding()">Enter LogicHub</button>
+                </div>
+            </div>
+            <div class="screen-preview" style="background: none; border: none;">
+                <div style="font-size: 4rem; color: var(--accent); margin-bottom: 1rem;">🚀</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress" id="progressDots">
+        <div class="progress-dot active" onclick="goToScreen(0)"></div>
+        <div class="progress-dot" onclick="goToScreen(1)"></div>
+        <div class="progress-dot" onclick="goToScreen(2)"></div>
+        <div class="progress-dot" onclick="goToScreen(3)"></div>
+        <div class="progress-dot" onclick="goToScreen(4)"></div>
+        <div class="progress-dot" onclick="goToScreen(5)"></div>
+        <div class="progress-dot" onclick="goToScreen(6)"></div>
+        <div class="progress-dot" onclick="goToScreen(7)"></div>
+        <div class="progress-dot" onclick="goToScreen(8)"></div>
+    </div>
+
+    <script>
+        let currentScreen = 0;
+        const totalScreens = 9;
+        const screens = document.querySelectorAll('.screen');
+        const dots = document.querySelectorAll('.progress-dot');
+        
+        // Navigation Logic
+        function goToScreen(index) {
+            if (index < 0 || index >= totalScreens) return;
+            
+            screens[currentScreen].classList.remove('active');
+            dots[currentScreen].classList.remove('active');
+            
+            currentScreen = index;
+            
+            screens[currentScreen].classList.add('active');
+            dots[currentScreen].classList.add('active');
+
+            // Trigger specific screen animations
+            if (currentScreen === 0) startTimelineAnimation();
+            if (currentScreen === 1) startCarouselAnimation();
+        }
+
+        // Completion logic
+        function completeOnboarding() {
+            localStorage.setItem('onboarding_complete', 'true');
+            window.location.href = 'index.html';
+        }
+
+        // Timeline Animation
+        function startTimelineAnimation() {
+            const items = document.querySelectorAll('.timeline-item');
+            const completeMsg = document.getElementById('timeline-complete');
+            
+            items.forEach(item => {
+                item.classList.remove('active', 'complete');
+            });
+            completeMsg.style.display = 'none';
+
+            let i = 0;
+            const animateNext = () => {
+                if (i > 0) {
+                    items[i-1].classList.remove('active');
+                    items[i-1].classList.add('complete');
+                }
+                if (i < items.length) {
+                    items[i].classList.add('active');
+                    i++;
+                    setTimeout(animateNext, 800);
+                } else {
+                    completeMsg.style.display = 'block';
+                }
+            };
+            
+            setTimeout(animateNext, 500);
+        }
+
+        // App Carousel Animation
+        let carouselInterval;
+        function startCarouselAnimation() {
+            if (carouselInterval) clearInterval(carouselInterval);
+            
+            const frames = document.querySelectorAll('.mock-app-frame');
+            const labels = ["Inventory App", "CRM System", "Field Audit App"];
+            const typeLabel = document.getElementById('appTypeLabel');
+            
+            let currentApp = 0;
+            
+            carouselInterval = setInterval(() => {
+                frames[currentApp].classList.remove('active');
+                
+                currentApp = (currentApp + 1) % frames.length;
+                
+                typeLabel.textContent = labels[currentApp];
+                frames[currentApp].classList.add('active');
+            }, 3000);
+        }
+
+        // Pipeline Toggle
+        function togglePipeline() {
+            const content = document.getElementById('pipelineContent');
+            const toggle = document.getElementById('pipelineToggle');
+            
+            content.classList.toggle('expanded');
+            toggle.classList.toggle('expanded');
+        }
+
+        // Select Option highlighting
+        function selectStartOption(index, event) {
+            const parent = event.currentTarget.parentNode;
+            const options = parent.querySelectorAll('.start-option');
+            options.forEach(opt => opt.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // Start Initial Animations
+        window.addEventListener('load', () => {
+            startTimelineAnimation();
+        });
+    </script>
+</body>
+</html>

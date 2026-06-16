@@ -6,9 +6,11 @@
     };
 
     bind('btn-toolbar-generate', function () {
+      document.body.classList.add('user-activated');
       if (global.app?.synthesizeArchitecture) global.app.synthesizeArchitecture();
     });
     bind('btn-toolbar-export', function () {
+      document.body.classList.add('user-activated');
       if (global.app?.exportZip) global.app.exportZip();
     });
     bind('btn-toolbar-publish', function () {

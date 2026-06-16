@@ -103,7 +103,7 @@ async function logToZayvora(task, trace, artifacts) {
   }
 }
 
-// Phase 1: Planning (Axiom) - ALCHEMIST LOGIC (TRACE-AUGMENTED)
+// Phase 1: Planning (Axiom) - ARTIFACT GENERATION ENGINE
 app.post('/api/zayvora/plan', async (req, res) => {
   const { prompt, architecture } = req.body;
   
@@ -113,28 +113,40 @@ app.post('/api/zayvora/plan', async (req, res) => {
     ? `HISTORICAL TRACE (Use this as a world-class template):\nTask: ${historicalTrace.task}\nCode: ${historicalTrace.artifacts?.code}\nPRD: ${JSON.stringify(historicalTrace.artifacts?.prd)}`
     : 'No historical trace found. Reason from first principles.';
 
-  const key = crypto.createHash('sha256').update(`axiom:${prompt}:${JSON.stringify(architecture)}`).digest('hex');
+  const key = crypto.createHash('sha256').update(`axiom_v2:${prompt}:${JSON.stringify(architecture)}`).digest('hex');
 
   try {
     const result = await zayvoraCoalescer.coalesce(key, async () => {
       const systemPrompt = `You are Zayvora Axiom, the Master Architect. 
-      Generate a complete 5-stage Design Document for this app.
+      Generate a COMPLETE APPLICATION ARTIFACT (Software Blueprint) for this app.
       
       ${traceContext}
       
       ${SYSTEM_ARCHITECTURE_GUIDE}
       
-      1. PRD (Product Requirements)
-      2. TRD (Technical Stack)
-      3. App Flow (User Journey)
-      4. UI/UX Brief (Design Tokens)
-      5. Backend Schema (ERD)
+      You must construct a complete project model with the following 14 sections. 
+      Format as STRICT JSON with the EXACT keys below:
       
-      Format as JSON with keys: prd, trd, flow, ui, schema.
+      {
+        "summary": { "name": "", "goal": "", "problem": "", "target_users": "", "value_prop": "", "constraints": "" },
+        "prd": { "features": [], "user_stories": [], "acceptance_criteria": [], "success_metrics": [], "edge_cases": [] },
+        "trd": { "frontend": "", "backend": "", "database": "", "auth": "", "apis": [], "deployment": "" },
+        "architecture": { "client": "", "api_layer": "", "services": "", "db": "", "integrations": "" },
+        "data_model": [ { "entity": "", "fields": [], "relationships": [] } ],
+        "app_flow": { "onboarding": [], "navigation": [], "state_transitions": [], "success_paths": [], "failure_paths": [] },
+        "ui_system": { "colors": [], "typography": "", "components": [], "screens": [] },
+        "source_tree": { "structure": {} },
+        "implementation_plan": [ { "step": "", "description": "", "dependencies": [] } ],
+        "code_preview": [ { "filename": "", "code": "representative snippets" } ],
+        "version_package": { "manifest": "project.logic.json structure" },
+        "export_package": { "contents": ["APK", "ZIP", "Git Repository", "project.logic.json"] },
+        "risk_analysis": { "technical": [], "scalability": [], "security": [] },
+        "continuation_prompt": "A prompt that can be pasted into Claude/Gemini/Cursor to continue development from this state."
+      }
       
       STRICT REQUIREMENT: 
-      - ZERO CHATTER.
-      - If this is a T1, T2, or T3 task, initialize a task.md manifest using the SOP Template.
+      - ZERO CHATTER. Output ONLY valid JSON.
+      - DO NOT wrap the output in \`\`\`json markdown blocks.
       
       Context: ${JSON.stringify(architecture)}`;
 
@@ -150,10 +162,22 @@ app.post('/api/zayvora/plan', async (req, res) => {
       return { response: data.choices[0].message.content };
     });
 
-    const artifacts = JSON.parse(result.response);
+    let rawJson = result.response;
+    
+    // Aggressive JSON cleansing (strip markdown ticks if the model ignores instructions)
+    if (rawJson.includes('\`\`\`')) {
+      const match = rawJson.match(/\`\`\`(?:json)?\s*([\s\S]+?)\s*\`\`\`/);
+      if (match) {
+        rawJson = match[1].trim();
+      }
+    }
+    rawJson = rawJson.trim();
+
+    const artifacts = JSON.parse(rawJson);
     res.json({ artifacts, reused_trace: !!historicalTrace });
   } catch (err) {
-    res.status(500).json({ error: 'Axiom planning failed' });
+    console.error('[Axiom Error]', err);
+    res.status(500).json({ error: 'Axiom planning failed', details: err.message });
   }
 });
 
@@ -178,43 +202,82 @@ app.post('/api/zayvora/synthesize', async (req, res) => {
       
       Instructions: ${prompt}`;
 
-      const response = await fetch('http://localhost:8080/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: fullPrompt }],
-          stream: false
-        })
-      });
-      const data = await response.json();
-      return { response: data.choices[0].message.content };
+      const OLLAMA_URL = process.env.LAB_NODE_URL || 'http://localhost:11434/v1/chat/completions';
+      const MODEL = 'daxini2404/zayvora:engineer';
+      
+      let attempt = 0;
+      const MAX_ATTEMPTS = 2;
+      let finalCode = "";
+      let lastError = null;
+      let currentPrompt = fullPrompt;
+
+      while (attempt < MAX_ATTEMPTS) {
+        attempt++;
+        const response = await fetch(OLLAMA_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [{ role: 'user', content: currentPrompt }],
+            stream: false
+          })
+        });
+        
+        if (!response.ok) {
+           throw new Error(`Ollama API returned ${response.status}`);
+        }
+        
+        const data = await response.json();
+        let code = data.choices[0]?.message?.content || "";
+        
+        // --- DAXINI AGGRESSIVE CLEANSE (Now handling agentic thought blocks) ---
+        // Strip <thought>...</thought> or [Cockpit]...[/Cockpit]
+        code = code.replace(/<thought>[\s\S]*?<\/thought>/gi, '');
+        code = code.replace(/\[Cockpit\][\s\S]*?\[\/Cockpit\]/gi, '');
+        
+        if (code.includes("```")) {
+          const match = code.match(/```(?:\w+)?\s*([\s\S]+?)\s*```/);
+          if (match) code = match[1].trim();
+        } else {
+          const chatterPrefixes = ["Here is the code:", "Here is the improved code:", "Sure!", "Certainly!", "Here is the raw code"];
+          chatterPrefixes.forEach(prefix => {
+            if (code.toLowerCase().includes(prefix.toLowerCase())) {
+              const index = code.toLowerCase().indexOf(prefix.toLowerCase()) + prefix.length;
+              code = code.substring(index).trim();
+              if (code.startsWith(":") || code.startsWith(".")) code = code.substring(1).trim();
+            }
+          });
+        }
+        code = code.trim();
+        
+        // --- COCKPIT v0.3 SUPERVISOR LOOP ---
+        // Basic Syntax/Closure Verification
+        const openBraces = (code.match(/\{/g) || []).length;
+        const closeBraces = (code.match(/\}/g) || []).length;
+        
+        if (openBraces !== closeBraces) {
+           lastError = `Syntax Error: Unmatched braces (${openBraces} open, ${closeBraces} closed).`;
+           currentPrompt = fullPrompt + `\n\n[Cockpit Supervisor]: Your previous output failed syntax verification: ${lastError}. Please fix the code and return the fully complete raw code.`;
+           continue; // Re-prompt
+        }
+        
+        if (!code || code.length < 10) {
+           lastError = "Verification Failed: Output too short or missing.";
+           currentPrompt = fullPrompt + `\n\n[Cockpit Supervisor]: Your previous output was blank. Output ONLY raw code.`;
+           continue;
+        }
+
+        finalCode = code;
+        break; // Verification passed
+      }
+      
+      if (!finalCode) {
+         finalCode = `// Synthesis failed after ${MAX_ATTEMPTS} attempts. Last error: ${lastError}`;
+      }
+      return { response: finalCode };
     });
 
-    let code = result.response?.trim() || "";
-    
-    // --- DAXINI AGGRESSIVE CLEANSE ---
-    // If there is a code block, we ignore EVERYTHING else.
-    if (code.includes("```")) {
-      const match = code.match(/```(?:\w+)?\s*([\s\S]+?)\s*```/);
-      if (match) {
-        code = match[1].trim();
-      }
-    } else {
-      // If no code block, strip common chatter prefixes
-      const chatterPrefixes = [
-        "Here is the code:", "Here is the improved code:", "Here is the updated code:",
-        "Sure!", "Certainly!", "I have updated", "This version", "Here is the raw code"
-      ];
-      chatterPrefixes.forEach(prefix => {
-        if (code.toLowerCase().includes(prefix.toLowerCase())) {
-          // If the prefix is found, try to take everything AFTER it
-          const index = code.toLowerCase().indexOf(prefix.toLowerCase()) + prefix.length;
-          code = code.substring(index).trim();
-          if (code.startsWith(":") || code.startsWith(".")) code = code.substring(1).trim();
-        }
-      });
-    }
-    // --- END FORCE-CLEANSE ---
+    let code = result.response;
 
     // LOG TO ZAYVORA FOR TRAINING
     await logToZayvora(prompt, result.response, { ...artifacts, code, filename });
