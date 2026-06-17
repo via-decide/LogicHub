@@ -8,8 +8,11 @@
 
   function validateProjectBundle(bundle) {
     const files = bundle && bundle.build ? bundle.build : {};
-    const required = ['index.html', 'app.js', 'style.css', 'manifest.json', 'metadata.json'];
+    const required = ['index.html', 'app.js', 'style.css', 'metadata.json'];
     const missing = required.filter((name) => !files[name]);
+    if (!files['manifest.json'] && !files['manifest.yaml']) {
+      missing.push('manifest.json or manifest.yaml');
+    }
     if (missing.length) throw new Error(`Missing required bundle files: ${missing.join(', ')}`);
     if (!/<html[\s>]/i.test(files['index.html'])) throw new Error('index.html must include an <html> root element.');
     if (!/<body[\s>]/i.test(files['index.html'])) throw new Error('index.html must include a <body> element.');
@@ -24,6 +27,33 @@
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '') || `app-${Date.now()}`;
+  }
+
+  function toYaml(obj, indent = 0) {
+    const spacing = " ".repeat(indent);
+    if (obj === null) return "null";
+    if (obj === undefined) return "null";
+    if (typeof obj === "string") {
+      if (obj.includes("\n")) {
+        return "|\n" + obj.split("\n").map(line => " ".repeat(indent + 2) + line).join("\n");
+      }
+      return `"${obj.replace(/"/g, '\\"')}"`;
+    }
+    if (typeof obj !== "object") return String(obj);
+    if (Array.isArray(obj)) {
+      if (obj.length === 0) return "[]";
+      return "\n" + obj.map(item => `${spacing}- ${toYaml(item, indent + 2).trim()}`).join("\n");
+    }
+    
+    const entries = Object.entries(obj);
+    if (entries.length === 0) return "{}";
+    return "\n" + entries.map(([key, val]) => {
+      const formattedVal = toYaml(val, indent + 2);
+      if (formattedVal.startsWith("\n")) {
+        return `${spacing}${key}:${formattedVal}`;
+      }
+      return `${spacing}${key}: ${formattedVal}`;
+    }).join("\n");
   }
 
   function buildPublishBundle(app, appName) {
@@ -62,8 +92,10 @@
         'app.js': files['app.js'] || '',
         'style.css': files['styles.css'] || files['style.css'] || '',
         'manifest.json': manifest,
+        'manifest.yaml': toYaml(parsedManifest).trim(),
         'metadata.json': JSON.stringify(metadata, null, 2),
-        'project.logic.json': JSON.stringify(projectLogic, null, 2)
+        'project.logic.json': JSON.stringify(projectLogic, null, 2),
+        'project.logic.yaml': toYaml(projectLogic).trim()
       },
       architecture_prd: app.map.buildPRD(),
       project_artifacts: app.map.projectArtifacts || {}

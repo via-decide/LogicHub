@@ -3817,6 +3817,34 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         const zip = new JSZip();
         const files = this.collectProjectFiles({ pwa: true });
         Object.entries(files).forEach(([fileName, code]) => zip.file(fileName, code));
+
+        // Simple helper to convert JS objects to YAML format
+        function toYaml(obj, indent = 0) {
+          const spacing = " ".repeat(indent);
+          if (obj === null) return "null";
+          if (obj === undefined) return "null";
+          if (typeof obj === "string") {
+            if (obj.includes("\n")) {
+              return "|\n" + obj.split("\n").map(line => " ".repeat(indent + 2) + line).join("\n");
+            }
+            return `"${obj.replace(/"/g, '\\"')}"`;
+          }
+          if (typeof obj !== "object") return String(obj);
+          if (Array.isArray(obj)) {
+            if (obj.length === 0) return "[]";
+            return "\n" + obj.map(item => `${spacing}- ${toYaml(item, indent + 2).trim()}`).join("\n");
+          }
+          
+          const entries = Object.entries(obj);
+          if (entries.length === 0) return "{}";
+          return "\n" + entries.map(([key, val]) => {
+            const formattedVal = toYaml(val, indent + 2);
+            if (formattedVal.startsWith("\n")) {
+              return `${spacing}${key}:${formattedVal}`;
+            }
+            return `${spacing}${key}: ${formattedVal}`;
+          }).join("\n");
+        }
         
         // Build the comprehensive 14-section version package
         const projectLogic = {
@@ -3830,11 +3858,24 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
           legacy_prd: this.map.buildPRD()
         };
         
+        // Output legacy files for backward compatibility
         zip.file("project.logic.json", JSON.stringify(projectLogic, null, 2));
         
-        // Keep the markdown PRD for backward compatibility or easy reading
+        // Output premium YAML configuration files
+        zip.file("project.logic.yaml", toYaml(projectLogic).trim());
+
+        const manifestJson = files['manifest.json'] || this.buildDefaultManifest(this.map.name);
+        try {
+          const parsedManifest = JSON.parse(manifestJson);
+          zip.file("manifest.yaml", toYaml(parsedManifest).trim());
+        } catch (_) {}
+        
+        // Keep the markdown PRD as raw text
         if (projectLogic.artifacts.prd) {
-          zip.file("ARCHITECTURE_PRD.md", JSON.stringify(projectLogic.artifacts.prd, null, 2));
+          const prdText = typeof projectLogic.artifacts.prd === 'string'
+            ? projectLogic.artifacts.prd
+            : (projectLogic.artifacts.prd.content || projectLogic.artifacts.prd.text || JSON.stringify(projectLogic.artifacts.prd, null, 2));
+          zip.file("ARCHITECTURE_PRD.md", prdText);
         } else {
           zip.file("ARCHITECTURE_PRD.md", this.map.buildPRD());
         }
