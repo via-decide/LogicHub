@@ -1219,6 +1219,40 @@
         }
       }
     }
+
+    /* --- Accessibility Enhancements (Focus & Touch Targets) --- */
+    a:focus-visible,
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--saffron, #ff671f);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* Ensure minimum touch targets on mobile for common interactive elements */
+      .header .toolbar-action, 
+      .header .btn-icon,
+      .footer a,
+      .eco-bar-link {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1329,11 +1363,11 @@
     </div>
     <div class="toolbar">
       <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
-      <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="toolbar-action viral-btn" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
-      <button id="btn-toolbar-generate" class="toolbar-action">Generate App</button>
-      <button id="btn-toolbar-export" class="toolbar-action" disabled>Export ZIP</button>
-      <button id="btn-toolbar-publish" class="toolbar-action" disabled>Publish</button>
+      <button class="btn-icon api-mobile-btn" aria-label="Toggle API panel" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
+      <button class="toolbar-action viral-btn" aria-label="Open Viral Boost dashboard" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
+      <button id="btn-toolbar-generate" class="toolbar-action" aria-label="Generate App from map">Generate App</button>
+      <button id="btn-toolbar-export" class="toolbar-action" aria-label="Export project as ZIP" disabled>Export ZIP</button>
+      <button id="btn-toolbar-publish" class="toolbar-action" aria-label="Publish project to daxini.space" disabled>Publish</button>
       <button class="btn-icon" onclick="alert('Quick help:
 1. Add the main parts you understand, like a screen or sign-in flow.
 2. You do not need separate JS or CSS parts unless you want custom files.
@@ -1375,7 +1409,7 @@
       <div class="log-line" id="log-2">>> READY TO BUILD</div>
       <div class="log-line success" id="log-3">>> ADD SCREEN TO START</div>
     </div>
-    <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
+    <button class="forge-fab" aria-label="Open AI Forge Assistant" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
   <div class="helper-strip"><strong>New here?</strong> Start with the canvas: add your first screen, organize blocks, preview your app, then publish when ready. Advanced deployment options (APK, export, and download package) are now grouped under Publish → Advanced Deployment.</div>
@@ -1622,19 +1656,19 @@
 
   <!-- FOOTER -->
   <div class="footer" id="step-footer">
-    <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Block</button>
-    <button id="btn-blocks" onclick="app.toggleBlocksPanel()">📄 Pages</button>
-    <button id="btn-preview" onclick="app.viewPRD()">👁 Preview</button>
-    <button id="btn-publish" disabled onclick="app.publishApp()">🚀 Publish</button>
-  </div>
-  <div style="display:none" aria-hidden="true">
-    <button id="btn-synth" class="compile-btn" onclick="app.synthesizeArchitecture()">⚡ Build</button>
-    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">📋 PRD</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
-    <button id="btn-apk" class="apk-btn" disabled onclick="app.buildApk()">📱 APK</button>
-    <button id="btn-install" class="install-btn" disabled onclick="app.installPWA()">Install</button>
-    <button id="btn-clear" onclick="app.clearMap()">Reset</button>
-    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">Synth</button>
+    <button id="btn-add-part" aria-label="Add UI Component" onclick="app.addBlock('ui')">➕ Add Block</button>
+    <button id="btn-blocks" aria-label="Toggle Pages Panel" onclick="app.toggleBlocksPanel()">📄 Pages</button>
+    <button id="btn-preview" aria-label="View Product Requirement Document" onclick="app.viewPRD()">👁 Preview</button>
+    <button id="btn-publish" aria-label="Publish App" disabled onclick="app.publishApp()">🚀 Publish</button>
+    
+    <!-- Desktop bottom actions -->
+    <button id="btn-synth" class="compile-btn" aria-label="Build application" onclick="app.synthesizeArchitecture()">⚡ Build</button>
+    <button id="btn-prd" class="prd-btn" aria-label="View Project PRD" onclick="app.viewPRD()">📋 PRD</button>
+    <button id="btn-export" aria-label="Export project to ZIP" disabled onclick="app.exportZip()">📦 Export</button>
+    <button id="btn-apk" class="apk-btn" aria-label="Build Android APK" disabled onclick="app.buildApk()">📱 APK</button>
+    <button id="btn-install" class="install-btn" aria-label="Install as PWA" disabled onclick="app.installPWA()">Install</button>
+    <button id="btn-clear" aria-label="Clear Map" onclick="app.clearMap()">Reset</button>
+    <button id="btn-validate" class="compile-btn" aria-label="Open Forge for Synthesis" onclick="openForgeModal()">Synth</button>
   </div>
 
   <div class="modal" id="create-app-modal">
