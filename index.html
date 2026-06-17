@@ -1032,6 +1032,27 @@
     button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
     button:disabled { opacity: 0.58; cursor: not-allowed; }
     button.compile-btn { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
+    @keyframes border-pulse {
+      0% {
+        border-color: var(--accent);
+        box-shadow: 0 0 5px rgba(0, 229, 255, 0.4);
+      }
+      50% {
+        border-color: var(--saffron);
+        box-shadow: 0 0 15px rgba(255, 103, 31, 0.8);
+      }
+      100% {
+        border-color: var(--accent);
+        box-shadow: 0 0 5px rgba(0, 229, 255, 0.4);
+      }
+    }
+    button.pulsing-publish-cta {
+      animation: border-pulse 2s infinite ease-in-out !important;
+      background: linear-gradient(135deg, rgba(255, 103, 31, 0.15), rgba(0, 229, 255, 0.15)) !important;
+      border: 2px solid var(--accent) !important;
+      color: #fff !important;
+      font-weight: 800 !important;
+    }
     button.forge-fab {
       background: linear-gradient(135deg, var(--accent), #00b8cc); color: #000;
       border: none; padding: 0.55rem 1rem; border-radius: 8px; font-weight: 800;
@@ -1722,6 +1743,8 @@
           <a href="https://aporaksha.com" style="transition: color 0.2s;">aporaksha</a>
           <a href="https://hanuman.solutions" style="transition: color 0.2s;">hanuman.solutions</a>
           <a href="https://store.viadecide.com/printbydd" style="transition: color 0.2s;">printbydd store</a>
+          <a href="/pages/how-it-works.html" style="transition: color 0.2s;">how it works</a>
+          <a href="/pages/design-process.html" style="transition: color 0.2s;">design process</a>
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: #8b90a6;">
@@ -2823,7 +2846,16 @@
         const ready = n > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
         document.getElementById("btn-export").disabled = !ready;
         document.getElementById("btn-apk").disabled = !ready;
-        document.getElementById("btn-publish").disabled = n === 0;
+        
+        const publishBtn = document.getElementById("btn-publish");
+        publishBtn.disabled = n === 0;
+        this.synthesisComplete = ready;
+        if (this.synthesisComplete) {
+          publishBtn.classList.add("pulsing-publish-cta");
+        } else {
+          publishBtn.classList.remove("pulsing-publish-cta");
+        }
+        
         if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
         const stat = document.getElementById("map-status");
         if (n === 0) { stat.textContent = "ADD SCREEN TO START"; stat.className = "map-status state-idle"; }
