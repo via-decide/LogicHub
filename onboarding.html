@@ -2,1315 +2,705 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LogicHub - Onboarding</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LogicHub - Welcome</title>
     <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.3);
+            --accent-light: #60a5fa;
+            --border: #2a2a2a;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --sheet-bg: #111111;
+            --ui-light: #ffffff;
+            --ui-gray: #f3f4f6;
+            --ui-dark: #1e293b;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0f0f0f;
-            --bg-secondary: #1a1a1a;
-            --bg-tertiary: #252525;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --text-muted: #707070;
-            --accent: #3b82f6;
-            --accent-light: #60a5fa;
-            --accent-dim: rgba(59, 130, 246, 0.1);
-            --border: #2a2a2a;
-            --border-light: #363636;
-            --success: #10b981;
-            --success-dim: rgba(16, 185, 129, 0.1);
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            line-height: 1.6;
+            height: 100dvh;
+            width: 100vw;
             overflow: hidden;
+            position: fixed;
         }
 
+        /* --- LAYOUT & NAVIGATION --- */
         .onboarding-container {
             width: 100%;
-            height: 100vh;
-            display: flex;
+            height: 100%;
             position: relative;
         }
 
         .screen {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: max(env(safe-area-inset-top, 20px), 2rem) 1.5rem max(env(safe-area-inset-bottom, 20px), 5rem);
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.98);
         }
 
         .screen.active {
             opacity: 1;
             pointer-events: auto;
+            transform: scale(1);
         }
 
-        .screen {
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem 1.5rem;
-            gap: 1.5rem;
-        }
-
-        .screen-content {
-            width: 100%;
-            max-width: 100%;
-            text-align: center;
-        }
-
-        @media (min-width: 1200px) {
-            .screen {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                padding: 3rem 4rem;
-                gap: 4rem;
-            }
-
-            .screen-content {
-                max-width: none;
-                flex: 1;
-                text-align: left;
-            }
-
-            .screen-preview {
-                flex: 1;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-                border-radius: 12px;
-                border: 1px solid var(--border-light);
-                padding: 2rem;
-                min-height: 500px;
-            }
-
-            .screen:nth-child(1) .screen-preview,
-            .screen:nth-child(2) .screen-preview,
-            .screen:nth-child(5) .screen-preview,
-            .screen:nth-child(8) .screen-preview {
-                order: 2;
-            }
-
-            .screen:nth-child(1) .screen-content,
-            .screen:nth-child(2) .screen-content,
-            .screen:nth-child(5) .screen-content,
-            .screen:nth-child(8) .screen-content {
-                order: 1;
-            }
-        }
-
-        h1 {
-            font-size: clamp(2rem, 8vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        h2 {
-            font-size: clamp(1.5rem, 6vw, 2.2rem);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-            letter-spacing: -0.01em;
-        }
-
-        .subheading {
-            font-size: clamp(0.95rem, 4vw, 1.1rem);
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-            max-width: 500px;
-        }
-
-        @media (max-width: 1199px) {
-            .subheading {
-                margin-left: auto;
-                margin-right: auto;
-            }
-        }
-
-        .generation-timeline {
-            width: 100%;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin: 1.5rem 0;
-        }
-
-        @media (min-width: 1200px) {
-            .generation-timeline {
-                margin: 0;
-            }
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .timeline-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .timeline-item.complete {
-            opacity: 1;
-        }
-
-        .timeline-item.active {
-            opacity: 1;
-            color: var(--accent);
-        }
-
-        .timeline-label {
-            flex: 1;
-        }
-
-        .timeline-icon {
-            font-size: 1rem;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        .timeline-item.active .timeline-icon {
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-        }
-
-        .app-carousel {
-            position: relative;
-            height: 500px;
-            width: 100%;
-        }
-
-        .mock-app-frame {
+        .skip-btn {
             position: absolute;
-            top: 0;
-            left: 0;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            aspect-ratio: 9 / 16;
-            max-width: 280px;
-            max-height: 500px;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            overflow: hidden;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            margin: 0 auto;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .mock-app-frame.active {
-            opacity: 1;
-        }
-
-        .app-type-label {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .mock-app-frame.active ~ .app-type-label,
-        .app-type-label.active {
-            opacity: 1;
-        }
-
-        .mock-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .mock-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .mock-menu {
+            top: max(env(safe-area-inset-top, 16px), 1.5rem);
+            right: 1.5rem;
+            color: var(--text-secondary);
             font-size: 0.9rem;
-            opacity: 0.6;
-        }
-
-        .mock-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .mock-item {
-            background: var(--bg-tertiary);
-            padding: 0.75rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            border-left: 2px solid var(--accent);
-        }
-
-        .mock-item-title {
             font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .mock-item-desc {
-            font-size: 0.75rem;
-            opacity: 0.6;
-        }
-
-        .mock-action {
-            padding: 0.75rem;
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-radius: 4px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 0.85rem;
-            margin-top: auto;
-        }
-
-        .start-options {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin: 1.5rem 0;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .start-options {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .start-option {
-            padding: 1.5rem;
-            background-color: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            text-align: center;
-        }
-
-        .start-option:hover {
-            border-color: var(--accent);
-            background-color: var(--accent-dim);
-        }
-
-        .start-option.active {
-            border-color: var(--accent);
-            background-color: var(--accent-dim);
-        }
-
-        .start-option-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .start-option-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .start-option-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .cost-breakdown {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 1.5rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-            margin: 1.5rem 0;
-        }
-
-        .cost-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .cost-row:last-child {
-            border-bottom: none;
-        }
-
-        .cost-label {
-            color: var(--text-secondary);
-        }
-
-        .cost-value {
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .cost-total {
-            padding-top: 1rem;
-            margin-top: 1rem;
-            border-top: 2px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-            color: var(--success);
-        }
-
-        .cost-disclaimer {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 1rem;
-            text-align: center;
-        }
-
-        .breakdown-list {
-            text-align: left;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 1.5rem;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            margin: 1.5rem 0;
-        }
-
-        .breakdown-item {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
-
-        .breakdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .breakdown-icon {
-            flex-shrink: 0;
-            margin-top: 0.125rem;
-            color: #ef4444;
-        }
-
-        .breakdown-text {
-            color: var(--text-secondary);
-        }
-
-        .own-forever-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .ecosystem-flow-visual {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin: 1.5rem 0;
-            width: 100%;
-        }
-
-        .flow-stage {
-            padding: 1.5rem;
-            background-color: var(--bg-secondary);
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .flow-stage-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-        }
-
-        .flow-stage-label {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .flow-stage-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .flow-arrow {
-            text-align: center;
-            color: var(--accent);
-            font-size: 1.5rem;
-        }
-
-        .pipeline-collapsible {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 1.5rem 0;
-        }
-
-        .pipeline-header {
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .pipeline-header:hover {
-            background-color: var(--bg-tertiary);
-        }
-
-        .pipeline-toggle {
-            font-size: 1.2rem;
-            transition: transform 0.3s ease;
-        }
-
-        .pipeline-toggle.expanded {
-            transform: rotate(180deg);
-        }
-
-        .pipeline-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .pipeline-content.expanded {
-            max-height: 500px;
-        }
-
-        .pipeline-stages {
-            padding: 0 1.5rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .pipeline-stage {
-            padding: 0.75rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            border-left: 2px solid var(--accent);
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .pipeline-stage-name {
-            font-weight: 500;
-        }
-
-        .pipeline-stage-desc {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .artifact-package {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin: 1.5rem 0;
-            text-align: left;
-        }
-
-        .package-tree {
-            text-align: left;
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-        }
-
-        .package-item {
-            padding: 0.25rem 0;
-        }
-
-        .package-folder {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .package-file {
-            padding-left: 1.5rem;
-            color: var(--text-secondary);
-        }
-
-        .activation-assets {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin: 1.5rem 0;
-            width: 100%;
-        }
-
-        @media (min-width: 1200px) {
-            .activation-assets {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .asset-item {
-            padding: 1rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-left: 3px solid var(--success);
-            border-radius: 6px;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .asset-icon {
-            font-size: 1.25rem;
-            color: var(--success);
-            margin-bottom: 0.5rem;
-        }
-
-        .cta-button {
-            padding: 0.875rem 2rem;
-            background-color: var(--accent);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 8px;
-            font-size: clamp(0.95rem, 3vw, 1rem);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            margin-top: 1rem;
-            letter-spacing: -0.01em;
-        }
-
-        .cta-button:hover {
-            background-color: var(--accent-light);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-
-        .cta-button:active {
-            transform: translateY(0);
-        }
-
-        .progress {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 0.5rem;
-            z-index: 10;
-        }
-
-        .progress-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--border);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .progress-dot.active {
-            background-color: var(--accent);
-            transform: scale(1.3);
-        }
-
-        .skip-button {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
             background: none;
             border: none;
-            color: var(--text-secondary);
+            z-index: 10;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            transition: color 0.2s;
+        }
+
+        .skip-btn:active { color: var(--text-primary); }
+
+        .progress-dots {
+            position: absolute;
+            bottom: max(env(safe-area-inset-bottom, 16px), 2rem);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
             z-index: 10;
         }
 
-        .skip-button:hover {
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            width: 24px;
+            background: var(--accent);
+        }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1 {
+            font-size: clamp(2rem, 8vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            line-height: 1.1;
+            background: linear-gradient(180deg, #fff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.sub {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+
+        .cta-btn {
+            width: 100%;
+            max-width: 340px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--bg-tertiary);
             color: var(--text-primary);
+            border: 1px solid var(--border);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        @media (max-width: 640px) {
-            .screen {
-                padding: 1.5rem 1rem;
-            }
+        .cta-btn:active { transform: scale(0.98); background: var(--bg-secondary); }
 
-            h1 {
-                font-size: 1.75rem;
-            }
-
-            h2 {
-                font-size: 1.35rem;
-            }
-
-            .progress {
-                bottom: 1.5rem;
-            }
-
-            .skip-button {
-                top: 1.5rem;
-                right: 1.5rem;
-                font-size: 0.85rem;
-            }
+        .cta-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px var(--accent-glow);
         }
+
+        .cta-btn.primary:active {
+            background: #1d4ed8;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* --- VISUAL CONTAINERS --- */
+        .visual-container {
+            width: 100%;
+            max-width: 340px;
+            height: 240px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            background: radial-gradient(circle at center, rgba(37,99,235,0.05) 0%, transparent 70%);
+        }
+
+        /* --- SCREEN 1: ANIMATION --- */
+        .s1-prompt {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            z-index: 3;
+            white-space: nowrap;
+            opacity: 0;
+        }
+        
+        .s1-prompt .cursor {
+            display: inline-block;
+            width: 2px; height: 14px; background: var(--accent-light);
+        }
+
+        .s1-ide {
+            position: absolute;
+            top: 55px;
+            left: 20px;
+            width: 190px;
+            height: 150px;
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 1;
+            opacity: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mac-header {
+            display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: #1a1a1a; border-bottom: 1px solid #333;
+        }
+        .mac-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mac-dot.r { background: #ff5f56; }
+        .mac-dot.y { background: #ffbd2e; }
+        .mac-dot.g { background: #27c93f; }
+
+        .s1-code-lines { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .s1-line { height: 4px; border-radius: 2px; opacity: 0; }
+        .s1-line.blue { background: #3b82f6; width: 60%; }
+        .s1-line.purple { background: #c084fc; width: 40%; margin-left: 10px; }
+        .s1-line.green { background: #34d399; width: 80%; margin-left: 10px; }
+        .s1-line.gray { background: #4b5563; width: 50%; }
+        .s1-line.orange { background: #fb923c; width: 70%; margin-left: 10px; }
+
+        .s1-ui-mockup {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            width: 140px;
+            height: 190px;
+            background: var(--ui-light);
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            box-shadow: -10px 15px 40px rgba(0,0,0,0.7);
+            z-index: 2;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .mock-nav { display: flex; justify-content: space-between; align-items: center; }
+        .mock-nav-menu { width: 16px; height: 12px; border-top: 2px solid #9ca3af; border-bottom: 2px solid #9ca3af; }
+        .mock-nav-avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .mock-title { width: 60%; height: 8px; background: #d1d5db; border-radius: 4px; }
+        
+        .mock-chart { display: flex; align-items: flex-end; gap: 4px; height: 40px; padding-bottom: 4px; border-bottom: 1px solid #f3f4f6; }
+        .mock-bar { flex: 1; background: #e0e7ff; border-radius: 3px 3px 0 0; }
+        .mock-bar:nth-child(1) { height: 40%; }
+        .mock-bar:nth-child(2) { height: 70%; }
+        .mock-bar:nth-child(3) { height: 100%; background: #3b82f6; } 
+        .mock-bar:nth-child(4) { height: 50%; }
+
+        .mock-list-item { background: var(--ui-gray); border-radius: 8px; padding: 8px; display: flex; gap: 8px; align-items: center; }
+        .mock-icon { width: 24px; height: 24px; border-radius: 6px; background: #dbeafe; display: flex; align-items: center; justify-content: center; }
+        .mock-icon::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; }
+        .mock-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .mock-text-1 { width: 100%; height: 4px; background: #9ca3af; border-radius: 2px; }
+        .mock-text-2 { width: 60%; height: 4px; background: #d1d5db; border-radius: 2px; }
+
+        /* Animation Keyframes S1 */
+        .screen[data-index="0"].active .s1-prompt { animation: promptDrop 0.6s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, promptGlow 2s 1s infinite alternate; }
+        .screen[data-index="0"].active .s1-prompt .cursor { animation: blink 0.8s infinite; }
+        .screen[data-index="0"].active .s1-ide { animation: ideSlideIn 0.5s 0.8s forwards; }
+        .screen[data-index="0"].active .s1-line:nth-child(1) { animation: typeCode 0.15s 1.2s forwards; }
+        .screen[data-index="0"].active .s1-line:nth-child(2) { animation: typeCode 0.15s 1.35s forwards; }
+        .screen[data-index="0"].active .s1-line:nth-child(3) { animation: typeCode 0.15s 1.5s forwards; }
+        .screen[data-index="0"].active .s1-line:nth-child(4) { animation: typeCode 0.15s 1.65s forwards; }
+        .screen[data-index="0"].active .s1-line:nth-child(5) { animation: typeCode 0.15s 1.8s forwards; }
+        .screen[data-index="0"].active .s1-ui-mockup { animation: uiSlideUp 0.6s 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes promptDrop { 0% { opacity: 0; transform: translateX(-50%) translateY(-20px); } 100% { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes promptGlow { 0% { border-color: var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.5); } 100% { border-color: var(--accent); box-shadow: 0 8px 24px var(--accent-glow); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes ideSlideIn { 0% { opacity: 0; transform: translateX(-20px) scale(0.95); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
+        @keyframes typeCode { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes uiSlideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        /* --- SCREEN 2: OWNERSHIP --- */
+        .s2-visual {
+            position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .s2-ide {
+            position: absolute; left: 10px; width: 180px; background: #0d0d0d; border: 1px solid #333; border-radius: 12px; overflow: hidden; font-family: ui-monospace, monospace; font-size: 0.75rem; color: #9ca3af;
+        }
+        .s2-file-tree { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .s2-folder { display: flex; align-items: center; gap: 6px; }
+        .s2-folder svg { width: 12px; height: 12px; fill: #60a5fa; }
+        .s2-file { display: flex; align-items: center; gap: 6px; padding-left: 18px; color: #d1d5db; }
+        .s2-file svg { width: 10px; height: 10px; stroke: #9ca3af; }
+
+        .s2-app {
+            position: absolute; right: 10px; width: 130px; height: 180px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); padding: 12px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .s2-app-img { width: 100%; height: 60px; border-radius: 8px; background: linear-gradient(45deg, #10b981, #059669); }
+        .s2-app-text { width: 80%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; }
+        .s2-app-text.short { width: 40%; }
+        .s2-app-btn { margin-top: auto; width: 100%; height: 24px; background: var(--accent); border-radius: 12px; }
+
+        .badge {
+            position: absolute; top: -12px; right: -12px; background: var(--success); color: #000; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; box-shadow: 0 4px 12px var(--success-glow); z-index: 10;
+        }
+
+        .info-chip {
+            background: var(--bg-tertiary); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; margin-top: 1.5rem; cursor: pointer; transition: background 0.2s;
+        }
+        .info-chip:active { background: var(--border); }
+
+        /* --- SCREEN 3: DIFFERENTIATION --- */
+        .s3-visual {
+            position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .bg-ui-widget {
+            position: absolute; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; opacity: 0; z-index: 0;
+        }
+        .widget-toggle { top: 20px; right: 20px; padding: 8px; display: flex; gap: 8px; align-items: center; }
+        .toggle-track { width: 24px; height: 14px; background: var(--accent); border-radius: 10px; position: relative; }
+        .toggle-knob { position: absolute; right: 2px; top: 2px; width: 10px; height: 10px; background: #fff; border-radius: 50%; }
+        .toggle-line { width: 30px; height: 4px; background: #444; border-radius: 2px; }
+
+        .widget-slider { bottom: 30px; left: 10px; padding: 10px; width: 100px; }
+        .slider-track { width: 100%; height: 4px; background: #333; border-radius: 2px; position: relative; }
+        .slider-fill { width: 60%; height: 100%; background: var(--success); border-radius: 2px; }
+        .slider-knob { position: absolute; left: 60%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; }
+
+        .compare-box { display: flex; flex-direction: column; gap: 12px; width: 100%; z-index: 2; }
+        .compare-row { display: flex; align-items: center; gap: 16px; background: var(--bg-secondary); padding: 16px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .compare-row.win { border-color: rgba(37, 99, 235, 0.4); background: linear-gradient(90deg, rgba(37,99,235,0.15) 0%, var(--bg-secondary) 100%); }
+        .c-icon { font-size: 1.2rem; }
+        .c-text { font-size: 0.9rem; font-weight: 500; }
+        .c-text.dim { color: var(--text-secondary); text-decoration: line-through; }
+
+        .screen[data-index="2"].active .bg-ui-widget { animation: fadeInFloat 0.8s 0.4s forwards; }
+        @keyframes fadeInFloat { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 0.6; transform: translateY(0); } }
+
+        /* --- SCREEN 4: ARTIFACT EXPLOSION --- */
+        .s4-visual {
+            position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+
+        .artifact-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 72px; height: 72px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px var(--accent-glow);
+            z-index: 10;
+        }
+
+        .artifact-node {
+            position: absolute;
+            top: 50%; left: 50%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 24px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+            z-index: 5;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .node-icon { display: flex; align-items: center; justify-content: center; color: var(--accent-light); }
+        .node-icon svg { width: 16px; height: 16px; stroke-width: 2; }
+
+        /* Screen 4 Animations */
+        .screen[data-index="3"].active .artifact-center { animation: centerPulse 2s infinite alternate; }
+        .screen[data-index="3"].active .node-1 { animation: explodeN1 0.7s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .screen[data-index="3"].active .node-2 { animation: explodeN2 0.7s 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .screen[data-index="3"].active .node-3 { animation: explodeN3 0.7s 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .screen[data-index="3"].active .node-4 { animation: explodeN4 0.7s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .screen[data-index="3"].active .node-5 { animation: explodeN5 0.7s 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes explodeN1 { 100% { opacity: 1; transform: translate(-100px, -70px) scale(1); color: #fff; border-color: rgba(96, 165, 250, 0.3); } }
+        @keyframes explodeN2 { 100% { opacity: 1; transform: translate(20px, -85px) scale(1); color: #fff; border-color: rgba(96, 165, 250, 0.3); } }
+        @keyframes explodeN3 { 100% { opacity: 1; transform: translate(-110px, 15px) scale(1); color: #fff; border-color: rgba(96, 165, 250, 0.3); } }
+        @keyframes explodeN4 { 100% { opacity: 1; transform: translate(35px, 25px) scale(1); color: #fff; border-color: rgba(96, 165, 250, 0.3); } }
+        @keyframes explodeN5 { 100% { opacity: 1; transform: translate(-40px, 80px) scale(1); color: #fff; border-color: rgba(96, 165, 250, 0.3); } }
+
+        @keyframes centerPulse {
+            0% { box-shadow: 0 0 20px var(--accent-glow); border-color: var(--accent); }
+            100% { box-shadow: 0 0 40px rgba(96, 165, 250, 0.5); border-color: var(--accent-light); }
+        }
+
+        /* --- BOTTOM SHEETS --- */
+        .sheet-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 100;
+        }
+        .sheet {
+            position: fixed; bottom: 0; left: 0; right: 0; background: var(--sheet-bg); border-top: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px 20px max(env(safe-area-inset-bottom, 24px), 32px); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 101;
+        }
+        .sheet-overlay.active { opacity: 1; pointer-events: auto; }
+        .sheet.active { transform: translateY(0); }
+        .sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 24px; }
+        .sheet h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .sheet p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; }
     </style>
 </head>
 <body>
-    <button class="skip-button" onclick="completeOnboarding()">Skip</button>
+
+    <button class="skip-btn" onclick="enterForge()">Skip</button>
 
     <div class="onboarding-container">
-        <!-- Screen 0: Animated Demo Generation -->
-        <div class="screen active" data-screen="0">
-            <div class="screen-content">
-                <h1>Describe an App. We'll Generate It.</h1>
-                <p class="subheading">LogicHub transforms ideas into complete, ownable software artifacts.</p>
+        
+        <!-- SCREEN 1: HOOK (UPDATED COPY) -->
+        <div class="screen active" data-index="0">
+            <div class="visual-container">
+                <div class="s1-prompt">
+                    <span style="color: var(--accent-light);">✨</span> "Dashboard app, show stats" <span class="cursor"></span>
+                </div>
                 
-                <div style="background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: 1.5rem 0; text-align: left;">
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 500;">Example Prompt:</div>
-                    <div style="font-size: 0.9rem; color: var(--text-primary); font-style: italic; padding: 0.75rem; background-color: var(--bg-primary); border-radius: 6px; border-left: 2px solid var(--accent);">
-                        "Create an inventory management app. Track items, quantity, location. Add photos. Export to CSV."
+                <div class="s1-ide">
+                    <div class="mac-header">
+                        <div class="mac-dot r"></div><div class="mac-dot y"></div><div class="mac-dot g"></div>
+                    </div>
+                    <div class="s1-code-lines">
+                        <div class="s1-line blue"></div>
+                        <div class="s1-line purple"></div>
+                        <div class="s1-line green"></div>
+                        <div class="s1-line gray"></div>
+                        <div class="s1-line orange"></div>
                     </div>
                 </div>
 
-                <button class="cta-button" onclick="goToScreen(1)">See Generation</button>
-            </div>
-            <div class="screen-preview">
-                <div class="generation-timeline" id="generationTimeline">
-                    <div class="timeline-item" data-index="0">
-                        <div class="timeline-label">PRD Generated</div>
-                        <div class="timeline-icon">📄</div>
+                <div class="s1-ui-mockup">
+                    <div class="mock-nav">
+                        <div class="mock-nav-menu"></div>
+                        <div class="mock-nav-avatar"></div>
                     </div>
-                    <div class="timeline-item" data-index="1">
-                        <div class="timeline-label">Architecture Designed</div>
-                        <div class="timeline-icon">🏗</div>
+                    <div class="mock-title"></div>
+                    <div class="mock-chart">
+                        <div class="mock-bar"></div><div class="mock-bar"></div><div class="mock-bar"></div><div class="mock-bar"></div>
                     </div>
-                    <div class="timeline-item" data-index="2">
-                        <div class="timeline-label">Data Schema Created</div>
-                        <div class="timeline-icon">🗄</div>
-                    </div>
-                    <div class="timeline-item" data-index="3">
-                        <div class="timeline-label">UI Components Built</div>
-                        <div class="timeline-icon">🎨</div>
-                    </div>
-                    <div class="timeline-item" data-index="4">
-                        <div class="timeline-label">APK Generated</div>
-                        <div class="timeline-icon">📱</div>
-                    </div>
-                    <div style="padding-top: 1rem; border-top: 1px solid var(--border); margin-top: 1rem; font-size: 0.85rem; color: var(--success); display: none;" id="timeline-complete">
-                        ✓ Complete artifact ready
+                    <div class="mock-list-item">
+                        <div class="mock-icon"></div>
+                        <div class="mock-text">
+                            <div class="mock-text-1"></div><div class="mock-text-2"></div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <h1>Build Apps You<br>Actually Own</h1>
+            <p class="sub">Describe an app. We generate the complete repository.</p>
+            <button class="cta-btn" onclick="nextScreen()">Continue</button>
         </div>
 
-        <!-- Screen 1: What You Get + Rotating App Previews -->
-        <div class="screen" data-screen="1">
-            <div class="screen-content">
-                <h2>Here's What You Own</h2>
-                <p class="subheading">Every generated artifact is a complete software package.</p>
-                
-                <div class="activation-assets">
-                    <div class="asset-item">
-                        <div class="asset-icon">✓</div>
-                        PRD
-                    </div>
-                    <div class="asset-item">
-                        <div class="asset-icon">✓</div>
-                        Architecture
-                    </div>
-                    <div class="asset-item">
-                        <div class="asset-icon">✓</div>
-                        App Flow
-                    </div>
-                    <div class="asset-item">
-                        <div class="asset-icon">✓</div>
-                        APK
-                    </div>
-                    <div class="asset-item">
-                        <div class="asset-icon">✓</div>
-                        ZIP
-                    </div>
-                    <div class="asset-item">
-                        <div class="asset-icon">✓</div>
-                        Version History
-                    </div>
-                </div>
-
-                <button class="cta-button" onclick="goToScreen(2)">Continue</button>
-            </div>
-            <div class="screen-preview">
-                <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                    <div class="app-type-label active" id="appTypeLabel">Inventory App</div>
-                    <div class="app-carousel" id="appCarousel">
-                        <div class="mock-app-frame active" id="app0">
-                            <div class="mock-header">
-                                <div class="mock-title">Inventory</div>
-                                <div class="mock-menu">⋮</div>
-                            </div>
-                            <div class="mock-content">
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Screwdrivers</div>
-                                    <div class="mock-item-desc">Qty: 47 | Shelf A2</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Bolts</div>
-                                    <div class="mock-item-desc">Qty: 156 | Shelf B1</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Hinges</div>
-                                    <div class="mock-item-desc">Qty: 32 | Shelf C3</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">+ Add Item</div>
-                                    <div class="mock-item-desc">New entry</div>
-                                </div>
-                            </div>
-                            <div class="mock-action">Export CSV</div>
+        <!-- SCREEN 2: OWNERSHIP -->
+        <div class="screen" data-index="1">
+            <div class="visual-container">
+                <div class="s2-visual">
+                    <div class="s2-ide">
+                        <div class="mac-header">
+                            <div class="mac-dot r"></div><div class="mac-dot y"></div><div class="mac-dot g"></div>
                         </div>
-
-                        <div class="mock-app-frame" id="app1">
-                            <div class="mock-header">
-                                <div class="mock-title">Contacts</div>
-                                <div class="mock-menu">⋮</div>
+                        <div class="s2-file-tree">
+                            <div class="s2-folder">
+                                <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                logic-app/
                             </div>
-                            <div class="mock-content">
-                                <div class="mock-item">
-                                    <div class="mock-item-title">John Acme Inc</div>
-                                    <div class="mock-item-desc">Active | $50K/yr</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Sarah Corp</div>
-                                    <div class="mock-item-desc">Active | $32K/yr</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Mike Startup</div>
-                                    <div class="mock-item-desc">Lead | $8K/yr</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">+ Add Contact</div>
-                                    <div class="mock-item-desc">New entry</div>
-                                </div>
+                            <div class="s2-file">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                build.gradle
                             </div>
-                            <div class="mock-action">Export List</div>
+                            <div class="s2-folder">
+                                <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                src/main/
+                            </div>
+                            <div class="s2-file" style="padding-left: 32px;">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path></svg>
+                                App.kt
+                            </div>
                         </div>
-
-                        <div class="mock-app-frame" id="app2">
-                            <div class="mock-header">
-                                <div class="mock-title">Inspections</div>
-                                <div class="mock-menu">⋮</div>
-                            </div>
-                            <div class="mock-content">
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Site A Review</div>
-                                    <div class="mock-item-desc">In Progress | 75%</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Site B Safety</div>
-                                    <div class="mock-item-desc">Complete | Jun 15</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">Site C Audit</div>
-                                    <div class="mock-item-desc">Scheduled | Jun 20</div>
-                                </div>
-                                <div class="mock-item">
-                                    <div class="mock-item-title">+ New Inspection</div>
-                                    <div class="mock-item-desc">Start check</div>
-                                </div>
-                            </div>
-                            <div class="mock-action">Photo Gallery</div>
-                        </div>
+                    </div>
+                    
+                    <div class="s2-app">
+                        <div class="badge">Own Forever</div>
+                        <div class="s2-app-img"></div>
+                        <div class="s2-app-text"></div>
+                        <div class="s2-app-text short"></div>
+                        <div class="s2-app-btn"></div>
                     </div>
                 </div>
             </div>
+            <h1>Every File<br>Is Yours</h1>
+            <p class="sub">Complete source code and binaries. No platform lock-in.</p>
+            
+            <div class="info-chip" onclick="openSheet('ai-sheet')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                Your AI Key ▾
+            </div>
+
+            <button class="cta-btn" style="margin-top: auto;" onclick="nextScreen()">Continue</button>
         </div>
 
-        <!-- Screen 2: Start Options -->
-        <div class="screen" data-screen="2">
-            <div class="screen-content">
-                <h2>Git For Apps</h2>
-                <p class="subheading">Generate, version, modify, regenerate.</p>
-                
-                <div class="start-options">
-                    <div class="start-option active" onclick="selectStartOption(0, event)">
-                        <div class="start-option-icon">✨</div>
-                        <div class="start-option-title">Start New</div>
-                        <div class="start-option-desc">Describe your idea</div>
+        <!-- SCREEN 3: DIFFERENTIATION -->
+        <div class="screen" data-index="2">
+            <div class="visual-container">
+                <div class="s3-visual">
+                    <div class="bg-ui-widget widget-toggle">
+                        <div class="toggle-line"></div>
+                        <div class="toggle-track"><div class="toggle-knob"></div></div>
                     </div>
-                    <div class="start-option" onclick="selectStartOption(1, event)">
-                        <div class="start-option-icon">📦</div>
-                        <div class="start-option-title">Upload Existing</div>
-                        <div class="start-option-desc">Modify your ZIP</div>
+                    <div class="bg-ui-widget widget-slider">
+                        <div class="slider-track"><div class="slider-fill"></div><div class="slider-knob"></div></div>
                     </div>
-                </div>
 
-                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 1rem; text-align: left;">Upload your existing ZIP package to regenerate, modify, or evolve.</p>
-                <button class="cta-button" style="display: block;" onclick="goToScreen(3)">Next</button>
-            </div>
-            <div class="screen-preview">
-                <div style="text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent);">⚡</div>
-                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; text-align: left;">
-                        <div style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Version Control for Software</strong></div>
-                        <div>✓ Generate → Version</div>
-                        <div>✓ Modify → Regenerate</div>
-                        <div>✓ Upload your code anytime</div>
-                        <div style="margin-top: 1rem; color: var(--success); font-weight: 600;">Never locked in</div>
+                    <div class="compare-box">
+                        <div class="compare-row">
+                            <div class="c-icon" style="color:#ef4444;">✕</div>
+                            <div class="c-text dim">Prompt → Output → Gone</div>
+                        </div>
+                        <div class="compare-row win">
+                            <div class="c-icon" style="color:var(--accent-light);">✓</div>
+                            <div class="c-text">Source Code → Versions → Yours</div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <h1>Not Output.<br>Software.</h1>
+            <p class="sub">We build version-controlled repositories, not disposable chat snippets.</p>
+            
+            <div class="info-chip" onclick="openSheet('eco-sheet')">
+                Build → Own → Publish ▾
+            </div>
+
+            <button class="cta-btn" style="margin-top: auto;" onclick="nextScreen()">Continue</button>
         </div>
 
-        <!-- Screen 3: Your AI + Cost -->
-        <div class="screen" data-screen="3">
-            <div class="screen-content">
-                <h2>Bring Your Own AI</h2>
-                <p class="subheading">You control inference. You control cost.</p>
-                
-                <div class="start-options">
-                    <div class="start-option" style="cursor: default; opacity: 0.8;">
-                        <div class="start-option-icon">🔑</div>
-                        <div class="start-option-title">Zayvora (Local)</div>
-                        <div class="start-option-desc">Local Node Model</div>
+        <!-- SCREEN 4: ACTIVATION (REDESIGNED) -->
+        <div class="screen" data-index="3">
+            <div class="visual-container">
+                <div class="s4-visual">
+                    <!-- Central Forge Node -->
+                    <div class="artifact-center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" style="width: 32px; height: 32px; stroke-width: 1.5;">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
                     </div>
-                    <div class="start-option" style="cursor: default; opacity: 0.8;">
-                        <div class="start-option-icon">🔑</div>
-                        <div class="start-option-title">Claude / Gemini</div>
-                        <div class="start-option-desc">Your API key</div>
-                    </div>
-                </div>
 
-                <button class="cta-button" style="display: block;" onclick="goToScreen(4)">Next</button>
-            </div>
-            <div class="screen-preview">
-                <div style="width: 100%; padding: 0;">
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 1rem;">Typical Generation Cost</div>
-                    <div class="cost-breakdown">
-                        <div class="cost-row">
-                            <span class="cost-label">Input Tokens</span>
-                            <span class="cost-value">~$0.50</span>
-                        </div>
-                        <div class="cost-row">
-                            <span class="cost-label">Output Tokens</span>
-                            <span class="cost-value">~$1.50</span>
-                        </div>
-                        <div class="cost-row">
-                            <span class="cost-label">LogicHub Fee</span>
-                            <span class="cost-value">$0.00</span>
-                        </div>
-                        <div class="cost-total">
-                            <span>Typical Total</span>
-                            <span>$1–5</span>
-                        </div>
-                        <div class="cost-disclaimer">
-                            Varies by model, prompt complexity, and artifact size. You only pay for what you use. (Free with local Zayvora node).
-                        </div>
+                    <!-- Exploding Deliverables -->
+                    <div class="artifact-node node-1">
+                        <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+                        <span>APK Binary</span>
+                    </div>
+                    <div class="artifact-node node-2">
+                        <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+                        <span>ZIP Archive</span>
+                    </div>
+                    <div class="artifact-node node-3">
+                        <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+                        <span>Source Code</span>
+                    </div>
+                    <div class="artifact-node node-4">
+                        <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div>
+                        <span>Git History</span>
+                    </div>
+                    <div class="artifact-node node-5">
+                        <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+                        <span>Architecture</span>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Screen 4: Pipeline (Collapsible) -->
-        <div class="screen" data-screen="4">
-            <div class="screen-content">
-                <h2>How LogicHub Works</h2>
-                <p class="subheading">Six stages from intent to artifact.</p>
-                
-                <div class="pipeline-collapsible">
-                    <div class="pipeline-header" onclick="togglePipeline()">
-                        <span>Learn the generation stages</span>
-                        <span class="pipeline-toggle" id="pipelineToggle">▼</span>
-                    </div>
-                    <div class="pipeline-content" id="pipelineContent">
-                        <div class="pipeline-stages">
-                            <div class="pipeline-stage">
-                                <div>
-                                    <div class="pipeline-stage-name">Intent</div>
-                                    <div class="pipeline-stage-desc">Scope captured</div>
-                                </div>
-                            </div>
-                            <div class="pipeline-stage">
-                                <div>
-                                    <div class="pipeline-stage-name">PRD</div>
-                                    <div class="pipeline-stage-desc">Requirements defined</div>
-                                </div>
-                            </div>
-                            <div class="pipeline-stage">
-                                <div>
-                                    <div class="pipeline-stage-name">Technical Design</div>
-                                    <div class="pipeline-stage-desc">Tech stack chosen</div>
-                                </div>
-                            </div>
-                            <div class="pipeline-stage">
-                                <div>
-                                    <div class="pipeline-stage-name">Schema</div>
-                                    <div class="pipeline-stage-desc">Database designed</div>
-                                </div>
-                            </div>
-                            <div class="pipeline-stage">
-                                <div>
-                                    <div class="pipeline-stage-name">Implementation</div>
-                                    <div class="pipeline-stage-desc">Code generated</div>
-                                </div>
-                            </div>
-                            <div class="pipeline-stage" style="border-left-color: var(--success);">
-                                <div>
-                                    <div class="pipeline-stage-name" style="color: var(--success);">Artifact</div>
-                                    <div class="pipeline-stage-desc">Your software</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="cta-button" onclick="goToScreen(5)">Continue</button>
-            </div>
-            <div class="screen-preview">
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent);">⚙</div>
-                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; text-align: left;">
-                        <div style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Each Stage Builds On</strong></div>
-                        <div style="margin-bottom: 0.5rem;">Intent defines scope</div>
-                        <div style="margin-bottom: 0.5rem;">PRD specifies features</div>
-                        <div style="margin-bottom: 0.5rem;">Design chooses technology</div>
-                        <div style="margin-bottom: 0.5rem;">Schema designs data</div>
-                        <div style="margin-bottom: 1rem;">Implementation generates code</div>
-                        <div style="color: var(--success); font-weight: 600; padding-top: 1rem; border-top: 1px solid var(--border-light);">Complete artifact ready</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Screen 5: Why Different -->
-        <div class="screen" data-screen="5">
-            <div class="screen-content">
-                <h2>Why LogicHub is Different</h2>
-                <p class="subheading">Complete software ownership vs locked outputs.</p>
-                
-                <div style="text-align: left; margin: 1.5rem 0;">
-                    <div style="margin-bottom: 1.5rem;">
-                        <div style="font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Typical AI Builder</div>
-                        <div class="breakdown-list" style="margin: 0;">
-                            <div class="breakdown-item">
-                                <div class="breakdown-icon">✗</div>
-                                <div class="breakdown-text">Prompt → Output</div>
-                            </div>
-                            <div class="breakdown-item">
-                                <div class="breakdown-icon">✗</div>
-                                <div class="breakdown-text">No version history</div>
-                            </div>
-                            <div class="breakdown-item">
-                                <div class="breakdown-icon">✗</div>
-                                <div class="breakdown-text">No source structure</div>
-                            </div>
-                            <div class="breakdown-item">
-                                <div class="breakdown-icon">✗</div>
-                                <div class="breakdown-text">Start over each time</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-weight: 600; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">LogicHub</div>
-                        <div style="background: var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
-                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Complete artifact</div>
-                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Full version history</div>
-                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Project structure</div>
-                            <div style="margin-bottom: 0.5rem; color: var(--accent); font-weight: 600;">✓ Modify and regenerate</div>
-                        </div>
-                        <div class="own-forever-badge">Own Forever</div>
-                    </div>
-                </div>
-
-                <button class="cta-button" onclick="goToScreen(6)">Next</button>
-            </div>
-            <div class="screen-preview">
-                <div style="text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--success);">🔐</div>
-                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; text-align: left;">
-                        <div style="margin-bottom: 1rem;"><strong style="color: var(--text-primary); font-size: 1rem;">Your Software</strong></div>
-                        <div>Complete source code</div>
-                        <div>Architecture docs</div>
-                        <div>Deployable APK</div>
-                        <div>Full history</div>
-                        <div style="margin-top: 1rem; color: var(--success); font-weight: 600;">You own everything</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Screen 6: Ecosystem -->
-        <div class="screen" data-screen="6">
-            <div class="screen-content">
-                <h2>Build. Verify. Publish. Distribute.</h2>
-                <p class="subheading">The complete software lifecycle.</p>
-                
-                <div class="ecosystem-flow-visual">
-                    <div class="flow-stage">
-                        <div class="flow-stage-number">1</div>
-                        <div class="flow-stage-label">Build</div>
-                        <div class="flow-stage-desc">Generate your artifact in LogicHub</div>
-                    </div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-stage">
-                        <div class="flow-stage-number">2</div>
-                        <div class="flow-stage-label">Verify</div>
-                        <div class="flow-stage-desc">Sign with Aporaksha identity</div>
-                    </div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-stage">
-                        <div class="flow-stage-number">3</div>
-                        <div class="flow-stage-label">Publish</div>
-                        <div class="flow-stage-desc">Distribute on Daxini Space</div>
-                    </div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-stage">
-                        <div class="flow-stage-number">4</div>
-                        <div class="flow-stage-label">Distribute</div>
-                        <div class="flow-stage-desc">Sell, license, or deploy via Zayvora</div>
-                    </div>
-                </div>
-
-                <button class="cta-button" onclick="goToScreen(7)">Next</button>
-            </div>
-            <div class="screen-preview">
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; margin-bottom: 1.5rem; color: var(--accent);">→ → → →</div>
-                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-light); font-size: 0.9rem; color: var(--text-secondary); line-height: 2; text-align: left;">
-                        <div style="margin-bottom: 1rem;"><strong style="color: var(--accent); font-size: 1rem;">One Connected Ecosystem</strong></div>
-                        <div>You build in LogicHub</div>
-                        <div>You sign with Aporaksha</div>
-                        <div>You publish on Daxini Space</div>
-                        <div style="margin-top: 1rem; color: var(--success); font-weight: 600;">You distribute through Zayvora</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Screen 7: Artifact Package -->
-        <div class="screen" data-screen="7">
-            <div class="screen-content">
-                <h2>Your Complete Artifact</h2>
-                <p class="subheading">Download, modify, share, publish.</p>
-                
-                <button class="cta-button" onclick="goToScreen(8)">Final Step</button>
-            </div>
-            <div class="screen-preview">
-                <div style="width: 100%; padding: 0;">
-                    <div class="artifact-package">
-                        <div class="package-tree">
-                            <div class="package-item package-folder">your-app.zip</div>
-                            <div class="package-item package-file">├── architecture.json</div>
-                            <div class="package-item package-file">├── app-flow.md</div>
-                            <div class="package-item package-file">├── prd.md</div>
-                            <div class="package-item package-file">├── apk/</div>
-                            <div class="package-item package-file">│   ├── MainActivity.kt</div>
-                            <div class="package-item package-file">│   └── build.gradle</div>
-                            <div class="package-item package-file">├── ui-system/</div>
-                            <div class="package-item package-file">│   └── components.json</div>
-                            <div class="package-item package-file">├── source/</div>
-                            <div class="package-item package-file">│   └── [all source code]</div>
-                            <div class="package-item package-file">└── versions/</div>
-                            <div class="package-item package-file">    ├── v1.0.0/</div>
-                            <div class="package-item package-file">    └── v1.1.0-draft/</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Screen 8: Complete -->
-        <div class="screen" data-screen="8">
-            <div class="screen-content">
-                <h2>Ready to Build</h2>
-                <p class="subheading">You are entering the Sovereign Workspace.</p>
-                <div style="margin: 2rem 0;">
-                    <button class="cta-button primary" onclick="completeOnboarding()">Enter LogicHub</button>
-                </div>
-            </div>
-            <div class="screen-preview" style="background: none; border: none;">
-                <div style="font-size: 4rem; color: var(--accent); margin-bottom: 1rem;">🚀</div>
-            </div>
+            <h1>The Complete<br>Artifact</h1>
+            <p class="sub">Download, modify, or publish immediately.</p>
+            <button class="cta-btn primary" onclick="enterForge()">Enter Forge</button>
         </div>
 
     </div>
 
-    <!-- Progress Dots -->
-    <div class="progress" id="progressDots">
-        <div class="progress-dot active" onclick="goToScreen(0)"></div>
-        <div class="progress-dot" onclick="goToScreen(1)"></div>
-        <div class="progress-dot" onclick="goToScreen(2)"></div>
-        <div class="progress-dot" onclick="goToScreen(3)"></div>
-        <div class="progress-dot" onclick="goToScreen(4)"></div>
-        <div class="progress-dot" onclick="goToScreen(5)"></div>
-        <div class="progress-dot" onclick="goToScreen(6)"></div>
-        <div class="progress-dot" onclick="goToScreen(7)"></div>
-        <div class="progress-dot" onclick="goToScreen(8)"></div>
+    <!-- PROGRESS INDICATOR -->
+    <div class="progress-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <!-- BOTTOM SHEETS -->
+    <div class="sheet-overlay" id="sheet-overlay" onclick="closeSheets()"></div>
+
+    <div class="sheet" id="ai-sheet">
+        <div class="sheet-handle"></div>
+        <h3>Bring Your Own AI</h3>
+        <p>You control the inference and the cost. Plug in your API key for Gemini, Claude, or OpenAI. You only pay the provider directly for the tokens you use—LogicHub charges zero markup.</p>
+    </div>
+
+    <div class="sheet" id="eco-sheet">
+        <div class="sheet-handle"></div>
+        <h3>The Complete Ecosystem</h3>
+        <p>LogicHub is just the forge. Sign your apps securely with <strong>Aporaksha</strong>, publish them to <strong>Daxini Space</strong>, and monetize or distribute your software via <strong>Zayvora</strong>.</p>
     </div>
 
     <script>
+        // Check local storage bypass
+        if (localStorage.getItem('onboarding_complete') === 'true') {
+            window.location.href = '/forge';
+        }
+
         let currentScreen = 0;
-        const totalScreens = 9;
         const screens = document.querySelectorAll('.screen');
-        const dots = document.querySelectorAll('.progress-dot');
-        
-        // Navigation Logic
-        function goToScreen(index) {
-            if (index < 0 || index >= totalScreens) return;
-            
-            screens[currentScreen].classList.remove('active');
-            dots[currentScreen].classList.remove('active');
-            
-            currentScreen = index;
-            
-            screens[currentScreen].classList.add('active');
-            dots[currentScreen].classList.add('active');
+        const dots = document.querySelectorAll('.dot');
+        const totalScreens = screens.length;
 
-            // Trigger specific screen animations
-            if (currentScreen === 0) startTimelineAnimation();
-            if (currentScreen === 1) startCarouselAnimation();
-        }
-
-        // Completion logic
-        function completeOnboarding() {
-            localStorage.setItem('onboarding_complete', 'true');
-            window.location.href = 'index.html';
-        }
-
-        // Timeline Animation
-        function startTimelineAnimation() {
-            const items = document.querySelectorAll('.timeline-item');
-            const completeMsg = document.getElementById('timeline-complete');
-            
-            items.forEach(item => {
-                item.classList.remove('active', 'complete');
+        function updateUI() {
+            screens.forEach((s, idx) => {
+                s.classList.toggle('active', idx === currentScreen);
             });
-            completeMsg.style.display = 'none';
+            dots.forEach((d, idx) => {
+                d.classList.toggle('active', idx === currentScreen);
+            });
 
-            let i = 0;
-            const animateNext = () => {
-                if (i > 0) {
-                    items[i-1].classList.remove('active');
-                    items[i-1].classList.add('complete');
-                }
-                if (i < items.length) {
-                    items[i].classList.add('active');
-                    i++;
-                    setTimeout(animateNext, 800);
-                } else {
-                    completeMsg.style.display = 'block';
-                }
-            };
-            
-            setTimeout(animateNext, 500);
+            // Re-trigger animations by forcing reflow
+            const current = screens[currentScreen];
+            current.classList.remove('active');
+            void current.offsetWidth; 
+            current.classList.add('active');
         }
 
-        // App Carousel Animation
-        let carouselInterval;
-        function startCarouselAnimation() {
-            if (carouselInterval) clearInterval(carouselInterval);
-            
-            const frames = document.querySelectorAll('.mock-app-frame');
-            const labels = ["Inventory App", "CRM System", "Field Audit App"];
-            const typeLabel = document.getElementById('appTypeLabel');
-            
-            let currentApp = 0;
-            
-            carouselInterval = setInterval(() => {
-                frames[currentApp].classList.remove('active');
-                
-                currentApp = (currentApp + 1) % frames.length;
-                
-                typeLabel.textContent = labels[currentApp];
-                frames[currentApp].classList.add('active');
-            }, 3000);
+        function nextScreen() {
+            if (currentScreen < totalScreens - 1) {
+                currentScreen++;
+                updateUI();
+            }
         }
 
-        // Pipeline Toggle
-        function togglePipeline() {
-            const content = document.getElementById('pipelineContent');
-            const toggle = document.getElementById('pipelineToggle');
-            
-            content.classList.toggle('expanded');
-            toggle.classList.toggle('expanded');
+        function prevScreen() {
+            if (currentScreen > 0) {
+                currentScreen--;
+                updateUI();
+            }
         }
 
-        // Select Option highlighting
-        function selectStartOption(index, event) {
-            const parent = event.currentTarget.parentNode;
-            const options = parent.querySelectorAll('.start-option');
-            options.forEach(opt => opt.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        function enterForge() {
+            localStorage.setItem('onboarding_complete', 'true');
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                window.location.href = '/forge';
+            }, 300);
         }
 
-        // Start Initial Animations
-        window.addEventListener('load', () => {
-            startTimelineAnimation();
-        });
+        // --- Bottom Sheet Logic ---
+        const overlay = document.getElementById('sheet-overlay');
+        const sheets = document.querySelectorAll('.sheet');
+
+        function openSheet(id) {
+            overlay.classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeSheets() {
+            overlay.classList.remove('active');
+            sheets.forEach(sheet => sheet.classList.remove('active'));
+        }
+
+        // --- Swipe Gestures ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const threshold = 50;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            if (overlay.classList.contains('active')) return;
+
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) nextScreen(); // Swipe Left
+                else prevScreen();          // Swipe Right
+            }
+        }
+
+        // Initialize first render
+        updateUI();
     </script>
 </body>
 </html>

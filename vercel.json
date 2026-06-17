@@ -5,6 +5,10 @@
   "framework": null,
   "outputDirectory": ".",
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/forge", "destination": "/index.html" },
+    { "source": "/forge/(.*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

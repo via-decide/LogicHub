@@ -62,6 +62,22 @@ app.get(['/', '/index.html'], (req, res) => {
     serveVersionedHTML(res);
 });
 
+// Onboarding clean URL (matches Vercel cleanUrls behaviour)
+app.get(['/onboarding', '/onboarding.html'], (req, res) => {
+    const onboardingPath = path.join(__dirname, 'onboarding.html');
+    if (fs.existsSync(onboardingPath)) {
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        return res.send(fs.readFileSync(onboardingPath, 'utf8'));
+    }
+    res.status(404).send('Onboarding not found');
+});
+
+// /forge route → serve main app (post-onboarding destination)
+app.get(['/forge', '/forge/*'], (req, res) => {
+    serveVersionedHTML(res);
+});
+
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
