@@ -74,9 +74,8 @@ app.get(['/onboarding', '/onboarding.html'], (req, res) => {
 });
 
 // /forge route → serve main app (post-onboarding destination)
-app.get(['/forge', '/forge/*'], (req, res) => {
-    serveVersionedHTML(res);
-});
+// Sub-paths are handled by the SPA catch-all fallback below
+app.get('/forge', (req, res) => { serveVersionedHTML(res); });
 
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));
