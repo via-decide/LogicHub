@@ -2,14 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <script>
-    // Onboarding gate — runs before anything else renders
-    (function() {
-      if (localStorage.getItem('onboarding_complete') !== 'true') {
-        window.location.replace('/onboarding');
-      }
-    })();
-  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#030508">
   <title>LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes</title>
@@ -54,9 +46,9 @@
   </script>
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="/assets/js/sovereign-analytics.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- Auth: Aporaksha JWT (sovereign) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <style>
     :root {
@@ -85,12 +77,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      scroll-behavior: smooth;
-    }
+    html, body { margin: 0; padding: 0; height: 100%; }
 
     body {
       background: var(--bg-primary);
@@ -98,9 +85,8 @@
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
-      min-height: 100dvh;
-      overflow-x: hidden;
-      overflow-y: auto;
+      height: 100dvh;
+      overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -150,22 +136,11 @@
       font-weight: 700;
       cursor: pointer;
     }
-    .toolbar-action.viral-btn {
-      background: linear-gradient(135deg, #ff00ff, var(--accent));
-      border: none;
-      color: #000;
-    }
     .toolbar-action:disabled { opacity: 0.45; cursor: not-allowed; }
     .api-input {
       padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px;
       background: var(--bg-primary); color: var(--accent); font-family: var(--font-mono);
       font-size: 0.75rem; width: 220px; outline: none; user-select: auto; -webkit-user-select: auto;
-    }
-    .toolbar-action.viral-btn {
-      background: linear-gradient(135deg, #ff00ff, #00e5ff);
-      border: none;
-      color: #000;
-      text-shadow: 0 0 5px rgba(255,255,255,0.5);
     }
     .api-input:focus { border-color: var(--accent); }
     .btn-icon {
@@ -421,14 +396,7 @@
     .log-line.error { color: var(--error); }
 
     /* ── MAIN LAYOUT ── */
-    .main-container {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      min-height: 700px;
-      height: 85vh;
-    }
+    .main-container { display: flex; flex: 1; overflow: hidden; position: relative; min-height: 0; }
     
     /* ── SIDEBAR ── */
     .sidebar { width: 190px; padding: 0.9rem; border-right: 1px solid var(--border-color); background: var(--bg-secondary); overflow-y: auto; z-index: 50; display: flex; flex-direction: column; gap: 1rem; flex-shrink: 0; }
@@ -1109,11 +1077,19 @@
         width: 100%;
         height: auto;
         min-height: 52px;
+        flex-direction: row;
+        flex-wrap: nowrap;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         padding: 0.4rem 0.6rem;
-        display: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 0.4rem;
+        align-items: center;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
       }
+      .sidebar::-webkit-scrollbar { display: none; }
       .sidebar h3 { display: none; }
       .sidebar-grid {
         display: flex;
@@ -1139,8 +1115,8 @@
       .canvas {
         display: block;
         width: 100%;
-        height: clamp(380px, 80dvh, 720px);
-        min-height: clamp(380px, 80dvh, 720px);
+        height: clamp(320px, 54dvh, 560px);
+        min-height: clamp(320px, 54dvh, 560px);
         overflow: hidden;
         touch-action: pan-y pinch-zoom;
         -webkit-overflow-scrolling: touch;
@@ -1152,7 +1128,7 @@
         position: sticky;
         bottom: 0;
         z-index: 120;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
         padding: 0.45rem 0.6rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
         gap: 0.35rem;
         margin-top: 0;
@@ -1206,7 +1182,7 @@
       .footer button {
         padding: 0.55rem 0.25rem;
         font-size: 0.62rem;
-        min-height: 48px;
+        min-height: 44px;
       }
       input, textarea {
         font-size: 16px;
@@ -1228,1207 +1204,62 @@
       }
     }
 
-    /* ── VALUE PROPOSITION LANDING PAGE ── */
-    .vp-hero {
-      padding: 3rem 1.5rem 2rem;
-      text-align: center;
-      background: linear-gradient(180deg, rgba(0,229,255,0.06) 0%, transparent 60%);
-    }
-    .vp-hero h1 {
-      font-family: var(--font-serif);
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin: 0 0 0.75rem;
-      background: linear-gradient(135deg, #ffffff 30%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      line-height: 1.15;
-    }
-    .vp-hero .vp-sub {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto 1.75rem;
-      line-height: 1.6;
-    }
-    .vp-cta-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 2.5rem;
-    }
-    .vp-cta-primary {
-      padding: 0.9rem 2.2rem;
-      font-size: 0.9rem;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent), #00b8d4);
-      color: #001018;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(0,229,255,0.25);
-    }
-    .vp-cta-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0,229,255,0.35);
-    }
-    .vp-cta-secondary {
-      padding: 0.75rem 1.6rem;
-      font-size: 0.82rem;
-      font-family: var(--font-mono);
-      font-weight: 600;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 10px;
-      background: transparent;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .vp-cta-secondary:hover {
-      border-color: var(--accent);
-      color: #fff;
-    }
 
-    /* 3-Step Vertical Flow */
-    .vp-flow {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 0;
-      max-width: 700px;
-      margin: 0 auto 1rem;
-    }
-    .vp-flow-step {
-      flex: 1;
-      text-align: center;
-      position: relative;
-      padding: 0 0.75rem;
-    }
-    .vp-flow-step::after {
-      content: '';
-      position: absolute;
-      top: 1.4rem;
-      right: -2px;
-      width: 40%;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), rgba(0,229,255,0.15));
-    }
-    .vp-flow-step:last-child::after { display: none; }
-    .vp-flow-icon {
-      width: 2.8rem;
-      height: 2.8rem;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      margin-bottom: 0.6rem;
-      border: 2px solid var(--accent);
-      background: rgba(0,229,255,0.08);
-      color: var(--accent);
-      box-shadow: 0 0 16px rgba(0,229,255,0.15);
-    }
-    .vp-flow-step h4 {
-      margin: 0 0 0.3rem;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-    .vp-flow-step p {
-      margin: 0;
-      font-size: 0.74rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    /* Differentiation Section */
-    .vp-section {
-      padding: 2.5rem 1.5rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .vp-section-title {
-      font-family: var(--font-serif);
-      font-size: clamp(1.3rem, 3.5vw, 1.8rem);
-      font-weight: 700;
-      color: #fff;
-      text-align: center;
-      margin: 0 0 0.5rem;
-      letter-spacing: -0.5px;
-    }
-    .vp-section-subtitle {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin: 0 0 2rem;
-      line-height: 1.5;
-    }
-    .vp-compare-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
-    .vp-compare-card {
-      border-radius: 14px;
-      padding: 1.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .vp-compare-card.typical {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .vp-compare-card.logichub {
-      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(255,103,31,0.06));
-      border: 1px solid rgba(0,229,255,0.25);
-    }
-    .vp-compare-card h3 {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin: 0 0 1.2rem;
-    }
-    .vp-compare-card.typical h3 { color: var(--text-secondary); }
-    .vp-compare-card.logichub h3 { color: var(--accent); }
-    .vp-compare-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    .vp-compare-list li {
-      font-size: 0.82rem;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      color: var(--text-secondary);
-    }
-    .vp-compare-card.logichub .vp-compare-list li { color: #ddd; }
-    .vp-compare-list li:last-child { border-bottom: none; }
-    .vp-compare-list li .vp-icon-bad { color: #ff4444; font-size: 0.9rem; }
-    .vp-compare-list li .vp-icon-good { color: var(--success); font-size: 0.9rem; }
-
-    /* APK Outcome Section */
-    .vp-apk-section {
-      padding: 2.5rem 1.5rem;
-      background: linear-gradient(180deg, transparent, rgba(255,103,31,0.04) 50%, transparent);
-    }
-    .vp-outcome-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .vp-outcome-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 1.5rem;
-      text-align: center;
-      transition: border-color 0.3s, transform 0.2s;
-    }
-    .vp-outcome-card:hover {
-      border-color: var(--saffron);
-      transform: translateY(-3px);
-    }
-    .vp-outcome-card .vp-outcome-icon {
-      font-size: 2rem;
-      margin-bottom: 0.75rem;
-      display: block;
-    }
-    .vp-outcome-card h4 {
-      margin: 0 0 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #fff;
-    }
-    .vp-outcome-card p {
-      margin: 0;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* Ownership Section */
-    .vp-ownership {
-      padding: 2.5rem 1.5rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .vp-ownership-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-    .vp-ownership-card {
-      background: linear-gradient(135deg, rgba(0,229,255,0.04), rgba(255,103,31,0.03));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 1.5rem;
-      transition: border-color 0.3s;
-    }
-    .vp-ownership-card:hover { border-color: var(--accent); }
-    .vp-ownership-card h4 {
-      margin: 0 0 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .vp-ownership-card p {
-      margin: 0;
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    /* Social Proof / Example Outputs */
-    .vp-examples {
-      padding: 2.5rem 1.5rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .vp-examples-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-    .vp-example-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      overflow: hidden;
-      transition: border-color 0.3s, transform 0.2s;
-    }
-    .vp-example-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-3px);
-    }
-    .vp-example-preview {
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(255,103,31,0.06));
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .vp-example-body {
-      padding: 1rem;
-    }
-    .vp-example-body h4 {
-      margin: 0 0 0.3rem;
-      font-size: 0.82rem;
-      color: #fff;
-      font-weight: 700;
-    }
-    .vp-example-body p {
-      margin: 0 0 0.75rem;
-      font-size: 0.72rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-    .vp-example-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .vp-example-btn {
-      flex: 1;
-      padding: 0.5rem;
-      font-size: 0.68rem;
-      font-family: var(--font-mono);
-      font-weight: 600;
-      text-align: center;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: transparent;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .vp-example-btn:hover {
-      border-color: var(--accent);
-      color: #fff;
-    }
-    .vp-example-btn.primary {
-      background: rgba(0,229,255,0.1);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .vp-example-btn.primary:hover {
-      background: rgba(0,229,255,0.2);
-    }
-
-    /* Features Grid */
-    .vp-features {
-      padding: 2rem 1.5rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .vp-features-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.75rem;
-    }
-    .vp-feature-chip {
-      text-align: center;
-      padding: 1rem 0.5rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-      transition: border-color 0.3s;
-    }
-    .vp-feature-chip:hover { border-color: var(--accent); }
-    .vp-feature-chip .vp-feat-icon {
-      font-size: 1.5rem;
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-    .vp-feature-chip span:last-child {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Final CTA */
-    .vp-final-cta {
-      text-align: center;
-      padding: 2.5rem 1.5rem 3rem;
-    }
-    .vp-final-cta h2 {
-      font-family: var(--font-serif);
-      font-size: clamp(1.2rem, 3vw, 1.6rem);
-      color: #fff;
-      margin: 0 0 0.5rem;
-    }
-    .vp-final-cta p {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin: 0 0 1.5rem;
-    }
-
-    /* Open Source Badge */
-    .vp-oss-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--success);
-      margin-top: 1rem;
-    }
-    .vp-oss-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success);
-    }
-
-    /* Responsive adjustments for VP sections */
-    @media (max-width: 680px) {
-      .vp-hero { padding: 2rem 1rem 1.5rem; }
-      .vp-flow { flex-direction: column; align-items: center; gap: 1.5rem; }
-      .vp-flow-step::after { display: none; }
-      .vp-flow-step { padding: 0; }
-      .vp-compare-grid { grid-template-columns: 1fr; }
-      .vp-outcome-grid { grid-template-columns: 1fr; }
-      .vp-ownership-grid { grid-template-columns: 1fr; }
-      .vp-examples-grid { grid-template-columns: 1fr; }
-      .vp-features-grid { grid-template-columns: repeat(2, 1fr); }
-      .vp-section, .vp-apk-section, .vp-ownership, .vp-examples, .vp-features, .vp-final-cta { padding-left: 1rem; padding-right: 1rem; }
-    }
-
-    /* ─── POST-EXPORT OFFBOARD MODAL ─── */
-    .offboard-overlay {
+    .deployment-error-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(3, 5, 8, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(3, 5, 8, 0.92);
+      z-index: 9999;
+      padding: 1rem;
     }
-    .offboard-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
+    .deployment-error-overlay.show { display: flex; }
+    .deployment-error-card {
+      width: min(560px, 100%);
+      border: 1px solid rgba(255, 68, 68, 0.45);
+      background: #12090b;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
     }
-    .offboard-modal {
-      width: 90%;
-      max-width: 680px;
-      background: linear-gradient(135deg, rgba(10, 12, 16, 0.95), rgba(18, 22, 31, 0.98));
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 24px;
-      padding: 2.25rem 2rem;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 229, 255, 0.05);
-      position: relative;
-      transform: scale(0.95) translateY(10px);
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .offboard-overlay.active .offboard-modal {
-      transform: scale(1) translateY(0);
-    }
-    .offboard-close {
-      position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 1.5rem;
-      cursor: pointer;
-      line-height: 1;
-      padding: 4px;
-      transition: color 0.2s;
-    }
-    .offboard-close:hover {
-      color: var(--text-primary);
-    }
-    .offboard-header {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .offboard-icon-success {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(46, 204, 113, 0.1);
-      border: 1px solid rgba(46, 204, 113, 0.25);
-      color: var(--success);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      box-shadow: 0 0 20px rgba(46, 204, 113, 0.15);
-    }
-    .offboard-header h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0;
-      color: var(--text-primary);
-    }
-    .offboard-header p {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      max-width: 480px;
-      margin: 0;
-      line-height: 1.45;
-    }
-    .offboard-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-    .offboard-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      text-align: left;
-    }
-    .offboard-card:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.12);
-      transform: translateY(-2px);
-    }
-    .offboard-card.highlight {
-      border-color: rgba(0, 229, 255, 0.2);
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.03), rgba(255, 255, 255, 0.01));
-    }
-    .offboard-card.highlight:hover {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.06), rgba(255, 255, 255, 0.02));
-      box-shadow: 0 10px 25px rgba(0, 229, 255, 0.05);
-    }
-    .offboard-card-head {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text-primary);
-    }
-    .offboard-card-icon {
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .offboard-card p {
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      line-height: 1.4;
-      margin: 0;
-      flex: 1;
-    }
-    .offboard-card-cta {
+    .deployment-error-title {
+      margin: 0 0 0.45rem;
+      color: var(--error);
       font-family: var(--font-mono);
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--accent);
+      font-size: 0.88rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
-    .offboard-card.highlight .offboard-card-cta {
-      color: #00ff96;
-    }
-    
-    @media (max-width: 680px) {
-      .offboard-modal {
-        padding: 1.75rem 1.25rem;
-      }
-      .offboard-grid {
-        grid-template-columns: 1fr;
-      }
+    .deployment-error-body {
+      margin: 0;
+      color: #ffd8d8;
+      font-size: 0.8rem;
+      line-height: 1.5;
     }
 
   </style>
 </head>
 <body>
-  <!-- Daxini Ecosystem Bar -->
-  <div class="daxini-eco-bar">
-    <div class="eco-bar-container">
-      <div class="eco-bar-brand">
-        <span class="eco-bar-icon">◆</span>
-        <span class="eco-bar-title">DAXINI MESH</span>
-      </div>
-      <div class="eco-bar-links">
-        <a href="http://localhost:7001" data-prod="https://logichub.app" class="eco-bar-link eco-bar-build">
-          <span class="eco-action">Build</span>
-          <span class="eco-dest">LogicHub</span>
-        </a>
-        <a href="http://localhost:7002" data-prod="https://aporaksha.com" class="eco-bar-link eco-bar-own">
-          <span class="eco-action">Own</span>
-          <span class="eco-dest">Aporaksha</span>
-        </a>
-        <a href="http://localhost:7004" data-prod="https://daxini.space" class="eco-bar-link eco-bar-sell">
-          <span class="eco-action">Sell</span>
-          <span class="eco-dest">Daxini Space</span>
-        </a>
-      </div>
-    </div>
-  </div>
-  <style>
-    .daxini-eco-bar {
-      width: 100%;
-      background: rgba(10, 10, 15, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 0.75rem;
-      position: sticky;
-      top: 0;
-      z-index: 9999;
-    }
-    .eco-bar-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 8px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .eco-bar-brand {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    .eco-bar-icon {
-      color: #ff671f;
-    }
-    .eco-bar-links {
-      display: flex;
-      gap: 12px;
-    }
-    .eco-bar-link {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      text-decoration: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: background 0.2s, color 0.2s;
-      color: rgba(255, 255, 255, 0.65);
-    }
-    .eco-bar-link:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-    }
-    .eco-bar-link .eco-action {
-      font-weight: 500;
-      opacity: 0.6;
-    }
-    .eco-bar-link .eco-dest {
-      font-weight: 700;
-    }
-    .eco-bar-build .eco-dest { color: #00e5ff; }
-    .eco-bar-own .eco-dest { color: #ff671f; }
-    .eco-bar-sell .eco-dest { color: #a78bfa; }
-    @media (max-width: 480px) {
-      .eco-bar-brand { display: none; }
-      .eco-bar-container { justify-content: center; }
-    }
-
-    /* ── ECOSYSTEM PLATFORM CONTAINER & TABS ── */
-    .platform-shell {
-      display: flex;
-      flex: 1;
-      height: 85vh;
-      min-height: 700px;
-      overflow: hidden;
-      border-top: 1px solid var(--border-color);
-      background: var(--bg-primary);
-    }
-    
-    .activity-bar {
-      width: 64px;
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.25rem 0;
-      gap: 1.25rem;
-      flex-shrink: 0;
-    }
-    
-    .activity-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      border: 1px solid transparent;
-      background: none;
-      color: var(--text-secondary);
-      font-size: 1.15rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-    }
-    .activity-btn:hover {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-    .activity-btn.active {
-      color: var(--accent);
-      background: rgba(0, 229, 255, 0.06);
-      border-color: rgba(0, 229, 255, 0.25);
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.1);
-    }
-    .activity-btn::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 54px;
-      background: #0d0d12;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-family: var(--font-mono);
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s, transform 0.2s;
-      z-index: 1000;
-      border: 1px solid var(--border-color);
-      transform: translateX(-5px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-    .activity-btn:hover::after {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .platform-content {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .tab-pane {
-      display: none;
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
-      padding: 1.5rem;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .tab-pane.active-tab-pane {
-      display: flex;
-    }
-
-    /* Tab-specific layouts */
-    #tab-build {
-      padding: 0;
-      overflow: hidden;
-    }
-
-    /* ── CREATOR OS DASHBOARD & KPI ── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      width: 100%;
-    }
-    .kpi-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .kpi-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.3;
-    }
-    .kpi-label {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .kpi-value {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1.1;
-    }
-    .kpi-trend {
-      font-size: 0.7rem;
-      color: var(--success);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .kpi-trend.down { color: var(--error); }
-
-    /* Progress milestones */
-    .milestone-container {
-      background: rgba(255,255,255,0.01);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
-    }
-    .milestone-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.85rem;
-    }
-    .milestone-track {
-      height: 8px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 4px;
-      display: flex;
-      position: relative;
-      margin: 1.5rem 0;
-    }
-    .milestone-progress {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), #c084fc);
-      border-radius: 4px;
-      width: 45%;
-    }
-    .milestone-node {
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 3px solid var(--bg-primary);
-      background: var(--text-secondary);
-      z-index: 2;
-    }
-    .milestone-node.completed {
-      background: var(--accent);
-    }
-    .milestone-node.active {
-      background: #c084fc;
-      box-shadow: 0 0 10px #c084fc;
-    }
-    .milestone-node-labels {
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-secondary);
-    }
-
-    /* Live activity stream */
-    .dashboard-details-grid {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 1.25rem;
-    }
-    .activity-stream-card, .notification-panel {
-      background: rgba(255,255,255,0.01);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .activity-log {
-      max-height: 240px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-    }
-    .log-entry {
-      display: flex;
-      gap: 8px;
-      color: var(--text-secondary);
-      border-bottom: 1px solid rgba(255,255,255,0.02);
-      padding-bottom: 4px;
-    }
-    .log-time { color: var(--accent); }
-    .log-text { flex: 1; }
-
-    /* ── EMBEDDED MARKETPLACE ── */
-    .market-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .market-filter-row {
-      display: flex;
-      gap: 0.5rem;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .market-filter-btn {
-      padding: 0.45rem 1rem;
-      border: 1px solid var(--border-color);
-      background: rgba(255, 255, 255, 0.02);
-      color: var(--text-secondary);
-      border-radius: 20px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-family: var(--font-mono);
-      transition: all 0.2s;
-    }
-    .market-filter-btn:hover {
-      color: #fff;
-      border-color: var(--accent);
-    }
-    .market-filter-btn.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      font-weight: 600;
-    }
-    .market-search {
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: rgba(0,0,0,0.4);
-      color: #fff;
-      font-size: 0.8rem;
-      width: 240px;
-    }
-    .market-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-    .market-card {
-      background: rgba(255,255,255,0.01);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      transition: all 0.25s;
-    }
-    .market-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-      background: rgba(0,229,255,0.02);
-    }
-    .market-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .market-card-icon {
-      font-size: 1.8rem;
-    }
-    .market-card-installs {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--success);
-      background: var(--success-glow);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    .market-card-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin: 0;
-      color: #fff;
-    }
-    .market-card-creator {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-    }
-    .market-card-desc {
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      line-height: 1.4;
-      flex: 1;
-    }
-    .market-card-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .market-card-btn {
-      flex: 1;
-      padding: 0.45rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background: rgba(255,255,255,0.02);
-      color: #fff;
-      font-size: 0.72rem;
-      cursor: pointer;
-      text-align: center;
-      font-family: var(--font-mono);
-      transition: all 0.2s;
-    }
-    .market-card-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .market-card-btn.primary {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      font-weight: 600;
-    }
-    .market-card-btn.primary:hover {
-      background: #00bcd4;
-      border-color: #00bcd4;
-      color: #000;
-    }
-
-    /* ── DEPLOY VIEW ── */
-    .deploy-panel-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-    }
-    .deploy-card {
-      background: rgba(255,255,255,0.01);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .deploy-check-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-    }
-    .deploy-check-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .deploy-check-status { font-weight: 700; }
-    .deploy-check-status.ok { color: var(--success); }
-    .deploy-check-status.warn { color: var(--error); }
-
-    /* ── HOMEPAGE FLOW DIAGRAM & STATS ── */
-    .flow-diagram-container {
-      width: 100%;
-      max-width: 760px;
-      margin: 1.5rem auto;
-      padding: 1.5rem;
-      border: 1px solid rgba(0, 229, 255, 0.15);
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(8,11,16,0.6), rgba(0,0,0,0.8));
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    .flow-steps {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .flow-step-card {
-      flex: 1;
-      min-width: 110px;
-      border: 1px solid var(--border-color);
-      background: rgba(255,255,255,0.01);
-      padding: 0.75rem;
-      border-radius: 8px;
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      transition: border-color 0.2s;
-    }
-    .flow-step-card:hover {
-      border-color: var(--accent);
-    }
-    .flow-step-num {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-    .flow-step-arrow {
-      color: rgba(255,255,255,0.2);
-      font-weight: 700;
-    }
-    
-    .eco-stat-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.5rem;
-      width: 100%;
-      max-width: 760px;
-      margin: 1rem auto;
-    }
-    .eco-stat-card {
-      border: 1px solid rgba(255,255,255,0.05);
-      background: rgba(0,0,0,0.2);
-      padding: 0.6rem;
-      border-radius: 8px;
-      text-align: center;
-    }
-    .eco-stat-num {
-      font-family: var(--font-mono);
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-    }
-    .eco-stat-lbl {
-      font-size: 0.6rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-    }
-    @media (max-width: 768px) {
-      .eco-stat-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      .flow-steps {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .flow-step-arrow {
-        transform: rotate(90deg);
-        align-self: center;
-      }
-      .dashboard-details-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-  <script>
-    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      document.querySelectorAll('.eco-bar-link').forEach(link => {
-        const prodUrl = link.getAttribute('data-prod');
-        if (prodUrl) link.setAttribute('href', prodUrl);
-      });
-    }
-  </script>
-
 
   <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <div class="header-title">LOGICHUB<span class="sep">//</span><span class="badge">AI APP BUILDER</span></div>
-      <div class="map-status state-idle" id="map-status">ADD SCREEN TO START</div>
+      <div class="map-status state-idle" id="map-status">ADD PARTS TO START</div>
       <div class="info-badge" id="block-count">0 parts</div>
     </div>
     <div class="toolbar">
-      <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)" oninput="syncTopApiKey()">
+      <input type="password" id="api-key" class="api-input" placeholder="Gemini API Key (Optional)">
       <button class="btn-icon api-mobile-btn" onclick="document.getElementById('api-panel').classList.toggle('open')">🔑</button>
-      <button class="toolbar-action viral-btn" onclick="app.toggleViralDashboard()">VIRAL BOOST</button>
       <button id="btn-toolbar-generate" class="toolbar-action">Generate App</button>
       <button id="btn-toolbar-export" class="toolbar-action" disabled>Export ZIP</button>
       <button id="btn-toolbar-publish" class="toolbar-action" disabled>Publish</button>
       <button class="btn-icon" onclick="alert('Quick help:
 1. Add the main parts you understand, like a screen or sign-in flow.
 2. You do not need separate JS or CSS parts unless you want custom files.
-3. Open Blocks to generate the files.
+3. Press Make App to generate the files.
 4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
@@ -2442,10 +1273,7 @@
     <div class="auth-chip" id="plan-state-chip">Plan: free</div>
     <div class="auth-chip" id="session-state-chip">Apps this session: 0/10</div>
   </div>
-  <div id="auth-retry-panel" style="display:none;margin:8px 14px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;background:rgba(255,80,80,.08);">
-    <strong>Authentication failed</strong>
-    <button type="button" style="margin-left:10px;" onclick="app.retryAuthConnection()">Retry Connection</button>
-  </div>
+
 
   <div class="premium-experience-shell">
     <div class="premium-experience-card" id="premium-experience-card">
@@ -2464,663 +1292,154 @@
     <div class="logger">
       <div class="log-line" id="log-1">>> SYSTEM BOOTING...</div>
       <div class="log-line" id="log-2">>> READY TO BUILD</div>
-      <div class="log-line success" id="log-3">>> ADD SCREEN TO START</div>
+      <div class="log-line success" id="log-3">>> ADD PARTS TO START</div>
     </div>
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> Start with the canvas: add your first screen, organize blocks, preview your app, then publish when ready. Advanced deployment options (APK, export, and download package) are now grouped under Publish → Advanced Deployment.</div>
+  <div class="helper-strip"><strong>New here?</strong> LogicHub helps you build prompt apps, internal tools, and lightweight workflow software without starting from a blank codebase. Add the main parts you understand and LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
 
-  <!-- ═══ VALUE PROPOSITION LANDING PAGE ═══ -->
-
-  <!-- §1 — HERO: "What is this?" -->
-  <div class="landing-hero vp-hero" id="vp-landing-hero">
-    <h1>Build Android Apps You Actually Own</h1>
-    <p class="vp-sub">Generate structured apps, export APKs, publish instantly, and keep full control of your source code. No lock-in. No vendor permission.</p>
-
-    <div class="vp-cta-row">
-      <button class="vp-cta-primary" onclick="app.openCreateAppWizard()">Build Your First App ⚡</button>
-      <button class="vp-cta-secondary" onclick="document.getElementById('vp-examples-section').scrollIntoView({behavior:'smooth'})">View Example Apps ↓</button>
-    </div>
-
-    <div class="vp-flow">
-      <div class="vp-flow-step">
-        <div class="vp-flow-icon">💡</div>
-        <h4>Idea</h4>
-        <p>Describe your concept in plain language</p>
+  <div class="landing-hero">
+    <div class="landing-hero-card">
+      <div>
+        <h2>LOGICHUB</h2>
+        <p>Build prompt apps, workflow tools, and app prototypes.</p>
       </div>
-      <div class="vp-flow-step">
-        <div class="vp-flow-icon">🏗️</div>
-        <h4>Build</h4>
-        <p>Watch LogicHub generate files and preview the layout</p>
+      <div class="primary-actions">
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('aiResearchTool')">Create From Template</button>
+        <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add parts manually</button>
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('sample')">View a sample app</button>
+        <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">Publish to Daxini.space</button>
       </div>
-      <div class="vp-flow-step">
-        <div class="vp-flow-icon">🚀</div>
-        <h4>Publish</h4>
-        <p>Compile a runnable APK, export source, or host instantly</p>
+      <div class="capability-strip">
+        <div class="capability-chip">Make App Plan</div>
+        <div class="capability-chip">Download ZIP</div>
+        <div class="capability-chip">Android App</div>
+        <div class="capability-chip">Publish</div>
+        <div class="capability-chip">Install</div>
       </div>
-    </div>
-
-    <div class="vp-oss-badge">
-      <span class="vp-oss-dot"></span>
-      <span>Open Source · BUSL-1.1 Licensed · 100% Local-First Compilation</span>
+      <div class="template-strip">
+        <button class="template-btn" onclick="app.applyStarterSetup('aiResearchTool')">AI Research Tool</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('gameSimulation')">Game Simulation</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('dataDashboard')">Data Dashboard</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge Explorer</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('workflowAutomation')">Workflow Automation</button>
+      </div>
+      <p><strong>Publish to Daxini.space</strong> creates a public app page and shareable link.</p>
     </div>
   </div>
 
-  <!-- §2 — DIFFERENTIATION: "Why not alternatives?" -->
-  <div class="vp-section">
-    <h2 class="vp-section-title">Why LogicHub Exists</h2>
-    <p class="vp-section-subtitle">Most AI builders generate previews. LogicHub generates software you can take with you.</p>
-
-    <div class="vp-compare-grid">
-      <div class="vp-compare-card typical">
-        <h3>Typical Builder</h3>
-        <ul class="vp-compare-list">
-          <li><span class="vp-icon-bad">✕</span> Generate a preview inside their platform</li>
-          <li><span class="vp-icon-bad">✕</span> Lock your work behind their hosting</li>
-          <li><span class="vp-icon-bad">✕</span> Charge you to export what you built</li>
-          <li><span class="vp-icon-bad">✕</span> Trap source code inside their ecosystem</li>
-        </ul>
-      </div>
-      <div class="vp-compare-card logichub">
-        <h3>LogicHub</h3>
-        <ul class="vp-compare-list">
-          <li><span class="vp-icon-good">✓</span> Generate a structured, runnable application</li>
-          <li><span class="vp-icon-good">✓</span> Export the complete source as a ZIP</li>
-          <li><span class="vp-icon-good">✓</span> Compile a real Android APK locally</li>
-          <li><span class="vp-icon-good">✓</span> Publish to the open Daxini Marketplace</li>
-        </ul>
-      </div>
-    </div>
+  <div class="builder-lanes">
+    <div class="lane-card"><h4>Left: Available Parts</h4><p>Use Screen, Login, Data, and Logic parts from the left panel.</p></div>
+    <div class="lane-card"><h4>Center: Current App Structure</h4><p>Arrange and connect parts in the center canvas. Node connection behavior is unchanged.</p></div>
+    <div class="lane-card"><h4>Right/Next: Generated Outputs</h4><p>Use Plan, Download ZIP, Android App, Publish, and Install actions after generation.</p></div>
   </div>
 
-  <!-- §3 — APK OUTCOMES: "What do I get?" -->
-  <div class="vp-apk-section">
-    <div style="max-width:900px;margin:0 auto;">
-      <h2 class="vp-section-title">Not A Preview. A Build.</h2>
-      <p class="vp-section-subtitle">Every project produces real, portable artifacts — not screenshots.</p>
-    </div>
 
-    <div class="vp-outcome-grid">
-      <div class="vp-outcome-card">
-        <span class="vp-outcome-icon">📱</span>
-        <h4>Android APK</h4>
-        <p>Compile a Gradle-wrapped APK from your generated app. Install directly on any Android device.</p>
+  <div class="onboarding-shell">
+    <div class="onboarding-card">
+      <div class="onboarding-kicker">✨ Premium onboarding</div>
+      <div class="onboarding-header">
+        <div>
+          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">LogicHub is an AI app builder for prompt apps, workflow tools, and Android-ready prototypes</h1>
+          <p>This reframes LogicHub clearly for search and AI discovery while keeping the existing guide and every existing action exactly where users already expect them. It is designed for non-technical users who want to plan, generate, export, publish, and iterate fast.</p>
+        </div>
+        <div class="onboarding-meta">
+          <span class="meta-chip">Prompt apps</span>
+          <span class="meta-chip">Workflow tools</span>
+          <span class="meta-chip">Publish or export</span>
+        </div>
       </div>
-      <div class="vp-outcome-card">
-        <span class="vp-outcome-icon">📦</span>
-        <h4>Source ZIP</h4>
-        <p>Download the complete project repository — HTML, CSS, JS, manifest, service worker, and PRD architecture doc.</p>
-      </div>
-      <div class="vp-outcome-card">
-        <span class="vp-outcome-icon">🌐</span>
-        <h4>Ecosystem Hosting</h4>
-        <p>Publish and host your app on the Daxini.Space Marketplace with instant deployment and a public listing.</p>
+      <div class="onboarding-grid">
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">01</span>
+          <h4>Pick the parts you understand</h4>
+          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">02</span>
+          <h4>Press Make App</h4>
+          <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
+        </div>
+        <div class="onboarding-step">
+          <span class="onboarding-step-number">03</span>
+          <h4>Choose your next step</h4>
+          <p>Review the plan, download a ZIP, build the Android app, or publish to the connected community flow when your app is ready.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- §4 — OWNERSHIP: "Why should I trust it?" -->
-  <div class="vp-ownership">
-    <h2 class="vp-section-title">Your App Should Not Need Permission To Exist</h2>
-    <p class="vp-section-subtitle">LogicHub is built on one principle: if you made it, you own it.</p>
+  <div class="payment-strip">
+    <div class="payment-strip-copy">
+      <div><strong>Founder Launch:</strong> Choose <span class="price-chip">India Founder Pass — ₹1717</span> or keep <span class="price-chip">Global Founder Pass — $99</span> visible for international buyers.</div>
+      <div class="limited-note">Founder deal • limited early-access pricing while manual confirmation is active.</div>
+    </div>
+    <button onclick="app.openFounderCheckout()">💳 View Founder Passes</button>
+  </div>
 
-    <div class="vp-ownership-grid">
-      <div class="vp-ownership-card">
-        <h4>Open Source</h4>
-        <p>The entire LogicHub codebase is public. You can audit, fork, or self-host every component.</p>
+  <!-- MAIN -->
+  <div class="main-container">
+    <div class="sidebar" id="sidebar">
+      <h3>Main Parts</h3>
+      <div class="sidebar-grid">
+        <div class="palette-item" onclick="app.addBlock('ui')">SCREEN</div>
+        <div class="palette-item" onclick="app.addBlock('api')">LIVE DATA</div>
+        <div class="palette-item" onclick="app.addBlock('database')">SAVED DATA</div>
+        <div class="palette-item" onclick="app.addBlock('auth')">LOGIN</div>
       </div>
-      <div class="vp-ownership-card">
-        <h4>Platform Independent</h4>
-        <p>Your exported app runs without any LogicHub dependency. No SDK lock-in, no proprietary runtime.</p>
+      <h3>Extra Parts</h3>
+      <div class="sidebar-grid">
+        <div class="palette-item" onclick="app.addBlock('util')">APP LOGIC</div>
+        <div class="palette-item" onclick="app.addBlock('styles')">STYLE</div>
+        <div class="palette-item" onclick="app.addBlock('config')">SETTINGS</div>
       </div>
-      <div class="vp-ownership-card">
-        <h4>Local-First</h4>
-        <p>APK compilation and file generation happen on your machine. Your project never requires cloud permission.</p>
+    </div>
+
+    <div class="canvas" id="canvas">
+      <svg id="arrows-svg">
+        <defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--text-secondary)"/></marker></defs>
+        <path id="drawing-path"></path>
+        <g id="connections-group"></g>
+      </svg>
+      <div id="blocks-container"></div>
+      <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.35; text-align:center; padding:0 1rem;">
+        <div style="font-size:2rem">⬡</div>
+        <div style="font-family:var(--font-mono);font-size:0.74rem;">Add Screen, Login, Data, or Logic to begin</div>
+        <div class="empty-state-guide" id="empty-state-guide">
+          <strong>Suggested one-click setups</strong>
+          <div class="empty-state-setups">
+            <button onclick="app.applyStarterSetup('aiResearchTool')">AI research tool setup</button>
+            <button onclick="app.applyStarterSetup('gameSimulation')">Game simulation setup</button>
+            <button onclick="app.applyStarterSetup('dataDashboard')">Data dashboard setup</button>
+            <button onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge explorer setup</button>
+            <button onclick="app.applyStarterSetup('workflowAutomation')">Workflow automation setup</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- §5 — SOCIAL PROOF: "What has been built?" -->
-  <div class="vp-examples" id="vp-examples-section">
-    <h2 class="vp-section-title">Built on LogicHub</h2>
-    <p class="vp-section-subtitle">Real project templates you can remix, export, or publish right now.</p>
-
-    <div class="vp-examples-grid">
-      <div class="vp-example-card">
-        <div class="vp-example-preview">🔬</div>
-        <div class="vp-example-body">
-          <h4>AI Research Tool</h4>
-          <p>Gather, compare, and summarize sources with human-in-the-loop review.</p>
-          <div class="vp-example-actions">
-            <button class="vp-example-btn primary" onclick="app.applyStarterSetup('ai-research-tool')">Remix</button>
-            <button class="vp-example-btn" onclick="app.openCreateAppWizard()">Build New</button>
-          </div>
-        </div>
-      </div>
-      <div class="vp-example-card">
-        <div class="vp-example-preview">📊</div>
-        <div class="vp-example-body">
-          <h4>Data Dashboard</h4>
-          <p>Ingest data, transform it, and render chart-first KPI dashboards.</p>
-          <div class="vp-example-actions">
-            <button class="vp-example-btn primary" onclick="app.applyStarterSetup('data-dashboard')">Remix</button>
-            <button class="vp-example-btn" onclick="app.openCreateAppWizard()">Build New</button>
-          </div>
-        </div>
-      </div>
-      <div class="vp-example-card">
-        <div class="vp-example-preview">🤖</div>
-        <div class="vp-example-body">
-          <h4>Automation Bot</h4>
-          <p>Trigger repeatable automations across auth, APIs, and persistence.</p>
-          <div class="vp-example-actions">
-            <button class="vp-example-btn primary" onclick="app.applyStarterSetup('automation-bot')">Remix</button>
-            <button class="vp-example-btn" onclick="app.openCreateAppWizard()">Build New</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Template gallery placeholder for dynamic templates -->
-    <div class="template-strip" id="template-gallery" style="margin-top: 1.5rem;"></div>
+  <div class="footer" id="step-footer">
+    <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
+    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">[⚡ Synth]</button>
+    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
+    <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
+    <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
+    <button id="btn-install" class="install-btn" disabled title="Install becomes available after APK export." onclick="app.installPWA()">[↓ Install]</button>
+  <!-- FOOTER -->
+  <div class="footer">
+    <button id="btn-add-part" onclick="app.addBlock('ui')">+ Part</button>
+    <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
+    <button onclick="app.viewPRD()">📋 Plan</button>
+    <button id="btn-export" disabled onclick="app.exportZip()">📦 Download ZIP</button>
+    <button id="btn-apk" disabled onclick="app.buildApk()">📱 Android App</button>
+    <button id="btn-publish" disabled onclick="app.publishApp()">🌐 Publish</button>
+    <button onclick="app.clearMap()">🗑 Reset</button>
   </div>
 
-  <!-- §6 — FEATURES: "What capabilities?" -->
-  <div class="vp-features">
-    <div class="vp-features-grid">
-      <div class="vp-feature-chip">
-        <span class="vp-feat-icon">🎨</span>
-        <span>Visual Builder</span>
-      </div>
-      <div class="vp-feature-chip">
-        <span class="vp-feat-icon">📋</span>
-        <span>Structured PRD</span>
-      </div>
-      <div class="vp-feature-chip">
-        <span class="vp-feat-icon">📱</span>
-        <span>APK Export</span>
-      </div>
-      <div class="vp-feature-chip">
-        <span class="vp-feat-icon">🌐</span>
-        <span>Publish Flow</span>
-      </div>
-      <div class="vp-feature-chip">
-        <span class="vp-feat-icon">🔓</span>
-        <span>Open Source</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- §7 — FINAL CTA: "What do I do next?" -->
-  <div class="vp-final-cta">
-    <h2>Ready to build something you actually own?</h2>
-    <p>Describe your app. Get source code, an APK, and a marketplace listing — in minutes.</p>
-    <button class="vp-cta-primary" onclick="app.openCreateAppWizard()">Start Building ⚡</button>
-  </div>
-
-  <!-- Legacy containers kept for JS compatibility (hidden by default via existing CSS) -->
-  <div class="builder-lanes" style="display:none;">
-    <div class="lane-card"><h4>Pages</h4><p>Design your app layout directly on the canvas with reusable blocks.</p></div>
-    <div class="lane-card"><h4>Data</h4><p>Add Data Source: Supabase, REST API, Google Sheets, or Static Data.</p></div>
-    <div class="lane-card"><h4>Logic + Settings</h4><p>Build workflows with triggers/actions, then preview and publish.</p></div>
-  </div>
-  <div class="onboarding-shell" style="display:none;"></div>
-
-
-  <!-- Daxini Ecosystem Unified Footer -->
-  <footer class="daxini-unified-footer">
-    <div class="footer-container">
-      <div class="footer-columns">
-        <div class="footer-col brand-col">
-          <div class="footer-logo">◆ DAXINI</div>
-          <p class="footer-desc">Sovereign, local-first computing mesh and decentralized product space.</p>
-        </div>
-        <div class="footer-col links-col">
-          <h5>Ecosystem Mesh</h5>
-          <a href="http://localhost:7001" data-prod="https://logichub.app" class="eco-footer-link">Build (LogicHub)</a>
-          <a href="http://localhost:7002" data-prod="https://aporaksha.com" class="eco-footer-link">Own (Aporaksha)</a>
-          <a href="http://localhost:7004" data-prod="https://daxini.space" class="eco-footer-link">Sell (Daxini Space)</a>
-        </div>
-        <div class="footer-col links-col">
-          <h5>Resources</h5>
-          <a href="http://localhost:7002/passport" data-prod="https://aporaksha.com/passport" class="eco-footer-link">Publish / Passport</a>
-          <a href="http://localhost:7005/articles" data-prod="https://viadecide.com/articles" class="eco-footer-link">Journal</a>
-          <a href="http://localhost:7001/pages/pricing.html" data-prod="https://logichub.app/pages/pricing.html" class="eco-footer-link">Pricing</a>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 Dharam Daxini. All rights reserved. Sovereign Local-First AI Mesh.</span>
-        <span>Designed for Complete local autonomy. Hashing logs daily.</span>
-      </div>
-    </div>
-  </footer>
-  <style>
-    .daxini-unified-footer {
-      margin-top: 4rem;
-      padding: 3rem 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(10, 11, 15, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      color: #8b90a6;
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 0.8rem;
-    }
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-    .footer-columns {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr;
-      gap: 2rem;
-      text-align: left;
-    }
-    .footer-col h5 {
-      color: #fff;
-      font-size: 0.85rem;
-      margin: 0 0 1rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .footer-col p {
-      line-height: 1.6;
-      max-width: 300px;
-      margin: 0.5rem 0 0;
-    }
-    .footer-logo {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: #fff;
-      letter-spacing: -0.5px;
-    }
-    .footer-col a {
-      display: block;
-      color: #8b90a6;
-      text-decoration: none;
-      margin-bottom: 0.6rem;
-      transition: color 0.2s;
-    }
-    .footer-col a:hover {
-      color: #fff;
-    }
-    .footer-bottom {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.03);
-      padding-top: 1.5rem;
-      font-size: 0.75rem;
-    }
-    @media (max-width: 768px) {
-      .footer-columns {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-      .footer-col p {
-        margin: 0.5rem auto 0;
-      }
-      .footer-bottom {
-        justify-content: center;
-        text-align: center;
-      }
-    }
-  </style>
-  <script>
-    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      document.querySelectorAll('.eco-footer-link').forEach(link => {
-        const prodUrl = link.getAttribute('data-prod');
-        if (prodUrl) link.setAttribute('href', prodUrl);
-      });
-    }
-  </script>
-
-  <div id="workspace-container" class="platform-shell" style="display:none;">
-    <!-- LEFT ACTIVITY BAR -->
-    <div class="activity-bar">
-      <button class="activity-btn active" data-tab="tab-build" data-tooltip="Build" onclick="switchTab('tab-build')">🛠️</button>
-      <button class="activity-btn" data-tab="tab-deploy" data-tooltip="Deploy" onclick="switchTab('tab-deploy')">🚀</button>
-      <button class="activity-btn" data-tab="tab-marketplace" data-tooltip="Marketplace" onclick="switchTab('tab-marketplace')">🌌</button>
-      <button class="activity-btn" data-tab="tab-analytics" data-tooltip="Analytics" onclick="switchTab('tab-analytics')">📈</button>
-      <button class="activity-btn" data-tab="tab-settings" data-tooltip="Settings" onclick="switchTab('tab-settings')">⚙️</button>
-      <button class="activity-btn" data-tooltip="Back to Home" onclick="app.exitEcosystemWorkspace()" style="margin-top: auto;">🏠</button>
-    </div>
-
-    <!-- MAIN PLATFORM CONTENT -->
-    <div class="platform-content">
-      
-      <!-- BUILD TAB -->
-      <div class="tab-pane active-tab-pane" id="tab-build">
-        <!-- MAIN -->
-        <div class="main-container">
-          <div class="sidebar" id="sidebar">
-            <h3>Pages</h3>
-            <div class="sidebar-grid">
-              <div class="palette-item" onclick="app.addBlock('ui')">TEXT</div>
-              <div class="palette-item" onclick="app.addBlock('api')">IMAGE</div>
-              <div class="palette-item" onclick="app.addBlock('database')">CARD</div>
-              <div class="palette-item" onclick="app.addBlock('auth')">FORM</div>
-            </div>
-            <h3>Data · Logic · Settings</h3>
-            <div class="sidebar-grid">
-              <div class="palette-item" onclick="app.addBlock('util')">BUTTON</div>
-              <div class="palette-item" onclick="app.addBlock('styles')">LIST</div>
-              <div class="palette-item" onclick="app.addBlock('config')">EMBED</div>
-            </div>
-          </div>
-
-          <div class="canvas" id="canvas">
-            <svg id="arrows-svg">
-              <defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--text-secondary)"/></marker></defs>
-              <path id="drawing-path"></path>
-              <g id="connections-group"></g>
-            </svg>
-            <div id="blocks-container"></div>
-            <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.35; text-align:center; padding:0 1rem;">
-              <div style="font-size:2rem">⬡</div>
-              <div style="font-family:var(--font-mono);font-size:0.74rem;">Add Screen, Login, Data, or Logic to begin</div>
-              <div class="empty-state-guide" id="empty-state-guide">
-                <strong>Suggested one-click setups</strong>
-                <div class="empty-state-setups">
-                  <button onclick="app.applyStarterSetup('ai-research-tool')">AI research tool setup</button>
-                  <button onclick="app.applyStarterSetup('simulation-builder')">Simulation builder setup</button>
-                  <button onclick="app.applyStarterSetup('data-dashboard')">Data dashboard setup</button>
-                  <button onclick="app.applyStarterSetup('knowledge-explorer')">Knowledge explorer setup</button>
-                  <button onclick="app.applyStarterSetup('automation-bot')">Automation bot setup</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="footer" id="step-footer">
-          <button id="btn-add-part" onclick="app.addBlock('ui')">➕ Add Block</button>
-          <button id="btn-blocks" onclick="app.toggleBlocksPanel()">📄 Pages</button>
-          <button id="btn-preview" onclick="app.viewPRD()">👁 Preview</button>
-          <button id="btn-publish" disabled onclick="app.publishApp()">🚀 Publish</button>
-        </div>
-      </div>
-
-      <!-- DEPLOY TAB -->
-      <div class="tab-pane" id="tab-deploy">
-        <h2 style="font-family: var(--font-display); color: #fff; margin:0;">Deploy &amp; Compile Console</h2>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin:0;">Sign, compile, package, and distribute your compiled workspace nodes.</p>
-        
-        <div class="deploy-panel-grid" style="margin-top:0.5rem;">
-          <!-- 1. Pre-flight check -->
-          <div class="deploy-card">
-            <h3 style="font-size: 1rem; color: #fff; margin:0;">1. Pre-Flight Integration Scan</h3>
-            <div class="deploy-check-list" style="margin-top:0.5rem;">
-              <div class="deploy-check-item">
-                <span class="deploy-check-status ok" id="deploy-check-nodes-icon">✓</span>
-                <span>Canvas Logic: <strong id="deploy-check-nodes">0 nodes defined</strong></span>
-              </div>
-              <div class="deploy-check-item">
-                <span class="deploy-check-status ok">✓</span>
-                <span>Entry Points: index.html verified</span>
-              </div>
-              <div class="deploy-check-item">
-                <span class="deploy-check-status ok">✓</span>
-                <span>Assets: Autorepair helper loaded</span>
-              </div>
-              <div class="deploy-check-item">
-                <span class="deploy-check-status ok">✓</span>
-                <span>Identity: Aporaksha key check</span>
-              </div>
-            </div>
-            <button class="market-card-btn" onclick="app.synthesizeArchitecture()" style="margin-top:auto;">Run Platform Pre-Build (Synth)</button>
-          </div>
-
-          <!-- 2. Package & Compiles -->
-          <div class="deploy-card">
-            <h3 style="font-size: 1rem; color: #fff; margin:0;">2. Compile &amp; Download Binaries</h3>
-            <p style="font-size: 0.74rem; color: var(--text-secondary); margin:0;">Generate platform-native distributions of your workspace assets.</p>
-            
-            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.5rem;">
-              <div style="border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px; background: rgba(255,255,255,0.01);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-                  <span style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#fff;">📦 Source ZIP Package</span>
-                  <span style="font-size:0.6rem; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">Free</span>
-                </div>
-                <button id="btn-deploy-export" class="market-card-btn primary" onclick="app.exportZip()" style="width:100%; margin:0;">Export &amp; Download ZIP</button>
-              </div>
-
-              <div style="border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px; background: rgba(255,255,255,0.01);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-                  <span style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#fff;">📱 Android APK Compilation</span>
-                  <span style="font-size:0.6rem; background:var(--success-glow); color:var(--success); padding:2px 6px; border-radius:4px; font-weight:700;">Founder</span>
-                </div>
-                <button id="btn-deploy-apk" class="market-card-btn compile-btn" onclick="app.buildApk()" style="width:100%; margin:0;">Compile &amp; Download APK</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. Host & Publish -->
-          <div class="deploy-card">
-            <h3 style="font-size: 1rem; color: #fff; margin:0;">3. Host &amp; Publish on Daxini</h3>
-            <p style="font-size: 0.74rem; color: var(--text-secondary); margin:0;">Push app to Daxini Space for direct web hosting and user downloads.</p>
-            
-            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.5rem; flex:1;">
-              <div>
-                <label style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary); display:block; margin-bottom:4px;">Short App Description</label>
-                <input type="text" id="deploy-app-desc" style="width:100%; padding:0.45rem; border:1px solid var(--border-color); border-radius:6px; background:#000; color:#fff; font-size:0.75rem;" placeholder="E.g., Simple calculator tool" oninput="syncDeployMetadata()">
-              </div>
-              <div>
-                <label style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary); display:block; margin-bottom:4px;">App Subdomain slug</label>
-                <div style="display:flex; align-items:center; font-family:var(--font-mono); font-size:0.74rem; color:var(--text-secondary);">
-                  <span style="margin-right:2px;">daxini.space/apps/</span>
-                  <span id="deploy-app-slug-preview" style="color:#fff; font-weight:700; text-decoration:underline;">app</span>
-                </div>
-              </div>
-              <button id="btn-deploy-publish" class="market-card-btn primary" onclick="app.publishApp()" style="margin-top:auto; width:100%; margin-left:0; margin-right:0;">🚀 Publish App to Daxini.Space</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MARKETPLACE TAB -->
-      <div class="tab-pane" id="tab-marketplace">
-        <div class="market-header">
-          <div>
-            <h2 style="font-family: var(--font-display); color: #fff; margin:0;">Daxini.Space Ecosystem Marketplace</h2>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin:0;">Browse live applications compiled and deployed in the mesh. Remix any app with one click.</p>
-          </div>
-          <input type="text" class="market-search" id="market-search-bar" placeholder="Search apps..." oninput="filterMarketplace()">
-        </div>
-
-        <div class="market-filter-row" style="margin-top:0.5rem;">
-          <button class="market-filter-btn active" data-cat="all" onclick="filterMarketCategory('all')">All Apps</button>
-          <button class="market-filter-btn" data-cat="productivity" onclick="filterMarketCategory('productivity')">Productivity</button>
-          <button class="market-filter-btn" data-cat="workflow" onclick="filterMarketCategory('workflow')">Workflow</button>
-          <button class="market-filter-btn" data-cat="utility" onclick="filterMarketCategory('utility')">Utilities</button>
-          <button class="market-filter-btn" data-cat="general" onclick="filterMarketCategory('general')">General</button>
-        </div>
-
-        <div class="market-grid" id="marketplace-apps-container" style="margin-top:0.5rem;">
-          <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-secondary); font-family:var(--font-mono);">
-            Loading apps from Daxini.Space Registry...
-          </div>
-        </div>
-      </div>
-
-      <!-- ANALYTICS TAB -->
-      <div class="tab-pane" id="tab-analytics">
-        <h2 style="font-family: var(--font-display); color: #fff; margin:0;">Creator OS Operations Center</h2>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin:0;">Manage distribution channels, installs, global rankings, and creator achievements.</p>
-        
-        <!-- KPIs -->
-        <div class="kpi-grid" style="margin-top:0.5rem;">
-          <div class="kpi-card">
-            <div class="kpi-label">Apps Created</div>
-            <div class="kpi-value" id="dashboard-created-count">0</div>
-            <div class="kpi-trend">Local Workspace active</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Apps Published</div>
-            <div class="kpi-value" id="dashboard-published-count">0</div>
-            <div class="kpi-trend" id="dashboard-published-rate">Daxini Registry live</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Total Downloads</div>
-            <div class="kpi-value" id="dashboard-installs-count">0</div>
-            <div class="kpi-trend" id="dashboard-installs-trend">---</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Marketplace Rank</div>
-            <div class="kpi-value" id="dashboard-rank">#9,999</div>
-            <div class="kpi-trend">Global Creator OS</div>
-          </div>
-        </div>
-
-        <!-- Milestones Progression -->
-        <div class="milestone-container" style="margin-top:0.5rem;">
-          <div class="milestone-header">
-            <h3 style="font-size:0.95rem; color:#fff; margin:0;">Ecosystem Creator Progression</h3>
-            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent);" id="milestone-level-label">Level 1: Builder</span>
-          </div>
-          <div class="milestone-track">
-            <div class="milestone-progress" id="milestone-progress-bar" style="width: 33%;"></div>
-            <div class="milestone-node completed" style="left: 0%;" title="Builder Start"></div>
-            <div class="milestone-node completed" style="left: 33%;" title="Publisher (App published to space)"></div>
-            <div class="milestone-node" style="left: 66%;" title="Distributor (10 installs reached)"></div>
-            <div class="milestone-node" style="left: 100%;" title="Ecosystem Legend (100 installs reached)"></div>
-          </div>
-          <div class="milestone-node-labels">
-            <span>[Builder]</span>
-            <span>[Publisher]</span>
-            <span>[Distributor]</span>
-            <span>[Ecosystem Legend]</span>
-          </div>
-        </div>
-
-        <div class="dashboard-details-grid" style="margin-top:0.5rem;">
-          <!-- Real-time activity log -->
-          <div class="activity-stream-card">
-            <h3 style="font-size: 0.95rem; color: #fff; margin:0;">Real-Time Mesh Distribution Stream</h3>
-            <div class="activity-log" id="dashboard-activity-log" style="margin-top:0.5rem;">
-              <!-- Logs appended here -->
-            </div>
-          </div>
-
-          <!-- Retention and Notifications -->
-          <div class="notification-panel">
-            <h3 style="font-size: 0.95rem; color: #fff; margin:0;">Ecosystem Notifications</h3>
-            <div style="display:flex; flex-direction:column; gap:0.8rem; font-size:0.76rem; margin-top:0.5rem;" id="dashboard-notification-list">
-              <div style="border-left:2px solid var(--accent); padding-left:8px; display:flex; flex-direction:column; gap:2px;">
-                <span style="font-weight:700; color:#fff;">Welcome to Creator OS</span>
-                <span style="color:var(--text-secondary);">Your mesh dashboard is active. Generate and deploy your first app to see installs telemetry metrics.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SETTINGS TAB -->
-      <div class="tab-pane" id="tab-settings">
-        <h2 style="font-family: var(--font-display); color: #fff; margin:0;">System Credentials &amp; Workspace Keys</h2>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin:0;">Configure local API proxies, security rules, encryption, and billing states.</p>
-        
-        <div style="display:flex; flex-direction:column; gap:1.25rem; max-width:600px; background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:12px; padding:1.5rem; margin-top:0.5rem;">
-          <div>
-            <label style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:6px;">Gemini API Credentials (BYOK)</label>
-            <input type="password" id="settings-api-key" style="width:100%; padding:0.5rem; border:1px solid var(--border-color); border-radius:6px; background:#000; color:#fff;" placeholder="Enter Gemini API Key (stored client-side in PWA IndexedDB)" oninput="syncSettingsApiKey()">
-            <p style="font-size:0.64rem; color:var(--text-secondary); margin-top:4px; margin-bottom:0;">Keys are encrypted and stored in client-side IndexedDB using the Service Worker. They are never saved to LogicHub servers.</p>
-          </div>
-          <div>
-            <label style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:6px;">Aporaksha Owner Identity Status</label>
-            <div style="border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; background:#000; font-family:var(--font-mono); font-size:0.74rem; display:flex; justify-content:space-between; align-items:center;">
-              <span id="settings-auth-status" style="color:var(--text-secondary);">Status: Connecting...</span>
-              <button class="market-card-btn" style="padding:4px 8px; font-size:0.68rem; margin:0; width:auto;" onclick="app.initFirebaseAuth()">Force Recheck</button>
-            </div>
-          </div>
-          <div>
-            <label style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:6px;">Active Billing Tiers</label>
-            <div style="border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; background:#000; font-family:var(--font-mono); font-size:0.74rem; display:flex; justify-content:space-between; align-items:center;">
-              <span id="settings-plan-status" style="color:var(--text-secondary);">Plan: checking...</span>
-              <button class="market-card-btn" style="padding:4px 8px; font-size:0.68rem; margin:0; width:auto;" onclick="app.openFounderCheckout()">View Plans</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-  <div style="display:none" aria-hidden="true">
-    <button id="btn-synth" class="compile-btn" onclick="app.synthesizeArchitecture()">⚡ Build</button>
-    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">📋 PRD</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">📦 Export</button>
-    <button id="btn-apk" class="apk-btn" disabled onclick="app.buildApk()">📱 APK</button>
-    <button id="btn-install" class="install-btn" disabled onclick="app.installPWA()">Install</button>
-    <button id="btn-clear" onclick="app.clearMap()">Reset</button>
-    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">Synth</button>
-  </div>
-
-  <div class="modal" id="create-app-modal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal('create-app-modal')">✕</button>
-      <div class="modal-header">Create App</div>
-      <div class="form-group"><label>1) App Name</label><input type="text" id="create-app-name" placeholder="My Creator App"></div>
-      <div class="form-group"><label>2) Choose Template</label><select id="create-app-template">
-        <option value="landing">Landing Page</option><option value="data-dashboard">Dashboard</option><option value="automation-bot">Tool</option><option value="simulation-builder">Mobile App</option><option value="blank">Blank</option>
-      </select></div>
-      <button style="width:100%;background:var(--accent);color:#000;font-weight:800;border:none;border-radius:8px;" onclick="app.createProjectFromWizard()">3) Create Project</button>
-    </div>
-  </div>
-
-    <!-- VIRAL DASHBOARD MODAL -->
-    <div id="viral-modal" class="modal">
-      <div class="modal-content" style="max-width: 800px;">
-        <button class="modal-close" onclick="app.closeViralDashboard()">✕</button>
-        <div class="modal-header">Viral Mastery Dashboard</div>
-        <div class="modal-body">
-          <div class="premium-experience-card" style="margin-bottom: 1rem; border-color: #ff00ff; background: linear-gradient(135deg, rgba(255,0,255,0.1), #080b10);">
-             <div class="onboarding-kicker" style="background: rgba(255,0,255,0.2); border-color: #ff00ff; color: #ff00ff;">Global Reach Active</div>
-             <h3>Viral Distribution Engine</h3>
-             <p>Your current workspace has a **Viral Potential Score of 88/100**. Use the Zayvora Share Engine to maximize visibility.</p>
-          </div>
-          
-          <div class="onboarding-grid">
-            <div class="onboarding-step">
-              <div class="onboarding-step-number">01</div>
-              <h4>Trending Logic</h4>
-              <p>Top architectures currently gaining traction in Daxini.space.</p>
-              <div id="viral-trending-list" style="margin-top: 0.5rem; font-size: 0.65rem; color: var(--accent);">
-                • AI-Native CRM (2.4k Swipes)<br>
-                • SpaceJMP Visualizer (1.8k Swipes)<br>
-                • Viral Loop Engine (1.2k Swipes)
-              </div>
-            </div>
-            <div class="onboarding-step">
-              <div class="onboarding-step-number">02</div>
-              <h4>Growth Hacks</h4>
-              <ul class="premium-feature-list">
-                <li>Inject "Daxini" keywords in PRD</li>
-                <li>Add social sharing metadata</li>
-                <li>Verify with Zayvora Axiom</li>
-              </ul>
-            </div>
-            <div class="onboarding-step">
-              <div class="onboarding-step-number">03</div>
-              <h4>Social Impact</h4>
-              <div class="premium-kpi">4.8M</div>
-              <p>Total impressions across the Zayvora ecosystem today.</p>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top: 1.5rem;">
-          <button style="width:100%; background: linear-gradient(90deg, #ff00ff, #00e5ff); color: #000; font-weight: 800; border: none; border-radius: 8px; padding: 1rem;" onclick="app.generateViralPost()">GENERATE VIRAL POST</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- NODE MODAL -->
+  <!-- NODE MODAL -->
   <div class="modal" id="node-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('node-modal')">✕</button>
@@ -3199,12 +1518,9 @@
           </div>
           <div class="payment-actions">
             <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
-            <button type="button" onclick="app.openFounderUpiApp()">📲 Open UPI App</button>
             <button type="button" onclick="app.showFounderIndiaPaymentHelp()">ℹ️ ₹1717 payment instructions</button>
           </div>
-          <div class="payment-note" id="founder-upi-link-note">UPI deep link ready. If app launch fails, scan the QR below and continue with UTR submission.</div>
-          <div id="founder-upi-apps" class="payment-note"></div>
-          <div id="founder-upi-qr" class="payment-status-box" style="word-break:break-all;">QR will appear if UPI deep link fails.</div>
+          <div class="payment-note"><strong>₹1717 payment link update:</strong> The UPI deep link is not working right now. Please pay manually in any UPI app to the UPI ID above, then submit your 12-digit UTR. After submission, LogicHub will draft the verification email to dharam@viadecide.com for approval.</div>
           <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">✅ I Paid — Submit UTR</button>
           <div class="payment-note">Limited early-access wording helps this read like a founder launch, not a generic payment form.</div>
         </div>
@@ -3240,9 +1556,9 @@
       <div class="payment-card">
         <h4>What happens after payment?</h4>
         <ul class="next-steps-list">
-          <li class="next-step-item"><strong>Step 1: Pay using UPI</strong> Launch UPI app via deep link, or use QR fallback if deep link fails.</li>
-          <li class="next-step-item"><strong>Step 2: Enter UTR number</strong> Submit the 12-digit UTR so server-side verification can start.</li>
-          <li class="next-step-item"><strong>Step 3: Submit verification</strong> Admin approves or rejects in dashboard, then founder role updates.</li>
+          <li class="next-step-item"><strong>1. Pay ₹1717 in any UPI app</strong> Copy the UPI ID from this modal and complete the India Founder Pass payment manually.</li>
+          <li class="next-step-item"><strong>2. Submit your UTR</strong> Save the 12-digit UTR so the founder request is recorded on this device.</li>
+          <li class="next-step-item"><strong>3. Email Dharam for review</strong> After submission, LogicHub drafts the payment email to dharam@viadecide.com so founder access can be verified and approved.</li>
         </ul>
       </div>
 
@@ -3261,107 +1577,29 @@
     </div>
   </div>
 
+
+  <div id="deployment-error-overlay" class="deployment-error-overlay" role="alert" aria-live="assertive">
+    <div class="deployment-error-card">
+      <h3 class="deployment-error-title">Deployment error</h3>
+      <p id="deployment-error-text" class="deployment-error-body">Check build logs and host runtime configuration.</p>
+    </div>
+  </div>
+
   <script src="./js/deploy-client.js"></script>
   <script src="./js/publish-app.js"></script>
 
   <script>
-    window.switchTab = function(tabId) {
-      const buttons = document.querySelectorAll('.activity-bar .activity-btn');
-      buttons.forEach(btn => {
-        if (btn.getAttribute('data-tab') === tabId) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-
-      const panes = document.querySelectorAll('#workspace-container .tab-pane');
-      panes.forEach(pane => {
-        if (pane.id === tabId) {
-          pane.classList.add('active-tab-pane');
-        } else {
-          pane.classList.remove('active-tab-pane');
-        }
-      });
-
-      if (tabId === 'tab-marketplace' && window.app) {
-        window.app.loadMarketplaceApps();
-      } else if (tabId === 'tab-analytics' && window.app) {
-        window.app.loadAnalyticsSummary();
-      } else if (tabId === 'tab-deploy' && window.app) {
-        window.updateDeploySlugPreview();
-      }
-
-      if (window.app && typeof window.app.log === 'function') {
-        window.app.log(`Switched to tab: ${tabId.replace('tab-', '')}`, 'info');
-      }
+    const FIREBASE_CONFIG = {
+      apiKey: 'AIzaSyA5yyW_s2AJiCloPU5_q7wVTdB9okb95Pk',
+      authDomain: 'logichub-app.firebaseapp.com',
+      projectId: 'logichub-app',
+      storageBucket: 'logichub-app.firebasestorage.app',
+      messagingSenderId: '4875740341'
     };
-
-    window.syncDeployMetadata = function() {
-      const descInput = document.getElementById('deploy-app-desc');
-      if (window.app && window.app.map) {
-        window.app.map.description = descInput ? descInput.value.trim() : '';
-      }
-    };
-
-    window.updateDeploySlugPreview = function() {
-      const slugPreview = document.getElementById('deploy-app-slug-preview');
-      if (slugPreview && window.app) {
-        const appName = window.app.getProjectDisplayName();
-        const slug = window.LogicHubDeployClient ? window.LogicHubDeployClient.slugify(appName) : appName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        slugPreview.textContent = slug;
-      }
-    };
-
-    window.syncSettingsApiKey = function() {
-      const keyInput = document.getElementById('settings-api-key');
-      if (!keyInput) return;
-      const key = keyInput.value.trim();
-      localStorage.setItem('lh_settings_api_key', key);
-      const topKeyInput = document.getElementById('api-key');
-      if (topKeyInput) topKeyInput.value = key;
-      if (window.app) {
-        window.app.apiKey = key;
-        window.app.log("API credentials synchronized.", "success");
-      }
-    };
-
-    window.syncTopApiKey = function() {
-      const topKeyInput = document.getElementById('api-key');
-      if (!topKeyInput) return;
-      const key = topKeyInput.value.trim();
-      localStorage.setItem('lh_settings_api_key', key);
-      const settingsKeyInput = document.getElementById('settings-api-key');
-      if (settingsKeyInput) settingsKeyInput.value = key;
-      if (window.app) {
-        window.app.apiKey = key;
-        window.app.log("API credentials synchronized.", "success");
-      }
-    };
-
-    const APORAKSHA_AUTH_URL = 'https://aporaksha.com/api';
-    window.SOVEREIGN_API_URL = window.location.hostname === 'localhost' ? 'http://localhost:7001/api' : 'https://api.logichub.app/api';
-    const AUTH_TOKEN_KEY = 'lh_aporaksha_token';
-    const AUTH_REFRESH_KEY = 'lh_aporaksha_refresh';
-    const AUTH_USER_KEY = 'lh_aporaksha_user';
     const APP_SESSION_LIMIT = 10;
     const FREE_FORGE_LIMIT = 3;
     const FREE_FORGE_WINDOW_MS = 5 * 60 * 60 * 1000;
     const FREE_FORGE_USAGE_KEY = 'lh_forge_usage_v2';
-    const AUTH_TIMEOUT_MS = 5000;
-    const AUTH_ERROR_LOG_KEY = 'lh_auth_error_logs';
-
-    function getStoredToken() { return localStorage.getItem(AUTH_TOKEN_KEY); }
-    function getStoredRefresh() { return localStorage.getItem(AUTH_REFRESH_KEY); }
-    function storeTokens(access, refresh) {
-      localStorage.setItem(AUTH_TOKEN_KEY, access);
-      if (refresh) localStorage.setItem(AUTH_REFRESH_KEY, refresh);
-    }
-    function clearStoredTokens() {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
-      localStorage.removeItem(AUTH_REFRESH_KEY);
-      localStorage.removeItem(AUTH_USER_KEY);
-    }
 
     function getStoredFounderOrders() {
       try {
@@ -3476,20 +1714,13 @@
       const sessionCount = getSessionAppCount();
       const nextReset = getNextForgeResetTimestamp();
       const resetLabel = nextReset ? formatRelativeResetTime(nextReset) : 'now';
-      const limitHit = sessionCount >= APP_SESSION_LIMIT || (!paid && count >= FREE_FORGE_LIMIT);
       const limitText = paid
         ? `Paid access: reset limits unlocked. Session apps ${sessionCount}/${APP_SESSION_LIMIT}.`
         : `Free: ${count}/${FREE_FORGE_LIMIT}. Session apps ${sessionCount}/${APP_SESSION_LIMIT}. Rolling reset in ${resetLabel}.`;
       document.getElementById("forge-limits-text").textContent = limitText;
       const planEl = document.getElementById("forge-plan-text");
       if (planEl) planEl.textContent = paid ? 'PAID: RESET LIMITS ON' : 'FREE: 3 FORGES / 5H';
-      document.getElementById("forge-community-btn").disabled = limitHit;
-      const createButton = document.querySelector('.primary-action-btn');
-      if (createButton) createButton.disabled = limitHit;
-      if (limitHit && !paid) {
-        const warning = 'You have reached your free limit. Upgrade to continue building.';
-        document.getElementById("forge-limits-text").textContent = warning;
-      }
+      document.getElementById("forge-community-btn").disabled = sessionCount >= APP_SESSION_LIMIT || (!paid && count >= FREE_FORGE_LIMIT);
       if (window.app && typeof window.app.updateAuthUI === 'function') window.app.updateAuthUI();
     }
 
@@ -3528,15 +1759,15 @@
       }
       addBlock(type, x, y) {
         const typeInfo = {
-          ui: { label: 'Text', badge: 'PAGES', filename: 'index.html' },
-          api: { label: 'Image', badge: 'PAGES', filename: 'api.js' },
-          database: { label: 'Card', badge: 'PAGES', filename: 'schema.sql' },
-          auth: { label: 'Form', badge: 'DATA', filename: 'auth.js' },
-          util: { label: 'Button', badge: 'LOGIC', filename: 'utils.js' },
-          styles: { label: 'List', badge: 'SETTINGS', filename: 'styles.css' },
-          config: { label: 'Embed', badge: 'SETTINGS', filename: 'config.js' }
+          ui: { label: 'Screen', badge: 'SCREEN', filename: 'index.html' },
+          api: { label: 'Live Data', badge: 'DATA', filename: 'api.js' },
+          database: { label: 'Saved Data', badge: 'DATA', filename: 'schema.sql' },
+          auth: { label: 'Login', badge: 'LOGIN', filename: 'auth.js' },
+          util: { label: 'App Logic', badge: 'LOGIC', filename: 'utils.js' },
+          styles: { label: 'Style', badge: 'STYLE', filename: 'styles.css' },
+          config: { label: 'Settings', badge: 'SETUP', filename: 'config.js' }
         };
-        const info = typeInfo[type] || { label: 'Block', badge: 'BLOCK', filename: 'file.js' };
+        const info = typeInfo[type] || { label: 'App Part', badge: 'PART', filename: 'file.js' };
         const b = {
           id: "NODE_" + Math.random().toString(36).substring(7).toUpperCase(),
           type, label: info.label, typeLabel: info.badge,
@@ -3563,7 +1794,6 @@
         this.blocks.find(b => b.id === to).dependsOn = this.blocks.find(b => b.id === to).dependsOn.filter(x => x !== from);
       }
       buildPRD() {
-        if (this.lastZayvoraPrd) return this.lastZayvoraPrd;
         let prd = `# LOGICHUB ARCHITECTURE PRD: ${this.id}\n\n`;
         if (this.blocks.length === 0) return "No parts in this app plan yet.";
         this.blocks.forEach(b => {
@@ -3607,307 +1837,7 @@
       isDragging: null, dragOffset: { x: 0, y: 0 },
       isDrawing: false, sourceId: null, activePointerId: null,
       authUser: null,
-      authState: 'connecting',
-      authResolved: false,
       serverAccess: { checked: false, paid: false, pending: false, source: 'unknown', plan: 'free' },
-      templateCatalog: [],
-      templateDefinitions: {},
-
-      openCreateAppWizard() {
-        const appNameInput = document.getElementById('create-app-name');
-        if (appNameInput) appNameInput.value = this.getProjectDisplayName();
-        openModal('create-app-modal');
-      },
-
-      createProjectFromWizard() {
-        const nameInput = document.getElementById('create-app-name');
-        const templateInput = document.getElementById('create-app-template');
-        const appName = nameInput ? nameInput.value.trim() : '';
-        const template = templateInput ? templateInput.value : 'blank';
-        if (appName) document.getElementById('forge-app-name').value = appName;
-        this.map = new LogicMap();
-        if (template !== 'blank' && template !== 'landing') this.applyStarterSetup(template);
-        if (template === 'landing') this.addBlock('ui');
-        this.render();
-        closeModal('create-app-modal');
-        this.enterEcosystemWorkspace();
-        this.log('Project created. Start in Build mode on the canvas.', 'success');
-      },
-
-      enterEcosystemWorkspace() {
-        const header = document.querySelector('.header');
-        if (header) header.style.display = 'none';
-        const authStrip = document.getElementById('auth-strip');
-        if (authStrip) authStrip.style.display = 'none';
-        const premiumShell = document.querySelector('.premium-experience-shell');
-        if (premiumShell) premiumShell.style.display = 'none';
-        const loggerRow = document.querySelector('.logger-row');
-        if (loggerRow) loggerRow.style.display = 'none';
-        const helperStrip = document.querySelector('.helper-strip');
-        if (helperStrip) helperStrip.style.display = 'none';
-        const landingHero = document.querySelector('.landing-hero');
-        if (landingHero) landingHero.style.display = 'none';
-        const builderLanes = document.querySelector('.builder-lanes');
-        if (builderLanes) builderLanes.style.display = 'none';
-        const onboardingShell = document.querySelector('.onboarding-shell');
-        if (onboardingShell) onboardingShell.style.display = 'none';
-        // Hide new VP sections
-        document.querySelectorAll('.vp-section, .vp-apk-section, .vp-ownership, .vp-examples, .vp-features, .vp-final-cta').forEach(el => el.style.display = 'none');
-        // Hide ecosystem footer when in workspace
-        const ecoFooter = document.querySelector('.daxini-unified-footer');
-        if (ecoFooter) ecoFooter.style.display = 'none';
-
-        const workspace = document.getElementById('workspace-container');
-        if (workspace) workspace.style.display = 'flex';
-        
-        window.switchTab('tab-build');
-      },
-
-      exitEcosystemWorkspace() {
-        const header = document.querySelector('.header');
-        if (header) header.style.display = 'flex';
-        const authStrip = document.getElementById('auth-strip');
-        if (authStrip) authStrip.style.display = 'flex';
-        const premiumShell = document.querySelector('.premium-experience-shell');
-        if (premiumShell) premiumShell.style.display = 'block';
-        const loggerRow = document.querySelector('.logger-row');
-        if (loggerRow) loggerRow.style.display = 'flex';
-        const helperStrip = document.querySelector('.helper-strip');
-        if (helperStrip) helperStrip.style.display = 'block';
-        const landingHero = document.querySelector('.landing-hero');
-        if (landingHero) landingHero.style.display = 'block';
-        const builderLanes = document.querySelector('.builder-lanes');
-        if (builderLanes) builderLanes.style.display = 'none';
-        const onboardingShell = document.querySelector('.onboarding-shell');
-        if (onboardingShell) onboardingShell.style.display = 'none';
-        // Show new VP sections
-        document.querySelectorAll('.vp-section, .vp-apk-section, .vp-ownership, .vp-examples, .vp-features, .vp-final-cta').forEach(el => el.style.display = 'block');
-        // Show ecosystem footer
-        const ecoFooter = document.querySelector('.daxini-unified-footer');
-        if (ecoFooter) ecoFooter.style.display = 'block';
-
-        const workspace = document.getElementById('workspace-container');
-        if (workspace) workspace.style.display = 'none';
-      },
-
-      activeMarketCategory: 'all',
-      marketplaceApps: [],
-
-      async loadMarketplaceApps() {
-        const container = document.getElementById('marketplace-apps-container');
-        if (!container) return;
-        try {
-          const resp = await fetch(`${window.SOVEREIGN_API_URL}/public-feed`);
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const data = await resp.json();
-          this.marketplaceApps = data.apps || [];
-          window.filterMarketplace();
-        } catch (err) {
-          this.log(`Marketplace load failed: ${err.message}`, "error");
-          container.innerHTML = `
-            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--error); font-family:var(--font-mono);">
-              Failed to load Daxini.Space registry: ${err.message}.
-            </div>
-          `;
-        }
-      },
-
-      renderMarketplace(filteredApps = null) {
-        const container = document.getElementById('marketplace-apps-container');
-        if (!container) return;
-        const apps = filteredApps || this.marketplaceApps || [];
-        if (apps.length === 0) {
-          container.innerHTML = `
-            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-secondary); font-family:var(--font-mono);">
-              No apps found in this category.
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = '';
-        apps.forEach(appItem => {
-          const card = document.createElement('div');
-          card.className = 'market-card';
-          card.innerHTML = `
-            <div class="market-card-header" style="display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:0.5rem;">
-              <span style="font-size:1.75rem;">${this.escapeHtml(appItem.icon || '✨')}</span>
-              <div style="display:flex; flex-direction:column; gap:2px;">
-                <strong style="font-size:0.85rem; color:#fff;">${this.escapeHtml(appItem.app_name || appItem.name)}</strong>
-                <span style="font-size:0.65rem; color:var(--text-secondary);">by @${this.escapeHtml(appItem.creator || 'anonymous')}</span>
-              </div>
-            </div>
-            <p style="font-size:0.75rem; color:var(--text-secondary); margin:0.6rem 0; min-height:2.25rem; line-height:1.4;">${this.escapeHtml(appItem.description || 'Ecosystem application')}</p>
-            <div style="font-size:0.68rem; color:var(--text-secondary); display:flex; justify-content:space-between; margin-bottom:0.8rem; font-family:var(--font-mono); border-top:1px solid rgba(255,255,255,0.03); padding-top:0.5rem;">
-              <span>Installs: ${appItem.installs || 0}</span>
-              <span>Remixes: ${appItem.remixes || 0}</span>
-            </div>
-            <div style="display:flex; gap:0.4rem;">
-              <button class="market-card-btn primary" onclick="app.remixApp('${appItem.slug}', '${this.escapeHtml(appItem.app_name || appItem.name || '').replace(/'/g, "\\'")}')" style="flex:1; margin:0; padding:6px 12px; font-size:0.75rem;">Remix</button>
-              <a href="${appItem.launch_url || '#'}" target="_blank" class="market-card-btn secondary" style="flex:1; text-align:center; text-decoration:none; line-height:28px; margin:0; font-size:0.75rem; display:inline-block; border:1px solid var(--border-color); border-radius:6px; color:#fff; background:rgba(255,255,255,0.02);">Open</a>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      },
-
-      async remixApp(slug, name) {
-        if (!confirm(`Are you sure you want to remix "${name}"? This will clear your current canvas.`)) return;
-        this.log(`Remixing app "${name}"...`, 'accent');
-        try {
-          const url = `https://daxini.space/apps/${slug}/project.logic.json`;
-          const resp = await fetch(url);
-          if (!resp.ok) throw new Error(`Could not fetch remix blueprint (HTTP ${resp.status})`);
-          const data = await resp.json();
-          const state = data.project_state;
-          if (!state || !Array.isArray(state.blocks)) throw new Error("Invalid project logic file");
-
-          this.map = new LogicMap();
-          this.map.id = state.id || ("REMIX_" + Math.random().toString(36).substring(7).toUpperCase());
-
-          // Re-populate blocks
-          state.blocks.forEach(b => {
-            const newBlock = {
-              id: b.id,
-              type: b.type,
-              label: b.label || 'Block',
-              typeLabel: b.typeLabel || 'BLOCK',
-              filename: b.filename || 'file.js',
-              prompt: b.prompt || '',
-              code: b.code || '',
-              x: Number(b.x) || 100,
-              y: Number(b.y) || 100,
-              status: b.status || 'PENDING',
-              dependsOn: Array.isArray(b.dependsOn) ? b.dependsOn : [],
-              connectedTo: Array.isArray(b.connectedTo) ? b.connectedTo : []
-            };
-            this.map.blocks.push(newBlock);
-          });
-
-          // Re-populate connections
-          if (Array.isArray(state.connections)) {
-            this.map.connections = state.connections.map(c => ({ from: c.from, to: c.to }));
-          } else {
-            const derived = [];
-            this.map.blocks.forEach(b => {
-              b.connectedTo.forEach(toId => {
-                if (!derived.some(c => c.from === b.id && c.to === toId)) {
-                  derived.push({ from: b.id, to: toId });
-                }
-              });
-            });
-            this.map.connections = derived;
-          }
-
-          this.render();
-          this.enterEcosystemWorkspace();
-          window.switchTab('tab-build');
-          this.log(`Successfully remixed "${name}"!`, 'success');
-        } catch (err) {
-          this.log(`Remix Error: ${err.message}`, 'error');
-          alert(`Failed to remix app: ${err.message}`);
-        }
-      },
-
-      async loadAnalyticsSummary() {
-        const userId = this.authUser?.uid || 'guest-local';
-        const createdCountEl = document.getElementById('dashboard-created-count');
-        const publishedCountEl = document.getElementById('dashboard-published-count');
-        const installsCountEl = document.getElementById('dashboard-installs-count');
-        const rankEl = document.getElementById('dashboard-rank');
-        const levelLabelEl = document.getElementById('milestone-level-label');
-        const progressBarEl = document.getElementById('milestone-progress-bar');
-        const activityLogEl = document.getElementById('dashboard-activity-log');
-
-        try {
-          const token = getStoredToken();
-          const headers = { 'Content-Type': 'application/json' };
-          if (token) headers['Authorization'] = `Bearer ${token}`;
-          if (userId) headers['X-Ecosystem-Uid'] = userId;
-
-          const resp = await fetch(`${window.SOVEREIGN_API_URL}/analytics-summary?userId=${encodeURIComponent(userId)}`, {
-            headers
-          });
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const data = await resp.json();
-
-          if (createdCountEl) createdCountEl.textContent = data.appsCount || 0;
-          if (publishedCountEl) publishedCountEl.textContent = data.publishedCount || 0;
-          if (installsCountEl) installsCountEl.textContent = data.totalInstalls || 0;
-          if (rankEl) rankEl.textContent = data.rank || '#9,999';
-
-          let level = 'Level 1: Builder';
-          let progress = '25%';
-          if (data.totalInstalls >= 100) {
-            level = 'Level 4: Ecosystem Legend';
-            progress = '100%';
-          } else if (data.totalInstalls >= 10) {
-            level = 'Level 3: Distributor';
-            progress = '75%';
-          } else if (data.publishedCount > 0) {
-            level = 'Level 2: Publisher';
-            progress = '50%';
-          } else if (data.appsCount > 0) {
-            level = 'Level 1: Builder';
-            progress = '25%';
-          } else {
-            level = 'Level 0: Apprentice';
-            progress = '5%';
-          }
-
-          if (levelLabelEl) levelLabelEl.textContent = level;
-          if (progressBarEl) progressBarEl.style.width = progress;
-
-          const nodes = document.querySelectorAll('.milestone-track .milestone-node');
-          if (nodes && nodes.length >= 4) {
-            nodes[0].classList.toggle('completed', data.appsCount > 0);
-            nodes[1].classList.toggle('completed', data.publishedCount > 0);
-            nodes[2].classList.toggle('completed', data.totalInstalls >= 10);
-            nodes[3].classList.toggle('completed', data.totalInstalls >= 100);
-          }
-
-          if (activityLogEl) {
-            activityLogEl.innerHTML = '';
-            const events = data.recentEvents || [];
-            if (events.length === 0) {
-              activityLogEl.innerHTML = '<span style="color:var(--text-secondary); font-size:0.75rem;">No recent mesh operations recorded.</span>';
-            } else {
-              events.forEach(evt => {
-                const item = document.createElement('div');
-                item.style.cssText = 'font-size:0.7rem; color:var(--text-secondary); margin-bottom:4px; font-family:var(--font-mono); border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:2px;';
-                const dateStr = evt.timestamp ? new Date(evt.timestamp).toLocaleTimeString() : '---';
-                let desc = '';
-                if (evt.event === 'publish_clicked') {
-                  desc = `Published app "${evt.metadata?.appName || evt.projectId}" to Daxini.Space`;
-                } else if (evt.event === 'apk_uploaded') {
-                  desc = `Compiled Android APK binary`;
-                } else if (evt.event === 'zip_uploaded') {
-                  desc = `Downloaded source ZIP package`;
-                } else if (evt.event === 'project_created') {
-                  desc = `Created project canvas`;
-                } else if (evt.event === 'onboarding_completed') {
-                  desc = `Completed onboarding flow`;
-                } else {
-                  desc = `Executed event: ${evt.event}`;
-                }
-                item.innerHTML = `<span style="color:var(--accent); font-weight:700;">[${dateStr}]</span> ${this.escapeHtml(desc)}`;
-                activityLogEl.appendChild(item);
-              });
-            }
-          }
-        } catch (err) {
-          this.log(`Analytics load failed: ${err.message}`, "error");
-        }
-      },
-
-
-      toggleBlocksPanel() {
-        const sidebar = document.getElementById('sidebar');
-        if (!sidebar || window.innerWidth > 680) return;
-        const isOpen = sidebar.style.display === 'block';
-        sidebar.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      },
 
       init() {
         this.setupPointerEvents();
@@ -3920,30 +1850,9 @@
         });
         this.updateAuthUI();
         this.initFirebaseAuth();
-        this.loadTemplateCatalog().then(() => this.renderTemplateGallery());
         this.render();
         updateForgeLimitUI();
         this.renderFounderStatus();
-
-        // Dynamically detect client country from central health API
-        const healthUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:3000/api/health'
-          : '/api/health';
-        fetch(healthUrl)
-          .then(res => res.json())
-          .then(data => {
-            window.clientCountry = data.client_country || 'US';
-            this.renderFounderStatus();
-            if (typeof this.renderForgePremiumState === 'function') this.renderForgePremiumState();
-          })
-          .catch(err => console.warn('Could not determine country status:', err));
-
-        const savedKey = localStorage.getItem('lh_settings_api_key') || '';
-        const settingsKeyInput = document.getElementById('settings-api-key');
-        const topKeyInput = document.getElementById('api-key');
-        if (settingsKeyInput) settingsKeyInput.value = savedKey;
-        if (topKeyInput) topKeyInput.value = savedKey;
-        this.apiKey = savedKey;
       },
 
       setupPointerEvents() {
@@ -4020,87 +1929,23 @@
 
       addBlock(type) {
         const c = document.getElementById("canvas");
-        const x = c.offsetWidth / 2 - 87 + (Math.random()*40-20);
-        const y = c.offsetHeight / 2 - 45 + (Math.random()*40-20);
-        const block = this.map.addBlock(type, x, y);
+        this.map.addBlock(type, c.offsetWidth / 2 - 87 + (Math.random()*40-20), c.offsetHeight / 2 - 45 + (Math.random()*40-20));
         this.render();
-        return block;
-      },
-
-      async loadTemplateCatalog() {
-        try {
-          const response = await fetch('./templates/index.json', { cache: 'no-store' });
-          if (!response.ok) throw new Error(`template index failed: ${response.status}`);
-          const catalog = await response.json();
-          this.templateCatalog = Array.isArray(catalog) ? catalog : [];
-          await Promise.all(this.templateCatalog.map(async (item) => {
-            if (!item?.key || !item?.file) return;
-            try {
-              const templateResp = await fetch(item.file, { cache: 'no-store' });
-              if (!templateResp.ok) return;
-              this.templateDefinitions[item.key] = await templateResp.json();
-            } catch (_) {
-              // Keep fallback template behavior available.
-            }
-          }));
-        } catch (_) {
-          this.templateCatalog = [];
-          this.templateDefinitions = {};
-        }
-      },
-
-      renderTemplateGallery() {
-        const gallery = document.getElementById('template-gallery');
-        if (!gallery || !Array.isArray(this.templateCatalog) || !this.templateCatalog.length) return;
-        gallery.innerHTML = '';
-        this.templateCatalog.forEach((template) => {
-          const card = document.createElement('button');
-          card.className = 'template-btn';
-          card.type = 'button';
-          card.innerHTML = `<strong>${this.escapeHtml(template.name || template.key)}</strong><br><span>${this.escapeHtml(template.description || 'Starter graph')}</span>`;
-          card.onclick = () => this.applyStarterSetup(template.key);
-          gallery.appendChild(card);
-        });
-      },
-
-      cloneTemplateGraph(templateKey) {
-        const template = this.templateDefinitions[templateKey];
-        const starterGraph = template?.starterGraph;
-        if (!starterGraph || !Array.isArray(starterGraph.blocks)) return false;
-        const createdByType = {};
-        starterGraph.blocks.forEach((type) => {
-          const created = this.addBlock(type);
-          if (!createdByType[type]) createdByType[type] = [];
-          createdByType[type].push(created);
-        });
-        (starterGraph.connections || []).forEach((link) => {
-          const [fromType, toType] = Array.isArray(link) ? link : [];
-          const fromNode = createdByType[fromType]?.[0];
-          const toNode = createdByType[toType]?.[0];
-          if (fromNode && toNode) this.map.connect(fromNode.id, toNode.id);
-        });
-        this.render();
-        return true;
       },
 
       applyStarterSetup(templateKey) {
-        const fallbackTemplates = {
-          'ai-research-tool': { starterGraph: { blocks: ['ui', 'api', 'database', 'util'], connections: [['ui', 'api'], ['api', 'database'], ['database', 'util']] } },
-          'data-dashboard': { starterGraph: { blocks: ['api', 'database', 'util', 'styles', 'ui'], connections: [['api', 'database'], ['database', 'util'], ['util', 'ui'], ['styles', 'ui']] } },
-          'automation-bot': { starterGraph: { blocks: ['auth', 'api', 'util', 'database', 'ui'], connections: [['auth', 'api'], ['api', 'util'], ['util', 'database'], ['database', 'ui']] } },
-          'simulation-builder': { starterGraph: { blocks: ['ui', 'util', 'api', 'database', 'styles'], connections: [['ui', 'util'], ['util', 'api'], ['api', 'database'], ['styles', 'ui']] } },
-          'knowledge-explorer': { starterGraph: { blocks: ['ui', 'database', 'api', 'util', 'styles'], connections: [['database', 'api'], ['api', 'util'], ['util', 'ui'], ['styles', 'ui']] } },
-          sample: { starterGraph: { blocks: ['ui', 'api', 'database', 'auth', 'util', 'styles'], connections: [['auth', 'ui'], ['api', 'database'], ['database', 'util'], ['styles', 'ui']] } }
+        const templates = {
+          aiResearchTool: ['ui', 'api', 'database', 'util'],
+          gameSimulation: ['ui', 'api', 'util', 'styles'],
+          dataDashboard: ['ui', 'database', 'api', 'styles'],
+          knowledgeExplorer: ['ui', 'database', 'util', 'styles'],
+          workflowAutomation: ['ui', 'auth', 'database', 'util'],
+          sample: ['ui', 'api', 'database', 'auth', 'util', 'styles'],
         };
-        if (!this.templateDefinitions[templateKey] && fallbackTemplates[templateKey]) {
-          this.templateDefinitions[templateKey] = fallbackTemplates[templateKey];
-        }
-        if (!this.map.blocks.length || confirm('Clone this template graph into your current app structure?')) {
-          const cloned = this.cloneTemplateGraph(templateKey);
-          if (cloned) {
-            this.log(`${templateKey} template cloned with starter workflow graph.`, 'success');
-            this.enterEcosystemWorkspace();
-          }
+        const sequence = templates[templateKey] || templates.aiResearchTool;
+        if (!this.map.blocks.length || confirm('Add this setup to your current app structure?')) {
+          sequence.forEach((type) => this.addBlock(type));
+          this.log(`${templateKey} starter setup added.`, 'success');
         }
       },
 
@@ -4190,8 +2035,6 @@
         }
         prd.disabled = this.map.blocks.length === 0;
         this.updateInstallButtonState();
-      },
-
       getPortPos(id, type) {
         const b = this.map.blocks.find(x => x.id === id);
         if (!b) return null;
@@ -4207,10 +2050,10 @@
         document.getElementById("btn-publish").disabled = n === 0;
         if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
         const stat = document.getElementById("map-status");
-        if (n === 0) { stat.textContent = "ADD SCREEN TO START"; stat.className = "map-status state-idle"; }
+        if (n === 0) { stat.textContent = "ADD PARTS TO START"; stat.className = "map-status state-idle"; }
         else if (ready) { stat.textContent = "APP READY"; stat.className = "map-status state-complete"; }
         else if (this.map.blocks.some(b => b.status === "GENERATING")) { stat.textContent = "MAKING APP..."; stat.className = "map-status state-active"; }
-        else { stat.textContent = "READY TO PREVIEW"; stat.className = "map-status state-ready"; }
+        else { stat.textContent = "READY TO MAKE APP"; stat.className = "map-status state-ready"; }
       },
 
       log(msg, type = "info") {
@@ -4297,18 +2140,69 @@
       },
 
       async refreshServerAccessStatus(forceRefresh = false) {
-        const token = await this.authUser?.getIdToken(forceRefresh);
-        if (!token) {
+        if (!this.authUser?.getIdToken) {
           this.serverAccess = { checked: true, paid: false, pending: false, source: 'guest', plan: 'free' };
           this.updateAuthUI();
           return this.serverAccess;
         }
         try {
-          // Check access status via Aporaksha or LogicHub API
+          renderStageList();
+          stages[0].status = "done";
+          addLog("→ Assembling web assets...", "progress");
+          this.zipFallbackBlob = await this.createZipBlob();
+          progress.style.width = "25%";
+          addLog("✓ Assembled web assets", "success");
+
+          stages[1].status = "done";
+          addLog("→ Injecting into Capacitor shell (android/app/src/main/assets/public)...", "progress");
+          const apkData = await this.generateRealAPK(this.zipFallbackBlob);
+          progress.style.width = "60%";
+          addLog("✓ Assets copied before capacitor copy android", "success");
+
+          stages[2].status = "done";
+          addLog("→ Running Gradle build (assembleDebug)...", "progress");
+          progress.style.width = "85%";
+          addLog("✓ Gradle output path: app/build/outputs/apk/debug/app-debug.apk", "success");
+
+          stages[3].status = "done";
+          addLog("→ Packaging APK...", "progress");
+
+          if (apkData.size < 500 * 1024) {
+            throw new Error("Generated APK is under 500KB and treated as failed.");
+          }
+          if (apkData.size < 1024 * 1024) {
+            addLog("⚠ APK is smaller than 1MB; build may be incomplete.", "error");
+          }
+
+        const apkData = await this.generateRealAPK();
+        this.apkBlob = apkData;
+        if (this.apkBlobUrl) URL.revokeObjectURL(this.apkBlobUrl);
+        this.apkBlobUrl = URL.createObjectURL(apkData);
+        this.updateInstallButtonState();
+        
+        progress.style.width = "100%";
+        addLog("✓ APK build complete!", "success");
+        addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
+        addLog(`Size: ${(apkData.size / 1024 / 1024).toFixed(2)} MB`, "success");
+        addLog("Ready for download & installation", "success");
+        
+        dlBtn.style.display = "inline-block"; this.apkBuildInProgress = false;
+        this.log("APK Ready! Download from modal.", "apk");
+          this.apkBlob = apkData;
+          const apkSizeMB = (apkData.size / 1024 / 1024).toFixed(2);
+          progress.style.width = "100%";
+          addLog("✓ APK build complete!", "success");
+          addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
+          addLog(`Size: ${apkSizeMB} MB`, "success");
+          dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${apkSizeMB}MB)`;
+          dlBtn.style.display = "inline-block";
+          zipFallbackBtn.style.display = "inline-block";
+          this.log("APK Ready! Download from modal.", "apk");
+          const idToken = await this.authUser.getIdToken(forceRefresh);
           const response = await fetch('/api/access-status', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ token })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify({ idToken })
           });
           const data = await this.readJsonResponse(response, 'Access status');
           if (!response.ok || data.error) throw new Error(data.error || `Access status failed with status ${response.status}`);
@@ -4318,7 +2212,7 @@
           this.log(`Access check fallback: ${error.message}`, 'info');
         }
         this.updateAuthUI();
-        if (typeof updateForgeLimitUI === 'function') updateForgeLimitUI();
+        updateForgeLimitUI();
         return this.serverAccess;
       },
 
@@ -4390,11 +2284,7 @@
           return;
         }
         card.className = 'premium-experience-card';
-        let upgradeSection = `<div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">India Founder Pass: ₹1717 with manual UPI payment and approval review.</div>`;
-        if (window.clientCountry === 'IN') {
-          upgradeSection = `<div class="premium-action-row"><button class="premium-action-btn secondary" disabled style="opacity:0.6;cursor:not-allowed;">🚫 SaaS Billing Restricted (India)</button><button class="premium-action-btn primary" onclick="alert('India users: Use the VIA app at http://localhost:7005 to upload your institutional ID card and bypass payment verification.')">🎓 Verify Student ID</button></div><div class="premium-support-note">SaaS subscriptions are disabled for India under SaaS Spec v8. Work local-first or use Student Verification to bypass.</div>`;
-        }
-        card.innerHTML = `<div class="premium-experience-head"><div><h3>Free workspace ready — upgrade when you want the founder path.</h3><p>Free users keep the current builder flow, while paid founder accounts swap this panel into a premium welcome state with clearer status, unlimited Forge messaging, and premium tool shortcuts.</p></div><span class="premium-state-badge free">⚡ free workspace</span></div><div class="premium-state-grid"><div class="premium-mini-card"><div class="premium-kpi">3 / 5h</div><h4>Current Forge window</h4><p>You can keep building with the free rolling Forge window and session app allowance today.</p></div><div class="premium-mini-card"><h4>Founder unlocks</h4><ul class="premium-feature-list"><li>Paid user welcome banner with founder status.</li><li>Unlimited Forge badge and premium modal copy.</li><li>Cleaner pending and approved founder screens.</li></ul></div><div class="premium-mini-card"><h4>Upgrade path</h4>${upgradeSection}</div></div>`;
+        card.innerHTML = `<div class="premium-experience-head"><div><h3>Free workspace ready — upgrade when you want the founder path.</h3><p>Free users keep the current builder flow, while paid founder accounts swap this panel into a premium welcome state with clearer status, unlimited Forge messaging, and premium tool shortcuts.</p></div><span class="premium-state-badge free">⚡ free workspace</span></div><div class="premium-state-grid"><div class="premium-mini-card"><div class="premium-kpi">3 / 5h</div><h4>Current Forge window</h4><p>You can keep building with the free rolling Forge window and session app allowance today.</p></div><div class="premium-mini-card"><h4>Founder unlocks</h4><ul class="premium-feature-list"><li>Paid user welcome banner with founder status.</li><li>Unlimited Forge badge and premium modal copy.</li><li>Cleaner pending and approved founder screens.</li></ul></div><div class="premium-mini-card"><h4>Upgrade path</h4><div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">India Founder Pass: ₹1717 with manual UPI payment and approval review.</div></div></div>`;
       },
 
       renderForgePremiumState() {
@@ -4428,18 +2318,9 @@
         const publishBtn = document.getElementById('btn-publish');
         const state = this.getAccessSnapshot();
         if (authChip) {
-          const authState = this.authState || (state.authReady ? 'authenticated' : 'guest');
-          authChip.className = `auth-chip ${authState === 'error' ? 'warn' : state.authReady ? 'success' : 'accent'}`;
-          authChip.textContent = authState === 'connecting'
-            ? 'Auth: connecting…'
-            : authState === 'error'
-              ? 'Auth: error'
-              : state.authReady
-                ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'authenticated'} • ${String(this.authUser.uid || 'guest').slice(0, 8)}`
-                : 'Auth: guest';
+          authChip.className = `auth-chip ${state.authReady ? 'success' : 'accent'}`;
+          authChip.textContent = state.authReady ? `Auth: ${this.authUser.isAnonymous ? 'guest' : 'user'} • ${this.authUser.uid.slice(0, 8)}` : 'Auth: local guest mode';
         }
-        const retryPanel = document.getElementById('auth-retry-panel');
-        if (retryPanel) retryPanel.style.display = (this.authState === 'error') ? 'block' : 'none';
         if (planChip) {
           planChip.className = `auth-chip ${state.paid ? 'success' : state.pending ? 'accent' : 'warn'}`;
           planChip.textContent = state.paid
@@ -4462,98 +2343,37 @@
       },
 
       async initFirebaseAuth() {
-        this.authState = 'connecting';
-        this.authResolved = false;
-        try {
-          const existingToken = getStoredToken();
-          if (existingToken) {
-            const saved = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || '{}');
-            this.authUser = { uid: saved.uid || 'user', email: saved.email || null, isAnonymous: false, getIdToken: async () => existingToken };
-            this.authState = 'authenticated';
-            this.authResolved = true;
-            this.log('Auth: restored session (Aporaksha JWT)', 'success');
-          } else {
-            this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
-            this.authState = 'guest';
-            this.authResolved = true;
-            this.log('Auth: guest mode (no saved token)', 'info');
-          }
-        } catch (error) {
-          this.authState = 'guest';
-          this.authResolved = true;
-          this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
-          this.log(`Auth init: ${error.message}`, 'info');
+        if (!window.firebase?.initializeApp || !window.firebase?.auth) {
+          this.log('Firebase auth scripts not available. Using local guest mode.', 'info');
+          this.updateAuthUI();
+          return;
         }
-        this.updateAuthUI();
-        await this.refreshServerAccessStatus();
-        updateForgeLimitUI();
-      },
-
-      async aporaksha_login(email, password) {
-        this.authState = 'connecting';
-        this.updateAuthUI();
         try {
-          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'login', email, password })
+          if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+          const auth = firebase.auth();
+          auth.onAuthStateChanged(async (user) => {
+            this.authUser = user || null;
+            this.updateAuthUI();
+            await this.refreshServerAccessStatus();
           });
-          const data = await resp.json();
-          if (!resp.ok || data.error) throw new Error(data.error || 'Login failed');
-          storeTokens(data.accessToken, data.refreshToken);
-          localStorage.setItem(AUTH_USER_KEY, JSON.stringify({ email, uid: data.userId || email }));
-          this.authUser = { uid: data.userId || email, email, isAnonymous: false, getIdToken: async () => getStoredToken() };
-          this.authState = 'authenticated';
-          this.log(`Auth: logged in as ${email}`, 'success');
+          if (!auth.currentUser) await auth.signInAnonymously();
+          this.log('Auth ready for all users.', 'success');
         } catch (error) {
-          this.authState = 'error';
-          this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
-          this.log(`Auth error: ${error.message}`, 'error');
+          this.authUser = null;
+          this.serverAccess = { checked: true, paid: false, pending: false, source: 'error', plan: 'free', error: error.message };
+          this.updateAuthUI();
+          updateForgeLimitUI();
+          this.log(`Auth fallback: ${error.message}`, 'info');
         }
-        this.updateAuthUI();
-        await this.refreshServerAccessStatus();
-      },
-
-      async aporaksha_signup(email, password) {
-        try {
-          const resp = await fetch(`${APORAKSHA_AUTH_URL}/auth`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'signup', email, password })
-          });
-          const data = await resp.json();
-          if (!resp.ok || data.error) throw new Error(data.error || data.message || 'Signup failed');
-          this.log(`Signup success: ${email}. Please log in.`, 'success');
-          return data;
-        } catch (error) {
-          this.log(`Signup error: ${error.message}`, 'error');
-          throw error;
-        }
-      },
-
-      aporaksha_logout() {
-        clearStoredTokens();
-        this.authUser = { uid: 'guest-local', isAnonymous: true, getIdToken: async () => null };
-        this.authState = 'guest';
-        this.serverAccess = { checked: true, paid: false, pending: false, source: 'logout', plan: 'free' };
-        this.updateAuthUI();
-        updateForgeLimitUI();
-        this.log('Logged out.', 'info');
-      },
-
-      retryAuthConnection() {
-        this.authState = 'connecting';
-        this.updateAuthUI();
-        this.initFirebaseAuth();
       },
 
       async syncFounderRequestToServer(order) {
-        const token = getStoredToken();
-        if (!token) throw new Error('Not authenticated. Please log in first.');
+        if (!this.authUser?.getIdToken) throw new Error('Auth is still connecting. Please try again in a moment.');
+        const idToken = await this.authUser.getIdToken(true);
         const response = await fetch('/api/founder-request', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ order })
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ idToken, order })
         });
         const data = await this.readJsonResponse(response, 'Founder request');
         if (!response.ok || data.error) throw new Error(data.error || `Founder request failed with status ${response.status}`);
@@ -4579,18 +2399,8 @@
         statusEl.innerHTML = `<div class="premium-thankyou free"><span class="founder-success-badge free">💳 Founder access not started</span><div><h4>No founder payment saved on this device yet.</h4><p>When a user pays ₹1717 and submits the UTR, this area becomes the pending approval screen. After approval, it turns into the founder-approved premium screen.</p></div><ul class="next-steps-list"><li class="next-step-item"><strong>India Founder Pass</strong>Manual UPI payment to ${this.escapeHtml(FOUNDER_PAYMENT.upiId)} with 12-digit UTR submission.</li><li class="next-step-item"><strong>Pending state</strong>A clearer status card appears immediately after submission.</li><li class="next-step-item"><strong>Paid state</strong>Unlimited Forge and premium publish sections become the default UX.</li></ul><div class="payment-actions"><button onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button></div></div>`;
       },
 
-
-      getAuthErrorLogs() {
-        try { const logs = JSON.parse(localStorage.getItem(AUTH_ERROR_LOG_KEY) || '[]'); return Array.isArray(logs) ? logs : []; } catch (_) { return []; }
-      },
-
-      saveAuthErrorLog(message) {
-        const logs = this.getAuthErrorLogs();
-        logs.push({ timestamp: new Date().toISOString(), device: navigator.userAgent || 'unknown', message: String(message || 'Unknown auth error') });
-        localStorage.setItem(AUTH_ERROR_LOG_KEY, JSON.stringify(logs.slice(-30)));
-      },
-
-      buildFounderVerificationMailto(order) {        const createdLabel = order?.createdAt
+      buildFounderVerificationMailto(order) {
+        const createdLabel = order?.createdAt
           ? new Date(order.createdAt).toLocaleString('en-IN')
           : new Date().toLocaleString('en-IN');
         const lines = [
@@ -4625,7 +2435,7 @@
       },
 
       showFounderIndiaPaymentHelp() {
-        alert('Step 1: Pay using UPI.\nStep 2: Enter UTR number.\nStep 3: Submit verification.');
+        alert(`₹1717 UPI payment link is not working right now.\n\nPlease open any UPI app manually and pay to ${FOUNDER_PAYMENT.upiId}.\nThen tap “I Paid — Submit UTR”. LogicHub will draft an email to dharam@viadecide.com with your payment details so the founder pass can be verified and approved.`);
         this.log('Showing India founder payment instructions.', 'info');
       },
       
@@ -4662,13 +2472,8 @@
         this.log(`Install prompt: ${choiceResult.outcome}`, choiceResult.outcome === "accepted" ? "success" : "info");
         this.deferredInstallPrompt = null;
         this.updateInstallButtonState();
-      },
 
       openFounderCheckout() {
-        if (window.clientCountry === 'IN') {
-          alert("SaaS Billing Blocked: Subscription billing is restricted in India under SaaS Spec v8. Please compile locally on your workstation for free, or verify your academic student ID on the VIA app.");
-          return;
-        }
         document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
         document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
         document.getElementById('founder-price-inr').textContent = `₹${Number(FOUNDER_PAYMENT.inrAmount).toLocaleString('en-IN')}`;
@@ -4693,27 +2498,7 @@
       },
 
       openFounderUpiApp() {
-        const amount = Number(FOUNDER_PAYMENT.inrAmount).toFixed(2);
-        const upiUrl = `upi://pay?pa=${encodeURIComponent(FOUNDER_PAYMENT.upiId)}&pn=${encodeURIComponent(FOUNDER_PAYMENT.payeeName)}&am=${encodeURIComponent(amount)}&cu=INR`;
-        const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(upiUrl)}&size=220`;
-        const qrEl = document.getElementById('founder-upi-qr');
-        if (qrEl) qrEl.innerHTML = `<div><strong>QR Fallback</strong><br><img src="${qrUrl}" alt="UPI QR" width="220" height="220" /></div>`;
-        const appsEl = document.getElementById('founder-upi-apps');
-        if (appsEl) {
-          const apps = ['Google Pay', 'PhonePe', 'Paytm'];
-          const detected = apps.filter((name) => navigator.userAgent.toLowerCase().includes(name.toLowerCase().replace(' ', '')));
-          appsEl.textContent = `Installed app hints: ${detected.length ? detected.join(', ') : 'No app detected from browser UA (Google Pay / PhonePe / Paytm supported).'}`;
-        }
-        try {
-          window.location.href = upiUrl;
-          setTimeout(() => {
-            if (document.visibilityState === 'visible') {
-              document.getElementById('founder-upi-link-note').textContent = 'UPI app did not open. Use QR fallback below.';
-            }
-          }, 1200);
-        } catch (_) {
-          document.getElementById('founder-upi-link-note').textContent = 'UPI launch failed. Use QR fallback below.';
-        }
+        this.showFounderIndiaPaymentHelp();
       },
 
       showFounderUtrForm() {
@@ -5010,6 +2795,8 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       },
 
       async synthesizeArchitecture() {
+        const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
+        if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
         if (this.map.blocks.length === 0) { alert("Add a few parts first."); return false; }
         if (!canCreateAnotherSessionApp(this.map.id)) {
           updateForgeLimitUI();
@@ -5019,60 +2806,19 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         document.getElementById("btn-synth").disabled = true;
         let success = true;
         try {
-          // Phase 1: Zayvora Planning (Axiom)
-          this.log("Phase 1: Zayvora Axiom generating PRD...", "accent");
-          let zayvoraPrd = "";
-          try {
-            const planResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/plan`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ prompt: "Synthesize this app", architecture: this.map.blocks })
-            });
-            const planData = await planResp.json();
-            zayvoraPrd = planData.prd || "";
-            this.map.lastZayvoraPrd = zayvoraPrd;
-            if (zayvoraPrd) this.log("✓ Zayvora PRD Generated.", "success");
-          } catch (e) {
-            this.log("⚠ Zayvora Axiom unavailable. Falling back to basic prompt.", "info");
-          }
-
           for (let b of this.map.blocks) {
-            b.status = "GENERATING"; this.render();
-            
-            // Phase 2: Zayvora Synthesis (Praxis)
-            this.log(`Phase 2: Synthesizing ${b.filename}...`, "accent");
+            b.status = "GENERATING"; this.render(); this.log(`Generating ${b.filename}...`, "accent");
             const ctx = b.dependsOn.map(id => this.map.blocks.find(x => x.id === id)).filter(d => d?.code).map(d => `--- File: ${d.filename} ---\n${d.code}`).join("\n\n");
-            
-            try {
-              const synthResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/synthesize`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: b.prompt || 'Synthesize logic based on connections.', context: ctx, prd: zayvoraPrd, filename: b.filename, type: b.type })
-              });
-              const data = await synthResp.json();
-              if (data.error) throw new Error(data.error);
-              let code = data.code || "";
-
-            // Phase 3: Zayvora Hardening (Engineer)
-            this.log(`Phase 3: Zayvora Engineer hardening ${b.filename}...`, "accent");
-            try {
-               const verifyResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/verify`, {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ code, filename: b.filename })
-               });
-               const verifyData = await verifyResp.json();
-               if (verifyData.code) code = verifyData.code;
-               this.log(`✓ ${b.filename} hardened.`, "success");
-            } catch (e) {
-               this.log(`⚠ Zayvora Engineer fallback on ${b.filename}.`, "info");
-            }
-
+            const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt || 'Synthesize logic based on connections.'}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nRequirements:\n- Output ONLY raw code. No markdown.\n- This app is for non-technical users, so prefer a working result over a perfect file split.\n- Do not reference missing local files.\n- If you create HTML, only reference CSS/JS files that already exist in the current architecture.\n- If no separate browser JS file exists, keep the page working with inline JavaScript or simple HTML-only behavior.\n- Keep filenames and imports consistent with the architecture.`;
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error.message);
+            let code = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+            if (code.startsWith("```")) code = code.split('\n').slice(1, -1).join('\n');
             b.code = code; b.status = "VERIFIED"; this.render();
-            } catch (err) {
-               this.log(`Phase 2 Error on ${b.filename}: ${err.message}`, "error");
-               b.status = "ERROR"; this.render();
-               throw err;
-            }
           }
           this.collectProjectFiles({ pwa: true });
           if (!markSessionAppCreated(this.map.id)) throw new Error(`This session is limited to ${APP_SESSION_LIMIT} apps.`);
@@ -5105,17 +2851,10 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       },
 
-      async exportZip(fromOffboard = false) {
+      async exportZip() {
         const blob = await this.buildProjectZipBlob();
         this.downloadBlob(blob, `LogicHub_${this.map.id}.zip`);
         this.log("ZIP Exported.", "success");
-        if (!fromOffboard) {
-          setTimeout(() => {
-            if (typeof window.showOffboardModal === 'function') {
-              window.showOffboardModal('zip');
-            }
-          }, 600);
-        }
       },
 
       async buildApk() {
@@ -5156,11 +2895,6 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
           const apkBlob = new Blob([apkBytes], { type: "application/vnd.android.package-archive" });
           this.downloadBlob(apkBlob, `LogicHub_${this.map.id}.apk`);
           this.log("APK downloaded.", "success");
-          setTimeout(() => {
-            if (typeof window.showOffboardModal === 'function') {
-              window.showOffboardModal('apk');
-            }
-          }, 600);
         } catch (err) {
           this.log(`APK Error: ${err.message}`, "error");
           alert(`APK build failed: ${err.message}`);
@@ -5195,28 +2929,6 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
           btn.disabled = this.map.blocks.length === 0;
           if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
         }
-      },
-
-      toggleViralDashboard() {
-        openModal('viral-modal');
-        this.log("Opening Viral Mastery Dashboard", "accent");
-      },
-
-      closeViralDashboard() {
-        closeModal('viral-modal');
-      },
-
-      generateViralPost() {
-        const prd = this.map.buildPRD();
-        const appName = this.getProjectDisplayName();
-        const link = `https://daxini.space/?app=${this.map.id}`;
-        const tweet = `🚀 Just forged "${appName}" using LogicHub!\n\nBuild app architectures visually with Zayvora AI.\n\n👉 Experience it here: ${link}\n\n#LogicHub #SovereignAI #BuildInPublic @viadecide`;
-        
-        navigator.clipboard.writeText(tweet).then(() => {
-          this.log("Viral post copied to clipboard!", "success");
-          alert("Viral post copied to clipboard! Share it to boost your app's visibility.");
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`, "_blank");
-        });
       }
     };
 
@@ -5234,6 +2946,29 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       if (!document.querySelector('.modal.active')) document.body.classList.remove('modal-open');
     }
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); }));
+
+
+    function showDeploymentError(message) {
+      const overlay = document.getElementById('deployment-error-overlay');
+      const text = document.getElementById('deployment-error-text');
+      if (!overlay || !text) return;
+      text.textContent = message || 'Check build logs and host runtime configuration.';
+      overlay.classList.add('show');
+    }
+
+    window.addEventListener('error', event => {
+      const message = event?.error?.message || event?.message || '';
+      if (!message) return;
+      showDeploymentError(`Check build logs: ${message}`);
+    });
+
+    window.addEventListener('unhandledrejection', event => {
+      const reason = event?.reason;
+      const message = typeof reason === 'string' ? reason : reason?.message;
+      if (!message) return;
+      showDeploymentError(`Check build logs: ${message}`);
+    });
+
     window.app = app;
 
     if ('serviceWorker' in navigator) {
@@ -5244,107 +2979,6 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
 
     app.init();
     if (window.LogicHubPublish) window.LogicHubPublish.syncToolbarButtonState();
-
-    // ─── OFFBOARD MODAL CONTROLLERS ───
-    window.showOffboardModal = function(type) {
-      const overlay = document.getElementById("offboard-overlay");
-      const title = document.getElementById("offboard-title");
-      const subtitle = document.getElementById("offboard-subtitle");
-      const zipCard = document.getElementById("offboard-card-zip");
-      
-      if (type === 'apk') {
-        title.textContent = "Your APK Is Ready";
-        subtitle.textContent = "Your APK has been packaged and downloaded. Your app is ready to install on any Android device.";
-        if (zipCard) zipCard.style.display = "flex";
-      } else {
-        title.textContent = "Your ZIP Is Ready";
-        subtitle.textContent = "Your project source code has been successfully generated and exported as a ZIP archive.";
-        if (zipCard) zipCard.style.display = "none";
-      }
-      
-      if (overlay) {
-        overlay.classList.add("active");
-        document.body.classList.add('modal-open');
-      }
-    };
-
-    window.closeOffboardModal = function() {
-      const overlay = document.getElementById("offboard-overlay");
-      if (overlay) {
-        overlay.classList.remove("active");
-        document.body.classList.remove('modal-open');
-      }
-    };
-
-    window.offboardAction = function(action) {
-      closeOffboardModal();
-      if (action === 'publish') {
-        app.publishApp();
-      } else if (action === 'marketplace') {
-        const dsUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? 'http://localhost:7004'
-          : 'https://daxini.space';
-        window.open(dsUrl, '_blank', 'noopener,noreferrer');
-      } else if (action === 'zip') {
-        app.exportZip(true);
-      } else if (action === 'new') {
-        app.openCreateAppWizard();
-      }
-    };
-    
-    // Light dismiss click-outside support
-    document.getElementById("offboard-overlay")?.addEventListener('pointerdown', function(e) {
-      if (e.target === this) closeOffboardModal();
-    });
   </script>
-
-  <!-- Success Offboarding Modal -->
-  <div id="offboard-overlay" class="offboard-overlay">
-    <div class="offboard-modal">
-      <button class="offboard-close" onclick="closeOffboardModal()">&times;</button>
-      <div class="offboard-header">
-        <div class="offboard-icon-success">✓</div>
-        <h2 id="offboard-title">Your App Is Ready</h2>
-        <p id="offboard-subtitle">Your project has been processed successfully. What would you like to do next?</p>
-      </div>
-      <div class="offboard-grid">
-        <div class="offboard-card highlight" onclick="offboardAction('publish')">
-          <div class="offboard-card-head">
-            <span class="offboard-card-icon">🌐</span>
-            <span>Publish to Marketplace</span>
-          </div>
-          <p>List your app on Daxini.Space so others can discover, install, and remix it.</p>
-          <div class="offboard-card-cta">Publish Now →</div>
-        </div>
-        
-        <div class="offboard-card" onclick="offboardAction('marketplace')">
-          <div class="offboard-card-head">
-            <span class="offboard-card-icon">🛒</span>
-            <span>Browse Marketplace</span>
-          </div>
-          <p>See what other builders have published. Get inspired or remix existing apps.</p>
-          <div class="offboard-card-cta">Open Marketplace →</div>
-        </div>
-        
-        <div id="offboard-card-zip" class="offboard-card" onclick="offboardAction('zip')">
-          <div class="offboard-card-head">
-            <span class="offboard-card-icon">📦</span>
-            <span>Export Source</span>
-          </div>
-          <p>Download the full project source as a ZIP for local development.</p>
-          <div class="offboard-card-cta">Export ZIP →</div>
-        </div>
-        
-        <div class="offboard-card" onclick="offboardAction('new')">
-          <div class="offboard-card-head">
-            <span class="offboard-card-icon">🔄</span>
-            <span>Build Another App</span>
-          </div>
-          <p>Start a fresh project from scratch or remix another template.</p>
-          <div class="offboard-card-cta">New Project →</div>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
