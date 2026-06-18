@@ -1,3 +1,4 @@
+export const maxDuration = 300; // 5 minutes to prevent 504 Gateway Timeout
 import admin, { getAdminDb, logRuntimeEvent } from "./_sovereignAuth.js";
 import { trackEvent, ANALYTICS_EVENTS } from "./_analyticsService.js";
 

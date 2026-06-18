@@ -1,3 +1,4 @@
+export const maxDuration = 300; // 5 minutes to prevent 504 Gateway Timeout
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
