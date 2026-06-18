@@ -1,5 +1,4 @@
-import { Filter } from "firebase-admin/firestore";
-import { getAdminDb, jsonError, logRuntimeEvent } from "./_firebaseAdmin.js";
+import { getAdminDb, jsonError, logRuntimeEvent, Filter } from "./_sovereignAuth.js";
 import { withAppDefaults } from "./_appAnalytics.js";
 
 const ALLOWED_ORIGIN = "https://daxini.space";
@@ -93,17 +92,52 @@ export default async function handler(req, res) {
     const db = getAdminDb();
     const appsRef = db.collection("apps");
 
-    const snap = await appsRef
-      .where(
-        Filter.or(
-          Filter.where("viewCount", ">=", 1),
-          Filter.where("isPublished", "==", true)
+    let snap;
+    try {
+      snap = await appsRef
+        .where(
+          Filter.or(
+            Filter.where("viewCount", ">=", 1),
+            Filter.where("isPublished", "==", true)
+          )
         )
-      )
-      .limit(120)
-      .get();
+        .limit(120)
+        .get();
+    } catch (e) {
+      console.warn("Local SQLite apps query failed:", e.message);
+      snap = { docs: [] };
+    }
 
-    const apps = snap.docs.map(toPublicApp).sort((a, b) => scoreApp(b) - scoreApp(a));
+    const localApps = snap.docs.map(toPublicApp);
+
+    let daxiniApps = [];
+    try {
+      const feedRes = await fetch("https://daxini.space/api/public-feed");
+      if (feedRes.ok) {
+        const feedData = await feedRes.json();
+        if (feedData && Array.isArray(feedData.apps)) {
+          daxiniApps = feedData.apps.map(app => ({
+            ...app,
+            id: app.id || app.app_id,
+            app_id: app.app_id || app.id
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch public feed from Daxini.Space:", e.message);
+    }
+
+    const seenIds = new Set();
+    const apps = [];
+    for (const app of [...localApps, ...daxiniApps]) {
+      const id = app.app_id || app.id;
+      if (id && !seenIds.has(id)) {
+        seenIds.add(id);
+        apps.push(app);
+      }
+    }
+
+    apps.sort((a, b) => scoreApp(b) - scoreApp(a));
     const seedGrid = apps.slice(0, GRID_SIZE);
     const lastOpenedAppId = String(req.query?.last_opened_app || "").trim();
     const replacements = pickRelatedApps(apps, lastOpenedAppId, 3);

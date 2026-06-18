@@ -1,5 +1,4 @@
-import admin from "firebase-admin";
-import { getAdminDb, logRuntimeEvent } from "./_firebaseAdmin.js";
+import admin, { getAdminDb, logRuntimeEvent } from "./_sovereignAuth.js";
 import { trackEvent, ANALYTICS_EVENTS } from "./_analyticsService.js";
 
 function toBase64(value) {
@@ -181,6 +180,18 @@ export default async function handler(req, res) {
         publishedAt: metadata.publishedAt
       }
     });
+    let projectBlocks = [];
+    let projectConnections = [];
+    if (files['project.logic.json']) {
+      try {
+        const parsed = JSON.parse(files['project.logic.json']);
+        projectBlocks = parsed.project_state?.blocks || [];
+        projectConnections = parsed.project_state?.connections || [];
+      } catch (err) {
+        console.warn("Could not parse project.logic.json during publish:", err.message);
+      }
+    }
+
     const db = getAdminDb();
     await db.collection("apps").doc(appId).set({
       app_id: appId,
@@ -192,6 +203,8 @@ export default async function handler(req, res) {
       permissions: metadata.permissions,
       slug,
       source: "logichub",
+      blocks: projectBlocks,
+      connections: projectConnections,
       created_at: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
     await logRuntimeEvent("publish_attempt", { appId, slug, creatorId: metadata.creatorId, status: "success" });
@@ -199,6 +212,23 @@ export default async function handler(req, res) {
       userId: metadata.creatorId,
       projectId: appId,
       metadata: { slug, appName: metadata.name },
+    });
+
+    // Fire-and-forget push to Daxini.Space API
+    fetch("https://daxini.space/api/apps/publish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": req.headers?.authorization || req.headers?.Authorization || ""
+      },
+      body: JSON.stringify({
+        appId,
+        slug,
+        bundle,
+        metadata
+      })
+    }).catch(err => {
+      console.warn("Background push to Daxini.Space failed:", err.message);
     });
 
     return res.status(200).json({

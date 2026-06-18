@@ -1,4 +1,4 @@
-import { getAdminAuth, getAdminDb, jsonError, verifyRequestUser } from "./_firebaseAdmin.js";
+import { getAdminAuth, getAdminDb, jsonError, verifyRequestUser } from "./_sovereignAuth.js";
 import { trackEvent, trackReturningUser, ANALYTICS_EVENTS } from "./_analyticsService.js";
 
 function isApprovedStatus(value) {
@@ -23,6 +23,7 @@ export default async function handler(req, res) {
     const auth = getAdminAuth();
     const db = getAdminDb();
 
+    // Fetch user record (sovereign mock) and SQLite docs in parallel
     const [userRecord, paidDocSnap, userDocSnap] = await Promise.all([
       auth.getUser(uid),
       db.collection("paidUsers").doc(uid).get(),
@@ -35,14 +36,30 @@ export default async function handler(req, res) {
     const paidDoc = paidDocSnap.exists ? paidDocSnap.data() || {} : {};
     const userDoc = userDocSnap.exists ? userDocSnap.data() || {} : {};
 
+    // Also check Aporaksha subscription REST endpoint
+    let paidByAporaksha = false;
+    try {
+      const aporaksha = await fetch(`http://localhost:7002/api/subscriptions/check-access?email=${encodeURIComponent(uid)}&t=${Date.now()}`, {
+        headers: { "Authorization": req.headers?.authorization || "" }
+      });
+      if (aporaksha.ok) {
+        const data = await aporaksha.json();
+        if (data.hasAccess || data.active || data.paid) {
+          paidByAporaksha = true;
+        }
+      }
+    } catch (e) {
+      // Aporaksha offline — no-op
+    }
+
     let paidByStudent = false;
     try {
       const gatewayUrl = process.env.GATEWAY_URL || "https://daxini.xyz";
-      const res = await fetch(`${gatewayUrl}/api/verify/student/status?userId=${encodeURIComponent(uid)}&t=${Date.now()}`, {
+      const studentRes = await fetch(`${gatewayUrl}/api/verify/student/status?userId=${encodeURIComponent(uid)}&t=${Date.now()}`, {
         cache: 'no-store'
       });
-      if (res.ok) {
-        const data = await res.json();
+      if (studentRes.ok) {
+        const data = await studentRes.json();
         if (data.verified) {
           paidByStudent = true;
         }
@@ -51,14 +68,14 @@ export default async function handler(req, res) {
       console.warn("[ACCESS_STATUS] Gateway Student Check Failed:", e.message);
     }
 
-    const paidByFirestore = paidDoc.paid === true || isApprovedStatus(paidDoc.status) || userDoc.paid === true || isApprovedStatus(userDoc.paymentStatus);
-    const pending = !paidByClaim && !paidByFirestore && !paidByStudent && (
+    const paidBySovereign = paidDoc.paid === true || isApprovedStatus(paidDoc.status) || userDoc.paid === true || isApprovedStatus(userDoc.paymentStatus);
+    const pending = !paidByClaim && !paidBySovereign && !paidByStudent && !paidByAporaksha && (
       String(userDoc.founderRequestStatus || "").toLowerCase() === "requested" ||
       String(userDoc.paymentStatus || "").toLowerCase() === "pending"
     );
 
-    const paid = paidByClaim || paidByFirestore || paidByStudent;
-    const source = paidByStudent ? "student_verification" : (paidByClaim ? "custom_claims" : paidByFirestore ? "firestore" : pending ? "pending_request" : "free");
+    const paid = paidByClaim || paidBySovereign || paidByStudent || paidByAporaksha;
+    const source = paidByStudent ? "student_verification" : (paidByAporaksha ? "aporaksha" : paidByClaim ? "custom_claims" : paidBySovereign ? "sovereign_db" : pending ? "pending_request" : "free");
     const plan = paidByStudent ? "student" : (paidDoc.plan || userDoc.plan || claims.plan || (paid ? "founder" : pending ? "pending" : "free"));
 
     const isNewUser = !userDocSnap.exists;
@@ -84,12 +101,12 @@ export default async function handler(req, res) {
       paymentStatus: paid ? "active" : pending ? "pending" : "free",
       checkedAt: new Date().toISOString(),
       user: {
-        email: userRecord.email || null,
-        anonymous: !!decodedToken.firebase?.sign_in_provider && decodedToken.firebase.sign_in_provider === "anonymous"
+        email: userRecord.email || decodedToken.email || null,
+        anonymous: false
       },
       access: {
         claimPaid: paidByClaim,
-        firestorePaid: paidByFirestore,
+        firestorePaid: paidBySovereign,
         latestOrderId: userDoc.latestOrderId || paidDoc.orderId || null,
         amount: paidDoc.amount || userDoc.amount || null,
         currency: paidDoc.currency || userDoc.currency || null
@@ -101,3 +118,4 @@ export default async function handler(req, res) {
     return jsonError(res, statusCode, error.message || "Access status check failed.");
   }
 }
+

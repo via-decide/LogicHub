@@ -1,4 +1,4 @@
-import { jsonError } from "./_firebaseAdmin.js";
+import { jsonError } from "./_sovereignAuth.js";
 import { incrementAppViewCount } from "./_appAnalytics.js";
 
 export default async function handler(req, res) {

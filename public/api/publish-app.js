@@ -1,5 +1,5 @@
-import admin from "firebase-admin";
-import { getAdminDb, logRuntimeEvent } from "./_firebaseAdmin.js";
+import admin 
+import { getAdminDb, logRuntimeEvent } from "./_sovereignAuth.js";
 
 function toBase64(value) {
   return Buffer.from(value).toString('base64');

@@ -1,5 +1,5 @@
-import admin from "firebase-admin";
-import { getAdminDb, jsonError, logRuntimeEvent } from "./_firebaseAdmin.js";
+import admin 
+import { getAdminDb, jsonError, logRuntimeEvent } from "./_sovereignAuth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return jsonError(res, 405, "Method not allowed. Use POST.");

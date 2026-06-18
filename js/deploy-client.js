@@ -80,7 +80,21 @@
       generatedAt: new Date().toISOString(),
       project_state: {
         id: app.map.id,
-        blocks: app.map.blocks.map(b => ({ id: b.id, type: b.type, filename: b.filename, dependsOn: b.dependsOn }))
+        blocks: app.map.blocks.map(b => ({
+          id: b.id,
+          type: b.type,
+          label: b.label || '',
+          typeLabel: b.typeLabel || '',
+          filename: b.filename || '',
+          prompt: b.prompt || '',
+          code: b.code || '',
+          x: b.x,
+          y: b.y,
+          status: b.status || 'PENDING',
+          dependsOn: b.dependsOn,
+          connectedTo: b.connectedTo
+        })),
+        connections: app.map.connections || []
       },
       artifacts: app.map.projectArtifacts || {},
       legacy_prd: app.map.buildPRD()

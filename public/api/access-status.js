@@ -1,4 +1,4 @@
-import { getAdminAuth, getAdminDb, jsonError, verifyRequestUser } from "./_firebaseAdmin.js";
+import { getAdminAuth, getAdminDb, jsonError, verifyRequestUser } from "./_sovereignAuth.js";
 
 function isApprovedStatus(value) {
   return ["active", "approved", "confirmed", "paid", "pro"].includes(String(value || "").toLowerCase());

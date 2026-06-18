@@ -10,8 +10,13 @@
  *   2. analyticsDailyCounts → mutable daily counter per event (fast dashboard reads)
  */
 
-import admin from "firebase-admin";
-import { getAdminDb } from "./_firebaseAdmin.js";
+import admin, { getAdminDb } from "./_sovereignAuth.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ─── Valid canonical event names ─────────────────────────────────────────────
 export const ANALYTICS_EVENTS = Object.freeze({
@@ -28,6 +33,12 @@ export const ANALYTICS_EVENTS = Object.freeze({
   SCREEN_2_VIEWED: "screen_2_viewed",
   SCREEN_3_VIEWED: "screen_3_viewed",
   ONBOARDING_COMPLETED: "onboarding_completed",
+  DS_ONBOARDING_STARTED: "ds_onboarding_started",
+  DS_SCREEN_0_VIEWED: "ds_screen_0_viewed",
+  DS_SCREEN_1_VIEWED: "ds_screen_1_viewed",
+  DS_SCREEN_2_VIEWED: "ds_screen_2_viewed",
+  DS_SCREEN_3_VIEWED: "ds_screen_3_viewed",
+  DS_ONBOARDING_COMPLETED: "ds_onboarding_completed",
 });
 
 const VALID_EVENTS = new Set(Object.values(ANALYTICS_EVENTS));
@@ -89,6 +100,22 @@ export async function trackEvent(eventName, opts = {}) {
     );
 
     await batch.commit();
+
+    try {
+      const dataDir = path.join(__dirname, "..", "data");
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      const logPath = path.join(dataDir, "events.jsonl");
+      const entry = JSON.stringify({
+        timestamp: new Date().toISOString(),
+        type: eventName,
+        payload: { userId, projectId, sessionId, ...metadata }
+      });
+      fs.appendFileSync(logPath, entry + "\n", "utf8");
+    } catch (e) {
+      console.error("[Analytics] JSONL append failed:", e.message);
+    }
   } catch (err) {
     // Never surface analytics failures to the product flow
     console.error(`[Analytics] trackEvent failed for "${eventName}":`, err.message);

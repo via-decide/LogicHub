@@ -7,6 +7,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Access logging for traffic visibility
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const ms = Date.now() - start;
+        const ts = new Date().toISOString();
+        if (!req.url.match(/\.(js|css|png|ico|woff|map)/) && !req.url.includes('.v1')) {
+            console.log(`[${ts}] ${req.method} ${req.url} → ${res.statusCode} (${ms}ms)`);
+        }
+    });
+    next();
+});
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -39,7 +53,7 @@ function serveVersionedHTML(res) {
     if (fs.existsSync(indexPath)) {
         let html = fs.readFileSync(indexPath, 'utf8');
         html = injectVersioning(html);
-        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         return res.send(html);
     }

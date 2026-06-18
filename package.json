@@ -16,5 +16,8 @@
   },
   "devDependencies": {
     "tsx": "^4.21.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1"
   }
 }

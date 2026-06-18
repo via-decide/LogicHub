@@ -1,5 +1,4 @@
-import admin from "firebase-admin";
-import { getAdminDb, jsonError, logRuntimeEvent } from "../_firebaseAdmin.js";
+import admin, { getAdminDb, jsonError, logRuntimeEvent } from "../_sovereignAuth.js";
 
 function authorized(req) {
   const expected = String(process.env.FIREBASE_ADMIN_SECRET || "").trim();

@@ -1,5 +1,5 @@
-import admin from "firebase-admin";
-import { getAdminDb, jsonError, logRuntimeEvent, verifyRequestUser } from "./_firebaseAdmin.js";
+import admin 
+import { getAdminDb, jsonError, logRuntimeEvent, verifyRequestUser } from "./_sovereignAuth.js";
 
 function shouldNotifyFounderReview(order) {
   return Number(order?.amount || 0) === 1717 && String(order?.currency || "INR").toUpperCase() === "INR";

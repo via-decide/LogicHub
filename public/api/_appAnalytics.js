@@ -1,5 +1,5 @@
-import admin from "firebase-admin";
-import { getAdminDb } from "./_firebaseAdmin.js";
+import admin from "./_sovereignAuth.js";
+import { getAdminDb } from "./_sovereignAuth.js";
 
 const APPS_COLLECTION = "apps";
 

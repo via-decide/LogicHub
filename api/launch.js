@@ -1,5 +1,4 @@
-import admin from "firebase-admin";
-import { getAdminDb, jsonError, logRuntimeEvent } from "./_firebaseAdmin.js";
+import admin, { getAdminDb, jsonError, logRuntimeEvent } from "./_sovereignAuth.js";
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,7 +20,8 @@ export default async function handler(req, res) {
     if (Number.isNaN(eventTs.getTime())) return jsonError(res, 400, "Invalid timestamp.");
 
     const db = getAdminDb();
-    await db.collection("app_launches").add({
+    const launchId = `launch_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    await db.collection("app_launches").doc(launchId).set({
       app_id: appId,
       device_id: deviceId,
       timestamp: admin.firestore.Timestamp.fromDate(eventTs),
