@@ -16,8 +16,17 @@ const execAsync = promisify(exec);
 const prisma = new PrismaClient();
 const app = express();
 
+const ALLOWED_ORIGINS = [
+  'https://logichub.app', 
+  'https://viadecide.com', 
+  'https://aporaksha.com', 
+  'https://daxini.space', 
+  'http://localhost:3000', 
+  'http://localhost:7004'
+];
+
 app.use(cors({
-  origin: '*',
+  origin: ALLOWED_ORIGINS,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Ecosystem-Uid', 'X-Requested-With']
 }));
@@ -98,6 +107,13 @@ app.post('/api/v1/project/analyze', requireAuth, async (req, res) => {
   const { sourceType, sourcePayload } = req.body; // sourceType: 'APK', 'ZIP', 'GITHUB'
   const userId = req.builder.ecosystem_uid;
 
+  // Security: Payload size validation
+  if (sourceType === 'APK' || sourceType === 'ZIP') {
+    if (!sourcePayload || sourcePayload.length > 50 * 1024 * 1024) { // 50MB Base64 limit
+      return res.status(400).json({ error: 'Payload exceeds size limit of 50MB or is missing.' });
+    }
+  }
+
   // 1. Create Project Record
   const project = await prisma.project.create({
     data: {
@@ -163,8 +179,11 @@ app.post('/api/v1/project/upgrade', requireAuth, async (req, res) => {
     data: { status: 'UPGRADING' }
   });
 
+  // Security: Sanitize prompt to prevent RCE if ever injected into bash commands
+  const sanitizedPrompt = (prompt || '').replace(/[^a-zA-Z0-9\s.,?!_-]/g, '');
+
   // Dispatch to Zayvora Python Engine + Worker
-  console.log(`[API] Queuing Zayvora Upgrade for ${projectId} with prompt: ${prompt}`);
+  console.log(`[API] Queuing Zayvora Upgrade for ${projectId} with prompt: ${sanitizedPrompt}`);
   
   // Wire directly to the local Python engine (bundle_zay.py) as requested
   try {
