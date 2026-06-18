@@ -163,23 +163,27 @@ export default async function handler(req, res) {
       [`apps/${slug}/architecture.json`, JSON.stringify({ prd: bundle.architecture_prd || '' }, null, 2)]
     ];
 
-    for (const [path, content] of fileEntries) {
-      const existing = await getGitHubFile(githubRepo, path, githubToken);
-      await putGitHubFile(githubRepo, path, githubToken, `LogicHub Publish: ${metadata.name} (${slug})`, String(content || ''), existing?.sha);
-    }
-
-    await updateRegistry({
-      githubRepo,
-      githubToken,
-      registryItem: {
-        slug,
-        name: metadata.name,
-        creator: metadata.creator,
-        appUrl: metadata.appUrl,
-        source: 'logichub',
-        publishedAt: metadata.publishedAt
+    if (githubToken) {
+      for (const [path, content] of fileEntries) {
+        const existing = await getGitHubFile(githubRepo, path, githubToken);
+        await putGitHubFile(githubRepo, path, githubToken, `LogicHub Publish: ${metadata.name} (${slug})`, String(content || ''), existing?.sha);
       }
-    });
+
+      await updateRegistry({
+        githubRepo,
+        githubToken,
+        registryItem: {
+          slug,
+          name: metadata.name,
+          creator: metadata.creator,
+          appUrl: metadata.appUrl,
+          source: 'logichub',
+          publishedAt: metadata.publishedAt
+        }
+      });
+    } else {
+      console.log(`[publish-app] Skipping GitHub publish for ${slug} (GITHUB_TOKEN not present).`);
+    }
     let projectBlocks = [];
     let projectConnections = [];
     if (files['project.logic.json']) {
@@ -192,44 +196,57 @@ export default async function handler(req, res) {
       }
     }
 
-    const db = getAdminDb();
-    await db.collection("apps").doc(appId).set({
-      app_id: appId,
-      creator_id: metadata.creatorId,
-      title: metadata.name,
-      description: metadata.description,
-      entry_url: metadata.entryUrl,
-      icon: metadata.icon,
-      permissions: metadata.permissions,
-      slug,
-      source: "logichub",
-      blocks: projectBlocks,
-      connections: projectConnections,
-      created_at: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-    await logRuntimeEvent("publish_attempt", { appId, slug, creatorId: metadata.creatorId, status: "success" });
-    await trackEvent(ANALYTICS_EVENTS.PUBLISH_CLICKED, {
-      userId: metadata.creatorId,
-      projectId: appId,
-      metadata: { slug, appName: metadata.name },
-    });
-
-    // Fire-and-forget push to Daxini.Space API
-    fetch("https://daxini.space/api/apps/publish", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": req.headers?.authorization || req.headers?.Authorization || ""
-      },
-      body: JSON.stringify({
-        appId,
+    try {
+      const db = getAdminDb();
+      await db.collection("apps").doc(appId).set({
+        app_id: appId,
+        creator_id: metadata.creatorId,
+        title: metadata.name,
+        description: metadata.description,
+        entry_url: metadata.entryUrl,
+        icon: metadata.icon,
+        permissions: metadata.permissions,
         slug,
-        bundle,
-        metadata
-      })
-    }).catch(err => {
-      console.warn("Background push to Daxini.Space failed:", err.message);
-    });
+        source: "logichub",
+        blocks: projectBlocks,
+        connections: projectConnections,
+        created_at: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      await logRuntimeEvent("publish_attempt", { appId, slug, creatorId: metadata.creatorId, status: "success" });
+      await trackEvent(ANALYTICS_EVENTS.PUBLISH_CLICKED, {
+        userId: metadata.creatorId,
+        projectId: appId,
+        metadata: { slug, appName: metadata.name },
+      });
+    } catch (dbError) {
+      console.warn("[publish-app] Skipping Firestore/Analytics (not configured or unavailable):", dbError.message);
+    }
+
+    // Push to Daxini.Space local edge
+    const daxiniEdgeUrl = process.env.DAXINI_SPACE_API || "http://127.0.0.1:7004/api/apps/publish";
+    console.log(`[publish-app] Pushing to Sovereign Edge at ${daxiniEdgeUrl}...`);
+    try {
+      const edgeRes = await fetch(daxiniEdgeUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": req.headers?.authorization || req.headers?.Authorization || ""
+        },
+        body: JSON.stringify({
+          appId,
+          slug,
+          bundle,
+          metadata
+        })
+      });
+      if (!edgeRes.ok) {
+        console.warn(`[publish-app] Local Edge returned status ${edgeRes.status}`);
+      } else {
+        console.log(`[publish-app] Local Edge successfully processed ${slug}`);
+      }
+    } catch (err) {
+      console.warn("[publish-app] Background push to local Daxini.Space failed:", err.message);
+    }
 
     return res.status(200).json({
       success: true,
