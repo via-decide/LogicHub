@@ -1,13 +1,8 @@
-import { getAdminDb, jsonError, logRuntimeEvent, Filter } from "./_sovereignAuth.js";
+import { Filter } from "firebase-admin/firestore";
+import { getAdminDb, jsonError, logRuntimeEvent } from "./_firebaseAdmin.js";
 import { withAppDefaults } from "./_appAnalytics.js";
 
 const ALLOWED_ORIGIN = "https://daxini.space";
-const GRID_SIZE = 8;
-
-const SAMPLE_APPS = [
-  { id: "sample-notes", name: "Quick Notes", author: "Daxini Team", icon: "📝", description: "Capture and organize lightweight notes.", launch_url: "https://daxini.space/samples/quick-notes", category: "productivity", installs: 0 },
-  { id: "sample-kanban", name: "Mini Kanban", author: "Daxini Team", icon: "📌", description: "Simple kanban board for tasks.", launch_url: "https://daxini.space/samples/mini-kanban", category: "workflow", installs: 0 }
-];
 
 function setPublicFeedHeaders(req, res) {
   res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
@@ -21,63 +16,25 @@ function setPublicFeedHeaders(req, res) {
   }
 }
 
-function fallbackText(value, fallback) {
-  const clean = String(value || "").trim();
-  return clean || fallback;
-}
-
 function toPublicApp(doc) {
   const data = withAppDefaults(doc.data() || {});
   return {
-    id: doc.id,
-    app_id: fallbackText(data.app_id || doc.id, doc.id),
-    app_name: fallbackText(data.name || data.title, "Untitled App"),
-    icon: fallbackText(data.icon, "✨"),
-    description: fallbackText(data.description, "No description provided yet."),
-    creator: fallbackText(data.creator || data.author || data.creator_id, "anonymous"),
-    launch_url: fallbackText(data.entry_url || data.entryUrl || data.launch_url, "about:blank"),
-    category: fallbackText(data.category || (Array.isArray(data.tags) && data.tags[0]) || "general", "general"),
-    installs: Number(data.installs || 0),
-    remixes: Number(data.remixes || 0),
-    ratings: Number(data.ratings || 0),
-    viewCount: Number(data.viewCount || 0)
+    app_id: doc.id,
+    app_name: String(data.app_name || "Untitled app").trim(),
+    creator: String(data.creator || "unknown").trim(),
+    icon: String(data.icon || "✨").trim() || "✨",
+    description: String(data.description || "No description provided yet.").trim(),
+    launch_url: String(data.launch_url || "").trim(),
+    installs: Number(data.install_count || 0),
+    category: String(data.category || "general").trim()
   };
 }
 
-function scoreApp(app) {
-  return (Number(app.installs) * 2) + Number(app.viewCount || 0);
-}
-
-function pickRelatedApps(allApps, lastOpenedAppId, maxSlots) {
-  if (!lastOpenedAppId) return [];
-  const base = allApps.find((app) => app.app_id === lastOpenedAppId || app.id === lastOpenedAppId);
-  if (!base) return [];
-
-  const related = allApps
-    .filter((candidate) => candidate.app_id !== base.app_id)
-    .map((candidate) => {
-      const sameCreator = candidate.creator === base.creator ? 6 : 0;
-      const sameCategory = candidate.category === base.category ? 4 : 0;
-      const installDistance = Math.abs(Number(candidate.installs || 0) - Number(base.installs || 0));
-      const similarInstalls = Math.max(0, 3 - Math.min(3, Math.floor(installDistance / 10)));
-      return { candidate, rank: sameCreator + sameCategory + similarInstalls };
-    })
-    .filter((item) => item.rank > 0)
-    .sort((a, b) => b.rank - a.rank)
-    .slice(0, maxSlots)
-    .map((item) => item.candidate);
-
-  return related;
-}
+const SAMPLE_APPS = [
+  { app_id: "sample-1", app_name: "Focus Sprint", creator: "Daxini Team", icon: "🚀", description: "Sample productivity app.", launch_url: "", installs: 0, category: "productivity" }
+];
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Ecosystem-Uid');
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
   setPublicFeedHeaders(req, res);
 
   if (req.method === "OPTIONS") {
@@ -92,88 +49,24 @@ export default async function handler(req, res) {
     const db = getAdminDb();
     const appsRef = db.collection("apps");
 
-    let snap;
-    try {
-      snap = await appsRef
-        .where(
-          Filter.or(
-            Filter.where("viewCount", ">=", 1),
-            Filter.where("isPublished", "==", true)
-          )
+    const snap = await appsRef
+      .where(
+        Filter.or(
+          Filter.where("viewCount", ">=", 10),
+          Filter.where("isPublished", "==", true)
         )
-        .limit(120)
-        .get();
-    } catch (e) {
-      console.warn("Local SQLite apps query failed:", e.message);
-      snap = { docs: [] };
-    }
+      )
+      .limit(80)
+      .get();
 
-    const localApps = snap.docs.map(toPublicApp);
+    const apps = snap.docs.map(toPublicApp).filter((app) => app.app_name && app.creator && app.launch_url);
+    const payloadApps = apps.length ? apps : SAMPLE_APPS;
 
-    let daxiniApps = [];
-    try {
-      const feedRes = await fetch("https://daxini.space/api/public-feed");
-      if (feedRes.ok) {
-        const feedData = await feedRes.json();
-        if (feedData && Array.isArray(feedData.apps)) {
-          daxiniApps = feedData.apps.map(app => ({
-            ...app,
-            id: app.id || app.app_id,
-            app_id: app.app_id || app.id
-          }));
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to fetch public feed from Daxini.Space:", e.message);
-    }
-
-    const seenIds = new Set();
-    const apps = [];
-    for (const app of [...localApps, ...daxiniApps]) {
-      const id = app.app_id || app.id;
-      if (id && !seenIds.has(id)) {
-        seenIds.add(id);
-        apps.push(app);
-      }
-    }
-
-    apps.sort((a, b) => scoreApp(b) - scoreApp(a));
-    const seedGrid = apps.slice(0, GRID_SIZE);
-    const lastOpenedAppId = String(req.query?.last_opened_app || "").trim();
-    const replacements = pickRelatedApps(apps, lastOpenedAppId, 3);
-    const roomGrid = [...seedGrid];
-
-    if (replacements.length) {
-      [5, 6, 7].forEach((slot, idx) => {
-        if (replacements[idx]) roomGrid[slot] = replacements[idx];
-      });
-    }
-
-    const finalGrid = roomGrid.filter(Boolean).slice(0, GRID_SIZE);
-
-    if (!finalGrid.length) {
-      await logRuntimeEvent("grid_refresh", { source: "sample_apps", app_count: SAMPLE_APPS.length });
-      return res.status(200).json({
-        count: 0,
-        empty: true,
-        message: "No apps published yet. Create the first one in LogicHub.",
-        apps: SAMPLE_APPS,
-        grid: SAMPLE_APPS
-      });
-    }
-
-    await logRuntimeEvent("grid_refresh", {
-      source: "live_apps",
-      app_count: finalGrid.length,
-      last_opened_app: lastOpenedAppId || null,
-      replacements: replacements.length
-    });
-
+    await logRuntimeEvent("grid_refresh", { count: payloadApps.length, used_sample: apps.length === 0 });
     return res.status(200).json({
-      count: finalGrid.length,
-      empty: false,
-      apps: finalGrid,
-      grid: finalGrid
+      count: payloadApps.length,
+      used_sample: apps.length === 0,
+      apps: payloadApps
     });
   } catch (error) {
     console.error("Public feed query failed:", error);

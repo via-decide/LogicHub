@@ -1,15 +1,9 @@
-import admin, { getAdminDb, jsonError, logRuntimeEvent } from "./_sovereignAuth.js";
+import admin from "firebase-admin";
+import { getAdminDb, jsonError, logRuntimeEvent } from "./_firebaseAdmin.js";
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Ecosystem-Uid');
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
   if (req.method !== "POST") return jsonError(res, 405, "Method not allowed. Use POST.");
 
   try {
@@ -52,8 +46,7 @@ export default async function handler(req, res) {
 
       tx.set(appRef, {
         app_id: appId,
-        installs: admin.firestore.FieldValue.increment(1),
-        last_install_at: admin.firestore.Timestamp.fromDate(eventTs),
+        install_count: admin.firestore.FieldValue.increment(1),
         updated_at: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     });
@@ -61,7 +54,7 @@ export default async function handler(req, res) {
     await logRuntimeEvent("install_event", { app_id: appId, device_id: deviceId, timestamp: ts });
     return res.status(200).json({ ok: true, app_id: appId, device_id: deviceId, timestamp: ts });
   } catch (error) {
-    await logRuntimeEvent("install_event_error", { app_id: req.body?.app_id || "", device_id: req.body?.device_id || "", message: error?.message || "Install save failed." });
+    await logRuntimeEvent("install_event_error", { message: error?.message || "Install save failed." });
     return jsonError(res, error.statusCode || 500, error.message || "Install save failed.");
   }
 }
