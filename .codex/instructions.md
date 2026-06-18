@@ -255,158 +255,40 @@ WHEN IN DOUBT
 
 Ask before acting. A clarifying question is better than a broken game.
 
-════════════════════════════════════════════
-AI EXECUTION PROTOCOL
-════════════════════════════════════════════
+---
 
-Codex must follow this protocol before performing any modification.
+## New addon rules
 
-READ → ANALYZE → PLAN → CONFIRM → MODIFY → VERIFY
+### 1. Core Principle: Adherence to Original Instructions
+Codex shall strictly adhere to the explicit instructions provided by the user. No changes, interpretations, or optimizations shall be implemented without prior clarification, explicit proposal, and user approval, as outlined in the following rules.
 
-Skipping steps is prohibited.
+### 2. Clarification and Confirmation
+Before proceeding with any coding task, Codex must ensure a complete and unambiguous understanding of the instructions.
+- Ambiguity detection: ask clarifying questions when instructions can be interpreted multiple ways.
+- Incompleteness identification: request missing information required for successful execution.
+- Contradiction resolution: identify conflicts and ask user to resolve.
+- Complex instruction paraphrasing: confirm understanding before implementation.
 
-1. CORE PRINCIPLE — STRICT ADHERENCE
-Codex must execute instructions exactly as given.
-Codex must never reinterpret user instructions, change architecture,
-refactor unrelated code, introduce frameworks, introduce build tools,
-introduce dependencies, or rewrite large files unless explicitly instructed.
-All edits must be surgical and minimal.
+### 3. Proposal for Improvements or Alternatives
+Codex may identify opportunities for improvement, but these must always be presented as proposals and never auto-implemented.
 
-2. MANDATORY REPOSITORY ANALYSIS
-Before modifying any file Codex must read the entire file and identify purpose,
-dependencies, imported scripts, and functions defined.
+### 4. AI Execution Protocol
+READ → ANALYZE → PLAN → CONFIRM → MODIFY → VERIFY. Skipping steps is prohibited.
 
-3. AMBIGUITY HANDLING
-If instructions are unclear, Codex must pause and ask questions.
-
-4. INCOMPLETE INSTRUCTION HANDLING
-If required information is missing, Codex must request it.
-
-5. CONTRADICTION DETECTION
-If instructions conflict, Codex must stop execution and ask for resolution.
-
-6. COMPLEX TASK CONFIRMATION
-For multi-step instructions Codex must confirm understanding.
-
-7. PROPOSAL SYSTEM
-Codex may propose improvements but must never implement them automatically.
-
-8. MODIFICATION SAFETY RULES
-Max lines modified per file: 20
-Max files changed per task: 5
-Max new functions added: 3
+### 5. Modification Safety Rules
+- Max lines modified per file: 20
+- Max files changed per task: 5
+- Max new functions added: 3
 If more changes are required, propose a separate task.
 
-9. PROHIBITED ACTIONS
-Codex must never rewrite entire files, rename files without instruction,
-delete files, move directories, change architecture, introduce frameworks,
-introduce package managers, convert scripts to modules, or modify protected files.
+### 6. Prohibited Actions
+Never rewrite whole files, rename/delete files without instruction, change architecture, add frameworks/dependencies, or modify protected files.
 
-10. BUG SCAN BEFORE EDIT
-Search for undefined variables, duplicate const, missing try/catch,
-unhandled promise, DOM reference before load, broken script order, invalid JSON,
-and report findings before editing.
+### 7. Bug Scan Before Edit
+Scan for undefined variables, duplicate const, missing try/catch, unhandled promise, DOM reference before load, broken script order, invalid JSON before editing.
 
-11. SAFE COMMIT FORMAT
-Every task must output a structured report.
+### 8. Maximum Stability Rule
+If not 100% sure an edit is safe: ask first and do not modify.
 
-12. AUTONOMOUS AUDIT MODE
-If instructed RUN REPO AUDIT, generate CODE_AUDIT_REPORT.md.
-
-13. MAXIMUM STABILITY RULE
-If not 100% sure an edit is safe: ASK FIRST, DO NOT MODIFY.
-
-14. BROWSER ENVIRONMENT ASSUMPTION
-No process.env, require(), node modules, npm packages, bundlers, webpack, vite.
-
-════════════════════════════════════════════
-DEPLOYMENT ENVIRONMENT RULES
-════════════════════════════════════════════
-
-This repository deploys directly to Vercel with NO BUILD STEP.
-
-THIS REPOSITORY IS A STATIC SITE.
-
-It must deploy with:
-Build Command: NONE
-Output Directory: NONE
-Framework Preset: Other
-
-Codex must NEVER introduce npm scripts, package.json build commands, vite,
-webpack, parcel, rollup, react, next.js, or node build systems.
-
-DO NOT create package.json unless explicitly requested.
-DO NOT add "npm run build".
-DO NOT add dist/ or build/ directories.
-DO NOT add bundlers.
-
-Everything must run as plain HTML + JS.
-
-════════════════════════════════════════════
-VERCEL DEPLOYMENT SAFETY CHECK
-════════════════════════════════════════════
-
-Before committing changes Codex must verify:
-1. No package.json was created
-2. No npm scripts added
-3. No "build" command introduced
-4. No duplicate files in /api directory
-5. No output directory assumptions
-6. vercel.json unchanged
-7. HTML files load scripts correctly
-
-If any rule fails: STOP AND REPORT. DO NOT COMMIT.
-
-════════════════════════════════════════════
-MAXIMUM MODIFICATION LIMIT
-════════════════════════════════════════════
-
-Per task Codex may modify:
-maximum 3 files
-maximum 15 lines per file
-
-If more changes are required: propose a second task.
-
-════════════════════════════════════════════
-DEPLOYMENT SIMULATION
-════════════════════════════════════════════
-
-Before committing changes Codex must simulate deployment:
-• HTML loads without build step
-• JS files referenced correctly
-• API endpoints unique
-• No build tools required
-
-If deployment would fail: STOP and report error.
-
-════════════════════════════════════════════
-CRITICAL FAILURE RULE
-════════════════════════════════════════════
-
-If Codex introduces a change that causes deployment failure,
-syntax error, or runtime crash, Codex must identify the cause,
-revert the change, and propose a corrected minimal fix.
-
-Never leave repository in broken state.
-
-════════════════════════════════════════════
-PACKAGE MANAGER PROHIBITION
-════════════════════════════════════════════
-
-This repository is NOT a Node.js project.
-
-The following files must NEVER be created:
-package.json
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-node_modules/
-
-If any of these files appear,
-Codex must immediately delete them.
-
-The repository runs in a browser environment only.
-
-
-## Zayvora bootstrap marker
-- Control files initialized for Zayvora execution pipeline.
+### 9. Browser Environment Assumption
+This repository runs browser-only JavaScript. Never introduce process.env, require(), node modules, npm packages, bundlers, webpack, or vite.
