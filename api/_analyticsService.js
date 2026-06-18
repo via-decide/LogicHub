@@ -22,6 +22,12 @@ export const ANALYTICS_EVENTS = Object.freeze({
   GITHUB_IMPORTED: "github_imported",
   PUBLISH_CLICKED: "publish_clicked",
   RETURNING_USERS: "returning_users",
+  ONBOARDING_STARTED: "onboarding_started",
+  SCREEN_0_VIEWED: "screen_0_viewed",
+  SCREEN_1_VIEWED: "screen_1_viewed",
+  SCREEN_2_VIEWED: "screen_2_viewed",
+  SCREEN_3_VIEWED: "screen_3_viewed",
+  ONBOARDING_COMPLETED: "onboarding_completed",
 });
 
 const VALID_EVENTS = new Set(Object.values(ANALYTICS_EVENTS));

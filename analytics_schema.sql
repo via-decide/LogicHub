@@ -1,7 +1,11 @@
 -- LogicHub Analytics Schema — v1
 -- Firestore is the live datastore; this SQL schema serves as:
 --   1. A documentation contract for the shape of all analytics documents
---   2. A migration template if the data is ever exported to PostgreSQL
+-- Tracks: signup_count | project_created | apk_uploaded | zip_uploaded
+--         github_imported | publish_clicked | returning_users | onboarding_started
+--         screen_0_viewed | screen_1_viewed | screen_2_viewed | screen_3_viewed | onboarding_completed
+--
+-- Architecture: Firestore-backed. Two writes per event:
 
 -- ─── analyticsEvents (Immutable event log) ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS analytics_events (
@@ -14,7 +18,13 @@ CREATE TABLE IF NOT EXISTS analytics_events (
                               'zip_uploaded',
                               'github_imported',
                               'publish_clicked',
-                              'returning_users'
+                              'returning_users',
+                              'onboarding_started',
+                              'screen_0_viewed',
+                              'screen_1_viewed',
+                              'screen_2_viewed',
+                              'screen_3_viewed',
+                              'onboarding_completed'
                             )),
   user_id       TEXT,
   project_id    TEXT,

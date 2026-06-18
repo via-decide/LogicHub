@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LogicHub - Welcome</title>
+    <script src="/assets/js/sovereign-analytics.js" defer></script>
     <style>
         :root {
             --bg-primary: #0a0a0a;
@@ -38,6 +39,11 @@
             width: 100vw;
             overflow: hidden;
             position: fixed;
+        }
+
+        button:focus-visible, .info-chip:focus-visible {
+            outline: 2px solid var(--accent-light);
+            outline-offset: 2px;
         }
 
         /* --- LAYOUT & NAVIGATION --- */
@@ -421,7 +427,7 @@
 </head>
 <body>
 
-    <button class="skip-btn" onclick="enterForge()">Skip</button>
+    <button class="skip-btn" onclick="enterForge(true)">Skip</button>
 
     <div class="onboarding-container">
         
@@ -507,10 +513,10 @@
             <h1>Every File<br>Is Yours</h1>
             <p class="sub">Complete source code and binaries. No platform lock-in.</p>
             
-            <div class="info-chip" onclick="openSheet('ai-sheet')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            <button type="button" class="info-chip" onclick="openSheet('ai-sheet')" aria-label="Learn about bringing your own AI key">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                 Your AI Key ▾
-            </div>
+            </button>
 
             <button class="cta-btn" style="margin-top: auto;" onclick="nextScreen()">Continue</button>
         </div>
@@ -542,9 +548,9 @@
             <h1>Not Output.<br>Software.</h1>
             <p class="sub">We build version-controlled repositories, not disposable chat snippets.</p>
             
-            <div class="info-chip" onclick="openSheet('eco-sheet')">
+            <button type="button" class="info-chip" onclick="openSheet('eco-sheet')" aria-label="Learn about the complete ecosystem">
                 Build → Own → Publish ▾
-            </div>
+            </button>
 
             <button class="cta-btn" style="margin-top: auto;" onclick="nextScreen()">Continue</button>
         </div>
@@ -585,7 +591,7 @@
             </div>
             <h1>The Complete<br>Artifact</h1>
             <p class="sub">Download, modify, or publish immediately.</p>
-            <button class="cta-btn primary" onclick="enterForge()">Enter Forge</button>
+            <button class="cta-btn primary" onclick="enterForge(false)">Enter Forge</button>
         </div>
 
     </div>
@@ -619,6 +625,55 @@
             window.location.href = '/forge';
         }
 
+        // Retrieve or generate persistent anonymous tracking ID
+        let userId = 'anon_guest';
+        try {
+            const savedUser = JSON.parse(localStorage.getItem('lh_aporaksha_user') || '{}');
+            if (savedUser && savedUser.uid) {
+                userId = savedUser.uid;
+            } else {
+                let anonId = localStorage.getItem('lh_anonymous_id');
+                if (!anonId) {
+                    anonId = 'anon_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+                    localStorage.setItem('lh_anonymous_id', anonId);
+                }
+                userId = anonId;
+            }
+        } catch (_) {}
+
+        // Generate or retrieve persistent sessionId
+        let sessionId = 'session_guest';
+        try {
+            let sessId = sessionStorage.getItem('lh_session_id');
+            if (!sessId) {
+                sessId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+                sessionStorage.setItem('lh_session_id', sessId);
+            }
+            sessionId = sessId;
+        } catch (_) {}
+
+        async function trackTelemetry(eventName, metadata = {}) {
+            try {
+                const payload = {
+                    event: eventName,
+                    userId: userId,
+                    sessionId: sessionId,
+                    metadata: metadata
+                };
+                await fetch('/api/analytics-event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    keepalive: true
+                });
+            } catch (err) {
+                console.error('[Telemetry] Failed to track event:', eventName, err);
+            }
+        }
+
+        // Emit onboarding started event
+        trackTelemetry('onboarding_started');
+
         let currentScreen = 0;
         const screens = document.querySelectorAll('.screen');
         const dots = document.querySelectorAll('.dot');
@@ -637,6 +692,9 @@
             current.classList.remove('active');
             void current.offsetWidth; 
             current.classList.add('active');
+
+            // Track screen view
+            trackTelemetry('screen_' + currentScreen + '_viewed');
         }
 
         function nextScreen() {
@@ -653,7 +711,8 @@
             }
         }
 
-        function enterForge() {
+        function enterForge(skipped = false) {
+            trackTelemetry('onboarding_completed', { skipped: skipped });
             localStorage.setItem('onboarding_complete', 'true');
             document.body.style.opacity = '0';
             setTimeout(() => {
