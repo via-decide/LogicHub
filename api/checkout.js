@@ -37,8 +37,8 @@ export default async function handler(req, res) {
   try {
     // Initialize Razorpay
     const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_zayvora_mock',
-      key_secret: process.env.RAZORPAY_KEY_SECRET || 'zayvora_secret_mock'
+      key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_T3BiCiW0o4slky',
+      key_secret: process.env.RAZORPAY_KEY_SECRET || ''
     });
 
     // 1. GLOBAL SAAS SUBSCRIPTIONS (Non-India)

@@ -1510,18 +1510,10 @@
             </div>
           </div>
           <div class="payment-amount" id="founder-price-inr">₹899</div>
-          <p>Use this now for direct founder sales in India with a simple UPI + UTR flow and limited early-access positioning.</p>
-          <div class="payment-status-box">
-            <strong>UPI ID:</strong> <span id="founder-upi-id"></span><br>
-            <strong>Plan:</strong> India Founder Pass<br>
-            <strong>Project:</strong> <span id="founder-project-name"></span>
-          </div>
+          <p>Use this to get instant access with an Aporaksha Passport and unlock the unlimited Forge window.</p>
           <div class="payment-actions">
-            <button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button>
-            <button type="button" onclick="app.showFounderIndiaPaymentHelp()">ℹ️ ₹899 payment instructions</button>
+            <button class="payment-wide-btn primary" onclick="app.purchasePassport()">🚀 Get Aporaksha Passport</button>
           </div>
-          <div class="payment-note"><strong>₹899 payment link update:</strong> The UPI deep link is not working right now. Please pay manually in any UPI app to the UPI ID above, then submit your 12-digit UTR. After submission, LogicHub will draft the verification email to dharam@viadecide.com for approval.</div>
-          <button class="payment-wide-btn primary" onclick="app.showFounderUtrForm()">✅ I Paid — Submit UTR</button>
           <div class="payment-note">Limited early-access wording helps this read like a founder launch, not a generic payment form.</div>
         </div>
 
@@ -1556,7 +1548,7 @@
       <div class="payment-card">
         <h4>What happens after payment?</h4>
         <ul class="next-steps-list">
-          <li class="next-step-item"><strong>1. Pay ₹899 in any UPI app</strong> Copy the UPI ID from this modal and complete the India Founder Pass payment manually.</li>
+          <li class="next-step-item"><strong>1. Checkout securely</strong> Complete your purchase via Aporaksha checkout.</li>
           <li class="next-step-item"><strong>2. Submit your UTR</strong> Save the 12-digit UTR so the founder request is recorded on this device.</li>
           <li class="next-step-item"><strong>3. Email Dharam for review</strong> After submission, LogicHub drafts the payment email to dharam@viadecide.com so founder access can be verified and approved.</li>
         </ul>
@@ -2284,7 +2276,7 @@
           return;
         }
         card.className = 'premium-experience-card';
-        card.innerHTML = `<div class="premium-experience-head"><div><h3>Free workspace ready — upgrade when you want the founder path.</h3><p>Free users keep the current builder flow, while paid founder accounts swap this panel into a premium welcome state with clearer status, unlimited Forge messaging, and premium tool shortcuts.</p></div><span class="premium-state-badge free">⚡ free workspace</span></div><div class="premium-state-grid"><div class="premium-mini-card"><div class="premium-kpi">3 / 5h</div><h4>Current Forge window</h4><p>You can keep building with the free rolling Forge window and session app allowance today.</p></div><div class="premium-mini-card"><h4>Founder unlocks</h4><ul class="premium-feature-list"><li>Paid user welcome banner with founder status.</li><li>Unlimited Forge badge and premium modal copy.</li><li>Cleaner pending and approved founder screens.</li></ul></div><div class="premium-mini-card"><h4>Upgrade path</h4><div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">India Founder Pass: ₹899 with manual UPI payment and approval review.</div></div></div>`;
+        card.innerHTML = `<div class="premium-experience-head"><div><h3>Free workspace ready — upgrade when you want the founder path.</h3><p>Free users keep the current builder flow, while paid founder accounts swap this panel into a premium welcome state with clearer status, unlimited Forge messaging, and premium tool shortcuts.</p></div><span class="premium-state-badge free">⚡ free workspace</span></div><div class="premium-state-grid"><div class="premium-mini-card"><div class="premium-kpi">3 / 5h</div><h4>Current Forge window</h4><p>You can keep building with the free rolling Forge window and session app allowance today.</p></div><div class="premium-mini-card"><h4>Founder unlocks</h4><ul class="premium-feature-list"><li>Paid user welcome banner with founder status.</li><li>Unlimited Forge badge and premium modal copy.</li><li>Cleaner pending and approved founder screens.</li></ul></div><div class="premium-mini-card"><h4>Upgrade path</h4><div class="premium-action-row"><button class="premium-action-btn primary" onclick="app.openFounderCheckout()">💳 Get Aporaksha Passport</button><button class="premium-action-btn secondary" onclick="openForgeModal()">⚡ Open Forge</button></div><div class="premium-support-note">Unlock the LogicHub Founder Path instantly with an Aporaksha Passport.</div></div></div>`;
       },
 
       renderForgePremiumState() {
@@ -2396,7 +2388,7 @@
           statusEl.innerHTML = `<div class="premium-thankyou pending"><span class="founder-success-badge pending">⏳ Pending approval</span><div><h4>Your payment is saved. Approval is still required.</h4><p>This pending screen now explains exactly where you are: payment details are stored, approval is next, and free limits remain until the founder account is approved.</p></div><div class="thankyou-meta"><div class="thankyou-stat"><div class="thankyou-stat-label">Order</div><div class="thankyou-stat-value">${orderLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Amount</div><div class="thankyou-stat-value">${amountLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Project</div><div class="thankyou-stat-value">${projectLabel}</div></div><div class="thankyou-stat"><div class="thankyou-stat-label">Saved</div><div class="thankyou-stat-value">${savedLabel}</div></div></div><ul class="next-steps-list"><li class="next-step-item"><strong>1. Review your founder request</strong>Make sure the UTR and project details are correct.</li><li class="next-step-item"><strong>2. Send approval email if needed</strong>LogicHub can draft the verification mail to dharam@viadecide.com.</li><li class="next-step-item"><strong>3. Wait for approval</strong>Once approved, this screen flips into the founder-approved state automatically.</li></ul><div class="payment-actions"><button onclick="app.openFounderCheckout()">💳 Review founder details</button>${state.latestOrder ? `<button onclick="app.openFounderVerificationEmail(app.getLatestFounderOrder())">📧 Draft approval email</button>` : `<button onclick="openForgeModal()">⚡ Keep using free Forge</button>`}</div></div>`;
           return;
         }
-        statusEl.innerHTML = `<div class="premium-thankyou free"><span class="founder-success-badge free">💳 Founder access not started</span><div><h4>No founder payment saved on this device yet.</h4><p>When a user pays ₹899 and submits the UTR, this area becomes the pending approval screen. After approval, it turns into the founder-approved premium screen.</p></div><ul class="next-steps-list"><li class="next-step-item"><strong>India Founder Pass</strong>Manual UPI payment to ${this.escapeHtml(FOUNDER_PAYMENT.upiId)} with 12-digit UTR submission.</li><li class="next-step-item"><strong>Pending state</strong>A clearer status card appears immediately after submission.</li><li class="next-step-item"><strong>Paid state</strong>Unlimited Forge and premium publish sections become the default UX.</li></ul><div class="payment-actions"><button onclick="app.openFounderCheckout()">💳 View Founder Passes</button><button onclick="app.copyFounderUpi()">📋 Copy UPI ID</button></div></div>`;
+        statusEl.innerHTML = `<div class="premium-thankyou free"><span class="founder-success-badge free">💳 Founder access not started</span><div><h4>No Aporaksha Passport found for this workspace.</h4><p>Purchase a Passport to unlock unlimited Forge and direct APK deployments via the Zayvora Engine.</p></div><ul class="next-steps-list"><li class="next-step-item"><strong>Aporaksha Ecosystem</strong>LogicHub uses centralized Aporaksha Passports.</li><li class="next-step-item"><strong>Instant Activation</strong>Your workspace automatically syncs once payment completes.</li><li class="next-step-item"><strong>Paid state</strong>Unlimited Forge and premium publish sections become the default UX.</li></ul><div class="payment-actions"><button onclick="app.openFounderCheckout()">💳 Get Aporaksha Passport</button></div></div>`;
       },
 
       buildFounderVerificationMailto(order) {
@@ -2474,86 +2466,12 @@
         this.updateInstallButtonState();
 
       openFounderCheckout() {
-        document.getElementById('founder-upi-id').textContent = FOUNDER_PAYMENT.upiId;
-        document.getElementById('founder-project-name').textContent = this.getProjectDisplayName();
-        document.getElementById('founder-price-inr').textContent = `₹${Number(FOUNDER_PAYMENT.inrAmount).toLocaleString('en-IN')}`;
-        document.getElementById('founder-utr-panel').style.display = 'none';
-        document.getElementById('founder-utr').value = '';
-        this.renderFounderStatus();
-        openModal('founder-modal');
+        window.open('https://aporaksha.com/#products', '_blank');
+        this.log('Redirecting to Aporaksha checkout...', 'info');
       },
 
-      copyFounderUpi() {
-        navigator.clipboard?.writeText(FOUNDER_PAYMENT.upiId)
-          .then(() => this.log('Founder UPI ID copied.', 'success'))
-          .catch(() => {
-            const temp = document.createElement('input');
-            temp.value = FOUNDER_PAYMENT.upiId;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            temp.remove();
-            this.log('Founder UPI ID copied.', 'success');
-          });
-      },
-
-      openFounderUpiApp() {
-        this.showFounderIndiaPaymentHelp();
-      },
-
-      showFounderUtrForm() {
-        document.getElementById('founder-utr-panel').style.display = 'block';
-        document.getElementById('founder-utr').focus();
-      },
-
-      async submitFounderUtr() {
-        const utrInput = document.getElementById('founder-utr');
-        const utr = String(utrInput.value || '').replace(/\s+/g, '').trim();
-        if (!/^\d{12}$/.test(utr)) {
-          alert('UTR must be exactly 12 digits.');
-          return;
-        }
-        const utrIndex = this.getFounderUtrIndex();
-        if (utrIndex[utr]) {
-          alert('That UTR is already saved on this device.');
-          return;
-        }
-        const orders = this.getFounderOrders();
-        const id = `LH-${Math.random().toString(36).slice(2, 6).toUpperCase()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
-        const order = {
-          id,
-          projectName: this.getProjectDisplayName(),
-          amount: FOUNDER_PAYMENT.inrAmount,
-          currency: 'INR',
-          payment: 'upi',
-          plan: 'india_founder',
-          utr,
-          status: 'founder_access_requested',
-          createdAt: new Date().toISOString()
-        };
-        orders.push(order);
-        utrIndex[utr] = { orderId: id, createdAt: order.createdAt };
-        this.saveFounderOrders(orders);
-        this.saveFounderUtrIndex(utrIndex);
-        let serverMessage = 'Founder request saved on this device.';
-        let shouldDraftVerificationEmail = true;
-        try {
-          const result = await this.syncFounderRequestToServer(order);
-          serverMessage = result.message || 'Founder request saved for server review.';
-          shouldDraftVerificationEmail = result?.emailNotification?.sent !== true;
-          this.log('Founder request synced to Firebase.', 'success');
-        } catch (error) {
-          this.log(`Founder request sync pending: ${error.message}`, 'info');
-        }
-        await this.refreshServerAccessStatus(true);
-        this.renderFounderStatus();
-        this.updateAuthUI();
-        updateForgeLimitUI();
-        document.getElementById('founder-utr-panel').style.display = 'none';
-        utrInput.value = '';
-        if (shouldDraftVerificationEmail) this.openFounderVerificationEmail(order);
-        this.log(`Founder access requested: ${id}`, 'success');
-        alert(`${serverMessage} Order: ${id}. If your mail app opened, send that draft to dharam@viadecide.com so the payment can be verified and approved.`);
+      purchasePassport() {
+        this.openFounderCheckout();
       },
 
       sanitizeCode(code) {
@@ -2858,11 +2776,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       },
 
       async buildApk() {
-        if (this.map.blocks.length === 0) { alert("Add the main pieces first. LogicHub can repair common missing JS/CSS files for you during APK build."); return; }
-        if (this.map.blocks.some(b => b.status !== "VERIFIED" || !b.code)) {
-          alert("Please run Synth first. LogicHub will auto-repair common missing files while packaging the APK.");
-          return;
-        }
+        if (this.map.blocks.length === 0) { alert("Add the main pieces first."); return; }
 
         const btn = document.getElementById("btn-apk");
         btn.disabled = true;

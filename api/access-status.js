@@ -36,20 +36,23 @@ export default async function handler(req, res) {
     const paidDoc = paidDocSnap.exists ? paidDocSnap.data() || {} : {};
     const userDoc = userDocSnap.exists ? userDocSnap.data() || {} : {};
 
-    // Also check Aporaksha subscription REST endpoint
+    // Also check Aporaksha Passport REST endpoint
     let paidByAporaksha = false;
     try {
-      const aporaksha = await fetch(`http://localhost:7002/api/subscriptions/check-access?email=${encodeURIComponent(uid)}&t=${Date.now()}`, {
+      const aporakshaUrl = process.env.APORAKSHA_API_URL || 'https://aporaksha.com';
+      const aporaksha = await fetch(`${aporakshaUrl}/api/passport/verify?email=${encodeURIComponent(uid)}&t=${Date.now()}`, {
         headers: { "Authorization": req.headers?.authorization || "" }
       });
       if (aporaksha.ok) {
         const data = await aporaksha.json();
-        if (data.hasAccess || data.active || data.paid) {
+        // Paid if passport is active and has the 'forge_builder' entitlement OR legacy hasAccess flag
+        if ((data.exists && data.entitlements && data.entitlements.includes('forge_builder')) || data.hasAccess || data.active || data.paid) {
           paidByAporaksha = true;
         }
       }
     } catch (e) {
       // Aporaksha offline — no-op
+      console.warn("[ACCESS_STATUS] Aporaksha Passport Check Failed:", e.message);
     }
 
     let paidByStudent = false;

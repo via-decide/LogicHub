@@ -35,62 +35,28 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing zipBase64 payload." });
   }
 
-  const shellRoot = process.env.APK_SHELL_DIR;
-  if (!shellRoot) {
-    return res.status(500).json({ error: "APK_SHELL_DIR is not configured on the server." });
-  }
-
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "logichub-apk-"));
-  const projectZipPath = path.join(tempRoot, `${mapId}.zip`);
-  const unpackedWebPath = path.join(tempRoot, "web-assets");
-  const shellWorkPath = path.join(tempRoot, "capacitor-shell");
-  const androidAssetsPublicPath = path.join(shellWorkPath, "android", "app", "src", "main", "assets", "public");
+  const zayvoraUrl = process.env.ZAYVORA_TUNNEL_URL || "http://localhost:8080";
+  const zayvoraToken = process.env.ZAYVORA_SECURE_TOKEN || "DEFAULT_LOGICHUB_SECURE_TOKEN";
 
   try {
-    await fs.writeFile(projectZipPath, Buffer.from(zipBase64, "base64"));
-    await fs.mkdir(unpackedWebPath, { recursive: true });
-
-    // Assemble web assets from uploaded ZIP.
-    await runCommand("unzip", ["-q", projectZipPath, "-d", unpackedWebPath], tempRoot);
-
-    // Clone shell workspace into temp dir.
-    await runCommand("cp", ["-R", shellRoot, shellWorkPath], tempRoot);
-
-    // Inject assembled web assets before capacitor/gradle build.
-    await fs.rm(androidAssetsPublicPath, { recursive: true, force: true });
-    await fs.mkdir(androidAssetsPublicPath, { recursive: true });
-    await runCommand("cp", ["-R", `${unpackedWebPath}/.`, androidAssetsPublicPath], tempRoot);
-
-    const localGoogleServicesPath = path.join(__dirname, '..', 'google-services.json');
-    const androidGoogleServicesPath = path.join(shellWorkPath, 'android', 'app', 'google-services.json');
-    try {
-      await fs.access(localGoogleServicesPath);
-      await fs.copyFile(localGoogleServicesPath, androidGoogleServicesPath);
-    } catch (error) {
-      // Firebase Android config is optional for shells that do not include native Firebase plugins.
-    }
-
-    // Keep Capacitor + Gradle pipeline order deterministic.
-    await runCommand("npx", ["cap", "copy", "android"], shellWorkPath);
-    await runCommand("./gradlew", ["assembleDebug"], path.join(shellWorkPath, "android"));
-
-    const apkPath = path.join(shellWorkPath, "android", APK_OUTPUT_RELATIVE_PATH);
-    const apkBuffer = await fs.readFile(apkPath);
-    const apkSize = apkBuffer.byteLength;
-
-    if (apkSize < 500 * 1024) {
-      return res.status(500).json({ error: "APK build output is under 500KB and considered invalid." });
-    }
-
-    return res.status(200).json({
-      success: true,
-      apkBase64: apkBuffer.toString("base64"),
-      sizeBytes: apkSize
+    const zayvoraRes = await fetch(`${zayvoraUrl}/api/zayvora/build-apk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${zayvoraToken}`
+      },
+      body: JSON.stringify({ zipBase64, mapId })
     });
+
+    const data = await zayvoraRes.json();
+
+    if (!zayvoraRes.ok) {
+      return res.status(zayvoraRes.status).json({ error: data.error || "Zayvora APK build failed." });
+    }
+
+    return res.status(200).json(data);
   } catch (error) {
-    console.error("APK build pipeline failed:", error);
-    return res.status(500).json({ error: `APK build failed: ${error.message}` });
-  } finally {
-    await fs.rm(tempRoot, { recursive: true, force: true });
+    console.error("Zayvora proxy error:", error);
+    return res.status(500).json({ error: "Failed to connect to Zayvora Sovereign Engine" });
   }
 }
