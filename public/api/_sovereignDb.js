@@ -356,7 +356,7 @@ class FirestoreCompat {
       try {
         db.prepare('ROLLBACK').run();
       } catch (rollbackErr) {
-        // Safe check
+        if (process.env.NODE_ENV === 'development') console.warn('[Database Rollback Failed]', rollbackErr);
       }
       throw err;
     }

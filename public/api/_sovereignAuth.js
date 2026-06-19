@@ -74,7 +74,7 @@ export async function verifyRequestUser(req) {
       }
     }
   } catch(e) {
-    // Fallthrough
+    if (process.env.NODE_ENV === 'development') console.warn('[Auth hmac validation failed]', e);
   }
 
   // 2. Try Aporaksha REST introspect (port 7002)
@@ -96,7 +96,7 @@ export async function verifyRequestUser(req) {
       }
     }
   } catch (e) {
-    // Fallthrough
+    if (process.env.NODE_ENV === 'development') console.warn('[Auth REST introspect failed]', e);
   }
 
   // 3. Try Mac Mini challenge-verify via node.daxini.xyz
@@ -114,7 +114,7 @@ export async function verifyRequestUser(req) {
       }
     }
   } catch (e) {
-    // Fallthrough
+    if (process.env.NODE_ENV === 'development') console.warn('[Auth challenge-verify failed]', e);
   }
 
   const error = new Error("Invalid or expired ID token.");
