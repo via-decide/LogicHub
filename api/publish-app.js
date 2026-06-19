@@ -166,10 +166,10 @@ export default async function handler(req, res) {
 
     if (githubToken && !githubToken.includes('<REMOVED')) {
       try {
-        for (const [path, content] of fileEntries) {
+        await Promise.all(fileEntries.map(async ([path, content]) => {
           const existing = await getGitHubFile(githubRepo, path, githubToken);
           await putGitHubFile(githubRepo, path, githubToken, `LogicHub Publish: ${metadata.name} (${slug})`, String(content || ''), existing?.sha);
-        }
+        }));
 
         await updateRegistry({
           githubRepo,
