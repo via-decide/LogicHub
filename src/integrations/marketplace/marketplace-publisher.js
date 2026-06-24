@@ -36,7 +36,9 @@
         nodes: graph.nodes,
         edges: graph.edges || [],
         plan: safeOptions.plan || null,
-        runtimeSnapshot: safeOptions.runtimeSnapshot || null
+        runtimeSnapshot: safeOptions.runtimeSnapshot || null,
+        'manifest.json': JSON.stringify(safeOptions.manifest || { intent: 'Not specified' }, null, 2),
+        'trace_log.json': JSON.stringify(safeOptions.traceLog || { axiom_nodes: [], praxis_nodes: [], nexar_nodes: [] }, null, 2)
       }
     };
   }
