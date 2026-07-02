@@ -37,8 +37,8 @@ export default async function handler(req, res) {
   try {
     // Initialize Razorpay
     const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_zayvora_mock',
-      key_secret: process.env.RAZORPAY_KEY_SECRET || 'zayvora_secret_mock'
+      key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_T3BiCiW0o4slky',
+      key_secret: process.env.RAZORPAY_KEY_SECRET || ''
     });
 
     // 1. GLOBAL SAAS SUBSCRIPTIONS (Non-India)
@@ -47,21 +47,12 @@ export default async function handler(req, res) {
       if (package_id === 'saas_pro') planId = 'plan_ProSaaS20USD';
       if (package_id === 'saas_builder') planId = 'plan_BuilderSaaS29USD';
       
-      /*
-      // In production, you would create a subscription:
       const subscription = await razorpay.subscriptions.create({
         plan_id: planId,
         customer_notify: 1,
         total_count: 12
       });
       return res.status(200).json({ checkout_url: subscription.short_url });
-      */
-      
-      return res.status(200).json({ 
-        success: true, 
-        message: 'Razorpay Global SaaS Subscription intent created',
-        checkout_url: `https://rzp.io/l/mock-saas-global-${package_id}`
-      });
     }
 
     // 2. INDIAN FOUNDER PASSES / ZAYVORA CREDITS (UPI)
@@ -73,23 +64,12 @@ export default async function handler(req, res) {
       else if (package_id === 'enterprise') amount = 499900;
       else amount = 10000; // Fallback
 
-      /*
-      // In production, you would create a one-time order:
       const order = await razorpay.orders.create({
         amount: amount,
         currency: 'INR',
         receipt: `receipt_${Date.now()}`
       });
       return res.status(200).json({ order_id: order.id });
-      */
-
-      return res.status(200).json({
-        success: true,
-        message: 'Razorpay UPI Order created',
-        order_id: `order_mock_${Date.now()}`,
-        amount: amount,
-        currency: 'INR'
-      });
     }
 
     return res.status(400).json({ error: 'Invalid package selected' });

@@ -1,3 +1,4 @@
+export const maxDuration = 300; // 5 minutes to prevent 504 Gateway Timeout
 import admin, { getAdminDb, logRuntimeEvent } from "./_sovereignAuth.js";
 import { trackEvent, ANALYTICS_EVENTS } from "./_analyticsService.js";
 
@@ -163,26 +164,30 @@ export default async function handler(req, res) {
       [`apps/${slug}/architecture.json`, JSON.stringify({ prd: bundle.architecture_prd || '' }, null, 2)]
     ];
 
-    if (githubToken) {
-      for (const [path, content] of fileEntries) {
-        const existing = await getGitHubFile(githubRepo, path, githubToken);
-        await putGitHubFile(githubRepo, path, githubToken, `LogicHub Publish: ${metadata.name} (${slug})`, String(content || ''), existing?.sha);
-      }
+    if (githubToken && !githubToken.includes('<REMOVED')) {
+      try {
+        await Promise.all(fileEntries.map(async ([path, content]) => {
+          const existing = await getGitHubFile(githubRepo, path, githubToken);
+          await putGitHubFile(githubRepo, path, githubToken, `LogicHub Publish: ${metadata.name} (${slug})`, String(content || ''), existing?.sha);
+        }));
 
-      await updateRegistry({
-        githubRepo,
-        githubToken,
-        registryItem: {
-          slug,
-          name: metadata.name,
-          creator: metadata.creator,
-          appUrl: metadata.appUrl,
-          source: 'logichub',
-          publishedAt: metadata.publishedAt
-        }
-      });
+        await updateRegistry({
+          githubRepo,
+          githubToken,
+          registryItem: {
+            slug,
+            name: metadata.name,
+            creator: metadata.creator,
+            appUrl: metadata.appUrl,
+            source: 'logichub',
+            publishedAt: metadata.publishedAt
+          }
+        });
+      } catch (ghError) {
+        console.warn(`[publish-app] GitHub publish failed, continuing anyway: ${ghError.message}`);
+      }
     } else {
-      console.log(`[publish-app] Skipping GitHub publish for ${slug} (GITHUB_TOKEN not present).`);
+      console.log(`[publish-app] Skipping GitHub publish for ${slug} (GITHUB_TOKEN invalid or missing).`);
     }
     let projectBlocks = [];
     let projectConnections = [];
@@ -223,7 +228,7 @@ export default async function handler(req, res) {
     }
 
     // Push to Daxini.Space local edge
-    const daxiniEdgeUrl = process.env.DAXINI_SPACE_API || "http://127.0.0.1:7004/api/apps/publish";
+    const daxiniEdgeUrl = process.env.DAXINI_SPACE_API || "https://daxini.space/api/apps/publish";
     console.log(`[publish-app] Pushing to Sovereign Edge at ${daxiniEdgeUrl}...`);
     try {
       const edgeRes = await fetch(daxiniEdgeUrl, {

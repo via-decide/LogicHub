@@ -1,23 +1,14 @@
 {
-  "name": "logic-hub",
-  "version": "1.0.0",
+  "name": "logichub",
   "private": true,
-  "description": "Viral App Distribution Engine",
   "type": "module",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
-    "build:vercel": "npm run build --workspace web",
-    "start": "npm run start --workspaces --if-present"
-  },
-  "devDependencies": {
-    "tsx": "^4.21.0"
+    "build": "node ./scripts/build-static.mjs",
+    "dev": "node ./scripts/serve-static.mjs",
+    "preview": "node ./scripts/serve-static.mjs --dist"
   },
   "dependencies": {
-    "better-sqlite3": "^12.11.1"
+    "firebase-admin": "^13.4.0",
+    "razorpay": "^2.9.6"
   }
 }

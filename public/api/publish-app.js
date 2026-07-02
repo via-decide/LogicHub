@@ -156,10 +156,10 @@ export default async function handler(req, res) {
       [`apps/${slug}/architecture.json`, JSON.stringify({ prd: bundle.architecture_prd || '' }, null, 2)]
     ];
 
-    for (const [path, content] of fileEntries) {
+    await Promise.all(fileEntries.map(async ([path, content]) => {
       const existing = await getGitHubFile(githubRepo, path, githubToken);
       await putGitHubFile(githubRepo, path, githubToken, `LogicHub Publish: ${metadata.name} (${slug})`, String(content || ''), existing?.sha);
-    }
+    }));
 
     await updateRegistry({
       githubRepo,
