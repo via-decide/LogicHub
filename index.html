@@ -2135,58 +2135,6 @@
           return this.serverAccess;
         }
         try {
-          renderStageList();
-          stages[0].status = "done";
-          addLog("→ Assembling web assets...", "progress");
-          this.zipFallbackBlob = await this.createZipBlob();
-          progress.style.width = "25%";
-          addLog("✓ Assembled web assets", "success");
-
-          stages[1].status = "done";
-          addLog("→ Injecting into Capacitor shell (android/app/src/main/assets/public)...", "progress");
-          const apkData = await this.generateRealAPK(this.zipFallbackBlob);
-          progress.style.width = "60%";
-          addLog("✓ Assets copied before capacitor copy android", "success");
-
-          stages[2].status = "done";
-          addLog("→ Running Gradle build (assembleDebug)...", "progress");
-          progress.style.width = "85%";
-          addLog("✓ Gradle output path: app/build/outputs/apk/debug/app-debug.apk", "success");
-
-          stages[3].status = "done";
-          addLog("→ Packaging APK...", "progress");
-
-          if (apkData.size < 500 * 1024) {
-            throw new Error("Generated APK is under 500KB and treated as failed.");
-          }
-          if (apkData.size < 1024 * 1024) {
-            addLog("⚠ APK is smaller than 1MB; build may be incomplete.", "error");
-          }
-
-        const apkData = await this.generateRealAPK();
-        this.apkBlob = apkData;
-        if (this.apkBlobUrl) URL.revokeObjectURL(this.apkBlobUrl);
-        this.apkBlobUrl = URL.createObjectURL(apkData);
-        this.updateInstallButtonState();
-        
-        progress.style.width = "100%";
-        addLog("✓ APK build complete!", "success");
-        addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
-        addLog(`Size: ${(apkData.size / 1024 / 1024).toFixed(2)} MB`, "success");
-        addLog("Ready for download & installation", "success");
-        
-        dlBtn.style.display = "inline-block"; this.apkBuildInProgress = false;
-        this.log("APK Ready! Download from modal.", "apk");
-          this.apkBlob = apkData;
-          const apkSizeMB = (apkData.size / 1024 / 1024).toFixed(2);
-          progress.style.width = "100%";
-          addLog("✓ APK build complete!", "success");
-          addLog(`APK: LogicVibe_${this.map.id}_v1.0.0.apk`, "success");
-          addLog(`Size: ${apkSizeMB} MB`, "success");
-          dlBtn.textContent = `⬇ Download APK (v1.0.0 · ${apkSizeMB}MB)`;
-          dlBtn.style.display = "inline-block";
-          zipFallbackBtn.style.display = "inline-block";
-          this.log("APK Ready! Download from modal.", "apk");
           const idToken = await this.authUser.getIdToken(forceRefresh);
           const response = await fetch('/api/access-status', {
             method: 'POST',
