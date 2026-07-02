@@ -28,11 +28,79 @@ import accessStatus from '../../api/access-status.js';
 import buildApk from '../../api/build-apk.js';
 import founderRequest from '../../api/founder-request.js';
 import publishApp from '../../api/publish-app.js';
+import { verifyRequestUser, getAdminAuth, getAdminDb } from '../../api/_firebaseAdmin.js';
 
 app.post('/api/access-status', wrap(accessStatus));
 app.post('/api/build-apk', wrap(buildApk));
 app.post('/api/founder-request', wrap(founderRequest));
 app.post('/api/publish-app', wrap(publishApp));
+
+// --- SERVER-SIDE IP RATE LIMITER FOR GUEST USERS ---
+const ipUsage = new Map(); // ip -> Array of timestamps
+const LIMIT_MAX = 3;
+const WINDOW_MS = 5 * 60 * 60 * 1000; // 5 hours
+
+function isApprovedStatus(value) {
+  return ["active", "approved", "confirmed", "paid", "pro"].includes(String(value || "").toLowerCase());
+}
+
+async function checkPaidAccess(req) {
+  try {
+    const { decodedToken } = await verifyRequestUser(req);
+    const uid = decodedToken.uid;
+    const auth = getAdminAuth();
+    const db = getAdminDb();
+
+    const [userRecord, paidDocSnap, userDocSnap] = await Promise.all([
+      auth.getUser(uid),
+      db.collection("paidUsers").doc(uid).get(),
+      db.collection("users").doc(uid).get()
+    ]);
+
+    const claims = userRecord.customClaims || {};
+    const paidByClaim = claims.paid === true || isApprovedStatus(claims.planStatus) || isApprovedStatus(claims.accessLevel);
+
+    const paidDoc = paidDocSnap.exists ? paidDocSnap.data() || {} : {};
+    const userDoc = userDocSnap.exists ? userDocSnap.data() || {} : {};
+
+    const paidByFirestore = paidDoc.paid === true || isApprovedStatus(paidDoc.status) || userDoc.paid === true || isApprovedStatus(userDoc.paymentStatus);
+
+    return paidByClaim || paidByFirestore;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function ipRateLimiter(req, res, next) {
+  try {
+    const isPaid = await checkPaidAccess(req);
+    if (isPaid) {
+      return next();
+    }
+
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
+    const now = Date.now();
+    
+    let timestamps = ipUsage.get(clientIp) || [];
+    timestamps = timestamps.filter(ts => (now - ts) < WINDOW_MS);
+    
+    if (timestamps.length >= LIMIT_MAX) {
+      const oldestTs = timestamps[0];
+      const remainingMs = oldestTs + WINDOW_MS - now;
+      const remainingMins = Math.ceil(remainingMs / 60000);
+      return res.status(429).json({
+        error: `Free rate limit reached (3 syntheses per 5 hours) for IP: ${clientIp}. Please upgrade to a Premium Founder Pass for unlimited access.`
+      });
+    }
+
+    timestamps.push(now);
+    ipUsage.set(clientIp, timestamps);
+    next();
+  } catch (error) {
+    console.error('[RateLimiter Error]', error.message);
+    next(); // Fallback to allow the request to run if rate limit verification errors
+  }
+}
 
 // --- ZAYVORA SOVEREIGN PIPELINE ---
 
@@ -104,7 +172,7 @@ async function logToZayvora(task, trace, artifacts) {
 }
 
 // Phase 1: Planning (Axiom) - ARTIFACT GENERATION ENGINE
-app.post('/api/zayvora/plan', async (req, res) => {
+app.post('/api/zayvora/plan', ipRateLimiter, async (req, res) => {
   const { prompt, architecture } = req.body;
   
   // PRE-EMPTIVE SEARCH: Find historical traces first
@@ -182,7 +250,7 @@ app.post('/api/zayvora/plan', async (req, res) => {
 });
 
 // Phase 2: Synthesis (Praxis) - GENERATES STAGE 6 + LOGS TRACE
-app.post('/api/zayvora/synthesize', async (req, res) => {
+app.post('/api/zayvora/synthesize', ipRateLimiter, async (req, res) => {
   const { prompt, context, prd, filename, type, artifacts } = req.body;
   const key = crypto.createHash('sha256').update(`praxis:${prompt}:${prd}:${filename}`).digest('hex');
 
@@ -289,7 +357,7 @@ app.post('/api/zayvora/synthesize', async (req, res) => {
 });
 
 // Phase 3: Hardening (Engineer)
-app.post('/api/zayvora/verify', async (req, res) => {
+app.post('/api/zayvora/verify', ipRateLimiter, async (req, res) => {
   const { code, filename } = req.body;
   try {
     const response = await fetch('http://localhost:8080/v1/chat/completions', {
