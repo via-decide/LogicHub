@@ -1256,11 +1256,7 @@
       <button id="btn-toolbar-generate" class="toolbar-action">Generate App</button>
       <button id="btn-toolbar-export" class="toolbar-action" disabled>Export ZIP</button>
       <button id="btn-toolbar-publish" class="toolbar-action" disabled>Publish</button>
-      <button class="btn-icon" onclick="alert('Quick help:
-1. Add the main parts you understand, like a screen or sign-in flow.
-2. You do not need separate JS or CSS parts unless you want custom files.
-3. Press Make App to generate the files.
-4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
+      <button class="btn-icon" onclick="alert('Quick help:\\n1. Add the main parts you understand, like a screen or sign-in flow.\\n2. You do not need separate JS or CSS parts unless you want custom files.\\n3. Press Make App to generate the files.\\n4. Download, Android App, and Publish can auto-repair missing app.js, styles.css, manifest.json, and sw.js for you.')">?</button>
     </div>
   </div>
 
@@ -2027,6 +2023,7 @@
         }
         prd.disabled = this.map.blocks.length === 0;
         this.updateInstallButtonState();
+      },
       getPortPos(id, type) {
         const b = this.map.blocks.find(x => x.id === id);
         if (!b) return null;
