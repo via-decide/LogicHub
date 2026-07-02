@@ -228,7 +228,7 @@ export default async function handler(req, res) {
     }
 
     // Push to Daxini.Space local edge
-    const daxiniEdgeUrl = process.env.DAXINI_SPACE_API || "http://127.0.0.1:7004/api/apps/publish";
+    const daxiniEdgeUrl = process.env.DAXINI_SPACE_API || "https://daxini.space/api/apps/publish";
     console.log(`[publish-app] Pushing to Sovereign Edge at ${daxiniEdgeUrl}...`);
     try {
       const edgeRes = await fetch(daxiniEdgeUrl, {

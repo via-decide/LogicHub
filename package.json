@@ -8,6 +8,7 @@
     "preview": "node ./scripts/serve-static.mjs --dist"
   },
   "dependencies": {
-    "firebase-admin": "^13.4.0"
+    "firebase-admin": "^13.4.0",
+    "razorpay": "^2.9.6"
   }
 }
