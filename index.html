@@ -1123,12 +1123,12 @@
         overscroll-behavior: contain;
       }
 
-      /* Footer: 3-col responsive grid */
+      /* Footer: deliberate mobile action panel */
       .footer {
         position: sticky;
         bottom: 0;
         z-index: 120;
-        grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         padding: 0.45rem 0.6rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
         gap: 0.35rem;
         margin-top: 0;
@@ -1180,9 +1180,13 @@
         grid-template-columns: 1fr;
       }
       .footer button {
-        padding: 0.55rem 0.25rem;
+        padding: 0.62rem 0.45rem;
         font-size: 0.62rem;
         min-height: 44px;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.25;
       }
       input, textarea {
         font-size: 16px;
@@ -1416,15 +1420,6 @@
     </div>
   </div>
 
-  <div class="footer" id="step-footer">
-    <button onclick="app.addBlockAtCenter('ui')">[+ Node]</button>
-    <button id="btn-validate" class="compile-btn" onclick="openForgeModal()">[⚡ Synth]</button>
-    <button id="btn-prd" class="prd-btn" onclick="app.viewPRD()">[📋 PRD]</button>
-    <button id="btn-export" disabled onclick="app.exportZip()">[📦 Export]</button>
-    <button id="btn-apk" class="apk-btn" style="display: none;" onclick="app.buildAPK()" id="step-apk">[📱 APK]</button>
-    <button id="btn-clear" onclick="if(confirm('Wipe architecture?')) app.clearMap()">[🗑 Wipe]</button>
-    <button id="btn-install" class="install-btn" disabled title="Install becomes available after APK export." onclick="app.installPWA()">[↓ Install]</button>
-  <!-- FOOTER -->
   <div class="footer">
     <button id="btn-add-part" onclick="app.addBlock('ui')">+ Part</button>
     <button class="compile-btn" id="btn-synth" onclick="app.synthesizeArchitecture()">⚡ Make App</button>
