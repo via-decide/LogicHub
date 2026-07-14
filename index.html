@@ -1115,8 +1115,8 @@
       .canvas {
         display: block;
         width: 100%;
-        height: clamp(320px, 54dvh, 560px);
-        min-height: clamp(320px, 54dvh, 560px);
+        height: clamp(420px, 62dvh, 620px);
+        min-height: clamp(420px, 62dvh, 620px);
         overflow: hidden;
         touch-action: pan-y pinch-zoom;
         -webkit-overflow-scrolling: touch;
@@ -1833,6 +1833,7 @@
         });
         this.updateAuthUI();
         this.initFirebaseAuth();
+        this.load();
         this.render();
         updateForgeLimitUI();
         this.renderFounderStatus();
@@ -1918,18 +1919,23 @@
 
       applyStarterSetup(templateKey) {
         const templates = {
-          aiResearchTool: ['ui', 'api', 'database', 'util'],
-          gameSimulation: ['ui', 'api', 'util', 'styles'],
-          dataDashboard: ['ui', 'database', 'api', 'styles'],
-          knowledgeExplorer: ['ui', 'database', 'util', 'styles'],
-          workflowAutomation: ['ui', 'auth', 'database', 'util'],
+          aiResearchTool: ['ui', 'api', 'util', 'database'],
+          gameSimulation: ['ui', 'util', 'database'],
+          dataDashboard: ['ui', 'api', 'util'],
+          knowledgeExplorer: ['ui', 'api', 'database', 'util'],
+          workflowAutomation: ['api', 'util', 'database'],
           sample: ['ui', 'api', 'database', 'auth', 'util', 'styles'],
         };
         const sequence = templates[templateKey] || templates.aiResearchTool;
-        if (!this.map.blocks.length || confirm('Add this setup to your current app structure?')) {
-          sequence.forEach((type) => this.addBlock(type));
-          this.log(`${templateKey} starter setup added.`, 'success');
-        }
+        if (this.map.blocks.length && !confirm('Add this setup to your current app structure?')) return;
+        const c = document.getElementById("canvas");
+        const x = Math.max(12, Math.min((c.offsetWidth || 360) / 2 - 87, (c.offsetWidth || 360) - 187));
+        const yGap = window.innerWidth <= 680 ? 76 : 118;
+        const startY = this.map.blocks.length ? 24 + this.map.blocks.length * 16 : 16;
+        const created = sequence.map((type, i) => this.map.addBlock(type, x, startY + i * yGap));
+        created.slice(0, -1).forEach((block, i) => this.map.connect(block.id, created[i + 1].id));
+        this.render();
+        this.log(`${templateKey} setup created ${created.length} editable parts.`, 'success');
       },
 
       removeBlock(id) { this.map.removeBlock(id); this.render(); this.log("Part removed.", "info"); },
@@ -1983,6 +1989,7 @@
         document.getElementById("canvas-hint").style.display = this.map.blocks.length ? "none" : "flex";
         this.renderConnections();
         this.updateStats();
+        this.save();
       },
 
       renderConnections() {
@@ -2029,6 +2036,7 @@
         const n = this.map.blocks.length;
         document.getElementById("block-count").textContent = `${n} parts`;
         const ready = n > 0 && this.map.blocks.every(b => b.status === "VERIFIED");
+        document.getElementById("btn-synth").disabled = n === 0 || this.map.blocks.some(b => b.status === "GENERATING");
         document.getElementById("btn-export").disabled = !ready;
         document.getElementById("btn-apk").disabled = !ready;
         document.getElementById("btn-publish").disabled = n === 0;
@@ -2372,6 +2380,12 @@
       },
       
       save() { sessionStorage.setItem("LH_MAP_V2", JSON.stringify({ id: this.map.id, blocks: this.map.blocks, connections: this.map.connections })); },
+      load() {
+        let saved = null;
+        try { saved = JSON.parse(sessionStorage.getItem("LH_MAP_V2") || "null"); } catch (error) { this.log("Saved plan could not be restored.", "error"); }
+        if (!saved || !Array.isArray(saved.blocks) || !Array.isArray(saved.connections)) return;
+        this.map.id = saved.id || this.map.id; this.map.blocks = saved.blocks; this.map.connections = saved.connections;
+      },
 
       // === ONBOARDING SYSTEM ===
       initInstallPrompt() {
@@ -2404,6 +2418,7 @@
         this.log(`Install prompt: ${choiceResult.outcome}`, choiceResult.outcome === "accepted" ? "success" : "info");
         this.deferredInstallPrompt = null;
         this.updateInstallButtonState();
+      },
 
       openFounderCheckout() {
         window.open('https://aporaksha.com/#products', '_blank');
