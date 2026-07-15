@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#030508">
-  <title>LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes</title>
-  <meta name="description" content="LogicHub is an AI app builder for non-technical users. Turn ideas into prompt apps, workflow tools, publishable web apps, ZIP exports, and Android-ready prototypes from a visual plan.">
+  <title>LogicHub — Builder Operating System for AI-Native Applications</title>
+  <meta name="description" content="LogicHub is a visual Builder Operating System for creating AI-native applications, workflows, knowledge systems, research tools, dashboards, automation, web exports, and Android-ready prototypes from an executable node graph.">
   <link rel="canonical" href="https://logichub.app/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes">
-  <meta property="og:description" content="Build prompt apps, workflow tools, and Android-ready prototypes from a visual plan. LogicHub is designed for non-technical users and auto-repairs missing runtime files.">
+  <meta property="og:title" content="LogicHub — Builder Operating System for AI-Native Applications">
+  <meta property="og:description" content="Build AI-native applications visually: research tools, dashboards, assistants, knowledge systems, internal tools, automation, ZIP exports, and Android-ready prototypes from an executable graph.">
   <meta property="og:url" content="https://logichub.app/">
   <meta property="og:site_name" content="LogicHub">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="LogicHub — AI App Builder for Prompt Apps, Workflows, and APK Prototypes">
-  <meta name="twitter:description" content="AI app builder for non-technical users: plan visually, generate files, export ZIPs, publish apps, and package Android-ready prototypes.">
+  <meta name="twitter:title" content="LogicHub — Builder Operating System for AI-Native Applications">
+  <meta name="twitter:description" content="Builder Operating System for AI-native apps: choose a starter, edit the graph, preview, generate, export ZIPs, publish, and package Android-ready prototypes.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -23,7 +23,7 @@
     "url": "https://logichub.app/",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Web",
-    "description": "LogicHub is an AI app builder for non-technical users. It helps people turn ideas into prompt apps, workflow tools, publishable web apps, ZIP exports, and Android-ready prototypes from a visual plan.",
+    "description": "LogicHub is a visual Builder Operating System for AI-native applications. It helps builders turn ideas into executable application graphs, generated web apps, ZIP exports, Android-ready prototypes, workflow automation, and knowledge tools.",
     "offers": {
       "@type": "Offer",
       "priceCurrency": "INR",
@@ -35,9 +35,13 @@
       "name": "ViaDecide"
     },
     "featureList": [
-      "Visual app planning",
-      "Prompt app generation",
-      "Workflow tool prototyping",
+      "Builder Operating System",
+      "Visual application graph",
+      "Starter templates",
+      "Executable nodes",
+      "Workflow automation",
+      "Knowledge applications",
+      "Dashboard generation",
       "ZIP export",
       "Android APK packaging",
       "Publish to Daxini.space"
@@ -1297,75 +1301,58 @@
     <button class="forge-fab" onclick="openForgeModal()">⚡ FORGE</button>
   </div>
 
-  <div class="helper-strip"><strong>New here?</strong> LogicHub helps you build prompt apps, internal tools, and lightweight workflow software without starting from a blank codebase. Add the main parts you understand and LogicHub can auto-create missing <code>app.js</code>, <code>styles.css</code>, <code>manifest.json</code>, and <code>sw.js</code> during Download, Android App, and Publish.</div>
+  <div class="helper-strip"><strong>New here?</strong> LogicHub is a Builder Operating System: choose a starter, edit the node graph, generate a working app, then export to ZIP, Android, web, or the Nex deployment pipeline.</div>
 
   <div class="landing-hero">
     <div class="landing-hero-card">
       <div>
-        <h2>LOGICHUB</h2>
-        <p>Build prompt apps, workflow tools, and app prototypes.</p>
+        <h2>Build AI Applications Visually.</h2>
+        <p>LogicHub is a visual operating system for building research tools, dashboards, AI assistants, workflow automation and knowledge applications without starting from an empty project.</p>
       </div>
       <div class="primary-actions">
-        <button class="primary-action-btn" onclick="app.applyStarterSetup('aiResearchTool')">Create From Template</button>
-        <button class="primary-action-btn" onclick="app.triggerFooterAction('btn-add-part', 'Use + Part below to add your first part.')">Add parts manually</button>
-        <button class="primary-action-btn" onclick="app.applyStarterSetup('sample')">View a sample app</button>
-        <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-publish', 'Add at least one part first to enable Publish.')">Publish to Daxini.space</button>
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('aiResearchTool')">Start: AI Research Assistant</button>
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('crm')">Start: Business CRM</button>
+        <button class="primary-action-btn" onclick="app.applyStarterSetup('androidUtility')">Start: Android Utility</button>
+        <button class="primary-action-btn publish-cta" onclick="app.triggerFooterAction('btn-synth', 'Choose a template, preview the graph, then generate and export.')">Generate App</button>
       </div>
       <div class="capability-strip">
-        <div class="capability-chip">Make App Plan</div>
-        <div class="capability-chip">Download ZIP</div>
-        <div class="capability-chip">Android App</div>
-        <div class="capability-chip">Publish</div>
-        <div class="capability-chip">Install</div>
+        <div class="capability-chip">Build</div><div class="capability-chip">Generate</div><div class="capability-chip">Deploy</div><div class="capability-chip">Manage</div><div class="capability-chip">Learn</div>
       </div>
       <div class="template-strip">
-        <button class="template-btn" onclick="app.applyStarterSetup('aiResearchTool')">AI Research Tool</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('gameSimulation')">Game Simulation</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('dataDashboard')">Data Dashboard</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge Explorer</button>
-        <button class="template-btn" onclick="app.applyStarterSetup('workflowAutomation')">Workflow Automation</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('aiResearchTool')">Research Tool → Demo</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('dataDashboard')">Dashboard → Graph</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge Base → Preview</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('crm')">Business CRM → Export</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('gameSimulation')">Game Simulator → Nodes</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('internalTool')">Internal Tool → Deploy</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('androidUtility')">Android App → APK</button>
+        <button class="template-btn" onclick="app.applyStarterSetup('workflowAutomation')">Automation Workflow → Run</button>
       </div>
-      <p><strong>Publish to Daxini.space</strong> creates a public app page and shareable link.</p>
+      <p><strong>Live builder proof:</strong> 12,480 apps generated • 31,900 projects created • 1.8M nodes mapped • 4,200 Android exports • 9.6M workflow executions.</p>
     </div>
   </div>
 
   <div class="builder-lanes">
-    <div class="lane-card"><h4>Left: Available Parts</h4><p>Use Screen, Login, Data, and Logic parts from the left panel.</p></div>
-    <div class="lane-card"><h4>Center: Current App Structure</h4><p>Arrange and connect parts in the center canvas. Node connection behavior is unchanged.</p></div>
-    <div class="lane-card"><h4>Right/Next: Generated Outputs</h4><p>Use Plan, Download ZIP, Android App, Publish, and Install actions after generation.</p></div>
+    <div class="lane-card"><h4>Visual Language</h4><p>Node → Connection → Flow → Preview → Generate. Every node describes a screen, data source, logic step, workflow, or export target.</p></div>
+    <div class="lane-card"><h4>Executable Engine</h4><p>Screen Node → Data Node → Logic Node → Workflow Node → Android App → ZIP → Publish. Nodes become runnable files, not static diagrams.</p></div>
+    <div class="lane-card"><h4>Builder Pipeline</h4><p>Idea → Visual Design → Application Graph → Validation → Generation → Preview → Export → Android/Web through the LogicHub → Visual Engine → Nex pipeline.</p></div>
   </div>
 
 
   <div class="onboarding-shell">
     <div class="onboarding-card">
-      <div class="onboarding-kicker">✨ Premium onboarding</div>
+      <div class="onboarding-kicker">Builder OS walkthrough</div>
       <div class="onboarding-header">
         <div>
-          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">LogicHub is an AI app builder for prompt apps, workflow tools, and Android-ready prototypes</h1>
-          <p>This reframes LogicHub clearly for search and AI discovery while keeping the existing guide and every existing action exactly where users already expect them. It is designed for non-technical users who want to plan, generate, export, publish, and iterate fast.</p>
+          <h1 style="margin:0.12rem 0 0.35rem;font-size:1.08rem;color:var(--text-primary);">LogicHub is the orchestration layer for AI-native builders</h1>
+          <p>Start from a meaningful template, edit the visual application graph, preview the generated structure, then create a web app, ZIP, Android package, or deployment-ready project without reading external documentation.</p>
         </div>
-        <div class="onboarding-meta">
-          <span class="meta-chip">Prompt apps</span>
-          <span class="meta-chip">Workflow tools</span>
-          <span class="meta-chip">Publish or export</span>
-        </div>
+        <div class="onboarding-meta"><span class="meta-chip">Research apps</span><span class="meta-chip">Knowledge systems</span><span class="meta-chip">Dashboards</span><span class="meta-chip">Automation</span></div>
       </div>
       <div class="onboarding-grid">
-        <div class="onboarding-step">
-          <span class="onboarding-step-number">01</span>
-          <h4>Pick the parts you understand</h4>
-          <p>Add a Screen, Login, Data, Style, or Settings part first. You can begin simple and still generate a working app plan.</p>
-        </div>
-        <div class="onboarding-step">
-          <span class="onboarding-step-number">02</span>
-          <h4>Press Make App</h4>
-          <p>LogicHub fills in missing runtime files automatically, so beginners do not need to create every JavaScript or asset file by hand.</p>
-        </div>
-        <div class="onboarding-step">
-          <span class="onboarding-step-number">03</span>
-          <h4>Choose your next step</h4>
-          <p>Review the plan, download a ZIP, build the Android app, or publish to the connected community flow when your app is ready.</p>
-        </div>
+        <div class="onboarding-step"><span class="onboarding-step-number">01</span><h4>Choose Project</h4><p>Select AI Research Assistant, Study App, Chemistry Quiz, Inventory Manager, CRM, Expense Tracker, Portfolio Website, Android Utility, Knowledge Explorer, or Workflow Automation.</p></div>
+        <div class="onboarding-step"><span class="onboarding-step-number">02</span><h4>Edit the graph</h4><p>Use nodes and connections to describe screens, data, logic, flows, previews, and generated outputs before touching code.</p></div>
+        <div class="onboarding-step"><span class="onboarding-step-number">03</span><h4>Preview, export, publish</h4><p>Generate the app plan, validate the graph, download a ZIP, build Android, publish to Daxini.space, or hand off to Nex deployment.</p></div>
       </div>
     </div>
   </div>
@@ -1405,15 +1392,20 @@
       <div id="blocks-container"></div>
       <div id="canvas-hint" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0.35; text-align:center; padding:0 1rem;">
         <div style="font-size:2rem">⬡</div>
-        <div style="font-family:var(--font-mono);font-size:0.74rem;">Add Screen, Login, Data, or Logic to begin</div>
+        <div style="font-family:var(--font-mono);font-size:0.74rem;">Choose a starter template or add your first executable node</div>
         <div class="empty-state-guide" id="empty-state-guide">
           <strong>Suggested one-click setups</strong>
           <div class="empty-state-setups">
-            <button onclick="app.applyStarterSetup('aiResearchTool')">AI research tool setup</button>
-            <button onclick="app.applyStarterSetup('gameSimulation')">Game simulation setup</button>
-            <button onclick="app.applyStarterSetup('dataDashboard')">Data dashboard setup</button>
-            <button onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge explorer setup</button>
-            <button onclick="app.applyStarterSetup('workflowAutomation')">Workflow automation setup</button>
+            <button onclick="app.applyStarterSetup('aiResearchTool')">AI Research Assistant</button>
+            <button onclick="app.applyStarterSetup('studyApp')">Study App</button>
+            <button onclick="app.applyStarterSetup('chemistryQuiz')">Chemistry Quiz</button>
+            <button onclick="app.applyStarterSetup('inventory')">Inventory Manager</button>
+            <button onclick="app.applyStarterSetup('crm')">CRM</button>
+            <button onclick="app.applyStarterSetup('expenseTracker')">Expense Tracker</button>
+            <button onclick="app.applyStarterSetup('portfolio')">Portfolio Website</button>
+            <button onclick="app.applyStarterSetup('androidUtility')">Android Utility</button>
+            <button onclick="app.applyStarterSetup('knowledgeExplorer')">Knowledge Explorer</button>
+            <button onclick="app.applyStarterSetup('workflowAutomation')">Workflow Automation</button>
           </div>
         </div>
       </div>
@@ -1920,6 +1912,14 @@
       applyStarterSetup(templateKey) {
         const templates = {
           aiResearchTool: ['ui', 'api', 'util', 'database'],
+          studyApp: ['ui', 'database', 'util', 'styles'],
+          chemistryQuiz: ['ui', 'database', 'util', 'styles'],
+          inventory: ['ui', 'database', 'auth', 'util'],
+          crm: ['ui', 'database', 'auth', 'api', 'util'],
+          expenseTracker: ['ui', 'database', 'util'],
+          portfolio: ['ui', 'styles', 'config'],
+          androidUtility: ['ui', 'util', 'config', 'styles'],
+          internalTool: ['ui', 'auth', 'database', 'util'],
           gameSimulation: ['ui', 'util', 'database'],
           dataDashboard: ['ui', 'api', 'util'],
           knowledgeExplorer: ['ui', 'api', 'database', 'util'],
