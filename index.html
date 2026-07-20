@@ -1560,6 +1560,8 @@
     </div>
   </div>
 
+  <script src="./providers/daxini-provider.js"></script>
+  <script src="./sdk/browser.js"></script>
   <script src="./js/deploy-client.js"></script>
   <script src="./js/publish-app.js"></script>
 
@@ -2668,8 +2670,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
       },
 
       async synthesizeArchitecture() {
-        const key = document.getElementById("api-key").value.trim() || document.getElementById("api-key-mobile").value.trim();
-        if (!key) { alert("API Key required. Click 🔑 icon."); return false; }
+        const key = ""; // DAXINI Identity supplies runtime authorization; LogicHub no longer accepts model API keys.
         if (this.map.blocks.length === 0) { alert("Add a few parts first."); return false; }
         if (!canCreateAnotherSessionApp(this.map.id)) {
           updateForgeLimitUI();
@@ -2690,7 +2691,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
           this.log("Phase 1: Zayvora Axiom generating PRD...", "accent");
           let zayvoraPrd = "";
           try {
-            const planResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/plan`, {
+            const planResp = await window.LogicHubSDK.request('/runtime/zayvora/plan', {
               method: 'POST',
               headers: authHeaders,
               body: JSON.stringify({ prompt: "Synthesize this app", architecture: this.map.blocks })
@@ -2716,18 +2717,18 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
             b.status = "GENERATING"; this.render(); this.log(`Generating ${b.filename}...`, "accent");
             const ctx = b.dependsOn.map(id => this.map.blocks.find(x => x.id === id)).filter(d => d?.code).map(d => `--- File: ${d.filename} ---\n${d.code}`).join("\n\n");
             const prompt = `You are a Senior Architect building ${b.filename}.\nType: ${b.type}\nInstructions: ${b.prompt || 'Synthesize logic based on connections.'}\n\n${ctx ? `Context:\n${ctx}` : ""}\n\nRequirements:\n- Output ONLY raw code. No markdown.\n- This app is for non-technical users, so prefer a working result over a perfect file split.\n- Do not reference missing local files.\n- If you create HTML, only reference CSS/JS files that already exist in the current architecture.\n- If no separate browser JS file exists, keep the page working with inline JavaScript or simple HTML-only behavior.\n- Keep filenames and imports consistent with the architecture.`;
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            const resp = await window.LogicHubSDK.request('/runtime/jobs/generate-code', {
+              method: 'POST',
+              body: JSON.stringify({ workspaceId: window.LogicHubSDK.getWorkspaceId(), type: 'code.generate', input: { prompt, filename: b.filename, blockType: b.type } })
             });
             const data = await resp.json();
             if (data.error) throw new Error(data.error.message);
-            let code = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+            let code = data.code || data.result?.code || data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
             if (code.startsWith("```")) code = code.split('\n').slice(1, -1).join('\n');
             b.code = code; b.status = "VERIFIED"; this.render();
             
             try {
-              const synthResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/synthesize`, {
+              const synthResp = await window.LogicHubSDK.request('/runtime/zayvora/synthesize', {
                 method: 'POST',
                 headers: authHeaders,
                 body: JSON.stringify({ prompt: b.prompt || 'Synthesize logic based on connections.', context: ctx, prd: zayvoraPrd, filename: b.filename, type: b.type })
@@ -2742,7 +2743,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
               // Phase 3: Zayvora Hardening (Engineer)
               this.log(`Phase 3: Zayvora Engineer hardening ${b.filename}...`, "accent");
               try {
-                 const verifyResp = await fetch(`${window.SOVEREIGN_API_URL}/zayvora/verify`, {
+                 const verifyResp = await window.LogicHubSDK.request('/runtime/zayvora/verify', {
                    method: 'POST',
                    headers: authHeaders,
                    body: JSON.stringify({ code, filename: b.filename })
@@ -2827,7 +2828,7 @@ self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));`
             reader.readAsDataURL(zipBlob);
           });
 
-          const response = await fetch("/api/build-apk", {
+          const response = await window.LogicHubSDK.request("/deployments/apk", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ zipBase64, mapId: this.map.id })
