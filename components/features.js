@@ -1,39 +1,16 @@
 (function (global) {
   function featureGrid() {
-    const blocks = [
-      {
-        icon: '🧠',
-        title: 'Prompt Apps',
-        body: 'Create AI tools without coding.',
-        example: 'Example: Customer support copilot with guided prompts.'
-      },
-      {
-        icon: '🏗️',
-        title: 'System Architecture',
-        body: 'Design full application flows.',
-        example: 'Example: Auth + dashboard + API + data lifecycle map.'
-      },
-      {
-        icon: '📦',
-        title: 'App Skeletons',
-        body: 'Generate ready-to-run project structures.',
-        example: 'Example: Starter bundle with routes, services, and config.'
-      }
+    const domains = ['SaaS', 'CRM', 'ERP', 'Manufacturing', 'Scientific Computing', 'Education', 'Finance', 'Healthcare', 'Government', 'AI Agents', 'Internal Tools', 'Dashboards', 'Browser Extensions', 'PWAs', 'Mobile Apps'];
+    const capabilities = [
+      ['Reasoning Transparency', 'Expose assumptions, constraints, alternatives, trade-offs, confidence, and rationale for every decision.'],
+      ['Planning Mode', 'Generate milestones, backlog, priorities, dependencies, risk analysis, and estimated effort before code.'],
+      ['Enterprise Readiness', 'Support RBAC, audit logs, private deployments, on-prem options, integrations, compliance, and secrets.']
     ];
-
     return `
       <section class="feature-grid py-14">
-        <h2 class="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-white">What You Can Build</h2>
-        <div class="mt-7 grid md:grid-cols-3 gap-5">
-          ${blocks.map((item) => `
-            <article class="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white dark:bg-slate-950">
-              <div class="text-2xl">${item.icon}</div>
-              <h3 class="mt-4 text-lg font-semibold text-slate-900 dark:text-white">${item.title}</h3>
-              <p class="mt-2 text-slate-600 dark:text-slate-300">${item.body}</p>
-              <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">${item.example}</p>
-            </article>
-          `).join('')}
-        </div>
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4"><div><p class="text-xs uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400 font-semibold">Engineering domains</p><h2 class="mt-2 text-2xl md:text-3xl font-semibold text-slate-900 dark:text-white">Not templates. Production contexts.</h2></div><p class="max-w-2xl text-slate-600 dark:text-slate-300">Import GitHub repositories, PDFs, Markdown, APIs, OpenAPI specs, database schemas, images, and existing codebases as reasoning context.</p></div>
+        <div class="mt-7 flex flex-wrap gap-2">${domains.map((domain) => `<span class="rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-700 dark:text-slate-200">${domain}</span>`).join('')}</div>
+        <div class="mt-7 grid md:grid-cols-3 gap-5">${capabilities.map(([title, body]) => `<article class="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white dark:bg-slate-950"><h3 class="text-lg font-semibold text-slate-900 dark:text-white">${title}</h3><p class="mt-3 text-slate-600 dark:text-slate-300">${body}</p></article>`).join('')}</div>
       </section>
     `;
   }
