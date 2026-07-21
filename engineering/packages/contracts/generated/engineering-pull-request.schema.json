@@ -1,0 +1,327 @@
+{
+  "$ref": "#/definitions/EngineeringPullRequest",
+  "definitions": {
+    "EngineeringPullRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "default": "0.1.0"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "number": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "baseBranch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseRevisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headBranch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headRevisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "changeIntentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "open",
+            "changes_requested",
+            "approved",
+            "merged",
+            "closed",
+            "rejected"
+          ],
+          "default": "draft"
+        },
+        "reviewState": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "open",
+            "changes_requested",
+            "approved",
+            "merged",
+            "closed",
+            "rejected"
+          ]
+        },
+        "requiredApprovals": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reviewer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "decision": {
+                "type": "string",
+                "enum": [
+                  "comment",
+                  "approve",
+                  "request_changes"
+                ]
+              },
+              "comment": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "reviewer",
+              "decision",
+              "createdAt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "changeRequests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reviewer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "decision": {
+                "type": "string",
+                "enum": [
+                  "comment",
+                  "approve",
+                  "request_changes"
+                ]
+              },
+              "comment": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "reviewer",
+              "decision",
+              "createdAt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "diffSummary": {
+          "type": "object",
+          "properties": {
+            "filesAdded": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "filesModified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "filesDeleted": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "objectsAdded": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "objectsModified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "objectsRemoved": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "filesAdded",
+            "filesModified",
+            "filesDeleted",
+            "objectsAdded",
+            "objectsModified",
+            "objectsRemoved"
+          ],
+          "additionalProperties": false
+        },
+        "validationSummary": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "warnings": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unknown": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "total",
+            "passed",
+            "warnings",
+            "failed",
+            "unknown"
+          ],
+          "additionalProperties": false
+        },
+        "constraintSummary": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "warnings": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "violations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unknown": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "total",
+            "passed",
+            "warnings",
+            "violations",
+            "unknown"
+          ],
+          "additionalProperties": false
+        },
+        "mergeEligibility": {
+          "type": "object",
+          "properties": {
+            "eligible": {
+              "type": "boolean"
+            },
+            "blockers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "eligible",
+            "blockers"
+          ],
+          "additionalProperties": false
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mergedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mergedRevisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "number",
+        "title",
+        "baseBranch",
+        "baseRevisionId",
+        "headBranch",
+        "headRevisionId",
+        "author",
+        "approvals",
+        "changeRequests",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

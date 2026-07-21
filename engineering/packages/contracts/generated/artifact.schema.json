@@ -1,0 +1,104 @@
+{
+  "$ref": "#/definitions/Artifact",
+  "definitions": {
+    "Artifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "default": "0.1.0"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "source",
+            "schematic_render",
+            "pcb_render",
+            "visual_diff",
+            "structural_diff",
+            "bom",
+            "bom_diff",
+            "erc_report",
+            "drc_report",
+            "constraint_report",
+            "validation_report",
+            "decision_export",
+            "revision_manifest",
+            "review_report"
+          ]
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mediaType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "byteSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "storageKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourcePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "generatedBy": {
+          "type": "string"
+        },
+        "generatorVersion": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "revisionId",
+        "role",
+        "filename",
+        "mediaType",
+        "byteSize",
+        "sha256",
+        "storageKey",
+        "sourcePaths",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

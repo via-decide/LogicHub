@@ -1,0 +1,120 @@
+{
+  "$ref": "#/definitions/Constraint",
+  "definitions": {
+    "Constraint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "default": "0.1.0"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "electrical",
+            "mechanical",
+            "thermal",
+            "manufacturing",
+            "supply_chain",
+            "cost",
+            "reliability",
+            "interface",
+            "project_policy"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warning",
+            "blocking"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetObjectIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "expression": {},
+        "unit": {
+          "type": "string"
+        },
+        "expected": {},
+        "source": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "default": "active"
+        },
+        "evaluation": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "warning",
+            "violation",
+            "unknown",
+            "requires_validation",
+            "error"
+          ],
+          "default": "unknown"
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "revisionId",
+        "name",
+        "category",
+        "severity",
+        "scope",
+        "targetObjectIds",
+        "createdBy",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
