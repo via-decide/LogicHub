@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logichub.engineering/schemas/reference-product/0.1.0/product.schema.json",
+  "title": "SovereignEducationalConsoleProduct",
+  "description": "Frozen reference-product contract for the Sovereign Educational Console v0.1. The authoritative runtime validator is the Zod ProductSchema in @logichub-engineering/validation-engine; this JSON Schema mirrors its structural requirements.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "productId",
+    "productName",
+    "productRevision",
+    "frozenAt",
+    "intendedAgeGroups",
+    "intendedUseModel",
+    "intendedOperatingEnvironment",
+    "controller",
+    "power",
+    "opticalTokenSystem",
+    "humanInterface",
+    "mechanical",
+    "daughterboardInterface",
+    "targets",
+    "knownExclusions",
+    "safetyAssumptions",
+    "unresolvedDecisions"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "productId": { "type": "string", "minLength": 1 },
+    "productName": { "type": "string", "minLength": 1 },
+    "productRevision": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+$" },
+    "frozenAt": { "type": "string", "format": "date-time" },
+    "intendedAgeGroups": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "intendedUseModel": { "type": "string", "minLength": 1 },
+    "intendedOperatingEnvironment": { "type": "object" },
+    "controller": {
+      "type": "object",
+      "required": ["frozenSelection", "rejectedAlternative", "decisionRecord"],
+      "properties": {
+        "frozenSelection": { "type": "string", "minLength": 1, "not": { "pattern": "(?i)\\bor\\b" } },
+        "rejectedAlternative": { "type": "string", "minLength": 1 },
+        "decisionRecord": { "type": "string", "minLength": 1 }
+      }
+    },
+    "power": { "type": "object", "required": ["battery", "charger", "rails", "ledPolicy", "runtimeTarget"] },
+    "opticalTokenSystem": { "type": "object", "required": ["bayCount", "classifier", "explicitStates"] },
+    "humanInterface": { "type": "object", "required": ["writingSlate"] },
+    "mechanical": { "type": "object", "required": ["printEnvelope", "materials", "wallThickness"] },
+    "daughterboardInterface": {
+      "type": "object",
+      "required": ["connector", "pins", "hotPlugSupported"],
+      "properties": { "hotPlugSupported": { "const": false } }
+    },
+    "targets": { "type": "object", "required": ["unitCostExFactory", "assemblyTime"] },
+    "knownExclusions": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "safetyAssumptions": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "unresolvedDecisions": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "quantity": {
+      "type": "object",
+      "required": ["value", "unit", "provenance", "evidenceGrade"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string", "minLength": 1 },
+        "provenance": { "type": "string", "minLength": 1 },
+        "evidenceGrade": { "enum": ["verified", "datasheet", "measured", "estimated", "unknown"] }
+      }
+    }
+  }
+}

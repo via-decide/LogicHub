@@ -1,0 +1,31 @@
+{
+  "id": "dec-sec-003-optical-emitter-architecture",
+  "schemaVersion": "0.1.0",
+  "projectId": "sovereign-educational-console",
+  "revisionId": "v0.1",
+  "question": "How are the four token-identification wells illuminated: one discrete RGB LED per bay with shared PWM channels, or one addressable (WS2812B-class) emitter per bay on a single data line?",
+  "context": "The task allows 'one RGB illumination source per bay or a verified shared-source architecture'. The ESP32-C3 pin budget (DEC-001) leaves few free pins after 4 ADC inputs, audio, backlight, daughterboard I2C/INT, and the RGB function.",
+  "alternatives": [
+    {
+      "id": "addressable-per-bay-single-data-line",
+      "description": "Four WS2812B-class addressable RGB emitters, one physically inside each bay, all on one data line (GPIO10). During classification exactly one bay is illuminated (single-bay strobe policy); the other three are commanded dark.",
+      "tradeoffs": "Pros: 1 GPIO total; per-bay physical isolation of light sources; deterministic color commands; trivially extensible. Cons: ~1 mA quiescent per emitter when dark (budgeted in power-tree.json); 5 V-class part driven at 3.3 V data/VBAT supply needs level margin verified on bench (R-12 adjacent); color spectrum fixed by the part, not tunable analog."
+    },
+    {
+      "id": "discrete-rgb-shared-pwm",
+      "description": "Common-anode discrete RGB LED per bay; three shared PWM channels plus four bay-enable transistors (7 GPIO total).",
+      "tradeoffs": "Pros: analog brightness control per channel, no digital-protocol timing concerns during ADC sampling. Cons: 7 GPIO does not fit the frozen pin map alongside the daughterboard interface; more BOM lines (4 transistors + 12 resistors)."
+    }
+  ],
+  "selectedAlternative": "addressable-per-bay-single-data-line",
+  "rationale": "The addressable chain is the only architecture that fits the frozen ESP32-C3 pin budget while keeping one physical emitter per bay. The 'shared source' is the data line, not the light: each bay has its own emitter and the single-bay strobe policy guarantees optical isolation during classification. Strobe-vs-ADC noise interaction is a registered risk (R-12) with a bench resolution path, not an assumed-safe condition.",
+  "tradeoffs": "Accepts ~4 mA total quiescent draw and a bench obligation to verify data-line timing and ADC noise during strobes.",
+  "constraintsConsidered": ["con-sec-adc-input-max", "con-sec-runtime-4h"],
+  "evidenceArtifactIds": [],
+  "validationResultIds": [],
+  "confidence": "medium",
+  "status": "accepted",
+  "createdBy": "logichub-rule-kernel-v1-freeze",
+  "createdAt": "2026-07-22T00:00:00+05:30",
+  "metadata": { "strobePolicy": "single bay illuminated during classification; settling 5 ms (estimated)" }
+}
