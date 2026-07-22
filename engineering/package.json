@@ -6,9 +6,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc --build packages/shared packages/contracts",
+    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store",
     "lint": "pnpm -r lint",
-    "typecheck": "tsc --build packages/shared packages/contracts",
+    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "pnpm -r test:integration",
@@ -20,5 +20,11 @@
     "@types/node": "^26.1.1",
     "typescript": "~5.7.0",
     "vitest": "~3.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild"
+    ]
   }
 }
