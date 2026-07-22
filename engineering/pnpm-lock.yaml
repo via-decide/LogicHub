@@ -46,6 +46,19 @@ importers:
         specifier: ~4.21.0
         version: 4.21.1
 
+  packages/git-adapter:
+    dependencies:
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/persistence':
+        specifier: workspace:*
+        version: link:../persistence
+
   packages/persistence:
     dependencies:
       '@logichub-engineering/contracts':

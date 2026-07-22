@@ -6,9 +6,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store",
+    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter",
     "lint": "pnpm -r lint",
-    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store",
+    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "pnpm -r test:integration",

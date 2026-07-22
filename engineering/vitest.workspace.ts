@@ -5,4 +5,5 @@ export default defineWorkspace([
   'packages/contracts',
   'packages/persistence',
   'packages/artifact-store',
+  'packages/git-adapter',
 ]);
