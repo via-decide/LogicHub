@@ -8,3 +8,8 @@ export * from './module/index.js';
 export * from './revision/index.js';
 export * from './change-intent/index.js';
 export * from './engineering-pull-request/index.js';
+export * from './operating-profile/index.js';
+export * from './material-profile/index.js';
+export * from './mechanical-manifest/index.js';
+export * from './operation/index.js';
+export * from './cross-domain-edge/index.js';

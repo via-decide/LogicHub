@@ -9,6 +9,7 @@ export {
   ValidationResultIdSchema, type ValidationResultId,
   ModuleIdSchema, type ModuleId,
   EngineeringPullRequestIdSchema, type EngineeringPullRequestId,
+  OperationIdSchema, type OperationId,
 } from './ids.js';
 
 export { ISODateTimeSchema, type ISODateTime } from './timestamps.js';

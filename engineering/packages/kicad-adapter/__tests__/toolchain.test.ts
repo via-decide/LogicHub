@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ToolExecutor } from '../src/kicad-executor.js';
 import {
   collectToolMetadata, detectCapabilities, assertSupportedVersion,
-  PINNED_KICAD_MAJOR,
+  PINNED_KICAD_MAJOR, SUPPORTED_KICAD_VERSIONS,
 } from '../src/toolchain.js';
 
 describe('collectToolMetadata', () => {
@@ -35,8 +35,10 @@ describe('collectToolMetadata', () => {
     }
   });
 
-  it('reports pinned major version', async () => {
-    expect(PINNED_KICAD_MAJOR).toBe(7);
+  it('reports supported versions include 7 and 8', async () => {
+    expect(SUPPORTED_KICAD_VERSIONS).toContain(7);
+    expect(SUPPORTED_KICAD_VERSIONS).toContain(8);
+    expect(PINNED_KICAD_MAJOR).toBe(8);
   });
 });
 
@@ -52,15 +54,15 @@ describe('assertSupportedVersion', () => {
     })).toThrow(/not available/i);
   });
 
-  it('throws for wrong major version', () => {
+  it('throws for unsupported major version', () => {
     expect(() => assertSupportedVersion({
       tool: 'kicad-cli',
       available: true,
-      versionString: '8.0.0',
-      majorVersion: 8,
-      pinnedMajorVersion: 7,
+      versionString: '6.0.0',
+      majorVersion: 6,
+      pinnedMajorVersion: PINNED_KICAD_MAJOR,
       supported: false,
-    })).toThrow(/not the pinned version/i);
+    })).toThrow(/not in the supported range/i);
   });
 
   it('does not throw for correct version', () => {

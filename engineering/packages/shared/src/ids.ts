@@ -29,3 +29,6 @@ export type ModuleId = z.infer<typeof ModuleIdSchema>;
 
 export const EngineeringPullRequestIdSchema = z.string().min(1);
 export type EngineeringPullRequestId = z.infer<typeof EngineeringPullRequestIdSchema>;
+
+export const OperationIdSchema = z.string().min(1);
+export type OperationId = z.infer<typeof OperationIdSchema>;

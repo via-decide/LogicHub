@@ -21,5 +21,5 @@ export {
 } from './extractors/engineering-objects.js';
 
 export { ToolExecutor, type ToolExecutorOptions, type ToolCommandAudit, type ToolCommandResult } from './kicad-executor.js';
-export { collectToolMetadata, detectCapabilities, assertSupportedVersion, PINNED_KICAD_MAJOR, type ToolchainCapabilities } from './toolchain.js';
+export { collectToolMetadata, detectCapabilities, assertSupportedVersion, PINNED_KICAD_MAJOR, SUPPORTED_KICAD_VERSIONS, type ToolchainCapabilities } from './toolchain.js';
 export { KicadAdapter, type KicadAdapterOptions } from './operations.js';
