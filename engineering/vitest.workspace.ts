@@ -5,4 +5,7 @@ export default defineWorkspace([
   'packages/contracts',
   'packages/persistence',
   'packages/artifact-store',
+  'packages/git-adapter',
+  'packages/kicad-adapter',
+  'packages/repository-engine',
 ]);

@@ -1,0 +1,36 @@
+{
+  "name": "@logichub-engineering/repository-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "fingerprint": "./dist/cli/fingerprint-cli.js",
+    "graphmap": "./dist/cli/graphmap-cli.js",
+    "semdiff": "./dist/cli/semdiff-cli.js"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "lint": "tsc --build",
+    "fingerprint": "node --enable-source-maps dist/cli/fingerprint-cli.js",
+    "graphmap": "node --enable-source-maps dist/cli/graphmap-cli.js",
+    "semdiff": "node --enable-source-maps dist/cli/semdiff-cli.js"
+  },
+  "dependencies": {
+    "@logichub-engineering/shared": "workspace:*",
+    "@logichub-engineering/contracts": "workspace:*",
+    "@logichub-engineering/git-adapter": "workspace:*",
+    "@logichub-engineering/kicad-adapter": "workspace:*",
+    "canonicalize": "~2.0.0"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,22 @@
+{
+  "profileId": "logichub-v0.1.0",
+  "canonicalizationProfile": "rfc8785-jcs",
+  "descriptorHashAlgorithm": "sha-256",
+  "kicadParserVersion": "kicad-sexpr-v7-logichub-0.1.0",
+  "softwareParserRuntime": "regex-v0.1.0",
+  "softwareParserVersion": "0.1.0",
+  "grammars": {
+    "typescript": "regex-0.1.0",
+    "javascript": "regex-0.1.0",
+    "python": "regex-0.1.0",
+    "c": "regex-0.1.0",
+    "cpp": "regex-0.1.0",
+    "arduino": "regex-0.1.0"
+  },
+  "resolverRules": "node-esm-relative-v1",
+  "signatureNormalization": "logichub-sig-v1",
+  "pathNormalization": "posix-forward-slash",
+  "unicodeNormalization": "NFC",
+  "jcsImplementation": "canonicalize",
+  "jcsVersion": "2.0.0"
+}
