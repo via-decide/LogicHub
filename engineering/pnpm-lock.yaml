@@ -59,6 +59,22 @@ importers:
         specifier: workspace:*
         version: link:../persistence
 
+  packages/kicad-adapter:
+    dependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@logichub-engineering/artifact-store':
+        specifier: workspace:*
+        version: link:../artifact-store
+      '@logichub-engineering/persistence':
+        specifier: workspace:*
+        version: link:../persistence
+
   packages/persistence:
     dependencies:
       '@logichub-engineering/contracts':

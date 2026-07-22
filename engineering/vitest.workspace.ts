@@ -6,4 +6,5 @@ export default defineWorkspace([
   'packages/persistence',
   'packages/artifact-store',
   'packages/git-adapter',
+  'packages/kicad-adapter',
 ]);
