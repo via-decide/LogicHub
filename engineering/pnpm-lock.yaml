@@ -94,6 +94,24 @@ importers:
         specifier: ~7.6.0
         version: 7.6.13
 
+  packages/repository-engine:
+    dependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/git-adapter':
+        specifier: workspace:*
+        version: link:../git-adapter
+      '@logichub-engineering/kicad-adapter':
+        specifier: workspace:*
+        version: link:../kicad-adapter
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      canonicalize:
+        specifier: ~2.0.0
+        version: 2.0.0
+
   packages/shared:
     dependencies:
       zod:
@@ -632,6 +650,9 @@ packages:
   cac@6.7.14:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
     engines: {node: '>=8'}
+
+  canonicalize@2.0.0:
+    resolution: {integrity: sha512-ulDEYPv7asdKvqahuAY35c1selLdzDwHqugK92hfkzvlDCwXRRelDkR+Er33md/PtnpqHemgkuDPanZ4fiYZ8w==}
 
   chai@5.3.3:
     resolution: {integrity: sha512-4zNhdJD/iOjSH0A05ea+Ke6MU5mmpQcbQsSOkgdaUMJ9zTlDTD/GYlwohmIE2u0gaxHYiVHEn1Fw9mZ/ktJWgw==}
@@ -1322,6 +1343,8 @@ snapshots:
       ieee754: 1.2.1
 
   cac@6.7.14: {}
+
+  canonicalize@2.0.0: {}
 
   chai@5.3.3:
     dependencies:
