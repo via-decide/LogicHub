@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "0.1.0",
+  "kernelVersion": "0.1.0",
+  "productId": "sovereign-educational-console",
+  "productRevision": "v0.1",
+  "generatedAt": "2026-07-22T00:00:00Z",
+  "totalCases": 6,
+  "classifiableCases": 0,
+  "documentedPhysicalOutcomes": 0,
+  "classifications": {
+    "agrees_with_documented_outcome": 0,
+    "detects_documented_failure": 0,
+    "misses_documented_failure": 0,
+    "false_warning": 0,
+    "insufficient_evidence": 4,
+    "not_applicable": 2
+  },
+  "falsePassCount": 0,
+  "falsePassNote": "Trivially zero — no documented physical outcomes exist to compare against. This is not a validation of kernel accuracy; it is an absence of testable evidence.",
+  "perRule": {
+    "SEC-POWER-THERMAL-001": {
+      "casesAttempted": 3,
+      "classifiable": 0,
+      "classifications": { "insufficient_evidence": 2, "not_applicable": 1 }
+    },
+    "SEC-OPTICAL-CLASSIFICATION-001": {
+      "casesAttempted": 0,
+      "classifiable": 0,
+      "classifications": {}
+    },
+    "SEC-INTERFACE-INTEGRITY-001": {
+      "casesAttempted": 2,
+      "classifiable": 0,
+      "classifications": { "insufficient_evidence": 1, "not_applicable": 1 }
+    },
+    "SEC-MECHANICAL-RUGGEDNESS-001": {
+      "casesAttempted": 1,
+      "classifiable": 0,
+      "classifications": { "insufficient_evidence": 1 }
+    },
+    "SEC-MANUFACTURING-ECONOMICS-001": {
+      "casesAttempted": 0,
+      "classifiable": 0,
+      "classifications": {}
+    }
+  },
+  "inputCompleteness": {
+    "mostMissingFields": [
+      "measured battery discharge curve",
+      "calibrated optical sensor responses",
+      "dimensional measurements with tolerances",
+      "thermal resistance measurements (junction-to-ambient)",
+      "cost actuals with labor, yield, and testing hours"
+    ],
+    "evidenceGapNote": "Every identified source is either a design record without execution or a narrative essay without instrument data."
+  },
+  "statisticalGeneralizationPossible": false,
+  "unknownRate": null,
+  "sensitivityRate": null,
+  "specificityRate": null,
+  "agreementRate": null
+}

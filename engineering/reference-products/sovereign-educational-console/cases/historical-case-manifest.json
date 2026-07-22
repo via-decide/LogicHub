@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "0.1.0",
+  "manifestId": "SEC-HISTORICAL-V0-001",
+  "generatedAt": "2026-07-22T00:00:00Z",
+  "productId": "sovereign-educational-console",
+  "productRevision": "v0.1",
+  "totalCasesAttempted": 6,
+  "totalCasesWithDocumentedPhysicalOutcome": 0,
+  "totalCasesClassifiable": 0,
+  "evidenceAuditNote": "Audit of LogicHub, electronics, daxini-bca-learning, and nex repositories found ZERO documented physical outcomes. All available source material consists of design records without executed test results, narrative journal essays without instrument data, or explicitly synthetic fixtures. No evidence was fabricated to meet the 10-case target.",
+  "cases": [
+    {
+      "caseId": "HIST-001-W25N01JW-POWER-DESIGN",
+      "sourceRepo": "via-decide/electronics",
+      "sourcePath": "hardware/platforms/w25n01jw_lab/",
+      "sourceRevision": "not-available (repo not cloned in this session)",
+      "evidenceClass": "design_record_no_outcome",
+      "description": "W25N01JW lab platform design records — power tree, electrical limits, pin allocation, BOM. No physical prototype was built; no measurements exist.",
+      "applicableRules": ["SEC-POWER-THERMAL-001", "SEC-INTERFACE-INTEGRITY-001"],
+      "classification": "insufficient_evidence",
+      "notes": "Design-only record. Evidence dirs in electronics/ are empty placeholders per exploration audit."
+    },
+    {
+      "caseId": "HIST-002-ESP32-MASTER-VALIDATION",
+      "sourceRepo": "via-decide/electronics",
+      "sourcePath": "reports/esp32_master_validation.md",
+      "sourceRevision": "not-available (repo not cloned in this session)",
+      "evidenceClass": "design_record_no_outcome",
+      "description": "ESP32 master validation report. Document header states 'Hardware execution remains pending.' No test results, no measurements.",
+      "applicableRules": ["SEC-POWER-THERMAL-001", "SEC-INTERFACE-INTEGRITY-001"],
+      "classification": "not_applicable",
+      "notes": "Execution pending at time of audit. Cannot replay absent data."
+    },
+    {
+      "caseId": "HIST-003-DAXINI-ENERGY-AUDITING",
+      "sourceRepo": "via-decide/daxini-bca-learning",
+      "sourcePath": "sovereign-stack-diaries-42-energy-auditing/",
+      "sourceRevision": "not-available (repo not cloned in this session)",
+      "evidenceClass": "narrative_claim",
+      "description": "Daxini Journal entry claiming 10 W average power and 500 Wh battery system. No instrument log, no measurement methodology, no timestamped data.",
+      "applicableRules": ["SEC-POWER-THERMAL-001"],
+      "classification": "insufficient_evidence",
+      "notes": "Narrative essay format. Claimed figures cannot be independently verified. Per kernel rules: narrative claims never produce agreement/detection classifications."
+    },
+    {
+      "caseId": "HIST-004-DAXINI-STEM-KIT-FIT",
+      "sourceRepo": "via-decide/daxini-bca-learning",
+      "sourcePath": "various STEM-kit diary entries/",
+      "sourceRevision": "not-available (repo not cloned in this session)",
+      "evidenceClass": "narrative_claim",
+      "description": "Daxini diary entries describing 3D-print fit issues, '10th failed attempt' on enclosure. No dimensional measurements, no caliper data, no photos with scale references.",
+      "applicableRules": ["SEC-MECHANICAL-RUGGEDNESS-001"],
+      "classification": "insufficient_evidence",
+      "notes": "Narrative failure report without quantitative data. Cannot extract dimensional inputs for rule replay."
+    },
+    {
+      "caseId": "HIST-005-SMART-PLANT-POT-SYNTHETIC",
+      "sourceRepo": "via-decide/electronics",
+      "sourcePath": "assets/evidence/examples/synthetic_power.yaml",
+      "sourceRevision": "not-available (repo not cloned in this session)",
+      "evidenceClass": "synthetic",
+      "description": "Smart-plant-pot labeled synthetic fixture. Included ONLY to demonstrate the synthetic-exclusion classification path.",
+      "applicableRules": ["SEC-POWER-THERMAL-001"],
+      "classification": "not_applicable",
+      "notes": "Explicitly labeled synthetic. Per kernel rules: synthetic material is classified not_applicable and excluded from all historical metrics."
+    },
+    {
+      "caseId": "HIST-006-DAXINI-SOIL-SENSOR-RS485",
+      "sourceRepo": "via-decide/daxini-bca-learning",
+      "sourcePath": "various RS-485/soil-sensor diary entries/",
+      "sourceRevision": "not-available (repo not cloned in this session)",
+      "evidenceClass": "narrative_claim",
+      "description": "Daxini journal entries on RS-485 soil sensor hardware. Narrative discussion of bus termination and wiring. No oscilloscope traces, no signal integrity measurements.",
+      "applicableRules": ["SEC-INTERFACE-INTEGRITY-001"],
+      "classification": "insufficient_evidence",
+      "notes": "Interface discussion without quantitative evidence. Cannot replay."
+    }
+  ],
+  "summary": {
+    "documented_physical_outcome": 0,
+    "design_record_no_outcome": 2,
+    "narrative_claim": 3,
+    "synthetic": 1,
+    "agrees_with_documented_outcome": 0,
+    "detects_documented_failure": 0,
+    "misses_documented_failure": 0,
+    "false_warning": 0,
+    "insufficient_evidence": 4,
+    "not_applicable": 2,
+    "false_pass_count": 0,
+    "statisticalGeneralizationPossible": false,
+    "statisticalNote": "With 0 documented physical outcomes and fewer than 10 total cases, no statistical generalization about kernel accuracy is possible. This is a hard factual constraint, not a modeling choice."
+  }
+}
