@@ -118,6 +118,24 @@ importers:
         specifier: ~3.24.0
         version: 3.24.4
 
+  packages/validation-engine:
+    dependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      canonicalize:
+        specifier: ~2.0.0
+        version: 2.0.0
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+      zod-to-json-schema:
+        specifier: ~3.24.0
+        version: 3.24.6(zod@3.24.4)
+
 packages:
 
   '@esbuild/aix-ppc64@0.27.7':
