@@ -2,8 +2,10 @@ import { createLogicHubError } from '@logichub-engineering/shared';
 import type { ToolExecutor } from './kicad-executor.js';
 import type { ToolMetadata } from './types.js';
 
-/** The one KiCad major version this adapter is pinned to for v0.1. */
-export const PINNED_KICAD_MAJOR = 7;
+/** KiCad major versions this adapter supports. */
+export const SUPPORTED_KICAD_VERSIONS = [7, 8] as const;
+/** @deprecated Use SUPPORTED_KICAD_VERSIONS — kept for backward-compatible ToolMetadata fields. */
+export const PINNED_KICAD_MAJOR = 8;
 
 export interface ToolchainCapabilities {
   metadata: ToolMetadata;
@@ -38,7 +40,7 @@ export async function collectToolMetadata(executor: ToolExecutor): Promise<ToolM
     versionString,
     majorVersion,
     pinnedMajorVersion: PINNED_KICAD_MAJOR,
-    supported: majorVersion === PINNED_KICAD_MAJOR,
+    supported: majorVersion !== null && (SUPPORTED_KICAD_VERSIONS as readonly number[]).includes(majorVersion),
   };
 }
 
@@ -65,11 +67,11 @@ export function assertSupportedVersion(metadata: ToolMetadata): void {
   if (!metadata.available) {
     throw createLogicHubError('LH_KICAD_VERSION_UNSUPPORTED',
       'kicad-cli is not available in this environment',
-      { diagnostics: { pinnedMajorVersion: PINNED_KICAD_MAJOR } });
+      { diagnostics: { supportedVersions: [...SUPPORTED_KICAD_VERSIONS] } });
   }
-  if (metadata.majorVersion !== PINNED_KICAD_MAJOR) {
+  if (!metadata.supported) {
     throw createLogicHubError('LH_KICAD_VERSION_UNSUPPORTED',
-      `KiCad major version ${metadata.majorVersion} is not the pinned version ${PINNED_KICAD_MAJOR}`,
-      { diagnostics: { detected: metadata.versionString, pinnedMajorVersion: PINNED_KICAD_MAJOR } });
+      `KiCad major version ${metadata.majorVersion} is not in the supported range [${SUPPORTED_KICAD_VERSIONS.join(', ')}]`,
+      { diagnostics: { detected: metadata.versionString, supportedVersions: [...SUPPORTED_KICAD_VERSIONS] } });
   }
 }

@@ -6,9 +6,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine",
+    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine",
     "lint": "pnpm -r lint",
-    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine",
+    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "pnpm -r test:integration",

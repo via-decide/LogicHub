@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "0.1.0",
+  "productId": "sovereign-educational-console",
+  "productName": "Sovereign Educational Console",
+  "productRevision": "v0.1",
+  "frozenAt": "2026-07-22T00:00:00+05:30",
+  "intendedAgeGroups": ["6-8", "9-12"],
+  "intendedUseModel": "supervised-classroom-use-only",
+  "intendedOperatingEnvironment": {
+    "location": "indoor classroom",
+    "ambientTemperatureMin": { "value": 15, "unit": "degC", "provenance": "task-spec", "evidenceGrade": "estimated" },
+    "ambientTemperatureMax": { "value": 40, "unit": "degC", "provenance": "estimate:engineering (Indian classroom, non-AC)", "evidenceGrade": "estimated" },
+    "supervision": "adult supervision assumed at all times; not a standalone toy"
+  },
+  "controller": {
+    "frozenSelection": "ESP32-C3-MINI-1",
+    "die": "ESP32-C3FN4",
+    "flash": { "value": 4, "unit": "MB", "provenance": "estimate:engineering (module family knowledge; datasheet not in corpus)", "evidenceGrade": "estimated" },
+    "rejectedAlternative": "RP2040",
+    "decisionRecord": "decisions/DEC-001-controller-selection.json",
+    "firmware": "local-only; Wi-Fi/BLE disabled in v0.1 profile",
+    "usb": "native USB-Serial-JTAG via USB-C",
+    "adcChannelsUsed": 4,
+    "adcResolutionBits": { "value": 12, "unit": "bit", "provenance": "estimate:engineering (ESP32-C3 family; datasheet not in corpus)", "evidenceGrade": "estimated" },
+    "adcMaxInputVoltage": { "value": 2.5, "unit": "V", "provenance": "estimate:engineering (11 dB attenuation envelope; datasheet not in corpus)", "evidenceGrade": "estimated" }
+  },
+  "power": {
+    "battery": {
+      "chemistry": "lithium-polymer, protected (integrated protection PCB)",
+      "nominalCapacity": { "value": 1200, "unit": "mAh", "provenance": "task-spec", "evidenceGrade": "estimated" },
+      "nominalVoltage": { "value": 3.7, "unit": "V", "provenance": "estimate:engineering (Li-po nominal)", "evidenceGrade": "estimated" },
+      "deratingFactor": { "value": 0.8, "unit": "fraction", "provenance": "estimate:engineering (aging + LDO discharge floor)", "evidenceGrade": "estimated" },
+      "dischargeFloor": { "value": 3.5, "unit": "V", "provenance": "estimate:engineering (LDO dropout margin)", "evidenceGrade": "estimated" }
+    },
+    "charger": {
+      "topology": "TP4056-class linear cell charger",
+      "conditionsRecord": "decisions/DEC-002-charger-tp4056-conditions.json",
+      "programCurrent": { "value": 500, "unit": "mA", "provenance": "estimate:engineering (Rprog selection; datasheet not in corpus)", "evidenceGrade": "estimated" },
+      "loadSharing": "required; P-MOSFET power-path circuit is an explicit implementation obligation, not assumed from the module",
+      "usbCcPulldowns": "required 5.1 kOhm on both CC pins; not assumed from the module"
+    },
+    "rails": [
+      { "name": "3V3", "kind": "regulated", "regulatorTopology": "linear-ldo", "regulatorPart": "AP2112K-3.3-class", "dropout": { "value": 600, "unit": "mV", "provenance": "estimate:engineering (datasheet not in corpus)", "evidenceGrade": "estimated" } },
+      { "name": "VBAT_SW", "kind": "unregulated-switched", "source": "battery via power switch and PPTC" }
+    ],
+    "protection": [
+      { "device": "PPTC", "location": "3V3 daughterboard branch", "holdCurrent": { "value": 500, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }, "tripCurrent": { "value": 1000, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } },
+      { "device": "PPTC", "location": "VBAT_SW main branch", "holdCurrent": { "value": 1100, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }, "tripCurrent": { "value": 2200, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } }
+    ],
+    "ledPolicy": {
+      "backlightMaxTotalCurrent": { "value": 60, "unit": "mA", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+      "tokenWellPeakCurrentPerBay": { "value": 24, "unit": "mA", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+      "tokenWellStrobeDutyMax": { "value": 0.05, "unit": "fraction", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+      "singleBayStrobePolicy": "only one bay illuminated during a classification strobe"
+    },
+    "runtimeTarget": { "value": 4, "unit": "h", "provenance": "task-spec", "evidenceGrade": "estimated" },
+    "exposedConductorPolicy": "no user-accessible unsafe power conductors; external contacts limited to USB-C receptacle and recessed PPTC-protected daughterboard connector"
+  },
+  "opticalTokenSystem": {
+    "bayCount": 4,
+    "illumination": "one WS2812B-class addressable RGB emitter per bay on a single shared data line (GPIO10)",
+    "emitterDecisionRecord": "decisions/DEC-003-optical-emitter-architecture.json",
+    "detector": "one LDR per bay, resistive divider into ADC1",
+    "ldrDividerResistor": { "value": 10, "unit": "kOhm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+    "wellFinish": "matte black internal reflectance wells",
+    "wellDepth": { "value": 12, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "tokenFormat": {
+      "body": "passive 3D-printed token, tactile + textual top markings",
+      "machineReadableRegion": "recessed color region facing well floor",
+      "diameter": { "value": 30, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+      "height": { "value": 12, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" }
+    },
+    "classifier": "deterministic nearest-centroid over dark-subtracted normalized RGB strobe responses; no machine learning",
+    "calibration": "per-device ambient + dark calibration routine required",
+    "explicitStates": ["unknown", "ambiguous"],
+    "strobeSettlingTime": { "value": 5, "unit": "ms", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+  },
+  "humanInterface": {
+    "writingSlate": {
+      "type": "self-contained 8.5-inch monochrome pressure-LCD writing tablet module",
+      "integration": "mechanical docking only; no electrical connection in v0.1",
+      "replaceable": true,
+      "widthNominal": { "value": 226, "unit": "mm", "provenance": "estimate:engineering (common 8.5-inch tablet module; datasheet not in corpus)", "evidenceGrade": "estimated" },
+      "heightNominal": { "value": 146, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "thicknessNominal": { "value": 5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "dimensionalTolerance": { "value": 0.5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+    },
+    "templateArea": "backlit translucent PETG diffuser; teacher-selected paper or plastic lesson sheets",
+    "audio": "piezo chime via PWM",
+    "display": "no mandatory graphical computer display"
+  },
+  "mechanical": {
+    "printEnvelope": {
+      "printer": "Bambu Lab A1",
+      "x": { "value": 256, "unit": "mm", "provenance": "estimate:engineering (vendor spec not in corpus)", "evidenceGrade": "estimated" },
+      "y": { "value": 256, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "z": { "value": 256, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+    },
+    "materials": {
+      "structural": "matte black PETG (PLA only with thermal-creep warning)",
+      "diffuser": "translucent white PETG",
+      "bumpers": "TPU 95A (4 corner bumpers, mechanically retained)"
+    },
+    "largestPartDimensions": {
+      "x": { "value": 250, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+      "y": { "value": 190, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+      "z": { "value": 30, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" }
+    },
+    "wallThickness": { "value": 2.4, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "floorThickness": { "value": 2.0, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "diffuserThickness": { "value": 1.2, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "fasteners": "M3 thread-forming screws into printed bosses (boss OD 7 mm, pilot 2.5 mm)",
+    "servicePanel": "replaceable bottom panel, 6x M3",
+    "wiring": "snap-fit internal wiring channels, groove width 2.4 mm, insulated conductors only",
+    "carryStrap": "two printed strap anchors; load rating requires_validation",
+    "bareConductorPolicy": "bare copper prohibited outside sealed electronics bay"
+  },
+  "daughterboardInterface": {
+    "connector": "2x6 2.54 mm shrouded keyed header, recessed pocket, asymmetric key post",
+    "pins": { "power": ["VBAT_SW", "3V3_PPTC"], "ground": ["GND", "GND", "GND"], "logicReference": "3V3", "communication": ["I2C_SDA(GPIO8)", "I2C_SCL(GPIO9)", "INT(GPIO7)"], "reserved": ["RSV1", "RSV2", "RSV3"] },
+    "maxCurrent3V3": { "value": 100, "unit": "mA", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "maxCurrentVbat": { "value": 300, "unit": "mA", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "reverseInsertionProtection": "mechanical keying (shroud + asymmetric key post)",
+    "hotPlugSupported": false,
+    "hotPlugDecisionRecord": "decisions/DEC-004-no-hot-plug-claim.json"
+  },
+  "targets": {
+    "mass": { "value": 900, "unit": "g", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "unitCostExFactory": { "value": 850, "unit": "INR", "provenance": "task-spec", "evidenceGrade": "estimated" },
+    "unitCostUpperBound": { "value": 1100, "unit": "INR", "provenance": "task-spec", "evidenceGrade": "estimated" },
+    "assemblyTime": { "value": 45, "unit": "min", "provenance": "task-freeze", "evidenceGrade": "estimated" },
+    "printVolumePerUnit": { "value": 300, "unit": "g", "provenance": "estimate:engineering (filament mass, all parts)", "evidenceGrade": "estimated" }
+  },
+  "knownExclusions": [
+    "no cloud services or companion-app requirement",
+    "no machine-learning classifier",
+    "no toy-safety certification claim (IS 9873 / EN 71 / IEC 62115)",
+    "no classroom-safety or child-safety claim without physical evidence",
+    "no drop-rating claim before controlled drop testing",
+    "no hot-plug support except USB-C",
+    "no Wi-Fi/BLE features in v0.1 firmware profile"
+  ],
+  "safetyAssumptions": [
+    "adult supervision at all times",
+    "battery is a protected cell; protection PCB behavior not yet bench-verified",
+    "charging only with the console on a desk, not inside a bag",
+    "tokens are large enough (30 mm) to reduce swallowing risk for the intended age group; NOT verified against small-parts cylinder testing",
+    "all conductors insulated and enclosed; service panel requires a tool to open"
+  ],
+  "unresolvedDecisions": [
+    "final TP4056-class charger implementation satisfying DEC-002 conditions",
+    "heat-set inserts vs thread-forming screws for high-cycle bosses",
+    "strap-anchor load rating (blocked on physical load test)",
+    "exact LDR part and divider value after optical bench calibration",
+    "final battery vendor and protected-cell certification evidence"
+  ]
+}

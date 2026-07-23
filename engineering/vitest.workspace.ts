@@ -8,4 +8,5 @@ export default defineWorkspace([
   'packages/git-adapter',
   'packages/kicad-adapter',
   'packages/repository-engine',
+  'packages/validation-engine',
 ]);

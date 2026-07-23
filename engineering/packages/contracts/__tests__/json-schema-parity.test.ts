@@ -13,6 +13,11 @@ import {
   RevisionSchema, RevisionJsonSchema,
   ChangeIntentSchema, ChangeIntentJsonSchema,
   EngineeringPullRequestSchema, EngineeringPullRequestJsonSchema,
+  OperatingProfileSchema, OperatingProfileJsonSchema,
+  MaterialProfileSchema, MaterialProfileJsonSchema,
+  MechanicalManifestSchema, MechanicalManifestJsonSchema,
+  OperationSchema, OperationJsonSchema,
+  CrossDomainEdgeSchema, CrossDomainEdgeJsonSchema,
 } from '../src/index.js';
 
 const ajv = new Ajv({ allErrors: true, strict: false });
@@ -82,6 +87,36 @@ const fixtures: Record<string, { zodSchema: any; jsonSchema: any; valid: any; in
     jsonSchema: EngineeringPullRequestJsonSchema,
     valid: { id: 'pr1', projectId: 'p1', number: 1, title: 'PR', baseBranch: 'main', baseRevisionId: 'r1', headBranch: 'feat', headRevisionId: 'r2', author: 'a', approvals: [], changeRequests: [], createdAt: ts },
     invalidField: { key: 'status', value: 'invalid' },
+  },
+  OperatingProfile: {
+    zodSchema: OperatingProfileSchema,
+    jsonSchema: OperatingProfileJsonSchema,
+    valid: { ambientTemperature: { nominal: 25, unit: 'degC' }, maxContinuousRuntime: { value: 8, unit: 'h' } },
+    invalidField: { key: 'ventilation', value: 'open_air' },
+  },
+  MaterialProfile: {
+    zodSchema: MaterialProfileSchema,
+    jsonSchema: MaterialProfileJsonSchema,
+    valid: { name: 'PETG', materialClass: 'thermoplastic', thermal: { maxServiceTemp: { value: 73, unit: 'degC' } } },
+    invalidField: { key: 'materialClass', value: 'wood' },
+  },
+  MechanicalManifest: {
+    zodSchema: MechanicalManifestSchema,
+    jsonSchema: MechanicalManifestJsonSchema,
+    valid: { enclosure: { materialName: 'PETG', internalVolume: { value: 120, unit: 'cm3' }, wallThickness: { value: 2, unit: 'mm' } } },
+    invalidField: { key: 'connectors', value: 'not-an-array' },
+  },
+  Operation: {
+    zodSchema: OperationSchema,
+    jsonSchema: OperationJsonSchema,
+    valid: { id: 'op1', type: 'import_revision', idempotencyKey: 'k1', correlationId: 'c1', projectId: 'p1', createdAt: ts },
+    invalidField: { key: 'type', value: 'deploy' },
+  },
+  CrossDomainEdge: {
+    zodSchema: CrossDomainEdgeSchema,
+    jsonSchema: CrossDomainEdgeJsonSchema,
+    valid: { revisionId: 'r1', edgeType: 'dissipates_into', sourceDomain: 'electrical', targetDomain: 'thermal', sourceRef: 'U1', targetRef: 'enclosure' },
+    invalidField: { key: 'edgeType', value: 'depends_on' },
   },
 };
 
