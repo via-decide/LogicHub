@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Connect a repository — LogicHub.app</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}.font-mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}</style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-200 antialiased flex flex-col">
+<header class="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+    <a href="/" class="font-mono text-sm font-bold tracking-tight text-zinc-100">LOGICHUB<span class="text-amber-500">.APP</span></a>
+    <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-600">UI State: Form Validation</span>
+  </div>
+</header>
+<main class="flex-1 flex items-center justify-center px-4 py-16">
+  <form id="connectForm" novalidate class="w-full max-w-sm rounded-lg border border-zinc-800 bg-[#0d0d0f] p-6">
+    <h1 class="text-lg font-semibold text-zinc-50 mb-1">Connect a repository</h1>
+    <p class="text-xs text-zinc-500 mb-6">Points to a local Git path — nothing is cloned to a server.</p>
+
+    <label class="block mb-4">
+      <span class="font-mono text-xs text-zinc-400 mb-1.5 block">Local path</span>
+      <input id="repoPath" type="text" placeholder="/Users/you/projects/my-repo"
+        class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-200 outline-none focus:border-amber-500 transition-colors" />
+      <span id="repoPathError" class="hidden mt-1.5 flex items-center gap-1.5 font-mono text-[11px] text-red-400">
+        <i data-lucide="alert-circle" class="h-3 w-3"></i> Path must be absolute and point to a Git repository.
+      </span>
+    </label>
+
+    <label class="block mb-4">
+      <span class="font-mono text-xs text-zinc-400 mb-1.5 block">Base branch</span>
+      <input id="branch" type="text" placeholder="main"
+        class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-200 outline-none focus:border-amber-500 transition-colors" />
+      <span id="branchError" class="hidden mt-1.5 flex items-center gap-1.5 font-mono text-[11px] text-red-400">
+        <i data-lucide="alert-circle" class="h-3 w-3"></i> Branch name can't contain spaces or start with "-".
+      </span>
+      <span id="branchOk" class="hidden mt-1.5 flex items-center gap-1.5 font-mono text-[11px] text-emerald-400">
+        <i data-lucide="check" class="h-3 w-3"></i> Valid branch name.
+      </span>
+    </label>
+
+    <label class="block mb-6">
+      <span class="font-mono text-xs text-zinc-400 mb-1.5 block">Required approvals</span>
+      <input id="approvals" type="number" min="1" max="10" value="1"
+        class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-200 outline-none focus:border-amber-500 transition-colors" />
+      <span id="approvalsError" class="hidden mt-1.5 flex items-center gap-1.5 font-mono text-[11px] text-red-400">
+        <i data-lucide="alert-circle" class="h-3 w-3"></i> Must be between 1 and 10.
+      </span>
+    </label>
+
+    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded bg-amber-500 px-5 py-3 font-mono text-sm font-semibold text-zinc-950 hover:bg-amber-400 transition-colors">
+      <i data-lucide="plug" class="h-4 w-4"></i> Connect repository
+    </button>
+  </form>
+</main>
+<footer class="border-t border-zinc-800/60 py-6 text-center font-mono text-[10px] text-zinc-600">
+  &copy; 2026 Logichub Sovereign Tooling.
+</footer>
+<script>
+  lucide.createIcons();
+
+  const form = document.getElementById('connectForm');
+  const pathInput = document.getElementById('repoPath');
+  const branchInput = document.getElementById('branch');
+  const approvalsInput = document.getElementById('approvals');
+
+  const REF_ALLOWED = /^[A-Za-z0-9._/-]+$/;
+
+  function validateBranch() {
+    const v = branchInput.value.trim();
+    const err = document.getElementById('branchError');
+    const ok = document.getElementById('branchOk');
+    err.classList.add('hidden'); ok.classList.add('hidden');
+    branchInput.classList.remove('border-red-500', 'border-emerald-500');
+    if (!v) return null;
+    const valid = REF_ALLOWED.test(v) && !v.startsWith('-') && !v.includes('..');
+    if (valid) {
+      ok.classList.remove('hidden');
+      branchInput.classList.add('border-emerald-500');
+    } else {
+      err.classList.remove('hidden');
+      branchInput.classList.add('border-red-500');
+    }
+    return valid;
+  }
+
+  function validatePath() {
+    const v = pathInput.value.trim();
+    const err = document.getElementById('repoPathError');
+    err.classList.add('hidden');
+    pathInput.classList.remove('border-red-500');
+    if (!v) return null;
+    const valid = v.startsWith('/');
+    if (!valid) { err.classList.remove('hidden'); pathInput.classList.add('border-red-500'); }
+    return valid;
+  }
+
+  function validateApprovals() {
+    const v = Number(approvalsInput.value);
+    const err = document.getElementById('approvalsError');
+    err.classList.add('hidden');
+    approvalsInput.classList.remove('border-red-500');
+    const valid = v >= 1 && v <= 10;
+    if (!valid) { err.classList.remove('hidden'); approvalsInput.classList.add('border-red-500'); }
+    return valid;
+  }
+
+  branchInput.addEventListener('input', validateBranch);
+  pathInput.addEventListener('input', validatePath);
+  approvalsInput.addEventListener('input', validateApprovals);
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const p = validatePath(), b = validateBranch(), a = validateApprovals();
+    if (p && b !== false && a) {
+      window.location.href = 'success.html';
+    }
+  });
+</script>
+</body>
+</html>

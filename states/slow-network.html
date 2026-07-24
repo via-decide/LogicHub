@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Slow connection — LogicHub.app</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}.font-mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}</style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-200 antialiased flex flex-col">
+<header class="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+    <a href="/" class="font-mono text-sm font-bold tracking-tight text-zinc-100">LOGICHUB<span class="text-amber-500">.APP</span></a>
+    <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-600">UI State: Slow Network</span>
+  </div>
+</header>
+
+<!-- persistent degraded-network banner, sits above content rather than blocking it -->
+<div class="bg-amber-950/40 border-b border-amber-900/50 px-4 py-2">
+  <div class="mx-auto max-w-5xl flex items-center gap-2 font-mono text-xs text-amber-400">
+    <i data-lucide="signal-low" class="h-3.5 w-3.5"></i>
+    Slow connection detected — agent context may take longer than usual to load.
+  </div>
+</div>
+
+<main class="flex-1 px-4 py-16">
+  <div class="mx-auto max-w-2xl">
+    <div class="rounded-lg border border-zinc-800 bg-[#0d0d0f] p-6 font-mono text-[13px]">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-zinc-400">Pull request #42</span>
+        <span class="text-zinc-600 flex items-center gap-1.5"><i data-lucide="wifi" class="h-3.5 w-3.5 text-amber-500"></i> 180ms avg</span>
+      </div>
+      <!-- skeleton rows for content still resolving under degraded network -->
+      <div class="space-y-3">
+        <div class="h-3 w-3/4 rounded bg-zinc-800 animate-pulse"></div>
+        <div class="h-3 w-1/2 rounded bg-zinc-800 animate-pulse"></div>
+        <div class="h-3 w-5/6 rounded bg-zinc-800 animate-pulse"></div>
+      </div>
+    </div>
+    <p class="mt-4 text-center font-mono text-[11px] text-zinc-600">Diff and AST results are cached locally — only the reasoning agent depends on network speed.</p>
+  </div>
+</main>
+<footer class="border-t border-zinc-800/60 py-6 text-center font-mono text-[10px] text-zinc-600">
+  &copy; 2026 Logichub Sovereign Tooling.
+</footer>
+<script>lucide.createIcons();</script>
+</body>
+</html>

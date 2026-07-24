@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>You're offline — LogicHub.app</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}.font-mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}</style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-200 antialiased flex flex-col">
+<header class="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+    <a href="/" class="font-mono text-sm font-bold tracking-tight text-zinc-100">LOGICHUB<span class="text-amber-500">.APP</span></a>
+    <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-600">UI State: No Internet</span>
+  </div>
+</header>
+<main class="flex-1 flex items-center justify-center px-4 py-24">
+  <div class="max-w-md text-center">
+    <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900">
+      <i data-lucide="wifi-off" class="h-7 w-7 text-zinc-500"></i>
+    </div>
+    <h1 class="text-xl font-bold text-zinc-50 mb-2">No connection detected</h1>
+    <p class="text-sm text-zinc-400 mb-6 leading-relaxed">
+      Core review — diffing, AST parsing, constraint checks — keeps running with zero network dependency. Only checking for a bundle update needs a connection.
+    </p>
+    <div class="rounded-lg border border-emerald-900/50 bg-emerald-950/20 p-4 mb-8 text-left">
+      <div class="flex items-center gap-2 font-mono text-xs text-emerald-400 mb-1">
+        <i data-lucide="shield-check" class="h-3.5 w-3.5"></i> Deterministic review: unaffected
+      </div>
+      <p class="font-mono text-[11px] text-zinc-500">Local AST parser and constraint engine do not require internet access to run.</p>
+    </div>
+    <button class="inline-flex items-center justify-center gap-2 rounded border border-zinc-800 px-5 py-3 font-mono text-sm text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors w-full sm:w-auto">
+      <i data-lucide="refresh-cw" class="h-4 w-4"></i> Check connection again
+    </button>
+  </div>
+</main>
+<footer class="border-t border-zinc-800/60 py-6 text-center font-mono text-[10px] text-zinc-600">
+  &copy; 2026 Logichub Sovereign Tooling.
+</footer>
+<script>lucide.createIcons();</script>
+</body>
+</html>

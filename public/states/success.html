@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Review complete — LogicHub.app</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}.font-mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}</style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-200 antialiased flex flex-col">
+<header class="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+    <a href="/" class="font-mono text-sm font-bold tracking-tight text-zinc-100">LOGICHUB<span class="text-amber-500">.APP</span></a>
+    <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-600">UI State: Success</span>
+  </div>
+</header>
+<main class="flex-1 flex items-center justify-center px-4 py-24">
+  <div class="max-w-md text-center">
+    <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-xl border border-emerald-900/50 bg-emerald-950/20">
+      <i data-lucide="check-circle-2" class="h-7 w-7 text-emerald-400"></i>
+    </div>
+    <h1 class="text-xl font-bold text-zinc-50 mb-2">Review complete — receipt signed</h1>
+    <p class="text-sm text-zinc-400 mb-6 leading-relaxed">
+      All deterministic checks passed. The signed receipt below separates strict AST findings from probabilistic agent suggestions.
+    </p>
+    <div class="text-left rounded-lg border border-zinc-800 bg-[#0d0d0f] p-4 font-mono text-[12px] text-zinc-400 mb-8 space-y-1.5">
+      <div class="flex justify-between"><span class="text-zinc-600">Run:</span><span>LH-2026-07-24-0043</span></div>
+      <div class="flex justify-between"><span class="text-zinc-600">Files reviewed:</span><span>14</span></div>
+      <div class="flex justify-between"><span class="text-zinc-600">Blocking findings:</span><span class="text-emerald-400">0</span></div>
+      <div class="flex justify-between"><span class="text-zinc-600">Signature:</span><span class="text-amber-500">VALID [sha256: e5f6a7b…]</span></div>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <button class="inline-flex items-center justify-center gap-2 rounded bg-amber-500 px-5 py-3 font-mono text-sm font-semibold text-zinc-950 hover:bg-amber-400 transition-colors">
+        <i data-lucide="download" class="h-4 w-4"></i> Download receipt
+      </button>
+      <a href="/" class="inline-flex items-center justify-center gap-2 rounded border border-zinc-800 px-5 py-3 font-mono text-sm text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors">
+        Back to repositories
+      </a>
+    </div>
+  </div>
+</main>
+<footer class="border-t border-zinc-800/60 py-6 text-center font-mono text-[10px] text-zinc-600">
+  &copy; 2026 Logichub Sovereign Tooling.
+</footer>
+<script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UI States — LogicHub.app</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}.font-mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}</style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-200 antialiased">
+<header class="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+    <a href="/" class="font-mono text-sm font-bold tracking-tight text-zinc-100">LOGICHUB<span class="text-amber-500">.APP</span></a>
+    <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-600">Every possible user state</span>
+  </div>
+</header>
+<main class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <h1 class="text-2xl font-bold text-zinc-50 mb-2">UI states reference</h1>
+  <p class="text-sm text-zinc-400 mb-10">Ten states every screen in Logichub needs to handle explicitly, not as an afterthought.</p>
+  <div class="grid sm:grid-cols-2 gap-3" id="grid"></div>
+</main>
+<script>
+  lucide.createIcons();
+  const states = [
+    ['empty.html', 'inbox', 'Empty State', 'Nothing connected yet'],
+    ['loading.html', 'loader-2', 'Loading State', 'Live pipeline progress'],
+    ['error.html', 'alert-triangle', 'Error State', 'Pipeline failure, retryable'],
+    ['offline.html', 'wifi-off', 'No Internet', 'Local review keeps working'],
+    ['slow-network.html', 'signal-low', 'Slow Network', 'Degraded-connection banner'],
+    ['no-results.html', 'search-x', 'No Search Results', 'Empty query result set'],
+    ['permission-denied.html', 'lock', 'Permission Denied', 'Access-restricted repository'],
+    ['session-expired.html', 'clock-alert', 'Session Expired', 'Device-key re-verification'],
+    ['form-validation.html', 'list-checks', 'Form Validation', 'Live inline validation'],
+    ['success.html', 'check-circle-2', 'Success State', 'Signed receipt confirmation'],
+  ];
+  const grid = document.getElementById('grid');
+  for (const [href, icon, title, desc] of states) {
+    const a = document.createElement('a');
+    a.href = href;
+    a.className = 'flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 hover:border-amber-500/50 transition-colors';
+    a.innerHTML = `
+      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950">
+        <i data-lucide="${icon}" class="h-4 w-4 text-amber-500"></i>
+      </div>
+      <div>
+        <div class="text-sm font-semibold text-zinc-100">${title}</div>
+        <div class="font-mono text-[11px] text-zinc-500 mt-0.5">${desc}</div>
+      </div>`;
+    grid.appendChild(a);
+  }
+  lucide.createIcons();
+</script>
+</body>
+</html>
