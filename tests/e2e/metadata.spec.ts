@@ -1,0 +1,2 @@
+import { test, expect } from '@playwright/test';
+test('metadata', async ({ page }) => { await page.goto('/'); await expect(page.locator('meta[name="description"]')).toHaveAttribute('content','Review and route AI-assisted code through a local, deterministic execution and evidence boundary without exporting the repository.'); await expect(page.locator('meta[name="logichub-product"]')).toHaveAttribute('content','sovereign-execution-boundary'); });
