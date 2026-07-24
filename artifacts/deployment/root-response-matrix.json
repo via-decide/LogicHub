@@ -1,0 +1,206 @@
+[
+  {
+    "url": "https://logichub.app/",
+    "userAgent": "LogicHubVerifier/1.0",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/index.html",
+    "userAgent": "LogicHubVerifier/1.0",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/?cachebust=1784915274830",
+    "userAgent": "LogicHubVerifier/1.0",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/",
+    "userAgent": "Googlebot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/index.html",
+    "userAgent": "Googlebot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/?cachebust=1784915274830",
+    "userAgent": "Googlebot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/",
+    "userAgent": "Bingbot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/index.html",
+    "userAgent": "Bingbot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/?cachebust=1784915274830",
+    "userAgent": "Bingbot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/",
+    "userAgent": "Twitterbot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/index.html",
+    "userAgent": "Twitterbot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  },
+  {
+    "url": "https://logichub.app/?cachebust=1784915274830",
+    "userAgent": "Twitterbot",
+    "status": 0,
+    "title": "",
+    "hero": "",
+    "productMarker": "",
+    "buildId": "",
+    "bodySha256": "",
+    "cacheControl": "",
+    "etag": "",
+    "age": "",
+    "pass": false,
+    "errors": [
+      "fetch failed"
+    ]
+  }
+]

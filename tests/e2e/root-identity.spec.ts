@@ -1,0 +1,2 @@
+import { test, expect } from '@playwright/test';
+test('root identity', async ({ page }) => { await page.goto('/'); await expect(page).toHaveTitle('LogicHub.app — Sovereign Execution Boundary'); await expect(page.getByRole('heading', { name: 'Review and route AI code without exporting the repository.' })).toBeVisible(); await expect(page.locator('body')).toHaveAttribute('data-product','sovereign-execution-boundary'); });

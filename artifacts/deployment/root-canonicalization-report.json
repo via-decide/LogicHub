@@ -1,0 +1,1 @@
+{"status":"implemented","canonicalSource":"site/index.html","generatedOutputs":["index.html","public/index.html"],"builderRoute":"public/builder/index.html","rootServiceWorker":"neutralized legacy unregistering worker","buildCommand":"pnpm site:build","verifyCommand":"pnpm site:verify"}
