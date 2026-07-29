@@ -13,4 +13,5 @@ export default defineWorkspace([
   'packages/kit-matching',
   'packages/generated-surfaces',
   'packages/project-capsule',
+  'packages/physical-loop',
 ]);
