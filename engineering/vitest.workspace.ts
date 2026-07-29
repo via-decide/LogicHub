@@ -9,4 +9,5 @@ export default defineWorkspace([
   'packages/kicad-adapter',
   'packages/repository-engine',
   'packages/validation-engine',
+  'packages/product-graph',
 ]);
