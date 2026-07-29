@@ -1,0 +1,34 @@
+{
+  "id": "dec-sec-001-controller-selection",
+  "schemaVersion": "0.1.0",
+  "projectId": "sovereign-educational-console",
+  "revisionId": "v0.1",
+  "question": "Which controller architecture is frozen for the Sovereign Educational Console v0.1 reference product: ESP32-C3-class or RP2040-class?",
+  "context": "The task mandate requires exactly one frozen controller so the rule kernel never receives ambiguous 'ESP32-C3 or RP2040' inputs. Selection criteria: GPIO count, ADC-channel availability, ADC input limits, LED control, audio output, UART/I2C/SPI and programming requirements, local Indian sourcing, unit price, lifecycle status, and package/assembly feasibility. Criteria that could not be verified against corpus evidence are recorded as estimated/unknown in assumptions.json (A-01..A-04) and risks.md (R-01, R-05) rather than silently assumed.",
+  "alternatives": [
+    {
+      "id": "esp32-c3-mini-1",
+      "description": "Espressif ESP32-C3-MINI-1 module (ESP32-C3FN4, 4 MB in-package flash), native USB-Serial-JTAG, ADC1 with >= 4 usable channels, castellated module suitable for simple 2-layer boards.",
+      "tradeoffs": "Pros: single-module BOM line (no external flash or crystal), native USB for development and charging port reuse, 4x ADC1 channels covers the four optical wells, integrated RF (disabled in v0.1) preserves daughterboard headroom, widely stocked by Indian distributors (unverified, A-04). Cons: fewer total GPIO than RP2040; strapping pins GPIO2/8/9 constrain the pin map (R-02); ADC quality is adequate but not the strongest in class."
+    },
+    {
+      "id": "rp2040",
+      "description": "Raspberry Pi RP2040 with external QSPI flash and crystal; USB device support; 4 ADC channels (one commonly reserved internally on modules).",
+      "tradeoffs": "Pros: more GPIO (30), strong PIO peripheral for WS2812 timing, good documentation. Cons: requires external flash + crystal (more BOM lines, more assembly steps and cost on a hand-assembled small batch); only ~3 freely usable ADC channels on common modules vs 4 wells needed without an external mux; no integrated radio for future daughterboard scenarios; bare-chip assembly (QFN-56) is not feasible for the intended small-batch process, forcing a costlier carrier module."
+    }
+  ],
+  "selectedAlternative": "esp32-c3-mini-1",
+  "rationale": "ESP32-C3-MINI-1 satisfies the four-ADC-well requirement on ADC1 alone, collapses flash/crystal/USB into one module line (directly serving the INR 850 cost target and 45 min assembly target), and its native USB-Serial-JTAG removes a UART bridge from the BOM. RP2040's GPIO surplus is not needed by the frozen pin map (15 functions fit the C3), while its external-flash requirement and ADC channel shortfall work directly against the reference architecture. RP2040 is therefore REJECTED for v0.1 and must not appear as an evaluator input.",
+  "tradeoffs": "Accepting tighter GPIO budget and strapping-pin constraints (mitigated in pin-map.json restrictedPinPolicy); accepting unverified sourcing/price/lifecycle criteria as recorded estimates pending distributor quotes (R-05).",
+  "constraintsConsidered": ["con-sec-adc-input-max", "con-sec-strapping-pins", "con-sec-cost-target"],
+  "evidenceArtifactIds": [],
+  "validationResultIds": [],
+  "confidence": "medium",
+  "status": "accepted",
+  "createdBy": "logichub-rule-kernel-v1-freeze",
+  "createdAt": "2026-07-22T00:00:00+05:30",
+  "metadata": {
+    "note": "Datasheets are not in the reviewed corpus; electrical criteria verified only to the 'estimated' grade (assumptions A-01..A-03). This decision freezes the architecture, not the unverified numbers.",
+    "rejectedAlternativeRecorded": "rp2040"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "0.1.0",
+  "productId": "sovereign-educational-console",
+  "productRevision": "v0.1",
+  "interfaces": [
+    {
+      "id": "usb-c",
+      "kind": "external",
+      "connector": "USB-C receptacle (charge + development)",
+      "signals": ["VBUS 5V", "CC1/CC2 with required 5.1 kOhm pull-downs", "D+/D- to native USB-Serial-JTAG (GPIO19/GPIO18)"],
+      "hotPlug": true,
+      "exposure": "user-accessible; recessed in enclosure wall"
+    },
+    {
+      "id": "daughterboard",
+      "kind": "external-recessed",
+      "connector": "2x6 2.54 mm shrouded keyed header + asymmetric printed key post",
+      "pinout": [
+        { "position": 1, "name": "VBAT_SW", "domain": "3.0-4.2V", "note": "PPTC-protected battery rail, 300 mA allowance" },
+        { "position": 2, "name": "GND" },
+        { "position": 3, "name": "3V3_PPTC", "domain": "3.3V", "note": "PPTC hold 0.5 A; 100 mA allowance" },
+        { "position": 4, "name": "GND" },
+        { "position": 5, "name": "I2C_SDA", "domain": "3.3V open-drain", "note": "GPIO8, 4.7k pull-up, 220R series" },
+        { "position": 6, "name": "I2C_SCL", "domain": "3.3V open-drain", "note": "GPIO9, 4.7k pull-up, 220R series" },
+        { "position": 7, "name": "INT", "domain": "3.3V", "note": "GPIO7 input, 100k pull-down" },
+        { "position": 8, "name": "GND" },
+        { "position": 9, "name": "RSV1", "note": "reserved — must remain unconnected" },
+        { "position": 10, "name": "RSV2", "note": "reserved — must remain unconnected" },
+        { "position": 11, "name": "RSV3", "note": "reserved — must remain unconnected" },
+        { "position": 12, "name": "KEY", "note": "mechanical key position — no contact" }
+      ],
+      "groundPins": 3,
+      "reverseInsertionProtection": "shrouded header + asymmetric key post; rotated/offset insertion mechanically blocked",
+      "hotPlug": false,
+      "hotPlugRationale": "no inrush limiting or sequencing designed/tested; see DEC-004",
+      "esdProtection": "clamp array on SDA/SCL/INT (part selection estimated)",
+      "exposure": "recessed pocket behind slide cover; contacts not fingertip-accessible per design intent (requires_validation)"
+    },
+    {
+      "id": "writing-slate-dock",
+      "kind": "mechanical",
+      "description": "8.5-inch self-contained LCD writing tablet docks into printed pocket; retained by lip + service panel; no electrical connection in v0.1",
+      "removalClearance": { "value": 0.8, "unit": "mm", "provenance": "task-freeze", "evidenceGrade": "estimated" }
+    },
+    {
+      "id": "lesson-template-slot",
+      "kind": "mechanical",
+      "description": "paper/plastic lesson sheet slides over backlit diffuser; teacher-replaceable without tools"
+    },
+    {
+      "id": "service-panel",
+      "kind": "mechanical",
+      "description": "bottom service panel, 6x M3 thread-forming screws into printed bosses; tool required (child-resistant intent, requires_validation)"
+    },
+    {
+      "id": "programming-header",
+      "kind": "internal",
+      "description": "UART0 (GPIO20/21) + BOOT-strap access on internal service header; inside enclosure, not user-accessible"
+    }
+  ]
+}

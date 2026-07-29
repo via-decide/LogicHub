@@ -1,0 +1,2 @@
+import { test, expect } from '@playwright/test';
+test('service worker migration keeps root canonical', async ({ page }) => { await page.goto('/'); await expect(page.locator('body')).toHaveAttribute('data-product','sovereign-execution-boundary'); const regs = await page.evaluate(async () => 'serviceWorker' in navigator ? (await navigator.serviceWorker.getRegistrations()).map(r => r.scope) : []); expect(regs.filter(scope => new URL(scope).pathname === '/')).toEqual([]); });

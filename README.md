@@ -69,3 +69,10 @@ This repository previously contained an older map/feed prototype that no longer 
 ## License
 
 Released under the Apache License 2.0. See [`LICENSE`](https://github.com/via-decide/LogicHub/blob/main/LICENSE).
+
+
+## Public routes
+
+LogicHub.app now has one canonical public landing page: the Sovereign Execution Boundary at `/`. The canonical editable source is `site/index.html`; run `pnpm site:build` to generate both root `index.html` and `public/index.html` with the current Git commit as `logichub-build-id`.
+
+The existing AI App Builder is preserved at `/builder/` with a scoped builder manifest and service worker. Use `pnpm site:verify` to check source/output identity before deployment and `pnpm site:verify-live --url https://logichub.app/ --expected-commit "$(git rev-parse HEAD)"` after deployment.

@@ -1,0 +1,145 @@
+{
+  "$ref": "#/definitions/EngineeringObject",
+  "definitions": {
+    "EngineeringObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "default": "0.1.0"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objectType": {
+          "type": "string",
+          "enum": [
+            "project",
+            "schematic_sheet",
+            "symbol",
+            "component",
+            "net",
+            "pin",
+            "interface",
+            "pcb",
+            "footprint",
+            "pad",
+            "track",
+            "via",
+            "zone",
+            "layer",
+            "board_outline",
+            "bom_item",
+            "test_point",
+            "document",
+            "firmware_interface",
+            "module_instance"
+          ]
+        },
+        "sourcePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceObjectId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semanticKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "contains",
+                  "depends_on",
+                  "connects_to",
+                  "powered_by",
+                  "implemented_by",
+                  "constrained_by",
+                  "validated_by",
+                  "represented_by",
+                  "replaces",
+                  "derived_from",
+                  "supplied_by",
+                  "instantiates",
+                  "supersedes"
+                ]
+              },
+              "targetId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "targetId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "geometry": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "semanticHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "revisionId",
+        "objectType",
+        "sourcePath",
+        "name",
+        "semanticKey",
+        "properties",
+        "relationships",
+        "contentHash",
+        "semanticHash",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

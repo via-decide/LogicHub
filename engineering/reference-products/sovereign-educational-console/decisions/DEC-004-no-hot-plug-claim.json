@@ -1,0 +1,31 @@
+{
+  "id": "dec-sec-004-no-hot-plug-claim",
+  "schemaVersion": "0.1.0",
+  "projectId": "sovereign-educational-console",
+  "revisionId": "v0.1",
+  "question": "Does the v0.1 daughterboard interface support hot plugging?",
+  "context": "The task forbids a hot-plug claim unless the electrical interface is explicitly designed and tested for it. The v0.1 interface has no inrush limiting, no supply sequencing, no connector with staggered mate-first ground pins, and no hot-plug test evidence.",
+  "alternatives": [
+    {
+      "id": "no-hot-plug",
+      "description": "Declare hotPlugSupported=false. Daughterboards are inserted or removed only with the console switched off. Firmware displays/announces this in the classroom flow; documentation states it explicitly.",
+      "tradeoffs": "Pros: honest, zero additional design cost, matches PPTC-only protection. Cons: less convenient classroom workflow."
+    },
+    {
+      "id": "design-for-hot-plug",
+      "description": "Add staggered-ground connector, inrush limiter, ESD-rated transceivers, and a hot-plug test campaign.",
+      "tradeoffs": "Pros: better UX. Cons: cost and schedule; unjustified for v0.1 pilot volumes."
+    }
+  ],
+  "selectedAlternative": "no-hot-plug",
+  "rationale": "Without sequencing and inrush design plus test evidence, any hot-plug claim would be unsupported. SEC-INTERFACE-INTEGRITY-001 rejects hotPlugSupported=true whenever sequencing/inrush evidence is undefined, so the frozen product declares false. Revisiting requires the design-for-hot-plug alternative plus validation evidence.",
+  "tradeoffs": "Classroom workflow requires power-off swaps; accepted for v0.1.",
+  "constraintsConsidered": ["con-sec-no-hot-plug"],
+  "evidenceArtifactIds": [],
+  "validationResultIds": [],
+  "confidence": "high",
+  "status": "accepted",
+  "createdBy": "logichub-rule-kernel-v1-freeze",
+  "createdAt": "2026-07-22T00:00:00+05:30",
+  "metadata": { "strappingPinNote": "GPIO8/9 (I2C) strapping approvals are documented in pin-map.json and risks.md R-02; a daughterboard holding SCL low during reset can force download mode — bench obligation recorded." }
+}

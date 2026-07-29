@@ -1,0 +1,30 @@
+{
+  "name": "logichub-engineering",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine packages/product-graph packages/kit-matching",
+    "lint": "pnpm -r lint",
+    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine packages/product-graph packages/kit-matching",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "pnpm -r test:integration",
+    "test:e2e": "pnpm --filter web test:e2e",
+    "dev": "pnpm -r --parallel dev",
+    "generate:json-schema": "pnpm --filter @logichub-engineering/contracts run generate:json-schema"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "~5.7.0",
+    "vitest": "~3.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild"
+    ]
+  }
+}

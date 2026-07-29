@@ -1,0 +1,322 @@
+{
+  "schemaVersion": "0.1.0",
+  "caseId": "SEC-REF-V0-NOMINAL-4H",
+  "description": "Nominal 4-hour classroom session for the Sovereign Educational Console v0.1. All inputs sourced from frozen product.json; all evidence grades estimated.",
+  "provenanceClass": "reference",
+  "intent": {
+    "productId": "sovereign-educational-console",
+    "productRevision": "v0.1",
+    "evaluationId": "eval-ref-v0-001",
+    "requestedDecision": "Is the frozen v0.1 design feasible for a 4-hour classroom session?",
+    "targetObjects": ["power-tree", "optical-token-system", "pin-map", "enclosure", "bom"],
+    "preservedConstraints": ["C-01-runtime-4h", "C-02-discharge-floor-3.5V", "C-05-adc-2.5V", "C-07-no-hot-plug"],
+    "optimizationTargets": ["runtime", "ex-factory-cost"],
+    "permittedChanges": [],
+    "prohibitedChanges": ["controller-selection", "bay-count", "battery-chemistry"],
+    "knownAssumptions": ["A-01", "A-02", "A-03", "A-04", "A-05"],
+    "missingInputs": ["enclosure-thermal-resistance", "actual-LDR-measurements", "physical-test-results"],
+    "evidenceSources": ["product.json", "pin-map.json", "power-tree.json", "bom.csv"],
+    "evaluationProfile": "design-review-v0.1",
+    "ruleVersions": {
+      "SEC-POWER-THERMAL-001": "0.1.0",
+      "SEC-OPTICAL-CLASSIFICATION-001": "0.1.0",
+      "SEC-INTERFACE-INTEGRITY-001": "0.1.0",
+      "SEC-MECHANICAL-RUGGEDNESS-001": "0.1.0",
+      "SEC-MANUFACTURING-ECONOMICS-001": "0.1.0"
+    }
+  },
+  "rules": "all",
+  "inputs": {
+    "power": {
+      "battery": {
+        "nominalCapacity": { "value": 1200, "unit": "mAh", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "deratingFactor": { "value": 0.8, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "nominalVoltage": { "value": 3.7, "unit": "V", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "dischargeLimit": { "value": 3.5, "unit": "V", "provenance": "product.json", "evidenceGrade": "estimated" }
+      },
+      "loads": [
+        { "name": "MCU-active", "rail": "3V3", "current": { "value": 80, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 1.0, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "WS2812B-quiescent", "rail": "3V3", "current": { "value": 4, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 1.0, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "WS2812B-strobe-1bay", "rail": "3V3", "current": { "value": 24, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 0.05, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "LDR-dividers-4ch", "rail": "3V3", "current": { "value": 0.6, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 1.0, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "piezo-speaker", "rail": "3V3", "current": { "value": 10, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 0.1, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "backlight", "rail": "VBAT_SW", "current": { "value": 60, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 0.5, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "daughterboard-3v3", "rail": "3V3", "current": { "value": 100, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 0.0, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": false },
+        { "name": "daughterboard-vbat", "rail": "VBAT_SW", "current": { "value": 300, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }, "duty": { "value": 0.0, "unit": "fraction", "provenance": "product.json", "evidenceGrade": "estimated" }, "peakConcurrent": false }
+      ],
+      "regulator": {
+        "topology": "linear-ldo",
+        "inputVoltage": { "value": 3.7, "unit": "V", "provenance": "product.json:power.battery.nominalVoltage", "evidenceGrade": "estimated" },
+        "outputVoltage": { "value": 3.3, "unit": "V", "provenance": "product.json:power.rails[3V3]", "evidenceGrade": "estimated" },
+        "thermalResistance": { "value": 50, "unit": "K/W", "provenance": "estimate:engineering (SOT-23 to ambient rough estimate)", "evidenceGrade": "estimated" },
+        "thermalResistanceClass": "estimated"
+      },
+      "charger": {
+        "programCurrent": { "value": 500, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "chargingWhileOperating": true,
+        "loadSharingEvidence": false
+      },
+      "ambientTemperature": { "value": 30, "unit": "degC", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "maxComponentTemperature": { "value": 85, "unit": "degC", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "maxTouchTemperature": { "value": 48, "unit": "degC", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "intendedDuration": { "value": 4, "unit": "h", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "enclosureThermalResistanceClass": "unknown"
+    },
+    "optical": {
+      "adc": {
+        "resolutionBits": { "value": 12, "unit": "bit", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "saturationCeiling": 4000
+      },
+      "calibration": {
+        "darkReading": 50,
+        "ambientReading": 200,
+        "calibratedAmbientMax": 500,
+        "normalizationReference": 3000,
+        "samplesPerClass": 5
+      },
+      "geometry": {
+        "wellDepth": { "value": 12, "unit": "mm", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "wellWallMaterial": "matte black PETG"
+      },
+      "timing": {
+        "strobeSettlingTime": { "value": 5, "unit": "ms", "provenance": "product.json", "evidenceGrade": "estimated" }
+      },
+      "tokenClasses": [
+        {
+          "name": "red",
+          "samplesR": [2800, 2750, 2820, 2790, 2810],
+          "samplesG": [200, 210, 195, 205, 200],
+          "samplesB": [180, 190, 175, 185, 180],
+          "tokenMaterial": "PETG",
+          "samplesEvidenceGrade": "estimated"
+        },
+        {
+          "name": "green",
+          "samplesR": [250, 260, 245, 255, 250],
+          "samplesG": [2700, 2680, 2720, 2710, 2690],
+          "samplesB": [300, 310, 295, 305, 300],
+          "tokenMaterial": "PETG",
+          "samplesEvidenceGrade": "estimated"
+        },
+        {
+          "name": "blue",
+          "samplesR": [180, 190, 175, 185, 180],
+          "samplesG": [350, 360, 345, 355, 350],
+          "samplesB": [2600, 2580, 2620, 2610, 2590],
+          "tokenMaterial": "PETG",
+          "samplesEvidenceGrade": "estimated"
+        },
+        {
+          "name": "yellow",
+          "samplesR": [2500, 2480, 2520, 2510, 2490],
+          "samplesG": [2400, 2380, 2420, 2410, 2390],
+          "samplesB": [200, 210, 195, 205, 200],
+          "tokenMaterial": "PETG",
+          "samplesEvidenceGrade": "estimated"
+        }
+      ],
+      "measurement": {
+        "R": 2780,
+        "G": 210,
+        "B": 185,
+        "dark": 45,
+        "ambient": 180
+      },
+      "thresholds": {
+        "unknownDistance": 0.5,
+        "ambiguityMargin": 0.1,
+        "minSeparationToSpreadRatio": 3.0
+      }
+    },
+    "interface": {
+      "logicVoltage": { "value": 3.3, "unit": "V", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "adcMaxInput": { "value": 2.5, "unit": "V", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "gpioMaxSource": { "value": 40, "unit": "mA", "provenance": "estimate:engineering (ESP32-C3 absolute max)", "evidenceGrade": "estimated" },
+      "pins": [
+        { "pin": "GPIO0", "function": "ADC-LDR-BAY-0", "direction": "analog-in", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO1", "function": "ADC-LDR-BAY-1", "direction": "analog-in", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO3", "function": "ADC-LDR-BAY-2", "direction": "analog-in", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO4", "function": "ADC-LDR-BAY-3", "direction": "analog-in", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO5", "function": "audio-PWM", "direction": "out", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO6", "function": "backlight-PWM", "direction": "out", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO7", "function": "daughterboard-INT", "direction": "in", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO8", "function": "I2C-SDA", "direction": "open-drain", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": true, "approvedStrappingUse": "I2C SDA with external pull-up; default high at boot is compatible" },
+        { "pin": "GPIO9", "function": "I2C-SCL", "direction": "open-drain", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": true, "approvedStrappingUse": "I2C SCL with external pull-up; default high at boot is compatible" },
+        { "pin": "GPIO10", "function": "WS2812B-data", "direction": "out", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO18", "function": "USB-D-", "direction": "usb", "voltageDomain": null, "strapping": false },
+        { "pin": "GPIO19", "function": "USB-D+", "direction": "usb", "voltageDomain": null, "strapping": false },
+        { "pin": "GPIO20", "function": "UART-RX", "direction": "in", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO21", "function": "UART-TX", "direction": "out", "voltageDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "strapping": false },
+        { "pin": "GPIO2", "function": "RESERVED-strap", "direction": "reserved", "voltageDomain": null, "strapping": true }
+      ],
+      "connections": [
+        { "id": "ldr-bay0", "fromPin": "LDR-BAY-0-divider", "fromDirection": "out", "fromDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "toPin": "GPIO0", "toDirection": "analog-in", "toDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" } },
+        { "id": "i2c-sda", "fromPin": "daughterboard-SDA", "fromDirection": "open-drain", "fromDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "toPin": "GPIO8", "toDirection": "open-drain", "toDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" } },
+        { "id": "i2c-scl", "fromPin": "daughterboard-SCL", "fromDirection": "open-drain", "fromDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" }, "toPin": "GPIO9", "toDirection": "open-drain", "toDomain": { "value": 3.3, "unit": "V", "provenance": "pin-map.json", "evidenceGrade": "estimated" } }
+      ],
+      "adcApplied": [
+        { "pin": "GPIO0", "appliedVoltage": { "value": 1.65, "unit": "V", "provenance": "estimate:engineering (mid-divider)", "evidenceGrade": "estimated" } },
+        { "pin": "GPIO1", "appliedVoltage": { "value": 1.65, "unit": "V", "provenance": "estimate:engineering (mid-divider)", "evidenceGrade": "estimated" } },
+        { "pin": "GPIO3", "appliedVoltage": { "value": 1.65, "unit": "V", "provenance": "estimate:engineering (mid-divider)", "evidenceGrade": "estimated" } },
+        { "pin": "GPIO4", "appliedVoltage": { "value": 1.65, "unit": "V", "provenance": "estimate:engineering (mid-divider)", "evidenceGrade": "estimated" } }
+      ],
+      "daughterboard": {
+        "rail": "3V3",
+        "maxLoad": { "value": 500, "unit": "mA", "provenance": "product.json:power.protection[PPTC-3V3]", "evidenceGrade": "estimated" },
+        "requestedLoad": { "value": 100, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "groundPins": 2,
+        "minGroundPins": 2,
+        "connectorKeyed": true,
+        "connectorOrientationDefined": true,
+        "mirroredInsertionPossible": false,
+        "reservedPins": ["RES1", "RES2"],
+        "reservedPinsUsed": [],
+        "hotPlugClaim": false,
+        "hotPlugSequencingEvidence": false,
+        "hotPlugInrushEvidence": false
+      },
+      "protection": {
+        "pptcHold": { "value": 500, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "pptcTrip": { "value": 1000, "unit": "mA", "provenance": "product.json", "evidenceGrade": "estimated" }
+      },
+      "exposedConductors": [
+        { "location": "USB-C receptacle", "bare": false, "accessibleToStudents": true },
+        { "location": "daughterboard connector (recessed)", "bare": false, "accessibleToStudents": false }
+      ]
+    },
+    "mechanical": {
+      "printer": {
+        "type": "Bambu A1",
+        "envelopeX": { "value": 256, "unit": "mm", "provenance": "task-spec", "evidenceGrade": "estimated" },
+        "envelopeY": { "value": 256, "unit": "mm", "provenance": "task-spec", "evidenceGrade": "estimated" },
+        "envelopeZ": { "value": 256, "unit": "mm", "provenance": "task-spec", "evidenceGrade": "estimated" },
+        "nozzleDiameter": { "value": 0.4, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "layerHeight": { "value": 0.2, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+      },
+      "material": {
+        "structural": "PETG",
+        "diffuser": "translucent PETG",
+        "bumper": "TPU Shore 95A"
+      },
+      "printOrientation": {
+        "screwLoadAcrossLayers": false,
+        "description": "Shell halves printed upright; screw bosses oriented along Z-axis so tensile load is across layers"
+      },
+      "enclosure": {
+        "largestPartX": { "value": 220, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "largestPartY": { "value": 180, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "largestPartZ": { "value": 45, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "wallThickness": { "value": 2.4, "unit": "mm", "provenance": "estimate:engineering (6 perimeters × 0.4 nozzle)", "evidenceGrade": "estimated" },
+        "floorThickness": { "value": 1.6, "unit": "mm", "provenance": "estimate:engineering (8 layers × 0.2)", "evidenceGrade": "estimated" },
+        "minWallThicknessProcess": { "value": 1.2, "unit": "mm", "provenance": "estimate:engineering (3 perimeters × 0.4)", "evidenceGrade": "estimated" },
+        "minStructuralWallThickness": { "value": 2.0, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+      },
+      "diffuser": {
+        "thickness": { "value": 0.8, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "minSupportableThickness": { "value": 0.6, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "blocked": false
+      },
+      "slate": {
+        "width": { "value": 175, "unit": "mm", "provenance": "estimate:engineering (8.5\" LCD)", "evidenceGrade": "estimated" },
+        "height": { "value": 215, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "thickness": { "value": 5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "tolerance": { "value": 0.5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "pocketWidth": { "value": 176.5, "unit": "mm", "provenance": "estimate:engineering (slate+tolerance+clearance)", "evidenceGrade": "estimated" },
+        "pocketHeight": { "value": 216.5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "pocketDepth": { "value": 6, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "requiredRemovalClearance": { "value": 1.0, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "printTolerance": { "value": 0.3, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+      },
+      "token": {
+        "diameter": { "value": 30, "unit": "mm", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "wellDiameter": { "value": 31.5, "unit": "mm", "provenance": "estimate:engineering (30+1.0 clearance+print tolerance)", "evidenceGrade": "estimated" },
+        "minClearance": { "value": 0.5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "printTolerance": { "value": 0.3, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "wellDepth": { "value": 12, "unit": "mm", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "ambientLightBlocked": true
+      },
+      "fastening": {
+        "screwDiameter": { "value": 3, "unit": "mm", "provenance": "estimate:engineering (M3)", "evidenceGrade": "estimated" },
+        "bossOuterDiameter": { "value": 8, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "bossPilotDiameter": { "value": 2.5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "minBossWall": { "value": 2.0, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "insertType": "heat-set"
+      },
+      "wiring": {
+        "grooveWidth": { "value": 3, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "conductorDiameter": { "value": 0.8, "unit": "mm", "provenance": "estimate:engineering (AWG 20 silicone)", "evidenceGrade": "estimated" },
+        "minConductorSpacing": { "value": 2, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "actualConductorSpacing": { "value": 3, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+        "retentionWithoutGlue": true,
+        "conductorsInsulated": true
+      },
+      "bumpers": {
+        "geometryBlocksAssembly": false
+      },
+      "strap": {
+        "anchorsPresent": true,
+        "anchorLoadTested": false
+      },
+      "product": {
+        "expectedMass": { "value": 900, "unit": "g", "provenance": "product.json", "evidenceGrade": "estimated" },
+        "targetDropHeight": { "value": 0.76, "unit": "m", "provenance": "estimate:engineering (desk height)", "evidenceGrade": "estimated" },
+        "dropTested": false,
+        "assemblyClearance": { "value": 1.5, "unit": "mm", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }
+      }
+    },
+    "economics": {
+      "materialLines": [
+        { "name": "ESP32-C3-MINI-1", "cost": { "value": 95, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "TP4056 charger board", "cost": { "value": 25, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "AP2112K-3.3 LDO", "cost": { "value": 12, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "1200 mAh Li-po cell (protected)", "cost": { "value": 250, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "USB-C receptacle (16-pin)", "cost": { "value": 20, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "WS2812B LED ×4", "cost": { "value": 40, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "LDR (GL5528) ×4", "cost": { "value": 20, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "Piezo speaker", "cost": { "value": 15, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "8.5\" LCD writing tablet module", "cost": { "value": 350, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "module" },
+        { "name": "Power slide switch", "cost": { "value": 8, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "PPTC ×2", "cost": { "value": 14, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "2x6 keyed header + receptacle", "cost": { "value": 18, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "P-MOSFET + passives (power-path)", "cost": { "value": 25, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "10 kΩ resistors ×6", "cost": { "value": 6, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "5.1 kΩ CC resistors ×2", "cost": { "value": 3, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "electronics" },
+        { "name": "M3 heat-set inserts ×6", "cost": { "value": 30, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "mechanical" },
+        { "name": "M3×8 screws ×6", "cost": { "value": 12, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "mechanical" },
+        { "name": "Silicone wire (AWG 20, 1 m)", "cost": { "value": 15, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "consumable" },
+        { "name": "Lesson template cards ×8", "cost": { "value": 40, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "consumable" },
+        { "name": "Tokens ×16 (4-color sets)", "cost": { "value": 15, "unit": "INR", "provenance": "bom.csv", "evidenceGrade": "estimated" }, "category": "consumable" }
+      ],
+      "filament": [
+        { "material": "PETG", "grams": { "value": 280, "unit": "g", "provenance": "estimate:engineering (enclosure + token wells)", "evidenceGrade": "estimated" }, "pricePerKg": { "value": 1500, "unit": "INR", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } },
+        { "material": "TPU", "grams": { "value": 30, "unit": "g", "provenance": "estimate:engineering (bumpers)", "evidenceGrade": "estimated" }, "pricePerKg": { "value": 2500, "unit": "INR", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } }
+      ],
+      "failedPrintAllowance": { "value": 0.1, "unit": "fraction", "provenance": "estimate:engineering (10% print waste allowance)", "evidenceGrade": "estimated" },
+      "printMachineHours": { "value": 6, "unit": "h", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "printMachineRate": { "value": 50, "unit": "INR", "provenance": "estimate:engineering (electricity + depreciation per hour)", "evidenceGrade": "estimated" },
+      "assemblyHours": null,
+      "laborRate": null,
+      "assemblyConsumables": { "value": 30, "unit": "INR", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "packaging": null,
+      "testingHours": null,
+      "reworkAllowance": null,
+      "scrapRate": null,
+      "procurementVariance": { "value": 0.1, "unit": "fraction", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "warrantyAllowance": null,
+      "logisticsAllowance": null,
+      "manufacturingOverhead": { "value": 100, "unit": "INR", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "targetExFactoryCost": { "value": 850, "unit": "INR", "provenance": "product.json", "evidenceGrade": "estimated" },
+      "targetSellingPrice": null,
+      "channelMargin": null,
+      "taxTreatment": null,
+      "productionQuantity": 100
+    }
+  },
+  "expected": {
+    "SEC-POWER-THERMAL-001": "requires_validation",
+    "SEC-OPTICAL-CLASSIFICATION-001": "pass",
+    "SEC-INTERFACE-INTEGRITY-001": "pass",
+    "SEC-MECHANICAL-RUGGEDNESS-001": "requires_validation",
+    "SEC-MANUFACTURING-ECONOMICS-001": "unknown"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "0.1.0",
+  "productId": "sovereign-educational-console",
+  "productRevision": "v0.1",
+  "evidenceGrades": ["verified", "datasheet", "measured", "estimated", "unknown"],
+  "assumptions": [
+    { "id": "A-01", "domain": "controller", "statement": "ESP32-C3-MINI-1 provides >= 15 usable GPIO including 4 ADC1 channels sufficient for the pin map", "evidenceGrade": "estimated", "provenance": "engineering familiarity with ESP32-C3 family; datasheet NOT in reviewed corpus", "resolution": "import ESP32-C3-MINI-1 datasheet into corpus and re-verify pin-map.json" },
+    { "id": "A-02", "domain": "controller", "statement": "ADC full-scale ~2.5 V at 11 dB attenuation, 12-bit resolution", "evidenceGrade": "estimated", "provenance": "family knowledge; datasheet not in corpus", "resolution": "datasheet import + bench ADC linearity check" },
+    { "id": "A-03", "domain": "controller", "statement": "MCU active current ~80 mA (Wi-Fi off), idle ~15 mA", "evidenceGrade": "estimated", "provenance": "engineering estimate", "resolution": "validation-plan test 1 (measured runtime/current)" },
+    { "id": "A-04", "domain": "controller", "statement": "ESP32-C3-MINI-1 is locally sourceable in India at ~INR 180/unit and is not near end-of-life", "evidenceGrade": "unknown", "provenance": "no vendor quote or lifecycle notice in corpus", "resolution": "obtain two Indian distributor quotes + Espressif longevity statement" },
+    { "id": "A-05", "domain": "power", "statement": "Battery derating factor 0.80 covers aging plus the 3.5 V discharge floor imposed by the LDO", "evidenceGrade": "estimated", "provenance": "engineering estimate", "resolution": "validation-plan test 1" },
+    { "id": "A-06", "domain": "power", "statement": "TP4056-class charger at 500 mA program current stays within component temperature limits inside the enclosure", "evidenceGrade": "unknown", "provenance": "no thermal data in corpus", "resolution": "validation-plan test 2 (charger-temperature test)" },
+    { "id": "A-07", "domain": "power", "statement": "LDO effective thermal resistance ~250 K/W on the intended footprint", "evidenceGrade": "estimated", "provenance": "engineering estimate for SOT-23-5 class package; datasheet not in corpus", "resolution": "datasheet import + validation-plan test 3", "thermalResistanceClass": "estimated" },
+    { "id": "A-08", "domain": "power", "statement": "Enclosure effective thermal resistance is unknown", "evidenceGrade": "unknown", "provenance": "never measured", "resolution": "validation-plan tests 2-3; until then enclosure-temperature margins are requires_validation" },
+    { "id": "A-09", "domain": "optical", "statement": "Dark-well LDR divider midpoint sits inside the ADC calibrated range for the chosen 10k divider", "evidenceGrade": "estimated", "provenance": "engineering estimate", "resolution": "validation-plan tests 4-5 (dark + bright-ambient calibration)" },
+    { "id": "A-10", "domain": "optical", "statement": "Four token colors can be separated by nearest-centroid with margin over ambient drift and filament-batch variation", "evidenceGrade": "unknown", "provenance": "no confusion-matrix measurement exists", "resolution": "validation-plan tests 6-7" },
+    { "id": "A-11", "domain": "mechanical", "statement": "Bambu Lab A1 working volume is 256x256x256 mm", "evidenceGrade": "estimated", "provenance": "vendor spec not in corpus", "resolution": "import vendor spec" },
+    { "id": "A-12", "domain": "mechanical", "statement": "8.5-inch slate module envelope 226 x 146 x 5 mm with +/-0.5 mm tolerance", "evidenceGrade": "estimated", "provenance": "common module estimate; vendor drawing not in corpus", "resolution": "import vendor drawing; validation-plan test 12" },
+    { "id": "A-13", "domain": "mechanical", "statement": "PETG printed wall >= 2.4 mm with 0.4 mm nozzle survives classroom handling loads except drops (drops untested)", "evidenceGrade": "unknown", "provenance": "no drop or load test exists", "resolution": "validation-plan tests 11-14" },
+    { "id": "A-14", "domain": "manufacturing", "statement": "Small-batch print yield 90% (failed-print allowance 10%)", "evidenceGrade": "estimated", "provenance": "engineering estimate", "resolution": "measure across pilot batch (validation-plan test 15 companion data)" },
+    { "id": "A-15", "domain": "manufacturing", "statement": "Assembly time 45 min at INR 150/h effective labor rate", "evidenceGrade": "estimated", "provenance": "engineering estimate", "resolution": "validation-plan test 15 (assembly-time measurement)" },
+    { "id": "A-16", "domain": "commercial", "statement": "BOM line prices in bom.csv are indicative small-batch Indian prices", "evidenceGrade": "estimated", "provenance": "no vendor quotes in corpus", "resolution": "collect quotes at 3 / 25 / 100 unit volumes" },
+    { "id": "A-17", "domain": "safety", "statement": "30 mm token diameter reduces small-parts risk for ages 6-12", "evidenceGrade": "unknown", "provenance": "no small-parts-cylinder test evidence; no certification claimed", "resolution": "physical small-parts gauge check; keep supervised-use-only model regardless" }
+  ]
+}

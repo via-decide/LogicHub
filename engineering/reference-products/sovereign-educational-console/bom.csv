@@ -1,0 +1,24 @@
+ref,category,description,qty,unit_cost_inr,line_cost_inr,evidence_grade,provenance,notes
+U1,electronics,ESP32-C3-MINI-1 module,1,180,180,estimated,estimate:engineering,price and lifecycle not verified against a vendor quote (risks.md R-05)
+U2,electronics,TP4056-class charger module with DW01A-class protection,1,25,25,estimated,estimate:engineering,accepted only under DEC-002 conditions; load-sharing parts extra (Q1/D1)
+U3,electronics,AP2112K-3.3-class LDO,1,10,10,estimated,estimate:engineering,
+Q1,electronics,P-MOSFET load-sharing power path (FET + diode + resistor),1,15,15,estimated,estimate:engineering,DEC-002 obligation
+BT1,electronics,Protected Li-po 1200 mAh,1,180,180,estimated,estimate:engineering,protection PCB behavior not bench-verified
+LED1-4,electronics,WS2812B-class addressable RGB (token wells),4,5,20,estimated,estimate:engineering,
+LDR1-4,electronics,LDR 5528-class + 10k divider resistor,4,5,20,estimated,estimate:engineering,final part after optical calibration
+LS1,electronics,Backlight LED strip section (6 LEDs) + resistors,1,20,20,estimated,estimate:engineering,
+BZ1,electronics,Piezo buzzer + drive transistor,1,15,15,estimated,estimate:engineering,
+F1,electronics,PPTC 1.1A hold (VBAT_SW),1,8,8,estimated,estimate:engineering,
+F2,electronics,PPTC 0.5A hold (3V3 daughterboard branch),1,8,8,estimated,estimate:engineering,
+J1,electronics,2x6 shrouded keyed header,1,15,15,estimated,estimate:engineering,
+J2,electronics,internal connectors and service header set,1,25,25,estimated,estimate:engineering,
+PCB1,electronics,Main PCB 2-layer,1,60,60,estimated,estimate:engineering,small-batch Indian fab assumption
+PAS1,electronics,Passives set (R/C/ESD clamps/switch),1,30,30,estimated,estimate:engineering,
+SLATE1,module,8.5-inch monochrome LCD writing tablet module,1,250,250,estimated,estimate:engineering,replaceable; self-contained erase
+MECH1,mechanical,PETG filament black (structural ~240 g),0.24,600,144,estimated,estimate:engineering,per-kg price estimate; includes token set
+MECH2,mechanical,PETG filament translucent white (diffuser ~30 g),0.03,700,21,estimated,estimate:engineering,
+MECH3,mechanical,TPU 95A filament (bumpers ~30 g),0.03,900,27,estimated,estimate:engineering,
+MECH4,mechanical,M3 thread-forming screws (10) + misc hardware,1,25,25,estimated,estimate:engineering,
+MECH5,mechanical,Carry strap + anchors hardware,1,25,25,estimated,estimate:engineering,strap anchors requires_validation
+MISC1,consumable,Wiring / heatshrink / labels / adhesive-free retention clips,1,30,30,estimated,estimate:engineering,
+PKG1,packaging,Box + insert + printed lesson-sheet starter pack,1,40,40,estimated,estimate:engineering,

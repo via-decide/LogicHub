@@ -1,0 +1,18 @@
+import { readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+const title = 'LogicHub.app — Sovereign Execution Boundary';
+const hero = 'Review and route AI code without exporting the repository.';
+const forbidden = ['AI APP BUILDER','Build Android Apps With AI','Authentication failed','localhost:7001','localhost:7002','localhost:7003','localhost:7004','localhost:7006'];
+const sha = execSync('git rev-parse HEAD').toString().trim();
+const bundle = readFileSync('public/downloads/logichub-demo-evidence-bundle-v0.4.1.json');
+const bundleHash = createHash('sha256').update(bundle).digest('hex');
+writeFileSync('public/downloads/logichub-demo-evidence-bundle-v0.4.1.json.sha256', `${bundleHash}  logichub-demo-evidence-bundle-v0.4.1.json\n`);
+let html = readFileSync('site/index.html','utf8').replaceAll('__LOGICHUB_BUILD_ID__', sha).replaceAll('__DEMO_BUNDLE_SHA256__', bundleHash);
+if (!html.includes(`<title>${title}</title>`) || !html.includes(hero)) throw new Error('Required root markers missing');
+for (const marker of forbidden) if (html.includes(marker)) throw new Error(`Forbidden marker in root: ${marker}`);
+writeFileSync('index.html', html);
+writeFileSync('public/index.html', html);
+copyFileSync('manifest.json', 'public/manifest.json');
+copyFileSync('sw.js', 'public/sw.js');
+console.log(JSON.stringify({ buildId: sha, rootSha256: createHash('sha256').update(html).digest('hex'), bundleHash }, null, 2));

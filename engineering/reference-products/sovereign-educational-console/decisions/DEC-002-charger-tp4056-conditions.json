@@ -1,0 +1,31 @@
+{
+  "id": "dec-sec-002-charger-tp4056-conditions",
+  "schemaVersion": "0.1.0",
+  "projectId": "sovereign-educational-console",
+  "revisionId": "v0.1",
+  "question": "Is a TP4056-class linear charger acceptable for the v0.1 power system, and under what conditions?",
+  "context": "Generic TP4056 boards are cheap and ubiquitous, but the task explicitly forbids assuming they provide safe power-path management, load sharing, correct USB-C negotiation, battery protection, thermal protection, or safe charge-while-operate behavior. Each of those properties must be an explicit implementation decision.",
+  "alternatives": [
+    {
+      "id": "tp4056-with-conditions",
+      "description": "TP4056-class charger accepted ONLY together with: (1) DW01A-class battery protection present AND a protected cell (double protection accepted); (2) an added P-MOSFET load-sharing power path so the system load is not summed into charge-termination current; (3) 5.1 kOhm pull-downs on both USB-C CC pins; (4) program current set to 500 mA; (5) charger thermal behavior bench-verified inside the closed enclosure (validation-plan test 2); (6) charge-while-operate verified as part of test 2.",
+      "tradeoffs": "Pros: lowest cost, locally available. Cons: linear charging dissipates up to ~1 W at 500 mA; conditions add 3-4 BOM lines; termination accuracy depends on the load-sharing circuit actually working."
+    },
+    {
+      "id": "integrated-power-path-charger-ic",
+      "description": "A charger IC with integrated power path (BQ24074-class).",
+      "tradeoffs": "Pros: correct-by-construction load sharing and thermal regulation. Cons: higher unit cost and lower local availability for small batches (unverified); finer-pitch package raises hand-assembly risk."
+    }
+  ],
+  "selectedAlternative": "tp4056-with-conditions",
+  "rationale": "v0.1 accepts the TP4056-class part strictly under the six enumerated conditions. The conditions are obligations on the implementation, not assumptions about the module: until validation-plan test 2 evidence exists, the charger-related constraints (con-sec-component-temp-85, con-sec-touch-temp-48) remain requires_validation and the rule kernel will not report them as pass.",
+  "tradeoffs": "Accepts added circuit complexity (power path) in exchange for cost; accepts that a failed test 2 forces migration to the integrated-power-path alternative.",
+  "constraintsConsidered": ["con-sec-component-temp-85", "con-sec-touch-temp-48", "con-sec-cost-target"],
+  "evidenceArtifactIds": [],
+  "validationResultIds": [],
+  "confidence": "medium",
+  "status": "accepted",
+  "createdBy": "logichub-rule-kernel-v1-freeze",
+  "createdAt": "2026-07-22T00:00:00+05:30",
+  "metadata": { "unresolvedUntil": "validation-plan test 2 evidence imported" }
+}

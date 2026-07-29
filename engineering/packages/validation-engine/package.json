@@ -1,0 +1,29 @@
+{
+  "name": "@logichub-engineering/validation-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" }
+  },
+  "bin": {
+    "rule-kernel": "./dist/cli/rule-kernel-cli.js"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "lint": "tsc --build",
+    "rule-kernel": "node --enable-source-maps dist/cli/rule-kernel-cli.js"
+  },
+  "dependencies": {
+    "@logichub-engineering/shared": "workspace:*",
+    "@logichub-engineering/contracts": "workspace:*",
+    "canonicalize": "~2.0.0",
+    "zod": "~3.24.0",
+    "zod-to-json-schema": "~3.24.0"
+  },
+  "devDependencies": {}
+}

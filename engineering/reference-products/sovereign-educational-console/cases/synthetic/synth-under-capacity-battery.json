@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "0.1.0",
+  "caseId": "SYNTH-UNDER-CAPACITY-001",
+  "description": "Synthetic negative fixture: 100 mAh battery cannot sustain 4-hour classroom session. Expected: fail on runtime check.",
+  "provenanceClass": "synthetic",
+  "intent": {
+    "productId": "sovereign-educational-console",
+    "productRevision": "v0.1",
+    "evaluationId": "eval-synth-under-cap-001",
+    "requestedDecision": "Does a 100 mAh battery meet the 4-hour requirement?",
+    "targetObjects": ["power-tree:battery"],
+    "preservedConstraints": ["C-01-runtime-4h"],
+    "optimizationTargets": [],
+    "permittedChanges": [],
+    "prohibitedChanges": [],
+    "knownAssumptions": [],
+    "missingInputs": [],
+    "evidenceSources": ["synthetic fixture"],
+    "evaluationProfile": "synthetic-test",
+    "ruleVersions": { "SEC-POWER-THERMAL-001": "0.1.0" }
+  },
+  "rules": ["SEC-POWER-THERMAL-001"],
+  "inputs": {
+    "power": {
+      "battery": {
+        "nominalCapacity": { "value": 100, "unit": "mAh", "provenance": "synthetic", "evidenceGrade": "estimated" },
+        "deratingFactor": { "value": 0.8, "unit": "fraction", "provenance": "synthetic", "evidenceGrade": "estimated" },
+        "nominalVoltage": { "value": 3.7, "unit": "V", "provenance": "synthetic", "evidenceGrade": "estimated" },
+        "dischargeLimit": { "value": 3.5, "unit": "V", "provenance": "synthetic", "evidenceGrade": "estimated" }
+      },
+      "loads": [
+        { "name": "MCU-active", "rail": "3V3", "current": { "value": 80, "unit": "mA", "provenance": "synthetic", "evidenceGrade": "estimated" }, "duty": { "value": 1.0, "unit": "fraction", "provenance": "synthetic", "evidenceGrade": "estimated" }, "peakConcurrent": true },
+        { "name": "LDR-dividers", "rail": "3V3", "current": { "value": 0.6, "unit": "mA", "provenance": "synthetic", "evidenceGrade": "estimated" }, "duty": { "value": 1.0, "unit": "fraction", "provenance": "synthetic", "evidenceGrade": "estimated" }, "peakConcurrent": true }
+      ],
+      "regulator": {
+        "topology": "linear-ldo",
+        "inputVoltage": { "value": 3.7, "unit": "V", "provenance": "synthetic", "evidenceGrade": "estimated" },
+        "outputVoltage": { "value": 3.3, "unit": "V", "provenance": "synthetic", "evidenceGrade": "estimated" },
+        "thermalResistanceClass": "estimated",
+        "thermalResistance": { "value": 50, "unit": "K/W", "provenance": "synthetic", "evidenceGrade": "estimated" }
+      },
+      "charger": { "chargingWhileOperating": false, "loadSharingEvidence": false },
+      "ambientTemperature": { "value": 30, "unit": "degC", "provenance": "synthetic", "evidenceGrade": "estimated" },
+      "maxComponentTemperature": { "value": 85, "unit": "degC", "provenance": "synthetic", "evidenceGrade": "estimated" },
+      "intendedDuration": { "value": 4, "unit": "h", "provenance": "synthetic", "evidenceGrade": "estimated" },
+      "enclosureThermalResistanceClass": "unknown"
+    }
+  },
+  "expected": {
+    "SEC-POWER-THERMAL-001": "fail"
+  }
+}

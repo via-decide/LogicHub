@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "0.1.0",
+  "productId": "sovereign-educational-console",
+  "productRevision": "v0.1",
+  "controller": "ESP32-C3-MINI-1",
+  "logicVoltage": { "value": 3.3, "unit": "V" },
+  "notes": [
+    "All electrical limits marked estimated: the ESP32-C3 datasheet is not part of the reviewed source corpus. Values must be re-verified against the datasheet before layout (see risks.md R-01).",
+    "Strapping pins GPIO2, GPIO8, GPIO9 are restricted. Uses below are the explicit, approved exceptions; Rule SEC-INTERFACE-INTEGRITY-001 flags any other use."
+  ],
+  "gpioLimits": {
+    "maxSourcePerPin": { "value": 40, "unit": "mA", "provenance": "estimate:engineering (datasheet not in corpus)", "evidenceGrade": "estimated" },
+    "recommendedSourcePerPin": { "value": 20, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+    "adcMaxInput": { "value": 2.5, "unit": "V", "provenance": "estimate:engineering (11 dB attenuation envelope)", "evidenceGrade": "estimated" }
+  },
+  "pins": [
+    { "pin": "GPIO0", "function": "ADC1_CH0 — LDR bay 1", "direction": "analog-in", "voltageDomain": "0-2.5V", "strapping": false },
+    { "pin": "GPIO1", "function": "ADC1_CH1 — LDR bay 2", "direction": "analog-in", "voltageDomain": "0-2.5V", "strapping": false },
+    { "pin": "GPIO2", "function": "RESERVED — strapping (must be 1 at boot); 10k pull-up; not routed to any connector", "direction": "reserved", "voltageDomain": "3V3", "strapping": true, "strappingApproval": "reserved-unused" },
+    { "pin": "GPIO3", "function": "ADC1_CH3 — LDR bay 3", "direction": "analog-in", "voltageDomain": "0-2.5V", "strapping": false },
+    { "pin": "GPIO4", "function": "ADC1_CH4 — LDR bay 4", "direction": "analog-in", "voltageDomain": "0-2.5V", "strapping": false },
+    { "pin": "GPIO5", "function": "Piezo audio PWM (transistor-driven)", "direction": "out", "voltageDomain": "3V3", "strapping": false },
+    { "pin": "GPIO6", "function": "Backlight PWM (low-side MOSFET gate)", "direction": "out", "voltageDomain": "3V3", "strapping": false },
+    { "pin": "GPIO7", "function": "Daughterboard INT", "direction": "in", "voltageDomain": "3V3", "pull": "pull-down 100k", "strapping": false },
+    { "pin": "GPIO8", "function": "I2C SDA (daughterboard)", "direction": "open-drain", "voltageDomain": "3V3", "pull": "pull-up 4.7k", "strapping": true, "strappingApproval": "approved: pull-up is compatible with SPI-boot strap requirement; documented in DEC-004 metadata and risks.md R-02" },
+    { "pin": "GPIO9", "function": "I2C SCL (daughterboard)", "direction": "open-drain", "voltageDomain": "3V3", "pull": "pull-up 4.7k", "strapping": true, "strappingApproval": "approved: pull-up keeps BOOT high in normal operation; download mode requires holding SCL low at reset via internal service header only; documented in risks.md R-02" },
+    { "pin": "GPIO10", "function": "WS2812B-class RGB token-well chain data", "direction": "out", "voltageDomain": "3V3", "strapping": false },
+    { "pin": "GPIO18", "function": "USB D-", "direction": "usb", "voltageDomain": "USB", "strapping": false },
+    { "pin": "GPIO19", "function": "USB D+", "direction": "usb", "voltageDomain": "USB", "strapping": false },
+    { "pin": "GPIO20", "function": "UART0 RX (programming/console; internal service header only)", "direction": "in", "voltageDomain": "3V3", "strapping": false },
+    { "pin": "GPIO21", "function": "UART0 TX (programming/console; internal service header only)", "direction": "out", "voltageDomain": "3V3", "strapping": false }
+  ],
+  "restrictedPinPolicy": {
+    "strappingPins": ["GPIO2", "GPIO8", "GPIO9"],
+    "approvedUses": { "GPIO2": "reserved-unused with pull-up", "GPIO8": "I2C SDA with pull-up", "GPIO9": "I2C SCL with pull-up" },
+    "anyOtherUse": "violation — flagged by SEC-INTERFACE-INTEGRITY-001"
+  }
+}

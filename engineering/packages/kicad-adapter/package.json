@@ -1,0 +1,28 @@
+{
+  "name": "@logichub-engineering/kicad-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "lint": "tsc --build"
+  },
+  "dependencies": {
+    "@logichub-engineering/shared": "workspace:*",
+    "@logichub-engineering/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@logichub-engineering/persistence": "workspace:*",
+    "@logichub-engineering/artifact-store": "workspace:*"
+  }
+}

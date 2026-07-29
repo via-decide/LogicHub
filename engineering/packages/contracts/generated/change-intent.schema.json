@@ -1,0 +1,134 @@
+{
+  "$ref": "#/definitions/ChangeIntent",
+  "definitions": {
+    "ChangeIntent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "default": "0.1.0"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseRevisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetBranch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestText": {
+          "type": "string"
+        },
+        "changeType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestedOperations": {
+          "type": "array",
+          "items": {}
+        },
+        "expectedObjectChanges": {
+          "type": "array",
+          "items": {}
+        },
+        "preserve": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "optimize": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {}
+        },
+        "approvalPolicy": {
+          "type": "object",
+          "properties": {
+            "requiredApprovals": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "autoMerge": {
+              "type": "boolean",
+              "const": false
+            }
+          },
+          "required": [
+            "requiredApprovals",
+            "autoMerge"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "captured",
+            "planned",
+            "executing",
+            "generated",
+            "validating",
+            "validated",
+            "review",
+            "accepted",
+            "rejected",
+            "failed",
+            "cancelled"
+          ],
+          "default": "captured"
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "baseRevisionId",
+        "targetBranch",
+        "title",
+        "changeType",
+        "requestedOperations",
+        "expectedObjectChanges",
+        "preserve",
+        "optimize",
+        "constraints",
+        "approvalPolicy",
+        "createdBy",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

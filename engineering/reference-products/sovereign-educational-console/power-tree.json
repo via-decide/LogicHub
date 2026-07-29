@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "0.1.0",
+  "productId": "sovereign-educational-console",
+  "productRevision": "v0.1",
+  "sources": [
+    {
+      "name": "USB-C",
+      "voltage": { "value": 5.0, "unit": "V", "provenance": "estimate:engineering (USB default)", "evidenceGrade": "estimated" },
+      "maxCurrent": { "value": 500, "unit": "mA", "provenance": "estimate:engineering (no PD negotiation; 5.1k CC pull-downs required)", "evidenceGrade": "estimated" },
+      "feeds": ["charger"]
+    },
+    {
+      "name": "battery",
+      "type": "protected Li-po 1200 mAh",
+      "voltageNominal": { "value": 3.7, "unit": "V", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "voltageFull": { "value": 4.2, "unit": "V", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "dischargeFloor": { "value": 3.5, "unit": "V", "provenance": "estimate:engineering (LDO dropout margin)", "evidenceGrade": "estimated" },
+      "feeds": ["power-path"]
+    }
+  ],
+  "converters": [
+    {
+      "name": "charger",
+      "topology": "TP4056-class linear cell charger",
+      "programCurrent": { "value": 500, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "notes": "Charge-while-operate requires the load-sharing power-path (DEC-002). Charger dissipation at 500 mA from 5 V into a 3.0-3.6 V cell is up to ~1 W and must be bench-verified (validation-plan test 2).",
+      "output": "power-path"
+    },
+    {
+      "name": "power-path",
+      "topology": "P-MOSFET load-sharing power path",
+      "notes": "Explicit implementation obligation per DEC-002; NOT assumed present on a generic TP4056 module.",
+      "output": "VBAT_SW"
+    },
+    {
+      "name": "ldo-3v3",
+      "topology": "linear-ldo",
+      "part": "AP2112K-3.3-class",
+      "input": "VBAT_SW",
+      "outputVoltage": { "value": 3.3, "unit": "V", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+      "dropout": { "value": 600, "unit": "mV", "provenance": "estimate:engineering (datasheet not in corpus)", "evidenceGrade": "estimated" },
+      "maxOutputCurrent": { "value": 600, "unit": "mA", "provenance": "estimate:engineering (datasheet not in corpus)", "evidenceGrade": "estimated" },
+      "thermalResistanceJunctionAmbient": { "value": 250, "unit": "K/W", "provenance": "estimate:engineering (SOT-23-5 on small copper; datasheet not in corpus)", "evidenceGrade": "estimated", "thermalResistanceClass": "estimated"
+      },
+      "output": "3V3"
+    }
+  ],
+  "rails": [
+    {
+      "name": "VBAT_SW",
+      "kind": "unregulated-switched",
+      "protection": "PPTC hold 1.1 A / trip 2.2 A (estimated)",
+      "loads": [
+        { "name": "backlight LED strip", "currentMax": { "value": 60, "unit": "mA", "provenance": "task-freeze ledPolicy", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.5, "unit": "fraction", "provenance": "task-freeze (default brightness 50%)", "evidenceGrade": "estimated" } },
+        { "name": "daughterboard VBAT pin", "currentMax": { "value": 300, "unit": "mA", "provenance": "task-freeze", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.0, "unit": "fraction", "provenance": "task-freeze (no daughterboard in reference case)", "evidenceGrade": "estimated" } }
+      ]
+    },
+    {
+      "name": "3V3",
+      "kind": "regulated",
+      "protection": "PPTC hold 0.5 A / trip 1.0 A on daughterboard branch (estimated)",
+      "loads": [
+        { "name": "ESP32-C3 active", "currentTypical": { "value": 80, "unit": "mA", "provenance": "estimate:engineering (Wi-Fi off; datasheet not in corpus)", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.7, "unit": "fraction", "provenance": "estimate:engineering (classroom interaction profile)", "evidenceGrade": "estimated" } },
+        { "name": "ESP32-C3 idle (light interaction)", "currentTypical": { "value": 15, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.3, "unit": "fraction", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } },
+        { "name": "token-well RGB strobe (single bay)", "currentPeak": { "value": 24, "unit": "mA", "provenance": "task-freeze ledPolicy", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.05, "unit": "fraction", "provenance": "task-freeze ledPolicy", "evidenceGrade": "estimated" } },
+        { "name": "WS2812B quiescent (4 emitters dark)", "currentTypical": { "value": 4, "unit": "mA", "provenance": "estimate:engineering (~1 mA each; datasheet not in corpus)", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 1.0, "unit": "fraction", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } },
+        { "name": "piezo audio", "currentTypical": { "value": 10, "unit": "mA", "provenance": "estimate:engineering", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.02, "unit": "fraction", "provenance": "estimate:engineering (short chimes)", "evidenceGrade": "estimated" } },
+        { "name": "LDR dividers (4x)", "currentTypical": { "value": 0.6, "unit": "mA", "provenance": "estimate:engineering (4 x ~0.15 mA at 10k+LDR)", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 1.0, "unit": "fraction", "provenance": "estimate:engineering", "evidenceGrade": "estimated" } },
+        { "name": "daughterboard 3V3 allowance", "currentMax": { "value": 100, "unit": "mA", "provenance": "task-freeze", "evidenceGrade": "estimated" }, "dutyDefault": { "value": 0.0, "unit": "fraction", "provenance": "task-freeze (no daughterboard in reference case)", "evidenceGrade": "estimated" } }
+      ]
+    }
+  ],
+  "thermal": {
+    "ambientDefault": { "value": 30, "unit": "degC", "provenance": "estimate:engineering (Indian classroom)", "evidenceGrade": "estimated" },
+    "ambientMax": { "value": 40, "unit": "degC", "provenance": "estimate:engineering", "evidenceGrade": "estimated" },
+    "maxComponentTemperature": { "value": 85, "unit": "degC", "provenance": "estimate:engineering (commercial-grade parts; datasheets not in corpus)", "evidenceGrade": "estimated" },
+    "maxTouchableSurfaceTemperature": { "value": 48, "unit": "degC", "provenance": "estimate:engineering (child-touchable surface policy; standard evidence not in corpus)", "evidenceGrade": "estimated" },
+    "enclosureThermalResistanceClass": "unknown",
+    "notes": "Enclosure effective thermal resistance is UNKNOWN until measured (validation-plan tests 2 and 3). Rule 1 must therefore return requires_validation, never pass, for enclosure-temperature margins."
+  }
+}
