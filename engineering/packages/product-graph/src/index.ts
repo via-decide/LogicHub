@@ -20,6 +20,7 @@ export {
   SensorParamsSchema, type SensorParams,
   ConnectivityTypeSchema, type ConnectivityType,
   ConnectivityParamsSchema, type ConnectivityParams,
+  SupplyEntrySchema, type SupplyEntry,
   OperatorAppParamsSchema, type OperatorAppParams,
 } from './schemas/node-params.schema.js';
 
