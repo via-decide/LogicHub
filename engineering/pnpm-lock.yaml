@@ -130,6 +130,24 @@ importers:
         specifier: ~3.24.0
         version: 3.24.4
 
+  packages/project-capsule:
+    dependencies:
+      '@logichub-engineering/generated-surfaces':
+        specifier: workspace:*
+        version: link:../generated-surfaces
+      '@logichub-engineering/kit-matching':
+        specifier: workspace:*
+        version: link:../kit-matching
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
   packages/repository-engine:
     dependencies:
       '@logichub-engineering/contracts':

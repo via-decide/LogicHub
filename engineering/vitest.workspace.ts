@@ -12,4 +12,5 @@ export default defineWorkspace([
   'packages/product-graph',
   'packages/kit-matching',
   'packages/generated-surfaces',
+  'packages/project-capsule',
 ]);
