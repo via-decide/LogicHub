@@ -376,6 +376,27 @@ export const COMPONENT_CATALOGUE: readonly PhysicalComponent[] = [
     notes: 'Prototype only. Carries no ingress, drop, or flammability rating.',
   }),
   component({
+    id: 'storage-w25q64jv',
+    name: '8 MB SPI NOR flash',
+    family: 'storage',
+    partFamily: 'W25Q64JV',
+    satisfiesNodeType: null,
+    electrical: {
+      supplyVoltageMinV: 2.7, supplyVoltageMaxV: 3.6,
+      typicalCurrentMa: 4, envelopeSource: 'DATASHEET',
+    },
+    providesCapabilities: {
+      'storage.present': true,
+      'storage.bytes': 8_388_608,
+      'storage.offline': true,
+    },
+    notes:
+      'Carries a project capsule offline, beside the controller rather than in its '
+      + 'program space. Figures are the published values for the W25Q64JV family; '
+      + 'confirm them against the datasheet revision for the exact part ordered.',
+  }),
+
+  component({
     id: 'wiring-jumper-set',
     name: 'Jumper wire set',
     family: 'wiring',

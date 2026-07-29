@@ -39,3 +39,13 @@ export {
   parseCapsule,
   importProductGraph,
 } from './io/capsule-io.js';
+
+export {
+  W25Q64JV,
+  planCartridgeLayout,
+  estimateWear,
+  type FlashDeviceProfile,
+  type FileLayoutEntry,
+  type CartridgeLayout,
+  type WearEstimate,
+} from './cartridge/cartridge-layout.js';
