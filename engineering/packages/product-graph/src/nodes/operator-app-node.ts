@@ -255,6 +255,7 @@ function sensorUnit(sensorType: string | undefined): string {
     case 'distance': return 'mm';
     case 'temperature': return 'degC';
     case 'light': return 'lux';
+    case 'moisture': return '%';
     case 'imu': return 'deg';
     default: return '';
   }
