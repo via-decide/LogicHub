@@ -14,8 +14,20 @@ export type BatteryParams = z.infer<typeof BatteryParamsSchema>;
 export const ControllerModelSchema = z.enum(['esp32', 'rp2040', 'rp2350', 'stm32f4']);
 export type ControllerModel = z.infer<typeof ControllerModelSchema>;
 
+/**
+ * Where the supply enters the controller.
+ *
+ * direct-3v3 — the regulated logic rail is fed directly, so the chip's own
+ *              absolute maximum applies.
+ * board-vin  — the supply enters a development board's input and passes
+ *              through its onboard regulator, which tolerates a wider range.
+ */
+export const SupplyEntrySchema = z.enum(['direct-3v3', 'board-vin']);
+export type SupplyEntry = z.infer<typeof SupplyEntrySchema>;
+
 export const ControllerParamsSchema = z.object({
   controller: ControllerModelSchema.default('esp32'),
+  supplyEntry: SupplyEntrySchema.default('direct-3v3'),
   assignedPins: z.record(z.string(), z.string()).default({}),
   enabledPeripherals: z.array(z.string()).default([]),
 });
@@ -35,7 +47,9 @@ export const MotorParamsSchema = z.object({
 });
 export type MotorParams = z.infer<typeof MotorParamsSchema>;
 
-export const SensorTypeSchema = z.enum(['distance', 'line', 'temperature', 'light', 'imu']);
+export const SensorTypeSchema = z.enum([
+  'distance', 'line', 'temperature', 'light', 'imu', 'moisture',
+]);
 export type SensorType = z.infer<typeof SensorTypeSchema>;
 
 export const SensorParamsSchema = z.object({

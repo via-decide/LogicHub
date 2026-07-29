@@ -10,4 +10,5 @@ export default defineWorkspace([
   'packages/repository-engine',
   'packages/validation-engine',
   'packages/product-graph',
+  'packages/kit-matching',
 ]);

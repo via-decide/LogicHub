@@ -22,7 +22,11 @@ export interface ControllerProfile {
   hasWifi: boolean;
   hasBle: boolean;
   operatingVoltageV: number;
+  /** Absolute maximum on the chip's own logic rail. */
   absoluteMaxInputV: number;
+  /** Input range a development board's onboard regulator accepts. */
+  boardInputMinV: number;
+  boardInputMaxV: number;
   maxClockMhz: number;
   idleCurrentMa: number;
   activeCurrentMa: number;
@@ -38,21 +42,25 @@ export const CONTROLLER_PROFILES: Record<ControllerModel, ControllerProfile> = {
   esp32: {
     gpioCount: 34, ramKb: 520, flashMb: 4, adcChannels: 18, pwmChannels: 16,
     hasWifi: true, hasBle: true, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
+    boardInputMinV: 4.5, boardInputMaxV: 9.0,
     maxClockMhz: 240, idleCurrentMa: 20, activeCurrentMa: 160,
   },
   rp2040: {
     gpioCount: 30, ramKb: 264, flashMb: 2, adcChannels: 4, pwmChannels: 16,
     hasWifi: false, hasBle: false, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
+    boardInputMinV: 4.5, boardInputMaxV: 9.0,
     maxClockMhz: 133, idleCurrentMa: 18, activeCurrentMa: 55,
   },
   rp2350: {
     gpioCount: 30, ramKb: 520, flashMb: 4, adcChannels: 4, pwmChannels: 24,
     hasWifi: false, hasBle: false, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
+    boardInputMinV: 4.5, boardInputMaxV: 9.0,
     maxClockMhz: 150, idleCurrentMa: 20, activeCurrentMa: 60,
   },
   stm32f4: {
     gpioCount: 50, ramKb: 192, flashMb: 1, adcChannels: 16, pwmChannels: 20,
     hasWifi: false, hasBle: false, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
+    boardInputMinV: 4.5, boardInputMaxV: 9.0,
     maxClockMhz: 168, idleCurrentMa: 15, activeCurrentMa: 50,
   },
 };
@@ -95,6 +103,9 @@ export const ControllerNode: NodePlugin<ControllerParams> = {
       supportedMotorChannels: Math.floor(profile.pwmChannels / 2),
       operatingVoltageV: profile.operatingVoltageV,
       absoluteMaxInputV: profile.absoluteMaxInputV,
+      supplyEntry: params.supplyEntry,
+      acceptedSupplyMinV: acceptedSupplyRange(params, profile).minV,
+      acceptedSupplyMaxV: acceptedSupplyRange(params, profile).maxV,
       maxClockMhz: profile.maxClockMhz,
       activeCurrentMa: profile.activeCurrentMa,
       idleCurrentMa: profile.idleCurrentMa,
@@ -153,22 +164,25 @@ export const ControllerNode: NodePlugin<ControllerParams> = {
           message: 'Upstream supply voltage is unknown; power compatibility is unverified.',
         });
       }
-    } else if (round(supplyV) > round(profile.absoluteMaxInputV)) {
-      results.push({
-        code: 'controller.regulator-required',
-        severity: 'error',
-        message:
-          `Supply is ${round(supplyV, 2)} V but ${params.controller} tolerates at most ` +
-          `${profile.absoluteMaxInputV} V. A regulator stage is required.`,
-      });
-    } else if (round(supplyV) < round(profile.operatingVoltageV)) {
-      results.push({
-        code: 'controller.undervoltage',
-        severity: 'error',
-        message:
-          `Supply is ${round(supplyV, 2)} V, below the ${profile.operatingVoltageV} V ` +
-          'operating voltage.',
-      });
+    } else {
+      const accepted = acceptedSupplyRange(params, profile);
+      if (round(supplyV) > round(accepted.maxV)) {
+        results.push({
+          code: 'controller.regulator-required',
+          severity: 'error',
+          message:
+            `Supply is ${round(supplyV, 2)} V but ${params.controller} accepts at most ` +
+            `${accepted.maxV} V at its ${accepted.label}. A regulator stage is required.`,
+        });
+      } else if (round(supplyV) < round(accepted.minV)) {
+        results.push({
+          code: 'controller.undervoltage',
+          severity: 'error',
+          message:
+            `Supply is ${round(supplyV, 2)} V, below the ${accepted.minV} V this ` +
+            `${params.controller} needs at its ${accepted.label}.`,
+        });
+      }
     }
 
     const duplicatePins = findDuplicatePins(params.assignedPins);
@@ -191,6 +205,20 @@ export const ControllerNode: NodePlugin<ControllerParams> = {
     return BOUNDS;
   },
 };
+
+/**
+ * The supply range that actually applies, which depends on where the supply
+ * enters. Feeding a development board's input goes through its onboard
+ * regulator and tolerates a wider range than the bare logic rail does.
+ */
+function acceptedSupplyRange(
+  params: ControllerParams,
+  profile: ControllerProfile,
+): { minV: number; maxV: number; label: string } {
+  return params.supplyEntry === 'board-vin'
+    ? { minV: profile.boardInputMinV, maxV: profile.boardInputMaxV, label: 'board input' }
+    : { minV: profile.operatingVoltageV, maxV: profile.absoluteMaxInputV, label: 'logic rail' };
+}
 
 function findDuplicatePins(assignedPins: Record<string, string>): string[] {
   const seen = new Set<string>();

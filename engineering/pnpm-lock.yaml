@@ -75,6 +75,18 @@ importers:
         specifier: workspace:*
         version: link:../persistence
 
+  packages/kit-matching:
+    dependencies:
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
   packages/persistence:
     dependencies:
       '@logichub-engineering/contracts':

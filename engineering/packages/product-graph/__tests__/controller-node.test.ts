@@ -62,6 +62,42 @@ describe('Gate 2 — controller node world', () => {
       .toContain('controller.regulator-required');
   });
 
+  it('accepts a board-input supply that would destroy the bare logic rail', () => {
+    // 4.8 V is well past the 3.6 V chip limit but inside what a development
+    // board's onboard regulator accepts.
+    const params = ControllerNode.parseParameters({
+      controller: 'esp32', supplyEntry: 'board-vin',
+    });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 4.8 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    expect(ControllerNode.validate(params, ctx)).toHaveLength(0);
+  });
+
+  it('still rejects a board-input supply above the regulator range', () => {
+    const params = ControllerNode.parseParameters({
+      controller: 'esp32', supplyEntry: 'board-vin',
+    });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 14.8 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    expect(ControllerNode.validate(params, ctx).map(c => c.code))
+      .toContain('controller.regulator-required');
+  });
+
+  it('defaults to the logic rail, so an unstated supply entry stays strict', () => {
+    const params = ControllerNode.parseParameters({ controller: 'esp32' });
+    expect(params.supplyEntry).toBe('direct-3v3');
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 4.8 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    expect(ControllerNode.validate(params, ctx).map(c => c.code))
+      .toContain('controller.regulator-required');
+  });
+
   it('flags a supply below the operating voltage', () => {
     const params = ControllerNode.parseParameters({ controller: 'esp32' });
     const ctx = bareContext({
