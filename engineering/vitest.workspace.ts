@@ -15,4 +15,5 @@ export default defineWorkspace([
   'packages/project-capsule',
   'packages/physical-loop',
   'packages/product-repository',
+  'packages/commerce',
 ]);
