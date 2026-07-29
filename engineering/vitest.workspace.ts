@@ -14,4 +14,5 @@ export default defineWorkspace([
   'packages/generated-surfaces',
   'packages/project-capsule',
   'packages/physical-loop',
+  'packages/product-repository',
 ]);
