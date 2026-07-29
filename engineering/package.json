@@ -6,9 +6,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine packages/product-graph packages/kit-matching packages/generated-surfaces packages/project-capsule packages/physical-loop",
+    "build": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine packages/product-graph packages/kit-matching packages/generated-surfaces packages/project-capsule packages/physical-loop packages/product-repository",
     "lint": "pnpm -r lint",
-    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine packages/product-graph packages/kit-matching packages/generated-surfaces packages/project-capsule packages/physical-loop",
+    "typecheck": "tsc --build packages/shared packages/contracts packages/persistence packages/artifact-store packages/git-adapter packages/kicad-adapter packages/repository-engine packages/validation-engine packages/product-graph packages/kit-matching packages/generated-surfaces packages/project-capsule packages/physical-loop packages/product-repository",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "pnpm -r test:integration",
