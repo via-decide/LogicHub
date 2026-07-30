@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Waiting List — Storage Cartridge | LogicHub</title>
+<meta name="description" content="Waiting List — Storage Cartridge for LogicHub.">
+<style>
+:root{--orange:#ff671f;--dark:#000}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dark);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;line-height:1.8}
+.container{max-width:800px;margin:0 auto}
+h1{color:var(--orange);margin-bottom:10px;font-size:2rem}
+.updated{color:#888;font-size:.9rem;margin-bottom:30px}
+h2{margin:30px 0 15px;font-size:1.5rem}
+h3{margin:20px 0 10px;font-size:1.15rem;color:#ddd}
+p{margin-bottom:15px;color:#ccc}
+ul{margin:15px 0 15px 20px;color:#ccc}
+li{margin-bottom:10px}
+a{color:var(--orange);text-decoration:none}
+a:hover{text-decoration:underline}
+dl{margin:15px 0;color:#ccc}
+dt{font-weight:700;margin-top:12px}
+dd{margin-left:0;color:#aaa}
+.notice{border:1px solid var(--orange);border-radius:8px;padding:16px;margin:20px 0;background:rgba(255,103,31,.08)}
+.notice strong{color:var(--orange)}
+.back{display:inline-block;margin-top:30px;padding:12px 24px;background:var(--orange);color:#000;border-radius:50px;font-weight:900;text-decoration:none}
+.back:hover{background:#ff8c3f}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid #333;color:#888;font-size:.85rem}
+footer a{margin-right:14px}
+</style>
+</head><body><div class="container">
+
+<h1>Storage Cartridge</h1>
+<p class="updated">Waiting list · indicative price USD 20</p>
+
+<div class="notice">
+<strong>This does not exist yet.</strong>
+<p style="margin:8px 0 0">No cartridge has been built, measured, or sourced. This
+page records that you want to be told when there is one, and nothing more. You are
+not buying anything, no payment details are collected, and no delivery date is
+being offered.</p>
+</div>
+
+<h2>What it is meant to be</h2>
+<p>An 8&nbsp;MB storage module that carries a LogicHub project capsule offline,
+sitting beside a controller rather than inside its program space. The design target
+is a 64&nbsp;Mbit SPI NOR flash part: 2.7–3.6&nbsp;V, 256-byte pages, 4&nbsp;KB
+erase sectors.</p>
+
+<h2>Why it exists</h2>
+<p>Your design stays on your own hardware. A capsule is self-contained, carries its
+own checksums, and resolves nothing over a network when opened — so the work can be
+handed to someone, archived, or moved between machines without passing through a
+service.</p>
+
+<h2>What is honestly known</h2>
+<ul>
+<li>A capsule of a full worked example occupies about 2% of the part, leaving
+roughly 7.8&nbsp;MB free. That is measured from real generated output.</li>
+<li>The flash figures above are published values for the part family and still need
+confirming against the datasheet revision of whatever is actually ordered.</li>
+<li>USD 20 is <strong>indicative</strong>. Pricing is not fixed, and it may move in
+either direction once the part is sourced and assembly is costed.</li>
+<li>There is no schedule. When there is one, the people on this list hear first.</li>
+</ul>
+
+<h2>Join the list</h2>
+<form id="waitlist-form">
+<p><label for="wl-email">Email</label><br>
+<input id="wl-email" name="email" type="email" required autocomplete="email"
+style="width:100%;padding:10px;border-radius:6px;border:1px solid #444;background:#111;color:#fff;font-size:1rem">
+</p>
+<p><label for="wl-note">Anything you want us to know (optional)</label><br>
+<textarea id="wl-note" name="note" rows="3" maxlength="500"
+style="width:100%;padding:10px;border-radius:6px;border:1px solid #444;background:#111;color:#fff;font-size:1rem"></textarea>
+</p>
+<button type="submit" class="back" style="border:0;cursor:pointer">Add me to the list</button>
+</form>
+<p id="wl-status" role="status" style="margin-top:16px"></p>
+<p style="font-size:.85rem;color:#888">We use your address to tell you about this
+one thing. It is covered by our <a href="/privacy">privacy policy</a>, and you can
+ask us to remove it at any time by emailing
+<a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a>.</p>
+
+<script>
+document.getElementById('waitlist-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  var status = document.getElementById('wl-status');
+  var button = event.target.querySelector('button');
+  button.disabled = true;
+  status.textContent = 'Recording...';
+  try {
+    var response = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('wl-email').value,
+        note: document.getElementById('wl-note').value
+      })
+    });
+    var data = await response.json();
+    if (response.ok) {
+      status.textContent = data.message;
+      event.target.style.display = 'none';
+    } else {
+      status.textContent = data.message || 'That did not work. Please email dharam@viadecide.com.';
+      button.disabled = false;
+    }
+  } catch (error) {
+    status.textContent = 'Could not reach the server. Please email dharam@viadecide.com.';
+    button.disabled = false;
+  }
+});
+</script>
+
+<a class="back" href="/">Back to LogicHub</a>
+<footer>
+<a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refund-policy">Refunds</a><a href="/shipping-policy">Shipping</a><a href="/cookies">Cookies</a><a href="/contact">Contact</a>
+<p style="margin-top:12px">Every query: <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></p>
+</footer>
+</div></body></html>

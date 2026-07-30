@@ -1,0 +1,16 @@
+{
+  "name": "LogicHub",
+  "short_name": "LogicHub",
+  "description": "Design hardware virtually and see what your configuration can become.",
+  "id": "/",
+  "start_url": "/product",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07110f",
+  "theme_color": "#07110f",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
