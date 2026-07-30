@@ -9,6 +9,7 @@ import {
   type ConnectionSpec,
   type ConstraintResult,
   type MetricValue,
+  type NodeContext,
   type NodePlugin,
   type ParameterBound,
 } from './node-plugin.js';
@@ -34,6 +35,23 @@ const TYPICAL_LOAD_FRACTION = 0.4;
  */
 const OVERVOLTAGE_MARGIN = 1.2;
 const UNDERVOLTAGE_MARGIN = 0.8;
+
+/**
+ * A brushed DC motor's free speed is very nearly proportional to the voltage
+ * across it, so a pack change moves the wheels. Speed is scaled by the ratio
+ * of applied to rated voltage.
+ *
+ * Only brushed motors are scaled. A servo is a position device driven by a
+ * signal, and a stepper follows its commanded step rate — neither speeds up
+ * because the supply rose, so applying the same ratio to them would invent a
+ * change that does not happen.
+ *
+ * Torque is deliberately left at its nameplate figure. Stall torque does track
+ * current, and current tracks voltage, but the winding resistance that sets
+ * that relationship is not in the model. Scaling torque on that basis would be
+ * a guess dressed as arithmetic.
+ */
+const VOLTAGE_SCALED_TYPES: ReadonlySet<MotorType> = new Set<MotorType>(['dc-brushed']);
 
 const DRIVER_REQUIREMENT: Record<MotorType, string> = {
   'dc-brushed': 'h-bridge',
@@ -64,15 +82,21 @@ export const MotorNode: NodePlugin<MotorParams> = {
     return MotorParamsSchema.parse(raw);
   },
 
-  deriveMetrics(params) {
+  deriveMetrics(params, ctx) {
     const efficiency = params.gearRatio === 1 ? 1 : GEARBOX_EFFICIENCY;
-    const effectiveRpm = round(params.noLoadRpm / params.gearRatio);
+
+    const { appliedVoltageV, voltageRatio, speedBasis } = resolveAppliedVoltage(params, ctx);
+
+    const effectiveRpm = round((params.noLoadRpm * voltageRatio) / params.gearRatio);
     const effectiveTorqueNcm = round(params.stallTorqueNcm * params.gearRatio * efficiency);
     const speedMps = round((Math.PI * params.wheelDiameterMm * effectiveRpm) / 60000);
     const typicalCurrentA = round(params.stallCurrentA * TYPICAL_LOAD_FRACTION);
     const powerConsumptionW = round(params.ratedVoltageV * typicalCurrentA);
 
     return {
+      appliedVoltageV,
+      voltageRatio,
+      speedBasis,
       motorType: params.motorType,
       gearboxEfficiency: efficiency,
       effectiveRpm,
@@ -83,8 +107,9 @@ export const MotorNode: NodePlugin<MotorParams> = {
       powerConsumptionW,
       stallPowerW: round(params.ratedVoltageV * params.stallCurrentA),
       driverRequirement: DRIVER_REQUIREMENT[params.motorType],
-      // Speed and torque come from nameplate figures under no load; real
-      // output depends on the built machine and must be measured.
+      // Speed follows the supply from nameplate free-running figures; torque
+      // stays at its nameplate value. Both describe an unloaded motor, so real
+      // output on a built machine still has to be measured.
       epistemicState: 'ESTIMATED',
     };
   },
@@ -168,6 +193,36 @@ export const MotorNode: NodePlugin<MotorParams> = {
     return BOUNDS;
   },
 };
+
+/**
+ * The voltage actually across the motor, and how that was arrived at.
+ *
+ * `speedBasis` is the honest part: 'supply' means a real upstream voltage was
+ * resolved and the speed reflects it, while 'nameplate' means nothing upstream
+ * published one and the figure is the motor's own rating. The two are not
+ * interchangeable, and a reader must be able to tell which they have.
+ */
+function resolveAppliedVoltage(
+  params: MotorParams,
+  ctx: NodeContext,
+): { appliedVoltageV: number; voltageRatio: number; speedBasis: string } {
+  const supplyV = readNumber(ctx.upstream, 'power.voltageV');
+  const scalable = VOLTAGE_SCALED_TYPES.has(params.motorType);
+
+  if (!scalable || supplyV === undefined) {
+    return {
+      appliedVoltageV: params.ratedVoltageV,
+      voltageRatio: 1,
+      speedBasis: 'nameplate',
+    };
+  }
+
+  return {
+    appliedVoltageV: round(supplyV),
+    voltageRatio: round(supplyV / params.ratedVoltageV),
+    speedBasis: 'supply',
+  };
+}
 
 function hasUpstreamControl(ctx: { nodeId: string; graph: { connections: readonly { to: string; type: string }[] } }): boolean {
   return ctx.graph.connections.some(c => c.to === ctx.nodeId && c.type === 'control');
