@@ -50,7 +50,11 @@ you a design we were never sent, and we cannot produce one if asked for it.</p>
 <h2>What we collect</h2>
 <dl>
 <dt>Waiting list</dt><dd>Your email address, and anything else you choose to type
-into the form. Collected only when you submit it.</dd>
+into the form. Collected only when you submit it. We email you once to confirm, and
+you are not counted as being on the list until you click that link.</dd>
+<dt>Abuse counters</dt><dd>A one-way hash of your network address, held for one hour
+so the signup form cannot be flooded. The address itself is not stored, and the
+counter records nothing about who you are or what you looked at.</dd>
 <dt>Correspondence</dt><dd>Messages you send us, so we can reply and keep a record
 of what was asked.</dd>
 <dt>Server logs</dt><dd>Standard request logs kept by our hosting provider,
@@ -72,7 +76,9 @@ any time, and withdrawing is as easy as giving it: email
 <h2>How long we keep it</h2>
 <dl>
 <dt>Waiting list entries</dt><dd>Until the list is fulfilled or you ask us to
-remove you, whichever comes first.</dd>
+remove you, whichever comes first. An entry you never confirm is never written to
+again beyond the single confirmation email.</dd>
+<dt>Abuse counters</dt><dd>One hour.</dd>
 <dt>Correspondence</dt><dd>For as long as needed to resolve the matter, and then
 as required for our records.</dd>
 <dt>Server logs</dt><dd>As retained by our hosting provider under their standard
