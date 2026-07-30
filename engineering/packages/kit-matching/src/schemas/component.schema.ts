@@ -14,6 +14,7 @@ export const ComponentFamilySchema = z.enum([
   'mechanical',
   'wiring',
   'enclosure',
+  'storage',
 ]);
 export type ComponentFamily = z.infer<typeof ComponentFamilySchema>;
 

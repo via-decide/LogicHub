@@ -24,6 +24,24 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
+  packages/commerce:
+    dependencies:
+      '@logichub-engineering/kit-matching':
+        specifier: workspace:*
+        version: link:../kit-matching
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/project-capsule':
+        specifier: workspace:*
+        version: link:../project-capsule
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
   packages/contracts:
     dependencies:
       '@logichub-engineering/shared':
@@ -45,6 +63,18 @@ importers:
       tsx:
         specifier: ~4.21.0
         version: 4.21.1
+
+  packages/generated-surfaces:
+    dependencies:
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
 
   packages/git-adapter:
     dependencies:
@@ -106,11 +136,68 @@ importers:
         specifier: ~7.6.0
         version: 7.6.13
 
+  packages/physical-loop:
+    dependencies:
+      '@logichub-engineering/kit-matching':
+        specifier: workspace:*
+        version: link:../kit-matching
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/project-capsule':
+        specifier: workspace:*
+        version: link:../project-capsule
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
   packages/product-graph:
     dependencies:
       '@logichub-engineering/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
+  packages/product-repository:
+    dependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/project-capsule':
+        specifier: workspace:*
+        version: link:../project-capsule
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@logichub-engineering/validation-engine':
+        specifier: workspace:*
+        version: link:../validation-engine
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
+  packages/project-capsule:
+    dependencies:
+      '@logichub-engineering/generated-surfaces':
+        specifier: workspace:*
+        version: link:../generated-surfaces
+      '@logichub-engineering/kit-matching':
+        specifier: workspace:*
+        version: link:../kit-matching
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
       '@logichub-engineering/shared':
         specifier: workspace:*
         version: link:../shared

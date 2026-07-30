@@ -7,7 +7,10 @@ export const BatteryParamsSchema = z.object({
   chemistry: BatteryChemistrySchema.default('lipo'),
   cellCount: z.number().int().min(1).max(6).default(3),
   capacityMah: z.number().positive().default(2200),
-  dischargeRating: z.number().positive().default(25),
+  // A pack added with these defaults must satisfy the explore-mode bounds this
+  // same plugin publishes, or a beginner's first node is invalid the moment it
+  // appears. 2200 mAh at 8C is 17.6 A, inside the 20 A explore ceiling.
+  dischargeRating: z.number().positive().default(8),
 });
 export type BatteryParams = z.infer<typeof BatteryParamsSchema>;
 
@@ -30,6 +33,16 @@ export const ControllerParamsSchema = z.object({
   supplyEntry: SupplyEntrySchema.default('direct-3v3'),
   assignedPins: z.record(z.string(), z.string()).default({}),
   enabledPeripherals: z.array(z.string()).default([]),
+  /**
+   * Junction-to-ambient thermal resistance of the board's onboard regulator,
+   * in K/W. That regulator is the part whose temperature the power rule
+   * estimates, and its figure depends on the board layout rather than the chip,
+   * so it is absent until someone declares it for the board in hand.
+   */
+  regulatorThermalResistanceKPerW: z.number().positive().optional(),
+  regulatorThermalResistanceClass: z
+    .enum(['measured', 'datasheet', 'estimated', 'unknown'])
+    .default('unknown'),
 });
 export type ControllerParams = z.infer<typeof ControllerParamsSchema>;
 
@@ -46,6 +59,48 @@ export const MotorParamsSchema = z.object({
   wheelDiameterMm: z.number().positive().default(65),
 });
 export type MotorParams = z.infer<typeof MotorParamsSchema>;
+
+export const DriverFamilySchema = z.enum(['h-bridge', 'stepper-driver', 'low-side-switch']);
+export type DriverFamily = z.infer<typeof DriverFamilySchema>;
+
+/**
+ * Grade of the thermal resistance figure, matching the vocabulary the
+ * validation engine already uses.
+ *
+ * There is no default of 'estimated'. A junction-to-ambient figure nobody
+ * supplied is 'unknown', and unknown must reach the reader as unknown rather
+ * than as a plausible number of unstated origin.
+ */
+export const ThermalResistanceClassSchema = z.enum([
+  'measured', 'datasheet', 'estimated', 'unknown',
+]);
+export type ThermalResistanceClass = z.infer<typeof ThermalResistanceClassSchema>;
+
+/**
+ * A motor driver stage.
+ *
+ * Defaults describe a TB6612-class dual H-bridge, which is the part the Motion
+ * Starter kit already lists. The R_DS(on) default is the datasheet typical for
+ * one side of a channel at 25 degC; real conduction loss depends on die
+ * temperature, so this is arithmetic for sizing, not a measurement.
+ */
+export const DriverParamsSchema = z.object({
+  driverFamily: DriverFamilySchema.default('h-bridge'),
+  channels: z.number().int().min(1).max(8).default(2),
+  rdsOnMilliohm: z.number().positive().default(500),
+  logicVoltageV: z.number().positive().default(3.3),
+  supplyVoltageMinV: z.number().positive().default(2.5),
+  supplyVoltageMaxV: z.number().positive().default(13.5),
+  maxContinuousCurrentA: z.number().positive().default(1.2),
+  quiescentCurrentMa: z.number().nonnegative().default(2),
+  /**
+   * Junction-to-ambient thermal resistance, in K/W. Optional, and absent by
+   * default: the package this rides on is not known from the part alone.
+   */
+  thermalResistanceKPerW: z.number().positive().optional(),
+  thermalResistanceClass: ThermalResistanceClassSchema.default('unknown'),
+});
+export type DriverParams = z.infer<typeof DriverParamsSchema>;
 
 export const SensorTypeSchema = z.enum([
   'distance', 'line', 'temperature', 'light', 'imu', 'moisture',

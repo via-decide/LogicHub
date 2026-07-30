@@ -1,6 +1,7 @@
 import type { NodePlugin } from './node-plugin.js';
 import { BatteryNode } from './battery-node.js';
 import { ControllerNode } from './controller-node.js';
+import { DriverNode } from './driver-node.js';
 import { MotorNode } from './motor-node.js';
 import { SensorNode } from './sensor-node.js';
 import { ConnectivityNode } from './connectivity-node.js';
@@ -16,6 +17,7 @@ export type AnyNodePlugin = NodePlugin<never> & {
 const PLUGINS = [
   BatteryNode,
   ControllerNode,
+  DriverNode,
   MotorNode,
   SensorNode,
   ConnectivityNode,
