@@ -32,7 +32,8 @@ describe('Gate 2 — consequence propagation', () => {
 
     expect(findNode(graph, 'n1_battery').derivedMetrics.nominalVoltageV).toBe(3.6);
     expect(findNode(graph, 'n2_controller').derivedMetrics.availableGpio).toBe(30);
-    expect(findNode(graph, 'n3_motor_left').derivedMetrics.effectiveRpm).toBe(200);
+    // Nameplate 200 rpm at 3 V, scaled by the 3.6 V the pack actually supplies.
+    expect(findNode(graph, 'n3_motor_left').derivedMetrics.effectiveRpm).toBe(240);
     expect(findNode(graph, 'n7_app').derivedMetrics.controlCount).toBe(5);
   });
 

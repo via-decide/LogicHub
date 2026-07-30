@@ -7,6 +7,93 @@ function metricsFor(raw: Record<string, unknown> = {}) {
 }
 
 describe('Gate 2 — motor node world', () => {
+  it('scales a brushed motor speed with the voltage actually applied', () => {
+    // A brushed motor's free speed is very nearly proportional to the voltage
+    // across it, so a bigger pack turns the wheels faster.
+    const params = MotorNode.parseParameters({
+      motorType: 'dc-brushed', ratedVoltageV: 6, noLoadRpm: 200,
+    });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 7.2 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    const metrics = MotorNode.deriveMetrics(params, ctx);
+
+    expect(metrics.voltageRatio).toBe(1.2);
+    expect(metrics.effectiveRpm).toBe(240);
+    expect(metrics.appliedVoltageV).toBe(7.2);
+    expect(metrics.speedBasis).toBe('supply');
+  });
+
+  it('slows a brushed motor when the pack sits below its rating', () => {
+    const params = MotorNode.parseParameters({ ratedVoltageV: 6, noLoadRpm: 200 });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 4.8 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    expect(MotorNode.deriveMetrics(params, ctx).effectiveRpm).toBe(160);
+  });
+
+  it('falls back to the nameplate figure when no supply is known, and says so', () => {
+    // An unknown supply must not be silently treated as the rated voltage
+    // without the reader being able to tell.
+    const metrics = metricsFor({ ratedVoltageV: 6, noLoadRpm: 200 });
+    expect(metrics.effectiveRpm).toBe(200);
+    expect(metrics.voltageRatio).toBe(1);
+    expect(metrics.speedBasis).toBe('nameplate');
+  });
+
+  it('does not scale a servo, which is a position device', () => {
+    // A servo does not run faster because the rail rose; applying the ratio
+    // would invent a change that does not happen.
+    const params = MotorNode.parseParameters({
+      motorType: 'servo', ratedVoltageV: 5, noLoadRpm: 60,
+    });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 6 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    const metrics = MotorNode.deriveMetrics(params, ctx);
+
+    expect(metrics.effectiveRpm).toBe(60);
+    expect(metrics.speedBasis).toBe('nameplate');
+  });
+
+  it('does not scale a stepper, which follows its step rate', () => {
+    const params = MotorNode.parseParameters({
+      motorType: 'stepper', ratedVoltageV: 6, noLoadRpm: 120,
+    });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 12 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    expect(MotorNode.deriveMetrics(params, ctx).effectiveRpm).toBe(120);
+  });
+
+  it('leaves torque at its nameplate figure', () => {
+    // Stall torque does track current, and current tracks voltage, but the
+    // winding resistance that sets that relationship is not modelled. Scaling
+    // it here would be a guess dressed as arithmetic.
+    const params = MotorNode.parseParameters({ ratedVoltageV: 6, stallTorqueNcm: 8 });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 7.2 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    expect(MotorNode.deriveMetrics(params, ctx).effectiveTorqueNcm).toBe(8);
+  });
+
+  it('carries the scaled speed through to ground speed', () => {
+    const params = MotorNode.parseParameters({
+      ratedVoltageV: 6, noLoadRpm: 200, wheelDiameterMm: 65, gearRatio: 1,
+    });
+    const ctx = bareContext({
+      upstream: { 'power.voltageV': 7.2 },
+      upstreamNodes: [node('n_batt', 'battery')],
+    });
+    // pi x 65 mm x 240 rpm / 60000
+    expect(MotorNode.deriveMetrics(params, ctx).speedMps).toBeCloseTo(0.8168, 4);
+  });
+
   it('divides RPM by the gear ratio', () => {
     expect(metricsFor({ noLoadRpm: 300, gearRatio: 3 }).effectiveRpm).toBe(100);
   });

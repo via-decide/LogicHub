@@ -13,7 +13,8 @@ describe('Gate 2 — operator app node world', () => {
     expect(speedControls).toHaveLength(2);
     expect(directionControls).toHaveLength(2);
     expect(speedControls[0].unit).toBe('rpm');
-    expect(speedControls[0].max).toBe(200);
+    // 200 rpm nameplate at 3 V, run from a 3.6 V pack.
+    expect(speedControls[0].max).toBe(240);
   });
 
   it('marks every control as bound by the firmware interlocks', () => {
