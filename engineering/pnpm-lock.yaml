@@ -118,6 +118,24 @@ importers:
         specifier: ~7.6.0
         version: 7.6.13
 
+  packages/physical-loop:
+    dependencies:
+      '@logichub-engineering/kit-matching':
+        specifier: workspace:*
+        version: link:../kit-matching
+      '@logichub-engineering/product-graph':
+        specifier: workspace:*
+        version: link:../product-graph
+      '@logichub-engineering/project-capsule':
+        specifier: workspace:*
+        version: link:../project-capsule
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+
   packages/product-graph:
     dependencies:
       '@logichub-engineering/contracts':
