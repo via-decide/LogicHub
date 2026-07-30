@@ -12,6 +12,8 @@ import {
   paymentsDisabledResponse,
   razorpayCredentials,
 } from './_payments-config.js';
+import { getAdminDb } from './_sovereignAuth.js';
+import { markOrderPaid, recordVerificationRejection } from './_orders.js';
 
 export default async function handler(req, res) {
   if (!applyCors(req, res)) {
@@ -47,12 +49,59 @@ export default async function handler(req, res) {
   const verified = signatureMatches(`${orderId}|${paymentId}`, signature, keySecret);
 
   if (!verified) {
-    // An unverified payment is not a payment. It is never partially accepted.
+    // An unverified payment is not a payment. It is never partially accepted,
+    // and the order it names is left exactly as it was.
     console.warn('Rejected payment with an invalid signature', { orderId, paymentId });
+    await recordVerificationRejection(getAdminDb(), { orderId, paymentId })
+      .catch((error) => console.error('Could not record the rejection:', error));
     return res.status(400).json({ error: 'signature_mismatch', verified: false });
   }
 
-  return res.status(200).json({ verified: true, orderId, paymentId });
+  // The signature is good. Now the order has to be one we actually issued.
+  let result;
+  try {
+    result = await markOrderPaid(getAdminDb(), { orderId, paymentId });
+  } catch (error) {
+    // The signature held but we could not write the outcome. Reporting success
+    // here would leave a paid customer with no record that they paid.
+    console.error('Order update failed after a valid signature:', error);
+    return res.status(503).json({
+      error: 'order_update_failed',
+      verified: true,
+      recorded: false,
+      message:
+        'The payment signature is valid but the order could not be updated. '
+        + 'Do not retry the payment — contact dharam@viadecide.com with the payment id.',
+      paymentId,
+    });
+  }
+
+  if (!result.ok) {
+    if (result.reason === 'unknown_order') {
+      // A valid signature for an order this side never created means the order
+      // came from somewhere else. It is refused, not adopted.
+      console.warn('Verification for an order that was never created here', { orderId });
+      return res.status(404).json({ error: 'unknown_order', verified: true, recorded: false });
+    }
+
+    console.warn('Second payment against an already-paid order', { orderId, paymentId });
+    return res.status(409).json({
+      error: result.reason,
+      verified: true,
+      recorded: false,
+      message:
+        'This order is already paid by a different payment. Nothing has been changed. '
+        + 'Contact dharam@viadecide.com with both payment ids.',
+    });
+  }
+
+  return res.status(200).json({
+    verified: true,
+    recorded: true,
+    alreadyPaid: result.reason === 'already_paid',
+    orderId,
+    paymentId,
+  });
 }
 
 /**

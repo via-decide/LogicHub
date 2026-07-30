@@ -11,6 +11,8 @@ import {
   paymentsDisabledResponse,
   razorpayCredentials,
 } from './_payments-config.js';
+import { getAdminDb } from './_sovereignAuth.js';
+import { orderRecord, saveOrder } from './_orders.js';
 
 const ALLOWED_COUNTRIES = ['IN', 'LU', 'JP'];
 
@@ -96,6 +98,26 @@ export default async function handler(req, res) {
       currency: 'INR',
       receipt: `receipt_${Date.now()}`,
     });
+
+    // The amount recorded is the one from the table above, never one supplied by
+    // the caller, so a later verification is checked against what we decided to
+    // charge rather than what the browser says it agreed to.
+    try {
+      await saveOrder(
+        getAdminDb(),
+        orderRecord({ orderId: order.id, packageId, amount, currency: 'INR', country }),
+      );
+    } catch (error) {
+      // An order we cannot remember is one we cannot later verify. Nothing has
+      // been charged at this point, so refusing is the cheap failure.
+      console.error('Order record write failed; refusing the checkout:', error);
+      return res.status(503).json({
+        error: 'order_not_recorded',
+        message:
+          'The order could not be recorded, so checkout was stopped. No charge has been made.',
+      });
+    }
+
     return res.status(200).json({ order_id: order.id, amount, currency: 'INR' });
   } catch (error) {
     console.error('Razorpay Error:', error);
