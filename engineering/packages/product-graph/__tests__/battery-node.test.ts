@@ -98,6 +98,13 @@ describe('Gate 2 — battery node world', () => {
     expect(codes).toContain('battery.explore-peak-current');
   });
 
+  it('ships defaults that satisfy its own explore-mode bounds', () => {
+    // A beginner's first battery must not be invalid the moment it appears.
+    const defaults = BatteryNode.defaultParameters;
+    const results = BatteryNode.validate(defaults, bareContext({ userMode: 'explore' }));
+    expect(results).toEqual([]);
+  });
+
   it('publishes explore-mode bounds that match what validation enforces', () => {
     const bounds = BatteryNode.getSafeParameterBounds();
     const cellBound = bounds.find(b => b.parameter === 'cellCount');

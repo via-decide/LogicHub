@@ -1,6 +1,14 @@
-import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { LH_ERROR_CODES, type LHErrorCode } from './error-codes.js';
+
+/**
+ * A correlation id from the Web Crypto API rather than node:crypto, so this
+ * package runs unchanged in a browser as well as on the server. The engine is
+ * meant to run on the user's own machine, which means it has to bundle.
+ */
+function newCorrelationId(): string {
+  return globalThis.crypto.randomUUID();
+}
 
 export const LogicHubErrorSchema = z.object({
   code: z.string(),
@@ -55,7 +63,7 @@ export function createLogicHubError(
   return new LogicHubError({
     code: def.code,
     message,
-    correlationId: options?.correlationId ?? randomUUID(),
+    correlationId: options?.correlationId ?? newCorrelationId(),
     retryable: def.retryable,
     entityIds: options?.entityIds,
     diagnostics: options?.diagnostics,

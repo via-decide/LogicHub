@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,7 +23,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@logichub-engineering/product-graph": [
+        "../../engineering/packages/product-graph/dist/index.d.ts"
+      ],
+      "@logichub-engineering/kit-matching": [
+        "../../engineering/packages/kit-matching/dist/index.d.ts"
+      ],
+      "@logichub-engineering/shared": [
+        "../../engineering/packages/shared/dist/index.d.ts"
+      ]
     }
   },
   "include": [
@@ -30,5 +45,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

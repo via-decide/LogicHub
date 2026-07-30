@@ -7,7 +7,10 @@ export const BatteryParamsSchema = z.object({
   chemistry: BatteryChemistrySchema.default('lipo'),
   cellCount: z.number().int().min(1).max(6).default(3),
   capacityMah: z.number().positive().default(2200),
-  dischargeRating: z.number().positive().default(25),
+  // A pack added with these defaults must satisfy the explore-mode bounds this
+  // same plugin publishes, or a beginner's first node is invalid the moment it
+  // appears. 2200 mAh at 8C is 17.6 A, inside the 20 A explore ceiling.
+  dischargeRating: z.number().positive().default(8),
 });
 export type BatteryParams = z.infer<typeof BatteryParamsSchema>;
 
