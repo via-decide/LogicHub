@@ -31,12 +31,30 @@ describe('Gate 4 — physical component catalogue', () => {
     }
   });
 
-  it('labels every electrical envelope as a generic family figure', () => {
+  it('records where every electrical envelope came from', () => {
     for (const component of COMPONENT_CATALOGUE) {
       if (component.electrical === null) continue;
-      expect(component.electrical.envelopeSource).toBe('GENERIC_FAMILY');
+      expect(['GENERIC_FAMILY', 'DATASHEET', 'MEASURED'])
+        .toContain(component.electrical.envelopeSource);
       expect(component.electrical.supplyVoltageMaxV)
         .toBeGreaterThanOrEqual(component.electrical.supplyVoltageMinV);
+    }
+  });
+
+  it('claims datasheet figures only for a named part family', () => {
+    // A generic figure may be anonymous; a datasheet figure is a claim about a
+    // specific part and must say which.
+    for (const component of COMPONENT_CATALOGUE) {
+      if (component.electrical?.envelopeSource !== 'DATASHEET') continue;
+      expect(component.partFamily, component.id).not.toBeNull();
+      expect(component.notes, component.id).toMatch(/confirm them against the datasheet/i);
+    }
+  });
+
+  it('keeps unnamed parts on generic family figures', () => {
+    for (const component of COMPONENT_CATALOGUE) {
+      if (component.electrical === null || component.partFamily !== null) continue;
+      expect(component.electrical.envelopeSource, component.id).toBe('GENERIC_FAMILY');
     }
   });
 
