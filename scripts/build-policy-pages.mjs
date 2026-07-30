@@ -70,7 +70,16 @@ is published so the terms are known in advance of payments opening, not because 
 transaction can happen today.</p>
 </div>`;
 
-const entityBlock = `
+/**
+ * Who operates the service.
+ *
+ * Registered entity, address, CIN and GSTIN are only required once money
+ * changes hands — they are what a merchant must publish, and there is no
+ * merchant relationship while nothing is sold. They appear the moment payments
+ * are switched on, at which point check-placeholders.mjs demands real values.
+ * Until then the contact address is the operator detail that is true.
+ */
+const entityBlock = PAYMENTS_ENABLED ? `
 <h2>Who operates this service</h2>
 <dl>
 <dt>Legal entity</dt><dd>${P.legalEntity} (${P.entityType})</dd>
@@ -78,7 +87,11 @@ const entityBlock = `
 <dt>Registration number</dt><dd>${P.registrationNumber}</dd>
 <dt>GSTIN</dt><dd>${P.gstin}</dd>
 <dt>Contact</dt><dd><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></dd>
-</dl>`;
+</dl>` : `
+<h2>Who operates this service</h2>
+<p>${SITE_NAME} is operated by ViaDecide. Nothing is sold here and no payment is
+taken, so there is no merchant registration to publish. Reach us at
+<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>.</p>`;
 
 const pages = {};
 
@@ -145,14 +158,12 @@ Each processes it only to provide that function.</p>
 <li>Withdraw consent, and complain about how we handled a request</li>
 </ul>
 
-<h2>Grievance Officer</h2>
-<dl>
-<dt>Name</dt><dd>${P.grievanceOfficer}</dd>
-<dt>Email</dt><dd><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></dd>
-</dl>
-<p>Write with "Grievance" in the subject line and we will respond. If you are not
-satisfied with our response you may complain to the Data Protection Board of
-India.</p>
+<h2>Grievance contact</h2>
+<p>For any question or complaint about how your personal data is handled, write to
+<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> with "Grievance" in the
+subject line. That address reaches the person responsible for answering it. If you
+are not satisfied with our response you may complain to the Data Protection Board
+of India.</p>
 
 <h2>Children</h2>
 <p>This service is not directed at children, and we do not knowingly collect
@@ -222,8 +233,8 @@ excluded.</p>
 <p>Currently ${SERVED_COUNTRIES.join(', ')}.</p>
 
 <h2>9. Governing law</h2>
-<p>These terms are governed by the laws of India. Disputes are subject to the
-courts of ${P.jurisdiction}.</p>
+<p>These terms are governed by the laws of India, and disputes are subject to the
+courts of India.${PAYMENTS_ENABLED ? ` Proceedings are brought in ${P.jurisdiction}.` : ''}</p>
 
 <h2>10. Contact</h2>
 <p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
@@ -235,7 +246,7 @@ pages['refund-policy.html'] = layout('Cancellation and Refund Policy', `
 <p class="updated">Last updated: ${UPDATED}</p>
 
 ${notTransacting}
-
+${PAYMENTS_ENABLED ? `
 <h2>Cancelling an order</h2>
 <p>An order for a physical kit may be cancelled at any time before it is dispatched,
 for a full refund. Once dispatched, the return terms below apply instead.</p>
@@ -250,19 +261,27 @@ electrically damaged cannot be returned, because it cannot be resold.</p>
 ${P.refundWindow} days and we will replace it or refund it in full, including
 return postage. This is in addition to your statutory rights, not instead of them.</p>
 
-<h2>Digital items</h2>
-<p>Where a purchase gives immediate access to a digital deliverable, it is refundable
-until that deliverable is first downloaded or generated. After that it cannot be
-returned, since it cannot be given back.</p>
-
 <h2>How refunds are made</h2>
 <p>Refunds go back to the original payment method. Once we approve a refund we
 initiate it promptly; how long it then takes to appear is set by your bank or card
 issuer, not by us, so we do not promise a date we do not control.</p>
+` : `
+<h2>There is nothing to refund</h2>
+<p>Nothing on this site is sold and no payment is accepted, so no order exists that
+could be cancelled or refunded. This page is here so the address to write to is
+easy to find, and so it is obvious that no charge should ever appear from us.</p>
 
-<h2>How to ask</h2>
-<p>Email <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> with your order
-reference and what went wrong.</p>
+<h2>If you were charged</h2>
+<p>You should not have been. If a charge appears from ${SITE_NAME}, email
+<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> with the details and we will
+investigate and return it.</p>
+
+<h2>When this changes</h2>
+<p>If payments open, this page is replaced with specific cancellation and refund
+terms before anything can be bought — not afterwards.</p>
+`}
+<h2>How to reach us</h2>
+<p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
 `);
 
 // ---------------------------------------------------------- shipping policy
@@ -271,33 +290,40 @@ pages['shipping-policy.html'] = layout('Shipping and Delivery Policy', `
 <p class="updated">Last updated: ${UPDATED}</p>
 
 ${notTransacting}
-
+${PAYMENTS_ENABLED ? `
 <h2>What ships</h2>
 <p>Kits and modules are physical goods, shipped to the address given at checkout.
 Anything digital is delivered to your account and is not shipped.</p>
 
 <h2>Where we ship</h2>
-<p>Currently ${SERVED_COUNTRIES.join(', ')}. If your country is not listed we cannot
-ship to you yet.</p>
+<p>Currently ${SERVED_COUNTRIES.join(', ')}.</p>
 
 <h2>Dispatch and delivery</h2>
 <dl>
 <dt>Dispatch</dt><dd>${P.dispatchTime} from a confirmed order.</dd>
 <dt>Delivery</dt><dd>${P.deliveryTime} from dispatch, depending on destination.</dd>
 </dl>
-<p>These are the times we work to, not guarantees. Carriers, customs, and weather
-are outside our control, and we would rather say so than promise a date we cannot
-hold. You will get a tracking reference when your order is dispatched.</p>
+<p>These are the times we work to, not guarantees. Carriers, customs and weather are
+outside our control, and we would rather say so than promise a date we cannot hold.</p>
 
 <h2>Charges, duties and taxes</h2>
 <p>Shipping is charged at checkout and shown before you pay. For international
 orders, import duty and local taxes are set by the destination country and are
 payable by you.</p>
+` : `
+<h2>Nothing ships yet</h2>
+<p>No physical item is sold on this site today, so there is nothing to dispatch and
+no delivery times to quote. The storage cartridge has not been built, measured, or
+sourced; the <a href="/waitlist.html">waiting list</a> records interest and nothing
+more.</p>
 
-<h2>Problems</h2>
-<p>If an order has not arrived within the expected window, or arrives damaged, email
-<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> and we will trace it. See
-the <a href="/refund-policy">refund policy</a> for what happens next.</p>
+<h2>When this changes</h2>
+<p>If physical items go on sale, this page is replaced with real dispatch windows,
+destinations and charges before anything can be ordered. We will not quote a
+delivery time we have never tested.</p>
+`}
+<h2>How to reach us</h2>
+<p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
 `);
 
 // ---------------------------------------------------------------- cookies
@@ -362,13 +388,10 @@ address reaches us. There is no queue to pick and no form to guess at.</p>
 
 ${entityBlock}
 
-<h2>Grievance Officer</h2>
-<dl>
-<dt>Name</dt><dd>${P.grievanceOfficer}</dd>
-<dt>Email</dt><dd><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></dd>
-</dl>
-<p>Appointed under the Digital Personal Data Protection Act, 2023 for questions and
-complaints about how your personal data is handled.</p>
+<h2>Grievance contact</h2>
+<p>Questions and complaints about personal data go to the same address, with
+"Grievance" in the subject line, under the Digital Personal Data Protection Act,
+2023.</p>
 `);
 
 // --------------------------------------------------------------- waitlist
