@@ -87,9 +87,9 @@ describe('Gate 4 — physical component catalogue', () => {
     expect(componentsForNodeType('battery').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('keeps structural parts out of the node-type mapping', () => {
+  it('maps parts to the node types that now exist for them', () => {
     expect(requireComponent('mechanical-chassis-2wd').satisfiesNodeType).toBeNull();
-    expect(requireComponent('driver-tb6612').satisfiesNodeType).toBeNull();
+    expect(requireComponent('driver-tb6612').satisfiesNodeType).toBe('driver');
   });
 
   it('does not claim a rating for the prototype enclosure', () => {

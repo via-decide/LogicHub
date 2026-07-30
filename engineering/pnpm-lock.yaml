@@ -168,6 +168,9 @@ importers:
 
   packages/product-repository:
     dependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@logichub-engineering/product-graph':
         specifier: workspace:*
         version: link:../product-graph
@@ -177,6 +180,9 @@ importers:
       '@logichub-engineering/shared':
         specifier: workspace:*
         version: link:../shared
+      '@logichub-engineering/validation-engine':
+        specifier: workspace:*
+        version: link:../validation-engine
       zod:
         specifier: ~3.24.0
         version: 3.24.4

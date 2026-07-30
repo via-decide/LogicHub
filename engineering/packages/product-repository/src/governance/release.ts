@@ -42,6 +42,22 @@ export function decideRelease(request: ReleaseRequest): ReleaseDecision {
     });
   }
 
+  // A rule that ran and came back short of a clean pass blocks too. A thermal
+  // margin computed from an estimated thermal resistance is a number waiting on
+  // a bench, not a result — releasing past it would be treating a simulation as
+  // a verification.
+  const unresolved = request.diff.validationChecks.filter(
+    c => c.verdict === 'WARNING' || c.verdict === 'REQUIRES_VALIDATION',
+  );
+  for (const check of unresolved) {
+    blockers.push({
+      code: check.verdict === 'WARNING'
+        ? 'release.validation-warning'
+        : 'release.validation-requires-physical-evidence',
+      message: `${check.label} did not clear: ${check.detail}`,
+    });
+  }
+
   for (const area of request.diff.affectedAreas.filter(a => !a.evaluated)) {
     blockers.push({
       code: 'release.area-unevaluated',

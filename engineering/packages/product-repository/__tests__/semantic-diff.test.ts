@@ -2,7 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { semanticDiff } from '../src/diff/semantic-diff.js';
 import { SemanticProductDiffSchema } from '../src/schemas/diff.schema.js';
 import { ProductRepository } from '../src/repository/product-repository.js';
-import { FIXED_TIME, INTENT, STAMP, roverGraph } from './helpers.js';
+import { CURRENT_SCHEMA_VERSION } from '@logichub-engineering/shared';
+import type { ProductGraph } from '@logichub-engineering/product-graph';
+import {
+  FIXED_TIME, INTENT, STAMP, roverGraph, roverWithDriver, roverWithRegulatorTheta,
+} from './helpers.js';
 
 function repoWithBatteryChange() {
   const repo = new ProductRepository();
@@ -82,9 +86,10 @@ describe('Gate 8 — semantic diff', () => {
     }
   });
 
-  it('marks thermal load affected but unevaluated rather than passed over', () => {
-    // Nothing in this release models thermal behaviour. Omitting the area
-    // would hide it; marking it evaluated would be a lie.
+  it('marks thermal load affected but unevaluated with no operating profile', () => {
+    // Ambient temperature is unknown without a profile, so the thermal rule
+    // cannot run. Omitting the area would hide it; marking it evaluated would
+    // be a lie.
     const { diff } = repoWithBatteryChange();
     const thermal = area(diff, 'Thermal load');
 
@@ -94,6 +99,7 @@ describe('Gate 8 — semantic diff', () => {
   });
 
   it('marks driver voltage and firmware limits unevaluated too', () => {
+    // This rover has no driver node, so there is no stage to assess.
     const { diff } = repoWithBatteryChange();
     expect(area(diff, 'Driver voltage').evaluated).toBe(false);
     expect(area(diff, 'Firmware limits').evaluated).toBe(false);
@@ -188,5 +194,95 @@ describe('Gate 8 — semantic diff', () => {
     for (let i = 0; i < 5; i += 1) {
       expect(JSON.stringify(semanticDiff(first, second))).toBe(baseline);
     }
+  });
+});
+
+describe('Gate 8 — thermal and driver, once the model can reach them', () => {
+  const profile = {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    ambientTemperature: { nominal: 25, unit: 'degC' as const },
+    maxContinuousRuntime: { value: 2, unit: 'h' as const },
+    installationOrientation: 'horizontal' as const,
+    environment: 'indoor' as const,
+    ventilation: 'sealed' as const,
+  };
+
+  function diffWith(
+    graphBefore: ProductGraph,
+    graphAfter: ProductGraph,
+    operatingProfile: typeof profile | null,
+  ) {
+    const repo = new ProductRepository();
+    const first = repo.commit({
+      intent: INTENT, stamp: STAMP, graph: graphBefore,
+      author: 'tester', message: 'before', createdAt: FIXED_TIME,
+    });
+    const second = repo.commit({
+      intent: INTENT, stamp: STAMP, graph: graphAfter,
+      author: 'tester', message: 'after', createdAt: FIXED_TIME,
+    });
+    return semanticDiff(first, second, operatingProfile);
+  }
+
+  it('leaves thermal UNKNOWN when the profile declares no regulator theta', () => {
+    // A profile supplies ambient, but nobody declared the regulator's
+    // junction-to-ambient resistance. F6 is skipped, not guessed at.
+    const diff = diffWith(roverGraph(3), roverGraph(4), profile);
+
+    expect(check(diff, 'thermal.load').verdict).toBe('UNKNOWN');
+    expect(check(diff, 'thermal.load').detail).toContain('SEC-POWER-THERMAL-001');
+    expect(area(diff, 'Thermal load').evaluated).toBe(false);
+  });
+
+  it('evaluates thermal load once ambient and a theta both exist', () => {
+    const before = roverWithRegulatorTheta(3);
+    const after = roverWithRegulatorTheta(4);
+
+    const diff = diffWith(before, after, profile);
+    const thermal = check(diff, 'thermal.load');
+
+    // The gap Gate 8 recorded is closed by the rule running, not by the area
+    // being quietly marked done.
+    expect(thermal.verdict).not.toBe('UNKNOWN');
+    expect(area(diff, 'Thermal load').evaluated).toBe(true);
+    expect(area(diff, 'Thermal load').effect).toContain('degC estimated');
+  });
+
+  it('caps an estimated theta at requires-validation even with room to spare', () => {
+    // A well-heatsunk regulator: 10 K/W leaves the estimate far under the
+    // ceiling. It still cannot pass, because the resistance it was computed
+    // from is somebody's estimate rather than a measurement.
+    const diff = diffWith(
+      roverWithRegulatorTheta(3, 'estimated', 10),
+      roverWithRegulatorTheta(4, 'estimated', 10),
+      profile,
+    );
+
+    expect(check(diff, 'thermal.load').verdict).toBe('REQUIRES_VALIDATION');
+  });
+
+  it('fails a linear regulator that would genuinely cook', () => {
+    // 4S lipo at 14.8 V down to a 3.3 V logic rail is 11.5 V across the pass
+    // element. At the ESP32's active current in a small package that is a real
+    // over-temperature, and the rule says so rather than warning politely.
+    const diff = diffWith(roverWithRegulatorTheta(3), roverWithRegulatorTheta(4), profile);
+
+    expect(check(diff, 'thermal.load').verdict).toBe('FAIL');
+    expect(check(diff, 'thermal.load').detail).toContain('exceeds');
+  });
+
+  it('evaluates driver margin once a driver stage is in the graph', () => {
+    const diff = diffWith(roverWithDriver(3), roverWithDriver(4), profile);
+
+    expect(check(diff, 'driver.margin').verdict).not.toBe('UNKNOWN');
+    expect(area(diff, 'Driver voltage').evaluated).toBe(true);
+  });
+
+  it('reports driver margin as UNKNOWN when no driver is modelled', () => {
+    const diff = diffWith(roverGraph(3), roverGraph(4), profile);
+    const driver = check(diff, 'driver.margin');
+
+    expect(driver.verdict).toBe('UNKNOWN');
+    expect(driver.detail).toContain('not a pass');
   });
 });

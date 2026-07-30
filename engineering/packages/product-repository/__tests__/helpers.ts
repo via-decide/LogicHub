@@ -83,3 +83,50 @@ export function roverGraph(cellCount = 3, motorRatedVoltageV = 12): ProductGraph
     updatedAt: FIXED_TIME,
   };
 }
+
+/**
+ * The rover with the controller board's regulator thermal resistance declared.
+ *
+ * 40 K/W is a plausible SOT-23 LDO figure and it is stated here as a fixture
+ * input, not asserted about any real board. Its grade is what decides whether
+ * the rule can pass on it: 'datasheet' can, 'estimated' is capped at
+ * requires_validation.
+ */
+export function roverWithRegulatorTheta(
+  cellCount = 3,
+  grade: 'measured' | 'datasheet' | 'estimated' = 'datasheet',
+  thetaKPerW = 40,
+): ProductGraph {
+  const base = roverGraph(cellCount);
+  return {
+    ...base,
+    nodes: base.nodes.map(n => (n.type === 'controller'
+      ? {
+        ...n,
+        parameters: {
+          ...n.parameters,
+          regulatorThermalResistanceKPerW: thetaKPerW,
+          regulatorThermalResistanceClass: grade,
+        },
+      }
+      : n)),
+  };
+}
+
+/** The rover with a driver stage between the pack and the motors. */
+export function roverWithDriver(cellCount = 3): ProductGraph {
+  const base = roverWithRegulatorTheta(cellCount);
+  return {
+    ...base,
+    nodes: [
+      ...base.nodes,
+      node('n7_driver', 'driver', { rdsOnMilliohm: 500, channels: 2, supplyVoltageMaxV: 20 }),
+    ],
+    connections: [
+      ...base.connections,
+      connection('c8', 'n1_battery', 'n7_driver', 'power'),
+      connection('c9', 'n7_driver', 'n3_motor_left', 'power'),
+      connection('c10', 'n7_driver', 'n4_motor_right', 'power'),
+    ],
+  };
+}

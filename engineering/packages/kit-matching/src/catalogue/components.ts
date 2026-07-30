@@ -96,7 +96,8 @@ export const COMPONENT_CATALOGUE: readonly PhysicalComponent[] = [
     name: 'TB6612-class dual motor driver',
     family: 'motor-driver',
     partFamily: 'TB6612FNG',
-    satisfiesNodeType: null,
+    // A driver node now exists in the graph, so this part can satisfy one.
+    satisfiesNodeType: 'driver',
     electrical: {
       supplyVoltageMinV: 2.5, supplyVoltageMaxV: 13.5,
       typicalCurrentMa: 2, envelopeSource: 'GENERIC_FAMILY',

@@ -40,7 +40,19 @@ export type AffectedArea = z.infer<typeof AffectedAreaSchema>;
  * PASS, FAIL, or UNKNOWN. There is no fourth state and no default: a check
  * that could not be run is UNKNOWN, and UNKNOWN is never treated as PASS.
  */
-export const CheckVerdictSchema = z.enum(['PASS', 'FAIL', 'UNKNOWN']);
+/**
+ * WARNING and REQUIRES_VALIDATION exist because SEC-POWER-THERMAL-001 produces
+ * them and collapsing either into PASS would misreport what it said. A margin
+ * computed from an estimated thermal resistance is not the same claim as one
+ * computed from a measured one, and a temperature sitting inside the warning
+ * band is not the same as one with room to spare.
+ *
+ * Neither releases. The release gate treats them the way it treats UNKNOWN: a
+ * check that has not cleanly passed is not a check that has passed.
+ */
+export const CheckVerdictSchema = z.enum([
+  'PASS', 'FAIL', 'WARNING', 'REQUIRES_VALIDATION', 'UNKNOWN',
+]);
 export type CheckVerdict = z.infer<typeof CheckVerdictSchema>;
 
 export const ValidationCheckSchema = z.object({

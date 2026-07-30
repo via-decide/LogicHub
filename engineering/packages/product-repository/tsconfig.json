@@ -5,6 +5,8 @@
   "references": [
     { "path": "../shared" },
     { "path": "../product-graph" },
-    { "path": "../project-capsule" }
+    { "path": "../project-capsule" },
+    { "path": "../contracts" },
+    { "path": "../validation-engine" }
   ]
 }

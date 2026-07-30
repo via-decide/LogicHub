@@ -34,13 +34,16 @@ describe('Gate 4 — a kit loads as an editable graph', () => {
     expect(graph.nodes.filter(n => n.type === 'sensor')).toHaveLength(1);
     expect(graph.nodes.filter(n => n.type === 'connectivity')).toHaveLength(1);
     expect(graph.nodes.filter(n => n.type === 'operator-app')).toHaveLength(1);
+    // The kit has listed a TB6612 since Gate 4 with nowhere to put it. Now that
+    // a driver node type exists, it becomes part of the graph rather than a
+    // line on a bill of materials.
+    expect(graph.nodes.filter(n => n.type === 'driver')).toHaveLength(1);
   });
 
-  it('leaves structural components out of the graph', () => {
+  it('leaves parts with no node type out of the graph', () => {
     const graph = loadMotionStarter();
     const sources = graph.nodes.map(n => n.parameters.sourceComponentId);
     expect(sources).not.toContain('mechanical-chassis-2wd');
-    expect(sources).not.toContain('driver-tb6612');
     expect(sources).not.toContain('wiring-jumper-set');
   });
 
@@ -57,9 +60,9 @@ describe('Gate 4 — a kit loads as an editable graph', () => {
     const battery = graph.nodes.find(n => n.type === 'battery')!;
     const controller = graph.nodes.find(n => n.type === 'controller')!;
 
-    // Controller, two motors, sensor and the link — everything but the app.
+    // Controller, driver, two motors, sensor and the link — everything but the app.
     const powered = graph.connections.filter(c => c.from === battery.id && c.type === 'power');
-    expect(powered).toHaveLength(5);
+    expect(powered).toHaveLength(6);
 
     const controlled = graph.connections.filter(
       c => c.from === controller.id && c.type === 'control',

@@ -1,5 +1,7 @@
 import type { LogicNode, ProductGraph } from '@logichub-engineering/product-graph';
 import { propagate } from '@logichub-engineering/product-graph';
+import type { OperatingProfile } from '@logichub-engineering/contracts';
+import { assessThermal, type GraphThermalResult } from '../thermal/graph-thermal.js';
 import type { ProductRevision } from '../schemas/revision.schema.js';
 import type {
   AffectedArea,
@@ -19,6 +21,14 @@ import type {
 export function semanticDiff(
   before: ProductRevision | null,
   after: ProductRevision,
+  /**
+   * The environment this product is meant to run in.
+   *
+   * Optional, and null by default. With a profile the thermal rule can be run;
+   * without one, ambient temperature is unknown and thermal stays UNKNOWN
+   * rather than being assessed against an assumed room.
+   */
+  operatingProfile: OperatingProfile | null = null,
 ): SemanticProductDiff {
   const beforeGraph = before === null ? null : propagate(before.graph).graph;
   const afterGraph = propagate(after.graph).graph;
@@ -27,8 +37,10 @@ export function semanticDiff(
     ? []
     : collectChanges(beforeGraph, afterGraph);
 
-  const affectedAreas = collectAffectedAreas(changes, beforeGraph, afterGraph);
-  const validationChecks = collectValidationChecks(afterGraph);
+  const thermal = assessThermal(afterGraph, operatingProfile);
+
+  const affectedAreas = collectAffectedAreas(changes, beforeGraph, afterGraph, thermal);
+  const validationChecks = collectValidationChecks(afterGraph, thermal);
 
   const hasFailures = validationChecks.some(c => c.verdict === 'FAIL');
   const hasUnevaluatedAreas = affectedAreas.some(a => !a.evaluated);
@@ -165,6 +177,7 @@ function collectAffectedAreas(
   changes: readonly SemanticChange[],
   before: ProductGraph | null,
   after: ProductGraph,
+  thermal: GraphThermalResult,
 ): AffectedArea[] {
   if (changes.length === 0) return [];
 
@@ -197,12 +210,17 @@ function collectAffectedAreas(
         ? null
         : `speedMps ${motorSpeed.before} -> ${motorSpeed.after}`,
     });
+    const driver = after.nodes.find(node => node.type === 'driver');
     areas.push({
       area: 'Driver voltage',
       domain: 'electrical',
       reason: 'The driver stage sits between the pack and the motors.',
-      evaluated: false,
-      effect: null,
+      // Unevaluated only when no driver is modelled. A graph that has one is
+      // checked against the window that part declares.
+      evaluated: driver !== undefined,
+      effect: driver === undefined
+        ? null
+        : driverEffect(driver),
     });
     areas.push({
       area: 'Regulator input',
@@ -212,13 +230,17 @@ function collectAffectedAreas(
       effect: regulatorEffect(after),
     });
     areas.push({
-      // Nothing in this release models thermal behaviour, so the area is
-      // reported as reached but not assessed rather than passed over.
+      // SEC-POWER-THERMAL-001 computes this when an operating profile supplies
+      // an ambient temperature. Without one it stays reported-but-unassessed,
+      // which is what it was for every revision before a profile existed.
       area: 'Thermal load',
       domain: 'thermal',
       reason: 'Dissipation scales with the supply and the current drawn.',
-      evaluated: false,
-      effect: null,
+      evaluated: thermal.verdict !== 'UNKNOWN',
+      effect: thermal.estimatedTemperatureC === null
+        ? null
+        : `${thermal.estimatedTemperatureC} degC estimated, `
+          + `${thermal.thermalMarginK ?? '?'} K margin (theta ${thermal.thermalResistanceClass})`,
     });
 
     const runtime = metricChange('battery', 'estimatedRuntimeH');
@@ -276,6 +298,24 @@ function regulatorEffect(after: ProductGraph): string {
     : 'Controller supply remains inside its accepted range.';
 }
 
+/**
+ * What the driver stage does with the supply it now has.
+ *
+ * Dissipation is reported only when it was computed. A stage with no motor
+ * below it has no current to lose, and saying "0 W" would read as a part that
+ * runs cold rather than one nobody worked out.
+ */
+function driverEffect(driver: LogicNode): string {
+  const dissipation = driver.derivedMetrics.dissipationW;
+  const channels = driver.derivedMetrics.channelsInUse;
+
+  if (typeof dissipation !== 'number') {
+    return `${channels ?? 0} channel(s) in use; no motor current published, so no dissipation figure`;
+  }
+
+  return `${dissipation} W across ${channels} channel(s)`;
+}
+
 function batteryVoltage(graph: ProductGraph | null): number | undefined {
   const battery = graph?.nodes.find(n => n.type === 'battery');
   const raw = battery?.derivedMetrics.nominalVoltageV;
@@ -288,7 +328,10 @@ function batteryVoltage(graph: ProductGraph | null): number | undefined {
  * A check the platform cannot run is UNKNOWN with a reason. It is never
  * folded into PASS, and never omitted so the list looks clean.
  */
-function collectValidationChecks(after: ProductGraph): ValidationCheck[] {
+function collectValidationChecks(
+  after: ProductGraph,
+  thermal: GraphThermalResult,
+): ValidationCheck[] {
   const checks: ValidationCheck[] = [];
   const constraintsOf = (type: string): string[] =>
     after.nodes.filter(n => n.type === type).flatMap(n => n.constraints);
@@ -336,22 +379,40 @@ function collectValidationChecks(after: ProductGraph): ValidationCheck[] {
     });
   }
 
-  // No driver node exists in the model, so its margin cannot be computed from
-  // the graph. Reporting UNKNOWN keeps the gap visible.
-  checks.push({
-    id: 'driver.margin',
-    label: 'Driver margin',
-    verdict: 'UNKNOWN',
-    detail:
-      'No driver stage is modelled, so its voltage and current margin could not be '
-      + 'evaluated. This is not a pass.',
-  });
+  const drivers = after.nodes.filter(n => n.type === 'driver');
+  if (drivers.length === 0) {
+    // A graph with no driver stage still cannot report a margin for one.
+    // Reporting UNKNOWN keeps the gap visible rather than closing it.
+    checks.push({
+      id: 'driver.margin',
+      label: 'Driver margin',
+      verdict: 'UNKNOWN',
+      detail:
+        'No driver stage is modelled, so its voltage and current margin could not be '
+        + 'evaluated. This is not a pass.',
+    });
+  } else {
+    const driverFaults = drivers.flatMap(n => n.constraints);
+    const failed = driverFaults.some(code => code.startsWith('driver.')
+      && code !== 'driver.thermal-resistance-unknown');
+    checks.push({
+      id: 'driver.margin',
+      label: 'Driver margin',
+      verdict: failed ? 'FAIL' : 'PASS',
+      detail: failed
+        ? `Driver stage reports ${[...new Set(driverFaults)].sort().join(', ')}.`
+        : 'Supply and motor current sit inside the driver’s declared window.',
+    });
+  }
 
   checks.push({
     id: 'thermal.load',
     label: 'Thermal load',
-    verdict: 'UNKNOWN',
-    detail: 'No thermal model has been run for this product. This is not a pass.',
+    verdict: thermal.verdict,
+    // The rule's own sentence, not a summary of it. It already says whether a
+    // figure was computed, from what grade of thermal resistance, and why not
+    // when it could not be.
+    detail: `${thermal.detail} [${thermal.ruleId} v${thermal.ruleVersion}]`,
   });
 
   return checks.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

@@ -26,6 +26,12 @@ export {
 export { semanticDiff } from './diff/semantic-diff.js';
 
 export {
+  assessThermal,
+  type GraphThermalResult,
+  type ThermalVerdict,
+} from './thermal/graph-thermal.js';
+
+export {
   touchedSubjects,
   detectStaleDecisions,
   detectStaleEvidence,
