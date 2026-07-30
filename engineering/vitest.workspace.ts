@@ -11,4 +11,5 @@ export default defineWorkspace([
   'packages/validation-engine',
   'packages/product-graph',
   'packages/kit-matching',
+  'packages/generated-surfaces',
 ]);
