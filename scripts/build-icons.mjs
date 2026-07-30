@@ -40,13 +40,51 @@ function pixel(x, y, size, inset) {
 }
 
 function buildPng(size, inset) {
-  const raw = Buffer.alloc((size * 3 + 1) * size);
+  return encodePng(size, size, (x, y) => pixel(x, y, size, inset));
+}
+
+/**
+ * The social card.
+ *
+ * A link to the site currently unfurls with no image at all. This draws the same
+ * mark on the 1200×630 canvas the platforms crop to, with a rule beneath it, so
+ * a shared link reads as deliberate rather than broken. No text is drawn — there
+ * is no font here, and a hand-plotted wordmark would look worse than none.
+ */
+function buildOgImage(width, height) {
+  const markSize = Math.floor(height * 0.42);
+  const markX = Math.floor((width - markSize) / 2);
+  const markY = Math.floor(height * 0.24);
+  const ruleY = markY + markSize + Math.floor(height * 0.09);
+  const ruleHalfWidth = Math.floor(width * 0.16);
+  const ruleThickness = Math.max(2, Math.floor(height * 0.008));
+
+  return encodePng(width, height, (x, y) => {
+    if (
+      y >= ruleY && y < ruleY + ruleThickness
+      && Math.abs(x - width / 2) < ruleHalfWidth
+    ) {
+      return MARK;
+    }
+
+    const localX = x - markX;
+    const localY = y - markY;
+    if (localX < 0 || localX >= markSize || localY < 0 || localY >= markSize) {
+      return BACKGROUND;
+    }
+    return pixel(localX, localY, markSize, 0);
+  });
+}
+
+/** Truecolour PNG, no filtering, one call per pixel. */
+function encodePng(width, height, colourAt) {
+  const raw = Buffer.alloc((width * 3 + 1) * height);
   let offset = 0;
-  for (let y = 0; y < size; y += 1) {
+  for (let y = 0; y < height; y += 1) {
     raw[offset] = 0; // no per-scanline filter
     offset += 1;
-    for (let x = 0; x < size; x += 1) {
-      const [r, g, b] = pixel(x, y, size, inset);
+    for (let x = 0; x < width; x += 1) {
+      const [r, g, b] = colourAt(x, y);
       raw[offset] = r;
       raw[offset + 1] = g;
       raw[offset + 2] = b;
@@ -54,19 +92,18 @@ function buildPng(size, inset) {
     }
   }
 
-  const chunks = [
+  return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', ihdr(size)),
+    chunk('IHDR', ihdr(width, height)),
     chunk('IDAT', deflateSync(raw, { level: 9 })),
     chunk('IEND', Buffer.alloc(0)),
-  ];
-  return Buffer.concat(chunks);
+  ]);
 }
 
-function ihdr(size) {
+function ihdr(width, height) {
   const header = Buffer.alloc(13);
-  header.writeUInt32BE(size, 0);
-  header.writeUInt32BE(size, 4);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
   header[8] = 8;  // bit depth
   header[9] = 2;  // colour type: truecolour
   return header;
@@ -98,5 +135,11 @@ for (const target of targets) {
   writeFileSync(`public/${target.path}`, png);
   written.push({ path: target.path, size: target.size, bytes: png.length });
 }
+
+// 1200×630 is the size every platform crops its preview from.
+const og = buildOgImage(1200, 630);
+writeFileSync('og-image.png', og);
+writeFileSync('public/og-image.png', og);
+written.push({ path: 'og-image.png', size: '1200x630', bytes: og.length });
 
 console.log(JSON.stringify({ written }, null, 2));

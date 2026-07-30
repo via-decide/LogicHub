@@ -14,18 +14,36 @@ import {
   PLACEHOLDER as P,
   PAYMENTS_ENABLED,
   SITE_NAME,
+  SITE_ORIGIN,
   SERVED_COUNTRIES,
 } from './site-constants.mjs';
 
 const UPDATED = new Date().toISOString().slice(0, 10);
 
-function layout(title, body) {
+function layout(title, body, { path, description } = {}) {
+  // Falls back to naming the document rather than inventing a summary of it.
+  const summary = description || `${title} for ${SITE_NAME}.`;
+  const canonical = path ? `${SITE_ORIGIN}${path}` : SITE_ORIGIN;
+
   return `<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title} | ${SITE_NAME}</title>
-<meta name="description" content="${title} for ${SITE_NAME}.">
+<meta name="description" content="${summary}">
+<link rel="canonical" href="${canonical}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${SITE_NAME}">
+<meta property="og:title" content="${title} | ${SITE_NAME}">
+<meta property="og:description" content="${summary}">
+<meta property="og:url" content="${canonical}">
+<meta property="og:image" content="${SITE_ORIGIN}/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${title} | ${SITE_NAME}">
+<meta name="twitter:description" content="${summary}">
+<meta name="twitter:image" content="${SITE_ORIGIN}/og-image.png">
 <style>
 :root{--orange:#ff671f;--dark:#000}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -178,7 +196,7 @@ personal data from a child. If you believe we have, tell us and we will delete i
 <h2>Changes</h2>
 <p>When this policy changes the date at the top changes with it. Material changes
 will be notified to anyone on the waiting list.</p>
-`);
+`, { path: '/privacy', description: 'What LogicHub collects, why, and how long it is kept. Your design never leaves your device.' });
 
 // ------------------------------------------------------------------ terms
 pages['terms.html'] = layout('Terms of Service', `
@@ -244,7 +262,7 @@ courts of India.${PAYMENTS_ENABLED ? ` Proceedings are brought in ${P.jurisdicti
 
 <h2>10. Contact</h2>
 <p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
-`);
+`, { path: '/terms', description: 'The terms under which LogicHub is offered, including what is not claimed about it.' });
 
 // ------------------------------------------------------------ refund policy
 pages['refund-policy.html'] = layout('Cancellation and Refund Policy', `
@@ -288,7 +306,7 @@ terms before anything can be bought — not afterwards.</p>
 `}
 <h2>How to reach us</h2>
 <p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
-`);
+`, { path: '/refund-policy', description: 'Cancellation and refund terms for LogicHub.' });
 
 // ---------------------------------------------------------- shipping policy
 pages['shipping-policy.html'] = layout('Shipping and Delivery Policy', `
@@ -330,7 +348,7 @@ delivery time we have never tested.</p>
 `}
 <h2>How to reach us</h2>
 <p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
-`);
+`, { path: '/shipping-policy', description: 'Dispatch and delivery terms for LogicHub.' });
 
 // ---------------------------------------------------------------- cookies
 pages['cookies.html'] = layout('Cookie Policy', `
@@ -370,7 +388,7 @@ tracking behind an unchanged policy.</p>
 
 <h2>Questions</h2>
 <p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
-`);
+`, { path: '/cookies', description: 'LogicHub sets no analytics or advertising cookies and runs no third-party trackers.' });
 
 // ---------------------------------------------------------------- contact
 pages['contact.html'] = layout('Contact', `
@@ -398,7 +416,7 @@ ${entityBlock}
 <p>Questions and complaints about personal data go to the same address, with
 "Grievance" in the subject line, under the Digital Personal Data Protection Act,
 2023.</p>
-`);
+`, { path: '/contact', description: 'One address for every query about LogicHub: dharam@viadecide.com.' });
 
 // --------------------------------------------------------------- waitlist
 pages['waitlist.html'] = layout('Waiting List — Storage Cartridge', `
@@ -487,7 +505,7 @@ document.getElementById('waitlist-form').addEventListener('submit', async (event
   }
 });
 </script>
-`);
+`, { path: '/waitlist', description: 'The 8 MB LogicHub storage cartridge does not exist yet. Ask to be told when it does.' });
 
 // -------------------------------------------------------------------- write
 const outputs = Object.entries(pages);
