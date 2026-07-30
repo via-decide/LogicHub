@@ -19,5 +19,9 @@
   "dependencies": {
     "firebase-admin": "^13.4.0",
     "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1"
   }
 }

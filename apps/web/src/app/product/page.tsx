@@ -60,6 +60,7 @@ export default function ProductPage() {
         ))}
         <span className="mx-1 h-5 w-px bg-neutral-300 dark:bg-neutral-700" />
         <select
+          aria-label="User mode"
           value={graph.userMode}
           onChange={e => setMode(e.target.value as UserMode)}
           className="rounded-md border border-neutral-300 dark:border-neutral-700
@@ -96,6 +97,7 @@ export default function ProductPage() {
               <div className="space-y-3">
                 <div className="flex gap-2">
                   <select
+                    aria-label="Connection type"
                     value={linkType}
                     onChange={e => setLinkType(e.target.value as ConnectionType)}
                     className="flex-1 rounded-md border border-neutral-300 dark:border-neutral-700
@@ -138,7 +140,7 @@ export default function ProductPage() {
                     ))}
                   </dl>
                   {Object.keys(selected.derivedMetrics).length === 0 && (
-                    <p className="text-xs text-neutral-400">Nothing resolved yet.</p>
+                    <p className="text-xs text-neutral-500">Nothing resolved yet.</p>
                   )}
                 </div>
               </div>

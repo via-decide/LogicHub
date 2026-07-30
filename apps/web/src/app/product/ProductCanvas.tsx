@@ -51,6 +51,9 @@ export function ProductCanvas({
   return (
     <svg
       ref={svgRef}
+      role="img"
+      aria-label={`Product graph: ${graph.nodes.length} node${graph.nodes.length === 1 ? '' : 's'},`
+        + ` ${graph.connections.length} connection${graph.connections.length === 1 ? '' : 's'}`}
       className="w-full h-[420px] touch-none rounded-lg bg-neutral-50 dark:bg-neutral-900
                  border border-neutral-200 dark:border-neutral-800"
       onPointerMove={e => {
@@ -119,7 +122,7 @@ export function ProductCanvas({
 
       {graph.nodes.length === 0 && (
         <text x="50%" y="50%" textAnchor="middle"
-              className="fill-neutral-400" fontSize={13}>
+              className="fill-neutral-600 dark:fill-neutral-400" fontSize={13}>
           Add a node to begin
         </text>
       )}

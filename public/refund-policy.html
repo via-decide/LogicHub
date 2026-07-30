@@ -29,13 +29,17 @@ h3{margin:20px 0 10px;font-size:1.15rem;color:#ddd}
 p{margin-bottom:15px;color:#ccc}
 ul{margin:15px 0 15px 20px;color:#ccc}
 li{margin-bottom:10px}
-a{color:var(--orange);text-decoration:none}
-a:hover{text-decoration:underline}
+/* Underlined, not merely orange. A link inside a paragraph that differs from the
+   text by colour alone is invisible to anyone who cannot see that difference. */
+a{color:var(--orange);text-decoration:underline;text-underline-offset:2px}
+a:hover{text-decoration-thickness:2px}
 dl{margin:15px 0;color:#ccc}
 dt{font-weight:700;margin-top:12px}
 dd{margin-left:0;color:#aaa}
 .notice{border:1px solid var(--orange);border-radius:8px;padding:16px;margin:20px 0;background:rgba(255,103,31,.08)}
 .notice strong{color:var(--orange)}
+/* A filled button is distinguishable by its own shape and background, so it does
+   not need the underline the inline links carry. */
 .back{display:inline-block;margin-top:30px;padding:12px 24px;background:var(--orange);color:#000;border-radius:50px;font-weight:900;text-decoration:none}
 .back:hover{background:#ff8c3f}
 footer{margin-top:40px;padding-top:20px;border-top:1px solid #333;color:#888;font-size:.85rem}
