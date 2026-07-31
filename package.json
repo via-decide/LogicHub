@@ -6,18 +6,22 @@
     "build": "node ./scripts/build-static.mjs",
     "dev": "node ./scripts/serve-static.mjs",
     "preview": "node ./scripts/serve-static.mjs --dist",
-    "site:build": "node ./scripts/build-icons.mjs && node ./scripts/build-policy-pages.mjs && node ./scripts/build-seo.mjs && node ./scripts/build-public-site.mjs",
+    "site:build": "node ./scripts/build-icons.mjs && node ./scripts/build-policy-pages.mjs && node ./scripts/build-workspace.mjs && node ./scripts/build-seo.mjs && node ./scripts/build-public-site.mjs",
+    "engineering:build": "cd engineering && pnpm --filter @logichub-engineering/physical-ci... build",
     "site:verify": "node ./scripts/verify-root-source.mjs",
     "site:verify-live": "node ./scripts/verify-live-root.mjs",
     "test:e2e": "npx playwright test",
     "site:icons": "node ./scripts/build-icons.mjs",
     "site:policies": "node ./scripts/build-policy-pages.mjs",
+    "site:workspace": "node ./scripts/build-workspace.mjs",
     "site:check": "node ./scripts/check-no-tracking.mjs && node ./scripts/check-placeholders.mjs",
     "test:unit": "node --test \"tests/*.test.mjs\"",
-    "site:seo": "node ./scripts/build-seo.mjs"
+    "site:seo": "node ./scripts/build-seo.mjs",
+    "db:migrate": "node ./scripts/migrate.mjs"
   },
   "dependencies": {
     "firebase-admin": "^13.4.0",
+    "postgres": "^3.4.5",
     "razorpay": "^2.9.6"
   },
   "devDependencies": {
