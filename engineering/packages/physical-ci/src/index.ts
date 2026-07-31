@@ -32,3 +32,22 @@ export {
 } from './pipeline/merge-gate.js';
 
 export * as fixtures from './telemetry/fixtures.js';
+
+export {
+  IssueStatusSchema, type IssueStatus,
+  IssueSchema, type Issue,
+  ClaimSchema, type Claim,
+  PullRequestStateSchema,
+  PhysicalPullRequestSchema, type PhysicalPullRequest,
+  RuleFindingSchema as MarketplaceRuleFindingSchema, type RuleFinding as MarketplaceRuleFinding,
+  CiRunSchema, type CiRun,
+  ReleaseConditionStatusSchema, type ReleaseConditionStatus,
+  ReleaseConditionSchema, type ReleaseCondition,
+} from './marketplace/marketplace.schema.js';
+
+export {
+  type WorkflowDecision,
+  canClaimIssue, markIssueClaimed, reopenIssueAfterFailure, createPullRequestFromClaim,
+  beginInspection, beginEvaluation, applyRunResult, mergePullRequest,
+  allConditionsMet,
+} from './marketplace/workflow.js';

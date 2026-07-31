@@ -4,6 +4,7 @@
   "include": ["src/**/*"],
   "references": [
     { "path": "../shared" },
-    { "path": "../project-capsule" }
+    { "path": "../project-capsule" },
+    { "path": "../commerce" }
   ]
 }

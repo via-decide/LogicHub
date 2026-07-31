@@ -2,13 +2,24 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { firestoreCompat, Filter } from "./_sovereignDb.js";
+import { getAdminDb as getPostgresAdminDb, Filter } from "./_pg.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Was `_sovereignDb.js`'s SQLite-backed `firestoreCompat` — broken on Vercel
+// (better-sqlite3 has no native build step there, and its file target is
+// the same read-only/ephemeral filesystem `_pg.js`'s own header comment
+// already flagged as the reason it exists). `_pg.js`'s Postgres-backed
+// compat layer implements the same Firestore-shaped interface (including
+// `where/orderBy/limit`, `batch()`, `runTransaction()`, and the
+// increment/serverTimestamp sentinels `adminMock` below produces), so every
+// caller of `getAdminDb()` here — `admin-grant-paid.js`, `access-status.js`,
+// `publish-app.js`, `analytics-summary.js`, `creator/[creator_id].js`,
+// `admin/dashboard.js`, `_appAnalytics.js`, `_analyticsService.js`,
+// `founder-request.js`, `app-view.js` — moves to Postgres unchanged.
 export function getAdminDb() {
-  return firestoreCompat;
+  return getPostgresAdminDb();
 }
 
 class AuthMock {

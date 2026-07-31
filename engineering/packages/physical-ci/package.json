@@ -18,6 +18,7 @@
     "lint": "tsc --build"
   },
   "dependencies": {
+    "@logichub-engineering/commerce": "workspace:*",
     "@logichub-engineering/project-capsule": "workspace:*",
     "@logichub-engineering/shared": "workspace:*",
     "yaml": "^2.9.0",
