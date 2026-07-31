@@ -112,6 +112,14 @@ export const ControllerNode: NodePlugin<ControllerParams> = {
       hasWifi: profile.hasWifi,
       hasBle: profile.hasBle,
       powerLoadW: round((profile.operatingVoltageV * profile.activeCurrentMa) / 1000),
+      // Declared for the board, not derived from the chip. Absent stays absent:
+      // the thermal rule refuses to estimate a temperature without it, which is
+      // the correct outcome rather than a gap to be filled with a plausible
+      // number.
+      regulatorThermalResistanceClass: params.regulatorThermalResistanceClass,
+      ...(params.regulatorThermalResistanceKPerW === undefined
+        ? {}
+        : { regulatorThermalResistanceKPerW: params.regulatorThermalResistanceKPerW }),
       epistemicState: 'ESTIMATED',
     };
   },

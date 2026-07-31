@@ -96,7 +96,8 @@ export const COMPONENT_CATALOGUE: readonly PhysicalComponent[] = [
     name: 'TB6612-class dual motor driver',
     family: 'motor-driver',
     partFamily: 'TB6612FNG',
-    satisfiesNodeType: null,
+    // A driver node now exists in the graph, so this part can satisfy one.
+    satisfiesNodeType: 'driver',
     electrical: {
       supplyVoltageMinV: 2.5, supplyVoltageMaxV: 13.5,
       typicalCurrentMa: 2, envelopeSource: 'GENERIC_FAMILY',
@@ -375,6 +376,27 @@ export const COMPONENT_CATALOGUE: readonly PhysicalComponent[] = [
     providesCapabilities: { 'enclosure.present': true },
     notes: 'Prototype only. Carries no ingress, drop, or flammability rating.',
   }),
+  component({
+    id: 'storage-w25q64jv',
+    name: '8 MB SPI NOR flash',
+    family: 'storage',
+    partFamily: 'W25Q64JV',
+    satisfiesNodeType: null,
+    electrical: {
+      supplyVoltageMinV: 2.7, supplyVoltageMaxV: 3.6,
+      typicalCurrentMa: 4, envelopeSource: 'DATASHEET',
+    },
+    providesCapabilities: {
+      'storage.present': true,
+      'storage.bytes': 8_388_608,
+      'storage.offline': true,
+    },
+    notes:
+      'Carries a project capsule offline, beside the controller rather than in its '
+      + 'program space. Figures are the published values for the W25Q64JV family; '
+      + 'confirm them against the datasheet revision for the exact part ordered.',
+  }),
+
   component({
     id: 'wiring-jumper-set',
     name: 'Jumper wire set',

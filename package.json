@@ -6,13 +6,22 @@
     "build": "node ./scripts/build-static.mjs",
     "dev": "node ./scripts/serve-static.mjs",
     "preview": "node ./scripts/serve-static.mjs --dist",
-    "site:build": "node ./scripts/build-public-site.mjs",
+    "site:build": "node ./scripts/build-icons.mjs && node ./scripts/build-policy-pages.mjs && node ./scripts/build-seo.mjs && node ./scripts/build-public-site.mjs",
     "site:verify": "node ./scripts/verify-root-source.mjs",
     "site:verify-live": "node ./scripts/verify-live-root.mjs",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npx playwright test",
+    "site:icons": "node ./scripts/build-icons.mjs",
+    "site:policies": "node ./scripts/build-policy-pages.mjs",
+    "site:check": "node ./scripts/check-no-tracking.mjs && node ./scripts/check-placeholders.mjs",
+    "test:unit": "node --test \"tests/*.test.mjs\"",
+    "site:seo": "node ./scripts/build-seo.mjs"
   },
   "dependencies": {
     "firebase-admin": "^13.4.0",
     "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1"
   }
 }
