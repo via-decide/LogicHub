@@ -88,9 +88,19 @@ export async function verifyRequestUser(req) {
     if (process.env.NODE_ENV === 'development') console.warn('[Auth hmac validation failed]', e);
   }
 
-  // 2. Try Aporaksha REST introspect (port 7002)
+  // 2. Try Aporaksha REST introspect.
+  //
+  // This used to be hardcoded to http://localhost:7002/api/auth, which can
+  // never resolve from a Vercel function -- there is no localhost service in
+  // a serverless runtime, so this leg silently failed on every production
+  // request and auth fell through to the Mac Mini leg below. Uses the same
+  // APORAKSHA_API_URL || 'https://aporaksha.com' resolution as
+  // access-status.js so both callers agree on where Aporaksha lives.
+  // Verified live: aporaksha.com/api/auth answers POST introspect, and its
+  // CORS already allows https://logichub.app.
   try {
-    const res = await fetch("http://localhost:7002/api/auth", {
+    const aporakshaUrl = process.env.APORAKSHA_API_URL || 'https://aporaksha.com';
+    const res = await fetch(`${aporakshaUrl}/api/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
