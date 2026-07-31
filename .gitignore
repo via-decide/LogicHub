@@ -5,3 +5,9 @@ dist/
 # Playwright
 test-results/
 playwright-report/
+
+# Secrets — never commit. .env.example documents the keys instead.
+.env
+.env.local
+.env.*.local
+.env.production
