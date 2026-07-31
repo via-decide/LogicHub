@@ -84,6 +84,17 @@ const files = readdirSync('.')
   .filter((name) => name.endsWith('.html') && !EXCLUDE.has(name))
   .sort();
 
+if (existsSync('public/tools')) {
+  try {
+    const toolsFolders = readdirSync('public/tools', { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory() && dirent.name.startsWith('tool-'))
+      .map(dirent => `tools/${dirent.name}.html`);
+    
+    files.push('tools.html');
+    files.push(...toolsFolders);
+  } catch (e) {}
+}
+
 const entries = files.map((file) => {
   const path = pagePath(file);
   return {

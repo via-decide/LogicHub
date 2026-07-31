@@ -18,8 +18,12 @@ const engineAlias = {
     monorepoRoot, 'engineering/packages/shared/dist/index.js'),
 };
 
+const isToolsBuild = process.env.BUILD_TOOLS === 'true';
+
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  output: isToolsBuild ? 'export' : 'standalone',
+  assetPrefix: isToolsBuild ? '/tools' : undefined,
+  trailingSlash: isToolsBuild ? true : undefined,
   typescript: {
     ignoreBuildErrors: true,
   },

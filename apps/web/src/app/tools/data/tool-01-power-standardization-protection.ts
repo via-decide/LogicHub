@@ -1,0 +1,135 @@
+import { ToolData } from './types';
+
+export const tool01PowerStandardizationProtection: ToolData = {
+  "id": "tool-01-power-standardization-protection",
+  "title": "Power Standardization & Protection",
+  "eyebrow": "Universal Hardware Production Tool · T01",
+  "lead": "Design pattern for hardware that “just works” when powered: protected inputs, known rails, current budget, safe brownout behaviour, and clear production gates before any user or supplier touches the device.",
+  "contractFields": [
+    {
+      "layer": "SOURCE",
+      "t_meaning": "USB-C receptacle, DC jack, battery pack, bench PSU, EVSE supply, solar/battery system, robot pack, machine mains input."
+    },
+    {
+      "layer": "ENTRY",
+      "t_meaning": "Connector, fuse/PTC, reverse-protection MOSFET/diode, TVS, ESD, EMI filter, ideal diode, power switch."
+    },
+    {
+      "layer": "INTENT",
+      "t_meaning": "Power the system safely while rejecting wrong polarity, overcurrent, overvoltage, ESD, brownout, and unsafe plug/unplug states."
+    },
+    {
+      "layer": "STATE/LOGIC",
+      "t_meaning": "Rails good, rails bad, brownout, overload, thermal throttle, battery low, charger connected, USB-only, external PSU, service mode."
+    },
+    {
+      "layer": "ACTIONS",
+      "t_meaning": "Enable regulator, latch fault, reset MCU, cut motor/heater relay, show status, log event, block write/commit, enter safe mode."
+    },
+    {
+      "layer": "OUTPUT/METRICS",
+      "t_meaning": "Measured rail voltage, ripple, current, temperature, inrush, reset count, runtime, fuse trip margin, pass/fail receipt."
+    }
+  ],
+  "projects": [
+    {
+      "name": "1. Electronics research bundle",
+      "content": "Use T01 when: converting SiC/power-electronics learning into lab boards. Production part: power-board checklist, gate-driver power assumptions, bench safety plan. Action: never move from study to powered hardware without voltage/current/thermal derating evidence."
+    },
+    {
+      "name": "4. Drone CAD implementation",
+      "content": "Use T01 when: validating flight-controller rails and LiPo/ESC separation. Production part: 5V input, 3.3V MCU/sensor rails, ESC signal reference, blackbox flash power. Action: no motor arming if rail check or brownout log fails."
+    },
+    {
+      "name": "5. Pupper V3",
+      "content": "Use T01 when: sizing battery, compute rails, servo/actuator rails, and undervoltage response. Production part: battery pack, main fuse, regulator, Pi rail, motor controller rail. Action: show low-battery and disable gait before brownout."
+    },
+    {
+      "name": "6. FarmBot",
+      "content": "Use T01 when: designing outdoor power and toolhead/motor power routing. Production part: controller enclosure, gantry motor harness, outdoor connector, waterproof power entry. Action: isolate irrigation/water routing from electronics and power cables."
+    },
+    {
+      "name": "7. OpenFlexure Microscope",
+      "content": "Use T01 when: powering Raspberry Pi, illumination, motor stage, and camera. Production part: Pi supply, LED driver, motor rail, cable strain relief. Action: verify illumination stability before measurement claims."
+    },
+    {
+      "name": "8. SatNOGS Ground Station",
+      "content": "Use T01 when: powering outdoor Raspberry Pi/SDR/rotator equipment. Production part: weatherproof PSU, grounded enclosure, SDR rail, rotator supply. Action: separate receive-only low-risk station from transmit/rotator expansion."
+    },
+    {
+      "name": "9. Voron 3D Printer",
+      "content": "Use T01 when: building mains/24V electronics and heater power wiring. Production part: PSU, bed heater, hotend heater, MCU rail, grounding, fuse. Action: verify heater power and thermal protection before first print."
+    },
+    {
+      "name": "10. OpenEVSE",
+      "content": "Use T01 when: handling low-voltage control power, mains isolation, relay power, GFCI, and earth. Production part: EVSE controller, contactor, GFCI, enclosure, service disconnect. Action: no commercial use without certified electrical review."
+    },
+    {
+      "name": "11. OpenMV + OpenIPC",
+      "content": "Use T01 when: powering camera modules, edge boards, and PoE/DC adapters. Production part: camera rail, WiFi/ethernet power, sensor accessories, local edge appliance. Action: prevent undervoltage causing corrupted video or firmware writes."
+    },
+    {
+      "name": "12. BeagleV-Fire / Milk-V Duo",
+      "content": "Use T01 when: designing carrier power, USB-C input, edge-board supply, camera/sensor rails. Production part: SBC carrier, boot media power, GPIO rail, FPGA/SERDES accessory power. Action: benchmark thermal/current margin under real workloads."
+    },
+    {
+      "name": "13. Precious Plastic",
+      "content": "Use T01 when: designing control box, motor/heater supply, VFD, emergency cutoff. Production part: mains panel, heater controller, motor protection, E-stop loop. Action: block machine operation without fuse, grounding, guarding, and disconnect."
+    },
+    {
+      "name": "14. NASA JPL Rover / OpenAMRobot",
+      "content": "Use T01 when: powering battery, Pi, motor drivers, sensors, and E-stop loop. Production part: 24V battery fuse, disconnect, 5V Pi rail, motor driver supply. Action: physical E-stop and fuse are mandatory before mobile operation."
+    }
+  ],
+  "stages": [
+    {
+      "num": "Stage 0",
+      "desc": "Input contract freeze.Define exact power sources: USB-C 5V only, USB-C PD, battery, 12V/24V DC, mains-derived PSU, PoE, solar/battery, bench-only."
+    },
+    {
+      "num": "Stage 1",
+      "desc": "Protection topology.Choose fuse/PTC, reverse-polarity method, TVS/ESD, connector rating, switch, ideal diode, soft-start/inrush control."
+    },
+    {
+      "num": "Stage 2",
+      "desc": "Rail architecture.Map all rails, regulator efficiency, dropout, sequencing, always-on rail, switched rail, analog/digital/noisy-motor separation."
+    },
+    {
+      "num": "Stage 3",
+      "desc": "Load budget.List every load with idle, typical, peak, startup/inrush, stall, heater max, RF peak, camera peak, motor transient."
+    },
+    {
+      "num": "Stage 4",
+      "desc": "Brownout and fault policy.Define what shuts down first, what logs, what remains powered, and what the user sees."
+    },
+    {
+      "num": "Stage 5",
+      "desc": "Layout and wiring release.Validate trace width, copper, connector current rating, creepage/clearance where relevant, star ground, motor/heater separation."
+    },
+    {
+      "num": "Stage 6",
+      "desc": "First-power procedure.Power with current-limited bench supply, no expensive modules inserted, record rail voltages and thermal rise."
+    },
+    {
+      "num": "Stage 7",
+      "desc": "Evidence receipt.Save measured voltages, currents, temperatures, pass/fail gates, photos, instrument IDs, operator, date, revision."
+    }
+  ],
+  "checklist": [
+    "Input connector current and voltage rating confirmed.",
+    "Fuse/PTC/eFuse sized below wire/trace/connector damage limit.",
+    "Reverse-polarity path tested, not only simulated.",
+    "TVS/ESD part placed close to connector.",
+    "All rails have expected load, regulator margin, and test points.",
+    "Motor/heater/noisy loads separated from MCU/sensor rails.",
+    "Brownout threshold is above flash-write corruption region.",
+    "Thermal rise measured at worst expected load.",
+    "User cannot plug power backward or into the wrong connector without protection.",
+    "Power error shows a visible state: LED/OLED/buzzer/log.",
+    "No exposed live/mains terminals in user-accessible areas.",
+    "Battery projects include fuse, disconnect, charger boundary, and low-voltage handling.",
+    "Outdoor products include weatherproofing, grounding, strain relief, and service access.",
+    "High-power products include physical emergency cutoff and inspection checklist.",
+    "Every production unit produces a power validation receipt."
+  ]
+};
