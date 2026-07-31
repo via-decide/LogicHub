@@ -16,4 +16,5 @@ export default defineWorkspace([
   'packages/physical-loop',
   'packages/product-repository',
   'packages/commerce',
+  'packages/physical-ci',
 ]);
