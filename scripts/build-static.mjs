@@ -8,6 +8,7 @@ const dist = resolve(root, 'dist');
 
 const includePaths = [
   'index.html',
+  'how-it-works.html',
   'workspace.html',
   'manifest.json',
   'sw.js',

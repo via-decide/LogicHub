@@ -4,39 +4,6 @@
 // one-layout-one-source-of-truth pattern build-policy-pages.mjs already
 // uses. Added to site:build so build-seo.mjs (which reads .html files at
 // the repo root, not a hand-kept list) picks it up automatically.
-//
-// Structurally follows a real supplied mockup (three tabs: Open Repo /
-// Local Branch / Pull Request), with these real changes from it:
-//
-//   1. No client-side pass/fail computation. The mockup's `qaData()` read
-//      #dimA/#wallThickness and decided PASSED/FAILED itself, in the
-//      browser -- exactly what `01-hardware-bridge-spec.md`'s "the pipeline
-//      must not run in the browser" forbids. This page never compares a
-//      reading to a bound; every verdict rendered here is copied verbatim
-//      from an api/marketplace/* response.
-//   2. A PENDING condition blocks. `allConditionsMet`-equivalent logic
-//      gates the release action; a single PENDING condition disables it the
-//      same way a FAILED one does.
-//   3. Bounty is the real PriceQuote tagged union (UNAVAILABLE | QUOTED),
-//      not a hardcoded string -- an unpriced issue renders as "Not priced
-//      yet", never as a number.
-//   4. A standing notice states plainly that no payment is taken, matching
-//      the wording api/_payments-config.js's paymentsDisabledResponse and
-//      the policy pages already use.
-//   5. No CDN script. The mockup loaded Lucide from unpkg -- a real
-//      third-party request from a page whose cookie policy claims none are
-//      made (scripts/check-no-tracking.mjs doesn't happen to block unpkg
-//      today, but that's a gap in the check, not permission). Icons here
-//      are self-authored inline SVGs in a similar minimal-stroke style --
-//      NOT copies of Lucide's actual path data, which this script has no
-//      network access to fetch and verify; presenting them as Lucide icons
-//      would be a claim this file can't back up.
-//   6. Real accessibility: role="tablist" with arrow-key navigation instead
-//      of a bare button row; #dimA/#wallThickness get explicit
-//      <label for="…"> instead of relying on implicit nesting; icon-only
-//      controls get aria-label; decorative icons get aria-hidden="true".
-//
-// Run: node scripts/build-workspace.mjs
 
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { SITE_NAME, SITE_ORIGIN, PAYMENTS_ENABLED } from './site-constants.mjs';
@@ -44,8 +11,6 @@ import { SITE_NAME, SITE_ORIGIN, PAYMENTS_ENABLED } from './site-constants.mjs';
 const UPDATED = new Date().toISOString().slice(0, 10);
 
 // ── Self-authored, minimal-stroke icon set ──────────────────────────────
-// 24x24 viewBox, stroke="currentColor", no fill -- same visual language the
-// mockup's Lucide icons used, but every path here was drawn for this file.
 const ICONS = {
   hexagon: 'M12 2 21 7v10l-9 5-9-5V7z',
   'git-commit': 'M12 4v5M12 15v5M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z',
@@ -83,7 +48,6 @@ const ICONS = {
   'list-checks': 'M4 6h2M9 6h11M4 11h2M9 11h11M4 16l1.5 1.5L8 15',
 };
 
-/** `aria-hidden` icon markup, for a control whose visible text already names it. */
 function icon(name, extraClass = '') {
   const d = ICONS[name] || ICONS.circle;
   return `<svg class="icon ${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
@@ -91,71 +55,73 @@ function icon(name, extraClass = '') {
 
 const STYLE = `
 :root{
-  --bg:#09090b;--panel:#0f0f12;--panel-2:#151519;--panel-3:#1b1b20;
-  --line:#29292f;--line-strong:#3b3b43;--text:#f4f4f5;--muted:#a1a1aa;--dim:#9a9aa3;
-  --green:#6ee7b7;--green-bg:rgba(16,185,129,.10);--green-line:rgba(16,185,129,.42);
+  --bg:#07110f;--panel:#0d1b18;--panel-2:#132622;--panel-3:#1c3731;
+  --line:#24433c;--line-strong:#315b51;--text:#f4fff9;--muted:#a7bcb4;--dim:#78968b;
+  --accent:#62ffd0;--gold:#eecb7a;
+  --green:#62ffd0;--green-bg:rgba(98,255,208,.10);--green-line:rgba(98,255,208,.42);
   --red:#fca5a5;--red-bg:rgba(239,68,68,.10);--red-line:rgba(239,68,68,.42);
-  --amber:#fcd34d;--amber-bg:rgba(245,158,11,.10);--amber-line:rgba(245,158,11,.42);
+  --amber:#eecb7a;--amber-bg:rgba(238,203,122,.10);--amber-line:rgba(238,203,122,.42);
   --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
 }
 *{box-sizing:border-box}
 html{background:var(--bg)}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top left,#163b35,transparent 34rem),var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
 button,input{font:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.5}
-a{color:#ff9955}
+a{color:var(--accent)}
 .icon{width:16px;height:16px;flex:0 0 auto}
-.brand-icon .icon{width:21px;height:21px}
+.brand-icon .icon{width:21px;height:21px;color:var(--accent)}
 .small{width:13px;height:13px}
-.topbar{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);background:rgba(9,9,11,.96)}
+.topbar{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);background:rgba(7,17,15,.96);backdrop-filter:blur(10px)}
 .topbar-inner,.tabbar,.content{width:min(1400px,calc(100% - 32px));margin:0 auto}
 .topbar-inner{min-height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line-strong);background:#000}
-.brand h1{font-size:15px;margin:0;font-weight:700}
-.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-strong);padding:4px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.brand-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line-strong);background:var(--panel-2);border-radius:8px}
+.brand h1{font-size:15px;margin:0;font-weight:800;letter-spacing:.06em}
+.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-strong);padding:4px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;border-radius:6px}
 .badge.pass{border-color:var(--green-line);color:var(--green);background:var(--green-bg)}
 .badge.fail{border-color:var(--red-line);color:var(--red);background:var(--red-bg)}
 .badge.pending{border-color:var(--amber-line);color:var(--amber);background:var(--amber-bg)}
-.badge.neutral{color:#d4d4d8;background:var(--panel-2)}
-.tabbar{display:flex;gap:2px}
-.tab{display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--dim);font-weight:700}
-.tab:hover{color:#d4d4d8}
-.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--text)}
-.tab:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
+.badge.neutral{color:var(--muted);background:var(--panel-2)}
+.tabbar{display:flex;gap:4px}
+.tab{display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-weight:700;border-radius:6px 6px 0 0}
+.tab:hover{color:var(--text);background:rgba(36,67,60,.2)}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);background:var(--panel-2)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .content{padding:16px 0 48px}
 [role="tabpanel"]{display:none}
 [role="tabpanel"]:not([hidden]){display:block}
-.panel{border:1px solid var(--line);background:rgba(15,15,18,.96);margin-bottom:12px}
-.section-header{min-height:44px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);background:#0a0a0c}
-.section-title{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
-.btn{min-height:34px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-strong);padding:7px 11px;background:var(--panel-2);color:#d4d4d8;font-size:12px;font-weight:700}
-.btn:hover:not(:disabled){background:var(--panel-3)}
-.btn-primary{background:#f4f4f5;color:#09090b;border-color:#f4f4f5}
+.panel{border:1px solid var(--line);background:rgba(13,27,24,.92);margin-bottom:16px;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.section-header{min-height:44px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);background:rgba(7,17,15,.6)}
+.section-title{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.btn{min-height:36px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-strong);padding:7px 14px;background:var(--panel-2);color:var(--text);font-size:12px;font-weight:700;border-radius:8px;text-decoration:none}
+.btn:hover:not(:disabled){background:var(--panel-3);border-color:var(--accent)}
+.btn-primary{background:var(--accent);color:#06100d;border-color:var(--accent)}
+.btn-primary:hover:not(:disabled){background:#83ffd9}
 .notice{border-bottom:1px solid var(--amber-line);background:var(--amber-bg);padding:10px 0}
-.notice p{width:min(1400px,calc(100% - 32px));margin:0 auto;color:var(--amber);font-size:12.5px;display:flex;align-items:center;gap:8px}
-.empty{padding:34px;color:var(--dim);text-align:center}
+.notice p{width:min(1400px,calc(100% - 32px));margin:0 auto;color:var(--gold);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.empty{padding:34px;color:var(--muted);text-align:center}
 .market-table{min-width:900px}
 .market-head,.market-row{display:grid;grid-template-columns:minmax(240px,1.4fr) 170px 130px 120px;gap:12px;align-items:center}
-.market-head{padding:9px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.market-head{padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .market-row{min-height:64px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .table-scroll{overflow-x:auto}
 .mono{font-family:var(--mono)}
-.money{font-family:var(--mono);font-weight:700}
+.money{font-family:var(--mono);font-weight:700;color:var(--gold)}
 .money.unpriced{color:var(--dim);font-weight:400;font-style:italic}
-.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px}
 .field label{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;font-weight:700}
-.field .input-group{display:flex;border:1px solid var(--line-strong);background:var(--panel-2)}
+.field .input-group{display:flex;border:1px solid var(--line-strong);background:#040908;border-radius:8px;overflow:hidden}
 .field .input-group input{width:100%;border:0;outline:none;padding:0 11px;height:38px;background:transparent;color:var(--text);font-family:var(--mono)}
-.field .input-group span{display:flex;align-items:center;border-left:1px solid var(--line-strong);padding:0 10px;color:var(--dim);font:11px var(--mono)}
+.field .input-group span{display:flex;align-items:center;border-left:1px solid var(--line-strong);padding:0 10px;color:var(--dim);font:11px var(--mono);background:var(--panel-2)}
 table.qa{width:100%;border-collapse:collapse;font-size:12px}
-table.qa th{padding:9px;border-bottom:1px solid var(--line);color:var(--dim);text-align:left}
-table.qa td{padding:10px 9px;border-bottom:1px solid #202024;font-family:var(--mono)}
+table.qa th{padding:10px;border-bottom:1px solid var(--line);color:var(--muted);text-align:left;background:var(--panel-2)}
+table.qa td{padding:10px;border-bottom:1px solid var(--line);font-family:var(--mono)}
 .condition-list{display:grid;gap:8px;padding:12px}
-.condition{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);padding:10px;background:rgba(0,0,0,.18);font-size:11.5px}
-.status-line{padding:10px 12px;font-size:12px;color:var(--dim)}
+.condition{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);padding:10px 14px;background:rgba(4,9,8,.5);font-size:12px;border-radius:8px}
+.status-line{padding:10px 14px;font-size:12px;color:var(--muted)}
 .status-line[data-tone="error"]{color:var(--red)}
 @media (max-width:760px){.market-head,.market-row{grid-template-columns:1fr}.field-grid{grid-template-columns:1fr}}
 `;
@@ -173,14 +139,18 @@ const HEAD = `<!DOCTYPE html>
 const TOPBAR = `
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand">
+    <a class="brand" href="/">
       <div class="brand-icon">${icon('hexagon')}</div>
       <div>
         <h1>${SITE_NAME} Workspace</h1>
-        <div class="mono" style="color:var(--dim);font-size:10.5px;margin-top:3px">manufacturing pull requests</div>
+        <div class="mono" style="color:var(--dim);font-size:10.5px;margin-top:2px">hardware manufacturing pull requests</div>
       </div>
+    </a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="/how-it-works" style="color:var(--muted);font-weight:700;font-size:13px;text-decoration:none">How It Works</a>
+      <a href="/tools/" style="color:var(--muted);font-weight:700;font-size:13px;text-decoration:none">Tools</a>
+      <div id="connectionStatus" class="badge neutral">${icon('circle-dot', 'small')}<span>checking connection…</span></div>
     </div>
-    <div id="connectionStatus" class="badge neutral">${icon('circle-dot', 'small')}<span>checking connection…</span></div>
   </div>
   <nav class="tabbar" role="tablist" aria-label="Workspace views">
     <button class="tab" role="tab" id="tab-open-repo" aria-selected="true" aria-controls="panel-open-repo" data-view="open-repo">${icon('git-fork')}Open Repo</button>
@@ -193,6 +163,20 @@ const PAYMENTS_NOTICE = `
 <div class="notice">
   <p>${icon('triangle-alert', 'small')}No payment is taken on this deployment. Release conditions and CI verdicts below are real; funds never move — the same posture <a href="/waitlist">the waiting list</a> and <a href="/terms">terms</a> already state.</p>
 </div>`;
+
+const WORKSPACE_HEADER = `
+<aside class="panel" style="padding:16px;margin-bottom:16px;border-left:4px solid var(--accent)">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div>
+      <h2 style="margin:0 0 4px;font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)">Hardware Verification Workspace</h2>
+      <p style="margin:0;color:var(--muted);font-size:12.5px">Claim open engineering issues, submit physical QA telemetry, evaluate Gate 1–9 deterministic conditions, and sign manufacturing packages.</p>
+    </div>
+    <div style="display:flex;gap:12px;font-size:12px">
+      <a href="/how-it-works" style="color:var(--accent);text-decoration:none;font-weight:700">See Pipeline &rarr;</a>
+      <a href="/tools/" style="color:var(--muted);text-decoration:none">14 Hardware Tools &rarr;</a>
+    </div>
+  </div>
+</aside>`;
 
 const OPEN_REPO_PANEL = `
 <section id="panel-open-repo" role="tabpanel" aria-labelledby="tab-open-repo">
@@ -337,13 +321,30 @@ const SCRIPT = `
   }
 
   function loadIssues() {
-    document.getElementById('issueRows').innerHTML = '<div class="empty">Loading issues…</div>';
-    fetch('/api/marketplace/issues').then(function (res) { return res.json(); }).then(function (data) {
-      state.issues = data.issues || [];
+    var root = document.getElementById('issueRows');
+    root.innerHTML = '<div class="empty">Loading open hardware issues…</div>';
+    fetch('/api/marketplace/issues').then(function (res) {
+      return res.json().then(function (data) {
+        return { ok: res.ok, status: res.status, data: data };
+      });
+    }).then(function (res) {
+      if (!res.ok || (res.data && res.data.error)) {
+        var msg = (res.data && (res.data.message || res.data.error)) || ('HTTP ' + res.status);
+        root.innerHTML = '<div class="empty" style="padding:28px 16px;color:var(--red);max-width:680px;margin:0 auto;text-align:center">'
+          + '<div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--text)">Marketplace Backend Unavailable (' + escapeHtml(msg) + ')</div>'
+          + '<div style="font-size:12.5px;color:var(--muted);line-height:1.5">DATABASE_URL is not configured on this server deployment. Physical CI gates and marketplace routes are currently unmounted.</div>'
+          + '</div>';
+        setConnectionStatus(false);
+        return;
+      }
+      state.issues = res.data.issues || [];
       renderIssues();
       setConnectionStatus(true);
     }).catch(function () {
-      document.getElementById('issueRows').innerHTML = '<div class="empty">Issues are unavailable right now.</div>';
+      root.innerHTML = '<div class="empty" style="padding:28px 16px;color:var(--red);max-width:680px;margin:0 auto;text-align:center">'
+        + '<div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--text)">Marketplace Connection Failed</div>'
+        + '<div style="font-size:12.5px;color:var(--muted);line-height:1.5">Could not reach /api/marketplace/issues endpoint. Verify network connection or workspace server status.</div>'
+        + '</div>';
       setConnectionStatus(false);
     });
   }
@@ -379,10 +380,6 @@ const SCRIPT = `
     document.getElementById('activePrTag').textContent = pr ? pr.id + ' — ' + pr.state : 'no pull request selected';
     document.getElementById('submitBtn').disabled = !pr;
     resetVerdict();
-    // Real conditions from the start, not a blank slate -- a freshly
-    // claimed pull request that hasn't submitted anything yet genuinely
-    // has "Telemetry submitted: PENDING", and that should be visible
-    // immediately, not only after the first CI run.
     if (pr) renderConditions(pr, null);
     else document.getElementById('releaseConditions').innerHTML = '';
     selectTab(document.getElementById('tab-pull-request'));
@@ -394,8 +391,6 @@ const SCRIPT = `
     document.getElementById('verdictEmpty').textContent = 'No CI run yet for this pull request.';
   }
 
-  // Every finding rendered here comes verbatim from the run-ci.js response.
-  // Nothing on this page compares a value to a bound itself.
   function renderVerdict(run) {
     var table = document.getElementById('verdictTable');
     var empty = document.getElementById('verdictEmpty');
@@ -419,9 +414,6 @@ const SCRIPT = `
     }).join('');
   }
 
-  // Conditions come from the pull request's own real state, not a fixture
-  // list -- a PENDING or missing stage disables the release action exactly
-  // like a FAILED one does; only every condition reporting PASSED enables it.
   function renderConditions(pr, run) {
     var conditions = [
       { label: 'Telemetry submitted', status: pr.state === 'DRAFT' ? 'PENDING' : 'PASSED' },
@@ -525,7 +517,7 @@ const SCRIPT = `
 </script>`;
 
 const BODY = TOPBAR + PAYMENTS_NOTICE
-  + `<main class="content">${OPEN_REPO_PANEL}${LOCAL_BRANCH_PANEL}${PULL_REQUEST_PANEL}</main>`
+  + `<main class="content">${WORKSPACE_HEADER}${OPEN_REPO_PANEL}${LOCAL_BRANCH_PANEL}${PULL_REQUEST_PANEL}</main>`
   + SCRIPT;
 
 function main() {

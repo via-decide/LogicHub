@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#07110f">
   <meta name="logichub-product" content="sovereign-execution-boundary">
   <meta name="logichub-build-id" content="__LOGICHUB_BUILD_ID__">
-  <title>LogicHub.app — Sovereign Execution Boundary</title>
-  <meta name="description" content="Review and route AI-assisted code through a local, deterministic execution and evidence boundary without exporting the repository.">
+  <title>LogicHub.app — Bounded Hardware Verification &amp; Execution</title>
+  <meta name="description" content="Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit, and signed manufacturing releases.">
   <link rel="canonical" href="https://logichub.app/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="LogicHub.app — Sovereign Execution Boundary">
-  <meta property="og:description" content="Review and route AI-assisted code through a local, deterministic execution and evidence boundary without exporting the repository.">
+  <meta property="og:title" content="LogicHub.app — Bounded Hardware Verification &amp; Execution">
+  <meta property="og:description" content="Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit.">
   <meta property="og:url" content="https://logichub.app/">
   <meta property="og:image" content="https://logichub.app/assets/social-preview.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="LogicHub.app — Sovereign Execution Boundary">
-  <meta name="twitter:description" content="Review and route AI-assisted code through a local, deterministic execution and evidence boundary without exporting the repository.">
+  <meta name="twitter:title" content="LogicHub.app — Bounded Hardware Verification &amp; Execution">
+  <meta name="twitter:description" content="Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit.">
   <meta name="twitter:image" content="https://logichub.app/assets/social-preview.svg">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"LogicHub","url":"https://logichub.app/","applicationCategory":"DeveloperApplication","description":"Review and route AI-assisted code through a local, deterministic execution and evidence boundary without exporting the repository.","operatingSystem":"Web"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"LogicHub","url":"https://logichub.app/","applicationCategory":"DeveloperApplication","description":"Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit.","operatingSystem":"Web"}</script>
   <style>
     :root{color-scheme:dark;--bg:#07110f;--panel:#0d1b18;--line:#24433c;--text:#f4fff9;--muted:#a7bcb4;--accent:#62ffd0;--gold:#eecb7a}
     *{box-sizing:border-box}
@@ -30,9 +30,12 @@
     a{color:inherit}
     /* Padding scales with the viewport instead of eating 56px of a 360px screen. */
     .wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,28px)}
-    .nav,.hero,.grid,.footer{display:flex}
-    .nav{justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .brand{font-weight:800;letter-spacing:.08em}
+    .nav,.hero,.footer{display:flex}
+    .nav{justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    .nav-links{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-weight:700;font-size:14px}
+    .nav-links a{text-decoration:none;padding:6px 4px}
+    .nav-links a:hover{color:var(--accent)}
+    .brand{font-weight:800;letter-spacing:.08em;font-size:18px}
     .pill,.card{border:1px solid var(--line);background:rgba(13,27,24,.78);box-shadow:0 20px 80px rgba(0,0,0,.3)}
     .pill{border-radius:999px;padding:9px 13px;color:var(--muted);font-size:13px;max-width:100%;overflow-wrap:anywhere}
     .hero{align-items:center;gap:36px;padding:clamp(28px,6vw,56px) 0}
@@ -42,12 +45,14 @@
     /* 42px was too large to sit well on a 360px screen; floor lowered and
        line-height relaxed so a long headline no longer collides with itself. */
     h1{font-size:clamp(31px,7vw,86px);line-height:1.03;margin:14px 0;letter-spacing:-.01em}
-    .lead{font-size:clamp(17px,2.2vw,27px);line-height:1.5;color:#d9eee8;max-width:770px}
+    .lead{font-size:clamp(17px,2.2vw,24px);line-height:1.5;color:#d9eee8;max-width:770px}
     .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
     .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:800;border:1px solid var(--line);text-align:center;line-height:1.25}
     .primary{background:var(--accent);color:#06100d}
     .secondary{background:#10231f}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:24px 0}
     .card{border-radius:24px;padding:clamp(18px,4vw,22px);min-width:0}
     .card h2,.card h3{margin-top:0}
     .muted{color:var(--muted)}
@@ -55,13 +60,20 @@
     /* overflow-wrap:anywhere is what actually breaks the 64-char hash. */
     pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#040908;border:1px solid var(--line);border-radius:18px;padding:clamp(14px,3.5vw,18px);color:#c9fff0;font-size:clamp(12px,2.6vw,14px);line-height:1.6;margin:0}
     .receipt{border-left:4px solid var(--gold)}
+    .fact-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+    .fact-table th,.fact-table td{padding:12px 14px;border:1px solid var(--line);text-align:left}
+    .fact-table th{background:rgba(36,67,60,.4);color:var(--text);font-family:ui-monospace,monospace;font-size:13px;width:30%}
+    .fact-table td{background:rgba(13,27,24,.5);color:#d9eee8}
+    .step-num{display:inline-block;color:var(--accent);font-family:ui-monospace,monospace;font-weight:700;font-size:14px;margin-bottom:8px}
+    .section-title{margin-top:48px;margin-bottom:16px}
+    .section-title h2{font-size:clamp(22px,4vw,36px);margin:0}
     .footer{justify-content:space-between;gap:16px;border-top:1px solid var(--line);margin-top:44px;padding-top:24px;color:var(--muted);flex-wrap:wrap;font-size:14px}
     /* Footer links were a dense "·"-separated run; as inline-block with real
        vertical padding each one clears the 44px touch-target guidance. */
     .footer a{display:inline-block;padding:7px 2px;text-decoration:underline;text-underline-offset:3px}
     @media(max-width:850px){
       .hero{display:block}
-      .grid{grid-template-columns:1fr}
+      .grid,.grid-2,.grid-4{grid-template-columns:1fr}
       .panel{margin-top:28px}
     }
     @media(max-width:520px){
@@ -76,15 +88,25 @@
 </head>
 <body data-product="sovereign-execution-boundary">
   <main class="wrap">
-    <nav class="nav" aria-label="Primary"><div class="brand">LOGICHUB</div><div class="pill">Build <span data-build-id>__LOGICHUB_BUILD_ID__</span></div></nav>
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">LOGICHUB</div>
+      <div class="nav-links">
+        <a href="/how-it-works">How It Works</a>
+        <a href="/tools/">Production Tools</a>
+        <a href="/workspace">Workspace</a>
+      </div>
+      <div class="pill">Build <span data-build-id>__LOGICHUB_BUILD_ID__</span></div>
+    </nav>
+
     <section class="hero">
       <div class="copy">
-        <p class="eyebrow">SOVEREIGN EXECUTION BOUNDARY</p>
-        <h1>Review and route AI code without exporting the repository.</h1>
-        <p class="lead">LogicHub is the engineering workflow, review, and evidence interface for AI-assisted changes that need a deterministic local boundary before they reach production.</p>
+        <p class="eyebrow">HARDWARE VERIFICATION ENGINE</p>
+        <h1>Anyone can generate a hardware design. LogicHub is where it gets verified.</h1>
+        <p class="lead">Deterministic gates, physical telemetry intake, evidence you can audit, and signed manufacturing releases — backed by a zero-egress local execution boundary.</p>
         <div class="actions">
-          <a class="btn primary" href="/downloads/logichub-demo-evidence-bundle-v0.4.1.json" download>Download Demonstration Evidence Bundle</a>
-          <a class="btn secondary" href="/workspace">Open Engineering Workspace</a>
+          <a class="btn primary" href="/workspace">Open Engineering Workspace</a>
+          <a class="btn secondary" href="/how-it-works">See How It Works</a>
+          <a class="btn secondary" href="/downloads/logichub-demo-evidence-bundle-v0.4.1.json" download>Download Evidence Bundle</a>
         </div>
       </div>
       <aside class="panel card receipt" aria-label="Demonstration execution receipt">
@@ -97,12 +119,116 @@ daxini: physical appliance in development
 zayvora: deterministic local execution runtime</pre>
       </aside>
     </section>
+
+    <section class="section-title">
+      <h2>Hardware Verification at a Glance</h2>
+      <p class="muted">A scannable overview of the LogicHub physical verification stack.</p>
+    </section>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="fact-table" aria-label="LogicHub hardware verification at a glance">
+        <tbody>
+          <tr>
+            <th scope="row">Role</th>
+            <td>Deterministic hardware verification, telemetry intake, and signed manufacturing releases</td>
+          </tr>
+          <tr>
+            <th scope="row">Runs On</th>
+            <td>Zero-egress local workstation runtime or sovereign hardware node</td>
+          </tr>
+          <tr>
+            <th scope="row">Verdict Source</th>
+            <td>Server-sealed evaluation of physical inspection telemetry against deterministic Gate 1–9 rules</td>
+          </tr>
+          <tr>
+            <th scope="row">Blocks Merge</th>
+            <td>Yes — any PENDING or FAILED physical condition blocks the release action</td>
+          </tr>
+          <tr>
+            <th scope="row">Deployment</th>
+            <td>Local CLI/UI runtime live; Daxini physical sovereign execution appliance in development</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="section-title">
+      <h2>How It Works, Step by Step</h2>
+      <p class="muted">The complete engineering pipeline from hardware PR to signed manufacturing release.</p>
+    </section>
+    <section class="grid-4" aria-label="Verification pipeline steps">
+      <article class="card">
+        <span class="step-num">STEP 01</span>
+        <h3>Claim &amp; Specify</h3>
+        <p class="muted">Claim open hardware engineering issues, specify physical capability targets, and link BOM/CAD manifests.</p>
+      </article>
+      <article class="card">
+        <span class="step-num">STEP 02</span>
+        <h3>Submit Telemetry</h3>
+        <p class="muted">Ingest sealed micrometer, thermal, weight, or voltage inspection data directly from physical QA fixtures.</p>
+      </article>
+      <article class="card">
+        <span class="step-num">STEP 03</span>
+        <h3>Deterministic Gates</h3>
+        <p class="muted">Run Gate 1–9 checks locally without network egress — zero hallucination, strict physical tolerance bounds.</p>
+      </article>
+      <article class="card">
+        <span class="step-num">STEP 04</span>
+        <h3>Signed Release</h3>
+        <p class="muted">Generate cryptographic evidence bundles and release signed manufacturing packages for production.</p>
+      </article>
+    </section>
+
+    <section class="section-title">
+      <h2>Universal Hardware Production Tools</h2>
+      <p class="muted">14 production tools spanning power, telemetry, geometry, fault tolerance, and compliance.</p>
+    </section>
+    <section class="grid" aria-label="Universal Hardware Production Tools preview">
+      <article class="card">
+        <span class="step-num">T01 · POWER</span>
+        <h3>Power Standardization</h3>
+        <p class="muted">Input protection, voltage rail derating, and safe brownout behavior before fabrication.</p>
+      </article>
+      <article class="card">
+        <span class="step-num">T05 · RELIABILITY</span>
+        <h3>Fault Tolerance &amp; Fallbacks</h3>
+        <p class="muted">Graceful degradation for firmware hangs, bus faults, and corrupted storage records.</p>
+      </article>
+      <article class="card">
+        <span class="step-num">T12 · QUALITY</span>
+        <h3>Manufacturing QA Fixtures</h3>
+        <p class="muted">Physical test fixture receipts and sealed inspection telemetry generation.</p>
+      </article>
+    </section>
+    <div style="margin-top:12px;text-align:center">
+      <a class="btn secondary" href="/tools/">Browse All 14 Hardware Tools &rarr;</a>
+    </div>
+
+    <section class="section-title">
+      <h2>Product Boundary &amp; Architecture</h2>
+      <p class="muted">The three layers powering LogicHub's deterministic engineering stack.</p>
+    </section>
     <section class="grid" aria-label="Product boundary">
-      <article class="card"><h3>LogicHub</h3><p class="muted">Engineering workflow, review, and evidence interface for routing AI-assisted code.</p></article>
-      <article class="card"><h3>Zayvora</h3><p class="muted">Deterministic local execution runtime used to evaluate bounded changes.</p></article>
+      <article class="card"><h3>LogicHub</h3><p class="muted">Engineering workflow, review, and evidence interface for routing AI-assisted hardware changes.</p></article>
+      <article class="card"><h3>Zayvora</h3><p class="muted">Deterministic local execution runtime used to evaluate bounded physical changes.</p></article>
       <article class="card"><h3>Daxini</h3><p class="muted">Physical sovereign execution appliance under development, not represented as deployed hardware.</p></article>
     </section>
-    <footer class="footer"><span>Root service worker disabled. Builder PWA is scoped to /builder/.</span><span><a href="/workspace">Workspace</a> · <a href="/waitlist.html">Waiting list</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/refund-policy.html">Refunds</a> · <a href="/shipping-policy.html">Shipping</a> · <a href="/cookies.html">Cookies</a> · <a href="/contact.html">Contact</a></span><span>Every query: <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span></footer>
+
+    <footer class="footer">
+      <span>Root service worker disabled. Builder PWA is scoped to /builder/.</span>
+      <span>
+        <a href="/workspace">Workspace</a> · 
+        <a href="/how-it-works">How It Works</a> · 
+        <a href="/tools/">Tools</a> · 
+        <a href="/waitlist.html">Waiting list</a> · 
+        <a href="/privacy.html">Privacy</a> · 
+        <a href="/terms.html">Terms</a> · 
+        <a href="/refund-policy.html">Refunds</a> · 
+        <a href="/shipping-policy.html">Shipping</a> · 
+        <a href="/cookies.html">Cookies</a> · 
+        <a href="/contact.html">Contact</a>
+      </span>
+      <span>Every query: <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span>
+    </footer>
   </main>
   <script>
   (function(){

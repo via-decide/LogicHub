@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07110f">
+  <meta name="logichub-product" content="sovereign-execution-boundary">
+  <meta name="logichub-build-id" content="__LOGICHUB_BUILD_ID__">
+  <title>How It Works — Hardware Verification &amp; Deterministic Gates | LogicHub</title>
+  <meta name="description" content="The claim → engineering PR → physical telemetry → deterministic gate → evidence → signed manufacturing release pipeline explained.">
+  <link rel="canonical" href="https://logichub.app/how-it-works">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How It Works — Hardware Verification &amp; Deterministic Gates | LogicHub">
+  <meta property="og:description" content="The claim → engineering PR → physical telemetry → deterministic gate → evidence → signed manufacturing release pipeline explained.">
+  <meta property="og:url" content="https://logichub.app/how-it-works">
+  <meta property="og:image" content="https://logichub.app/assets/social-preview.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How It Works — Hardware Verification &amp; Deterministic Gates | LogicHub">
+  <meta name="twitter:description" content="The claim → engineering PR → physical telemetry → deterministic gate → evidence → signed manufacturing release pipeline explained.">
+  <meta name="twitter:image" content="https://logichub.app/assets/social-preview.svg">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"How LogicHub Works","url":"https://logichub.app/how-it-works","description":"The deterministic hardware engineering verification pipeline.","operatingSystem":"Web"}</script>
+  <style>
+    :root{color-scheme:dark;--bg:#07110f;--panel:#0d1b18;--line:#24433c;--text:#f4fff9;--muted:#a7bcb4;--accent:#62ffd0;--gold:#eecb7a}
+    *{box-sizing:border-box}
+    html,body{max-width:100%;overflow-x:hidden}
+    body{margin:0;background:radial-gradient(circle at top left,#163b35,transparent 34rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-text-size-adjust:100%}
+    a{color:inherit}
+    .wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,28px)}
+    .nav,.hero,.footer{display:flex}
+    .nav{justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    .nav-links{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-weight:700;font-size:14px}
+    .nav-links a{text-decoration:none;padding:6px 4px}
+    .nav-links a:hover,.nav-links a[aria-current="page"]{color:var(--accent)}
+    .brand{font-weight:800;letter-spacing:.08em;font-size:18px;text-decoration:none}
+    .pill,.card{border:1px solid var(--line);background:rgba(13,27,24,.78);box-shadow:0 20px 80px rgba(0,0,0,.3)}
+    .pill{border-radius:999px;padding:9px 13px;color:var(--muted);font-size:13px;max-width:100%;overflow-wrap:anywhere}
+    .hero{align-items:center;gap:36px;padding:clamp(28px,5vw,48px) 0}
+    .eyebrow{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:clamp(12px,3vw,14px);letter-spacing:.06em}
+    h1{font-size:clamp(30px,6vw,64px);line-height:1.05;margin:14px 0;letter-spacing:-.01em}
+    .lead{font-size:clamp(16px,2vw,22px);line-height:1.5;color:#d9eee8;max-width:820px}
+    .card{border-radius:24px;padding:clamp(18px,4vw,24px);min-width:0}
+    .card h2,.card h3{margin-top:0}
+    .muted{color:var(--muted)}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .fact-table,.check-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+    .fact-table th,.fact-table td,.check-table th,.check-table td{padding:12px 14px;border:1px solid var(--line);text-align:left}
+    .fact-table th,.check-table th{background:rgba(36,67,60,.4);color:var(--text);font-family:ui-monospace,monospace;font-size:13px}
+    .fact-table th{width:30%}
+    .fact-table td,.check-table td{background:rgba(13,27,24,.5);color:#d9eee8}
+    .step-list{display:grid;gap:16px;margin:24px 0}
+    .step-item{display:flex;gap:20px;align-items:flex-start}
+    .step-badge{flex:0 0 44px;height:44px;border-radius:12px;background:var(--accent);color:#06100d;display:grid;place-items:center;font-family:ui-monospace,monospace;font-weight:800;font-size:16px}
+    .step-content{flex:1;min-width:0}
+    .step-content h3{margin:0 0 6px;font-size:18px}
+    .quotable{border-left:4px solid var(--gold);background:rgba(238,203,122,.06);padding:20px 24px;border-radius:0 16px 16px 0;margin:32px 0}
+    .quotable p{margin:0;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--gold);line-height:1.4}
+    .section-title{margin-top:48px;margin-bottom:16px}
+    .section-title h2{font-size:clamp(22px,4vw,36px);margin:0}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:800;border:1px solid var(--line);text-align:center;line-height:1.25}
+    .primary{background:var(--accent);color:#06100d}
+    .secondary{background:#10231f}
+    .footer{justify-content:space-between;gap:16px;border-top:1px solid var(--line);margin-top:44px;padding-top:24px;color:var(--muted);flex-wrap:wrap;font-size:14px}
+    .footer a{display:inline-block;padding:7px 2px;text-decoration:underline;text-underline-offset:3px}
+    @media(max-width:768px){
+      .step-item{flex-direction:column;gap:10px}
+      .fact-table th,.fact-table td{display:block;width:100%}
+    }
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="/">LOGICHUB</a>
+      <div class="nav-links">
+        <a href="/how-it-works" aria-current="page">How It Works</a>
+        <a href="/tools/">Production Tools</a>
+        <a href="/workspace">Workspace</a>
+      </div>
+      <div class="pill">Build <span data-build-id>__LOGICHUB_BUILD_ID__</span></div>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <p class="eyebrow">VERIFICATION PIPELINE ARCHITECTURE</p>
+        <h1>How LogicHub Verifies Physical Hardware</h1>
+        <p class="lead">The engineering pull request workflow for physical hardware: claim issues, submit sealed telemetry, run deterministic CI gates, and produce audited manufacturing releases.</p>
+      </div>
+    </header>
+
+    <!-- SECTION 1: X at a glance -->
+    <section class="section-title">
+      <h2>Hardware Verification at a Glance</h2>
+      <p class="muted">Key technical facts about the LogicHub execution and gate model.</p>
+    </section>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="fact-table" aria-label="Hardware verification at a glance summary">
+        <tbody>
+          <tr>
+            <th scope="row">Role</th>
+            <td>Deterministic hardware verification, physical telemetry intake, and signed manufacturing package release.</td>
+          </tr>
+          <tr>
+            <th scope="row">Runs On</th>
+            <td>Zero-egress local workstation runtime (`zayvora`) or dedicated sovereign execution node (`daxini`).</td>
+          </tr>
+          <tr>
+            <th scope="row">Verdict Source</th>
+            <td>Server-sealed evaluation of physical QA telemetry against deterministic Gate 1–9 rule graphs.</td>
+          </tr>
+          <tr>
+            <th scope="row">Blocks Merge</th>
+            <td>Yes — any PENDING or FAILED condition halts the release action exactly like a software CI failure.</td>
+          </tr>
+          <tr>
+            <th scope="row">Deployment</th>
+            <td>Local workspace CLI/UI live; physical sovereign hardware appliance in active development.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 2: How it works, step by step -->
+    <section class="section-title">
+      <h2>How It Works, Step by Step</h2>
+      <p class="muted">A 5-stage deterministic workflow bridging hardware CAD/BOM specs to physical manufacturing.</p>
+    </section>
+    <div class="step-list">
+      <article class="card step-item">
+        <div class="step-badge">01</div>
+        <div class="step-content">
+          <h3><strong>Claim an Engineering Issue &amp; Link Manifest</strong></h3>
+          <p class="muted">Select an open hardware issue in the workspace, link your repository BOM/CAD manifest, and establish exact physical tolerance targets before assembly.</p>
+        </div>
+      </article>
+      <article class="card step-item">
+        <div class="step-badge">02</div>
+        <div class="step-content">
+          <h3><strong>Submit Physical Inspection Telemetry</strong></h3>
+          <p class="muted">Ingest sealed micrometer, thermal, weight, or voltage inspection data directly from physical QA fixtures into the pull request stream.</p>
+        </div>
+      </article>
+      <article class="card step-item">
+        <div class="step-badge">03</div>
+        <div class="step-content">
+          <h3><strong>Run Deterministic Gate 1–9 Evaluation</strong></h3>
+          <p class="muted">Evaluate capability graphs, power rails, thermal derating, and interlocks locally without network egress — zero AI hallucination or statistical guesswork.</p>
+        </div>
+      </article>
+      <article class="card step-item">
+        <div class="step-badge">04</div>
+        <div class="step-content">
+          <h3><strong>Inspect Bounded Evidence Receipts</strong></h3>
+          <p class="muted">Audit server-sealed verification receipts detailing exact observed values, lower/upper bounds, and cryptographic payload hashes.</p>
+        </div>
+      </article>
+      <article class="card step-item">
+        <div class="step-badge">05</div>
+        <div class="step-content">
+          <h3><strong>Package &amp; Sign Manufacturing Release</strong></h3>
+          <p class="muted">When every condition reports PASSED, generate an audit-ready evidence bundle and sign the final manufacturing change order.</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- SECTION 3: What the gate checks -->
+    <section class="section-title">
+      <h2>What the Deterministic Gates Check</h2>
+      <p class="muted">The 9 deterministic gate layers enforced across every hardware PR.</p>
+    </section>
+    <div class="card" style="padding:0;overflow:x-auto">
+      <table class="check-table" aria-label="Deterministic gate checks summary">
+        <thead>
+          <tr>
+            <th scope="col" style="width:12%">Gate</th>
+            <th scope="col" style="width:28%">Check Concern</th>
+            <th scope="col">Deterministic Verification Rules</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Gate 1</strong></td>
+            <td><strong>Power &amp; Input Protection</strong></td>
+            <td>Verifies input voltage envelope, reverse-polarity protection, rail budgets, and safe brownout limits.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 2</strong></td>
+            <td><strong>Input FSM &amp; Debounce</strong></td>
+            <td>Validates tactile state machines, mechanical switch debouncing bounds, and input timing windows.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 3</strong></td>
+            <td><strong>State &amp; Offline Telemetry</strong></td>
+            <td>Checks telemetry queue integrity, state visibility under network disconnect, and stream sequence continuity.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 4</strong></td>
+            <td><strong>Kit &amp; Capability Matching</strong></td>
+            <td>Evaluates physical BOM graph against kit definitions, driver requirements, motor voltage limits, and tool requirements.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 5</strong></td>
+            <td><strong>Fault Tolerance &amp; Fallbacks</strong></td>
+            <td>Proves graceful degradation under firmware hang, bus failure, missing sensor, or storage corruption.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 6</strong></td>
+            <td><strong>BOM &amp; CAD Intake Hashes</strong></td>
+            <td>Verifies SHA-256 integrity across CAD step files, BOM component IDs, firmware binaries, and manuals.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 7</strong></td>
+            <td><strong>Storage Transactional Safety</strong></td>
+            <td>Ensures persistent flash/EEPROM writes survive unexpected power loss without state corruption.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 8</strong></td>
+            <td><strong>Sensor &amp; Actuator Interlocks</strong></td>
+            <td>Enforces thermal/current derating bounds, sensor calibration freshness, and motor/heater safety interlocks.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 9</strong></td>
+            <td><strong>QA Fixture &amp; Compliance Ledger</strong></td>
+            <td>Validates sealed physical test receipts, DFM enclosure constraints, and compliance risk ledgers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 4: In one line -->
+    <div class="quotable">
+      <p>&ldquo;Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit.&rdquo;</p>
+    </div>
+
+    <!-- SECTION 5: Related links -->
+    <section class="section-title">
+      <h2>Related Resources</h2>
+      <p class="muted">Explore the interactive workspace and hardware tool production guides.</p>
+    </section>
+    <div class="nav-links" style="font-size:16px;gap:24px;margin-bottom:32px">
+      <a class="btn primary" href="/workspace">Open Engineering Workspace &rarr;</a>
+      <a class="btn secondary" href="/tools/">14 Production Tools &rarr;</a>
+      <a class="btn secondary" href="/waitlist.html">Join Waiting List &rarr;</a>
+    </div>
+
+    <footer class="footer">
+      <span>Root service worker disabled. Builder PWA is scoped to /builder/.</span>
+      <span>
+        <a href="/workspace">Workspace</a> · 
+        <a href="/how-it-works">How It Works</a> · 
+        <a href="/tools/">Tools</a> · 
+        <a href="/waitlist.html">Waiting list</a> · 
+        <a href="/privacy.html">Privacy</a> · 
+        <a href="/terms.html">Terms</a> · 
+        <a href="/refund-policy.html">Refunds</a> · 
+        <a href="/shipping-policy.html">Shipping</a> · 
+        <a href="/cookies.html">Cookies</a> · 
+        <a href="/contact.html">Contact</a>
+      </span>
+      <span>Every query: <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span>
+    </footer>
+  </main>
+  <script>
+  (function(){
+    var key='logichub-root-sw-migration-v1';
+    if(!('serviceWorker' in navigator)||sessionStorage.getItem(key))return;
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      var root=new URL('/', location.origin).href; var changed=false;
+      return Promise.all(regs.map(function(reg){
+        if(reg.scope!==root) return false;
+        var script=reg.active&&reg.active.scriptURL||reg.installing&&reg.installing.scriptURL||reg.waiting&&reg.waiting.scriptURL||'';
+        if(!/\/sw\.js(\?|$)/.test(script)) return false;
+        changed=true; return reg.unregister();
+      })).then(function(){return caches&&caches.delete?Promise.all(['logichub-v2-cache-v1','logichub-cache-v1'].map(function(c){return caches.delete(c)})):[]}).then(function(){if(changed){sessionStorage.setItem(key,'1'); location.reload();}});
+    }).catch(function(){sessionStorage.setItem(key,'1');});
+  }());
+  </script>
+</body>
+</html>
