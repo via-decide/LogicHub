@@ -58,6 +58,17 @@ export function getSql() {
     max: 5,
     idle_timeout: 20,
     connect_timeout: 10,
+    // Serverless deployments must connect through a transaction-mode pooler
+    // (Neon's `-pooler` endpoint, Supabase's port 6543), because each function
+    // invocation is its own short-lived client and direct connections are
+    // exhausted long before the traffic is interesting. Transaction-mode
+    // PgBouncer does not support prepared statements — postgres.js enables
+    // them by default, and leaving that on produces a runtime
+    // "prepared statement ... already exists" failure on the *second* query of
+    // a reused connection, not on the first. That is a genuinely nasty failure
+    // mode: it passes a smoke test and breaks under load, so it is disabled
+    // here rather than left to be discovered in production.
+    prepare: false,
   });
   return client;
 }
