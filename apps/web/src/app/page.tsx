@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export const runtime = "edge";
 
@@ -132,18 +133,18 @@ export default function Home() {
             <span>⚙️</span> Engineering Truth Pipeline
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="/product" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-blue-500/50 block">
+            <Link href="/product" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-blue-500/50 block">
               <h3 className="text-xl font-bold text-blue-400 mb-2">Canonical Graph</h3>
               <p className="text-gray-400 text-sm">Visualize cross-domain hardware dependencies and physical object constraints.</p>
-            </a>
-            <a href="/diff" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-amber-500/50 block">
+            </Link>
+            <Link href="/diff" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-amber-500/50 block">
               <h3 className="text-xl font-bold text-amber-400 mb-2">Semantic Diff</h3>
               <p className="text-gray-400 text-sm">Evaluate the physics and thermal cascade of a hardware component change.</p>
-            </a>
-            <a href="/release" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-green-500/50 block">
+            </Link>
+            <Link href="/release" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-green-500/50 block">
               <h3 className="text-xl font-bold text-green-400 mb-2">Release Gate</h3>
               <p className="text-gray-400 text-sm">Enforce cryptographic physical-CI receipts for manufacturing release.</p>
-            </a>
+            </Link>
           </div>
         </section>
 

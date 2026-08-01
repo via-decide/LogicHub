@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function SemanticDiffPage() {
   return (
     <main className="min-h-screen bg-black text-white p-6 font-sans">
       <header className="max-w-6xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <a href="/" className="text-zinc-500 hover:text-white transition-colors">← Back</a>
+          <Link href="/" className="text-zinc-500 hover:text-white transition-colors">← Back</Link>
           <span className="bg-amber-500/20 text-amber-500 text-xs font-black px-2 py-1 rounded border border-amber-500/30 uppercase tracking-widest">Semantic Diff</span>
         </div>
         <h1 className="text-4xl font-black tracking-tight mb-2">Component Swap: LDO Regulator</h1>

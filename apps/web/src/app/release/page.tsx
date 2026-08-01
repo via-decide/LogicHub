@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function ReleaseGatePage() {
   return (
     <main className="min-h-screen bg-black text-white p-6 font-sans">
       <header className="max-w-4xl mx-auto mb-12 text-center">
         <div className="flex justify-center items-center gap-3 mb-4">
-          <a href="/" className="text-zinc-500 hover:text-white transition-colors absolute left-8 top-8">← Back</a>
+          <Link href="/" className="text-zinc-500 hover:text-white transition-colors absolute left-8 top-8">← Back</Link>
           <span className="bg-green-500/20 text-green-500 text-xs font-black px-3 py-1.5 rounded border border-green-500/30 uppercase tracking-widest">Manufacturing Release Gate</span>
         </div>
         <h1 className="text-4xl font-black tracking-tight mb-2">Release to Factory: v2.4.1</h1>
