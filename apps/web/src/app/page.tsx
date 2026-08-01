@@ -126,6 +126,27 @@ export default function Home() {
       </header>
 
       <main className="max-w-6xl mx-auto">
+        {/* Hardware Truth Pipeline Navigation */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>⚙️</span> Engineering Truth Pipeline
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="/product" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-blue-500/50 block">
+              <h3 className="text-xl font-bold text-blue-400 mb-2">Canonical Graph</h3>
+              <p className="text-gray-400 text-sm">Visualize cross-domain hardware dependencies and physical object constraints.</p>
+            </a>
+            <a href="/diff" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-amber-500/50 block">
+              <h3 className="text-xl font-bold text-amber-400 mb-2">Semantic Diff</h3>
+              <p className="text-gray-400 text-sm">Evaluate the physics and thermal cascade of a hardware component change.</p>
+            </a>
+            <a href="/release" className="group bg-zinc-900/40 hover:bg-zinc-900/80 p-6 rounded-3xl border border-white/5 transition-all hover:border-green-500/50 block">
+              <h3 className="text-xl font-bold text-green-400 mb-2">Release Gate</h3>
+              <p className="text-gray-400 text-sm">Enforce cryptographic physical-CI receipts for manufacturing release.</p>
+            </a>
+          </div>
+        </section>
+
         {/* Viral Submission Box */}
         <section className="mb-16 bg-gradient-to-br from-zinc-900 to-black p-8 rounded-3xl border border-white/10 shadow-2xl">
           <h2 className="text-2xl font-bold mb-4">Drop a GitHub repo. Get a viral app page.</h2>
