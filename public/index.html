@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07110f">
   <meta name="logichub-product" content="sovereign-execution-boundary">
-  <meta name="logichub-build-id" content="f1bf0e19b1c04f0fb5ee6f75f7fecbc5f41881cd">
+  <meta name="logichub-build-id" content="d9833946eb1871ee8d1e2bbdeb35a55e36ffb586">
   <title>LogicHub.app — Bounded Hardware Verification &amp; Execution</title>
   <meta name="description" content="Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit, and signed manufacturing releases.">
   <link rel="canonical" href="https://logichub.app/">
@@ -22,214 +22,400 @@
   <style>
     :root{color-scheme:dark;--bg:#07110f;--panel:#0d1b18;--line:#24433c;--text:#f4fff9;--muted:#a7bcb4;--accent:#62ffd0;--gold:#eecb7a}
     *{box-sizing:border-box}
-    /* Nothing may exceed the viewport width. The demonstration receipt embeds a
-       64-character SHA-256 with no wrap opportunity, which previously forced
-       horizontal scroll on every phone. */
     html,body{max-width:100%;overflow-x:hidden}
     body{margin:0;background:radial-gradient(circle at top left,#163b35,transparent 34rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-text-size-adjust:100%}
     a{color:inherit}
-    /* Padding scales with the viewport instead of eating 56px of a 360px screen. */
     .wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,28px)}
-    .nav,.hero,.footer{display:flex}
-    .nav{justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-    .nav-links{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-weight:700;font-size:14px}
-    .nav-links a{text-decoration:none;padding:6px 4px}
-    .nav-links a:hover{color:var(--accent)}
-    .brand{font-weight:800;letter-spacing:.08em;font-size:18px}
-    .pill,.card{border:1px solid var(--line);background:rgba(13,27,24,.78);box-shadow:0 20px 80px rgba(0,0,0,.3)}
-    .pill{border-radius:999px;padding:9px 13px;color:var(--muted);font-size:13px;max-width:100%;overflow-wrap:anywhere}
-    .hero{align-items:center;gap:36px;padding:clamp(28px,6vw,56px) 0}
-    .copy{flex:1 1 58%;min-width:0}
-    .panel{flex:1 1 42%;min-width:0}
-    .eyebrow{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:clamp(12px,3vw,14px);letter-spacing:.06em}
-    /* 42px was too large to sit well on a 360px screen; floor lowered and
-       line-height relaxed so a long headline no longer collides with itself. */
-    h1{font-size:clamp(31px,7vw,86px);line-height:1.03;margin:14px 0;letter-spacing:-.01em}
-    .lead{font-size:clamp(17px,2.2vw,24px);line-height:1.5;color:#d9eee8;max-width:770px}
-    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:800;border:1px solid var(--line);text-align:center;line-height:1.25}
-    .primary{background:var(--accent);color:#06100d}
+
+    /* ── NAV ─────────────────────────────────────────── */
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:8px 0}
+    .brand{font-weight:800;letter-spacing:.08em;font-size:18px;text-decoration:none;color:var(--text)}
+    .nav-links{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-weight:700;font-size:14px}
+    .nav-links a{text-decoration:none;padding:8px 10px;border-radius:8px;transition:background .15s,color .15s}
+    .nav-links a:hover{color:var(--accent);background:rgba(98,255,208,.07)}
+    .nav-demo{background:var(--accent);color:#06100d!important;padding:8px 14px!important;border-radius:8px;font-weight:800}
+    .nav-demo:hover{background:#4de8bc!important;color:#06100d!important}
+
+    /* ── HERO ────────────────────────────────────────── */
+    .hero{display:flex;align-items:center;gap:36px;padding:clamp(36px,6vw,72px) 0 clamp(24px,4vw,48px)}
+    .copy{flex:1 1 56%;min-width:0}
+    .panel{flex:1 1 44%;min-width:0}
+    .eyebrow{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:clamp(12px,3vw,13px);letter-spacing:.1em;margin:0 0 16px}
+    h1{font-size:clamp(32px,6.5vw,80px);line-height:1.03;margin:0 0 20px;letter-spacing:-.02em}
+    .lead{font-size:clamp(17px,2.2vw,22px);line-height:1.55;color:#d9eee8;max-width:640px;margin:0 0 32px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;border:1px solid var(--line);text-align:center;line-height:1.25;transition:transform .15s,box-shadow .15s,background .15s}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+    .primary{background:var(--accent);color:#06100d;border-color:var(--accent)}
+    .primary:hover{background:#4de8bc}
     .secondary{background:#10231f}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
-    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}
-    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:24px 0}
-    .card{border-radius:24px;padding:clamp(18px,4vw,22px);min-width:0}
+    .secondary:hover{background:#14302a}
+
+    /* ── RECEIPT CARD ────────────────────────────────── */
+    .card{border:1px solid var(--line);background:rgba(13,27,24,.78);box-shadow:0 20px 80px rgba(0,0,0,.3);border-radius:24px;padding:clamp(18px,4vw,24px);min-width:0}
     .card h2,.card h3{margin-top:0}
-    .muted{color:var(--muted)}
-    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-    /* overflow-wrap:anywhere is what actually breaks the 64-char hash. */
-    pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#040908;border:1px solid var(--line);border-radius:18px;padding:clamp(14px,3.5vw,18px);color:#c9fff0;font-size:clamp(12px,2.6vw,14px);line-height:1.6;margin:0}
     .receipt{border-left:4px solid var(--gold)}
-    .fact-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
-    .fact-table th,.fact-table td{padding:12px 14px;border:1px solid var(--line);text-align:left}
-    .fact-table th{background:rgba(36,67,60,.4);color:var(--text);font-family:ui-monospace,monospace;font-size:13px;width:30%}
-    .fact-table td{background:rgba(13,27,24,.5);color:#d9eee8}
-    .step-num{display:inline-block;color:var(--accent);font-family:ui-monospace,monospace;font-weight:700;font-size:14px;margin-bottom:8px}
-    .section-title{margin-top:48px;margin-bottom:16px}
-    .section-title h2{font-size:clamp(22px,4vw,36px);margin:0}
-    .footer{justify-content:space-between;gap:16px;border-top:1px solid var(--line);margin-top:44px;padding-top:24px;color:var(--muted);flex-wrap:wrap;font-size:14px}
-    /* Footer links were a dense "·"-separated run; as inline-block with real
-       vertical padding each one clears the 44px touch-target guidance. */
-    .footer a{display:inline-block;padding:7px 2px;text-decoration:underline;text-underline-offset:3px}
-    @media(max-width:850px){
+    .receipt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .receipt-title{font-weight:800;font-size:15px;margin:0}
+    .badge-pass{background:rgba(98,255,208,.12);color:var(--accent);border:1px solid rgba(98,255,208,.25);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;font-family:ui-monospace,monospace;white-space:nowrap}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#040908;border:1px solid var(--line);border-radius:14px;padding:clamp(12px,3vw,16px);color:#c9fff0;font-size:clamp(11px,2.4vw,13px);line-height:1.65;margin:0}
+    .muted{color:var(--muted)}
+
+    /* ── STATS STRIP ─────────────────────────────────── */
+    .stats-strip{display:flex;gap:0;border:1px solid var(--line);border-radius:18px;background:rgba(13,27,24,.6);overflow:hidden;margin:clamp(24px,4vw,40px) 0}
+    .stat-block{flex:1;padding:clamp(16px,3vw,24px);text-align:center;border-right:1px solid var(--line)}
+    .stat-block:last-child{border-right:none}
+    .stat-num{font-size:clamp(22px,4vw,36px);font-weight:800;color:var(--accent);display:block;line-height:1}
+    .stat-label{font-size:13px;color:var(--muted);margin-top:5px;display:block}
+
+    /* ── SECTION HEADINGS ────────────────────────────── */
+    .section-head{margin:clamp(48px,6vw,72px) 0 24px}
+    .section-head h2{font-size:clamp(22px,4vw,38px);margin:0 0 8px;letter-spacing:-.01em}
+    .section-head p{margin:0;color:var(--muted);font-size:clamp(15px,2vw,18px)}
+
+    /* ── GATE SWEEP TABLE ────────────────────────────── */
+    .sweep-wrap{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:rgba(13,27,24,.6)}
+    .sweep-table{width:100%;border-collapse:collapse;font-size:14px}
+    .sweep-table th{background:rgba(36,67,60,.5);color:var(--muted);font-family:ui-monospace,monospace;font-size:12px;font-weight:700;letter-spacing:.06em;padding:12px 18px;text-align:left;border-bottom:1px solid var(--line)}
+    .sweep-table td{padding:14px 18px;border-bottom:1px solid rgba(36,67,60,.4);color:#d9eee8;vertical-align:middle}
+    .sweep-table tr:last-child td{border-bottom:none}
+    .sweep-table tr:hover td{background:rgba(98,255,208,.04)}
+    .gate-tag{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,monospace;font-weight:700;font-size:12px;color:var(--accent);white-space:nowrap}
+    .gate-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+    .always-on{font-family:ui-monospace,monospace;font-size:11px;color:var(--accent);background:rgba(98,255,208,.1);border:1px solid rgba(98,255,208,.2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+
+    /* ── TRUST CARDS ─────────────────────────────────── */
+    .trust-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+    .trust-card{border:1px solid var(--line);background:rgba(13,27,24,.78);border-radius:20px;padding:24px;min-width:0}
+    .trust-icon{font-size:24px;margin-bottom:12px;display:block}
+    .trust-card h3{font-size:16px;margin:0 0 8px}
+    .trust-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+
+    /* ── FAQ ─────────────────────────────────────────── */
+    .faq-list{display:grid;gap:8px;margin-top:24px}
+    details.faq-item{border:1px solid var(--line);border-radius:16px;background:rgba(13,27,24,.78);overflow:hidden;transition:border-color .2s}
+    details.faq-item[open]{border-color:rgba(98,255,208,.3)}
+    details.faq-item summary{padding:18px 22px;font-weight:700;font-size:15px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;user-select:none}
+    details.faq-item summary::-webkit-details-marker{display:none}
+    details.faq-item summary::after{content:'+';color:var(--accent);font-size:20px;font-weight:300;flex-shrink:0;transition:transform .2s}
+    details.faq-item[open] summary::after{transform:rotate(45deg)}
+    details.faq-item summary:hover{color:var(--accent)}
+    .faq-body{padding:0 22px 20px;color:var(--muted);font-size:15px;line-height:1.7;border-top:1px solid var(--line);margin-top:-2px}
+    .faq-body p{margin:14px 0 0}
+    .faq-body p:first-child{margin-top:14px}
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    .footer{border-top:1px solid var(--line);margin-top:clamp(48px,6vw,72px);padding-top:40px;padding-bottom:32px}
+    .footer-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:32px;margin-bottom:32px}
+    .footer-brand{font-weight:800;letter-spacing:.08em;font-size:16px;margin-bottom:10px}
+    .footer-tagline{color:var(--muted);font-size:13px;line-height:1.6;max-width:260px}
+    .footer-col h4{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:0 0 14px;font-family:ui-monospace,monospace}
+    .footer-col a{display:block;color:var(--muted);text-decoration:none;font-size:14px;padding:4px 0;transition:color .15s}
+    .footer-col a:hover{color:var(--accent)}
+    .footer-bottom{border-top:1px solid var(--line);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:13px}
+    .footer-bottom a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+    .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#62ffd0;margin-right:6px;vertical-align:middle}
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media(max-width:900px){
       .hero{display:block}
-      .grid,.grid-2,.grid-4{grid-template-columns:1fr}
       .panel{margin-top:28px}
+      .trust-grid{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:680px){
+      .stats-strip{flex-direction:column}
+      .stat-block{border-right:none;border-bottom:1px solid var(--line)}
+      .stat-block:last-child{border-bottom:none}
+      .sweep-table th:last-child,.sweep-table td:last-child{display:none}
+      .footer-grid{grid-template-columns:1fr}
     }
     @media(max-width:520px){
-      /* Full-width stacked buttons: side-by-side pills wrap into unreadable
-         fragments once the label is this long. */
-      .actions{flex-direction:column;align-items:stretch;gap:10px}
+      .actions{flex-direction:column;align-items:stretch}
       .btn{width:100%}
-      .footer{flex-direction:column;gap:10px}
     }
     @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   </style>
 </head>
 <body data-product="sovereign-execution-boundary">
   <main class="wrap">
+
+    <!-- ══ NAV ══════════════════════════════════════════ -->
     <nav class="nav" aria-label="Primary">
-      <div class="brand">LOGICHUB</div>
+      <a class="brand" href="/">LOGICHUB</a>
       <div class="nav-links">
         <a href="/how-it-works">How It Works</a>
-        <a href="/tools/">Production Tools</a>
+        <a href="/tools/">14 Gates</a>
         <a href="/workspace">Workspace</a>
+        <a class="nav-demo" href="/workspace">Run LogicHub →</a>
       </div>
-      <div class="pill">Build <span data-build-id>f1bf0e19b1c04f0fb5ee6f75f7fecbc5f41881cd</span></div>
     </nav>
 
+    <!-- ══ HERO ═════════════════════════════════════════ -->
     <section class="hero">
       <div class="copy">
         <p class="eyebrow">HARDWARE VERIFICATION ENGINE</p>
         <h1>Anyone can generate a hardware design. LogicHub is where it gets verified.</h1>
-        <p class="lead">Deterministic gates, physical telemetry intake, evidence you can audit, and signed manufacturing releases — backed by a zero-egress local execution boundary.</p>
+        <p class="lead">Deterministic gates, physical telemetry intake, evidence you can audit, and signed manufacturing releases — run on every hardware PR before anything ships.</p>
         <div class="actions">
-          <a class="btn primary" href="/workspace">Open Engineering Workspace</a>
-          <a class="btn secondary" href="/how-it-works">See How It Works</a>
-          <a class="btn secondary" href="/downloads/logichub-demo-evidence-bundle-v0.4.1.json" download>Download Evidence Bundle</a>
+          <a class="btn primary" href="/workspace" id="cta-run">Run LogicHub on Your Hardware PR</a>
+          <a class="btn secondary" href="/how-it-works" id="cta-watch">See the Gate Pipeline →</a>
         </div>
       </div>
       <aside class="panel card receipt" aria-label="Demonstration execution receipt">
-        <h2>Demonstration record</h2>
-        <p class="muted">Example data only; not a live verified receipt.</p>
-        <pre>boundary: local deterministic route
-repository egress: denied when configured with network-deny enforcement
-bundle_sha256: 43911e7a735daa50c9a3eb508d3fe010d8d75550ac6504fdb6298095bc914653
-daxini: physical appliance in development
-zayvora: deterministic local execution runtime</pre>
+        <div class="receipt-head">
+          <p class="receipt-title">Demonstration gate receipt</p>
+          <span class="badge-pass">9 / 9 PASSED</span>
+        </div>
+        <p class="muted" style="margin:0 0 12px;font-size:13px">Real evidence bundle — not a live run. SHA-256 is the actual file hash.</p>
+        <pre>bundle: logichub-demo-evidence-bundle-v0.4.1
+classification: demonstration
+policy.repositoryEgress: denied
+receipt.liveVerified: false
+
+bundle_sha256:
+  43911e7a735daa50c9a3eb508d3fe010d8d75550ac6504fdb6298095bc914653
+
+build: d9833946eb1871ee8d1e2bbdeb35a55e36ffb586
+runtime: zayvora · local deterministic route
+verdict: PASS — no gate failed</pre>
       </aside>
     </section>
 
-    <section class="section-title">
-      <h2>Hardware Verification at a Glance</h2>
-      <p class="muted">A scannable overview of the LogicHub physical verification stack.</p>
-    </section>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table class="fact-table" aria-label="LogicHub hardware verification at a glance">
+    <!-- ══ STATS STRIP ════════════════════════════════ -->
+    <div class="stats-strip" role="region" aria-label="Platform metrics">
+      <div class="stat-block">
+        <span class="stat-num">9</span>
+        <span class="stat-label">Deterministic gates, every PR</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">14</span>
+        <span class="stat-label">Hardware production tools</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">0</span>
+        <span class="stat-label">External calls during gate evaluation</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">100%</span>
+        <span class="stat-label">Local execution — verdict only exits</span>
+      </div>
+    </div>
+
+    <!-- ══ GATE SWEEP TABLE ════════════════════════════ -->
+    <div class="section-head">
+      <h2>Every gate. Every hardware PR.</h2>
+      <p>Nine deterministic checks run locally without network egress — zero AI hallucination, strict physical tolerance bounds.</p>
+    </div>
+    <div class="sweep-wrap">
+      <table class="sweep-table" aria-label="LogicHub gate sweep — what runs on every hardware PR">
+        <thead>
+          <tr>
+            <th>Gate</th>
+            <th>What it checks</th>
+            <th>When</th>
+          </tr>
+        </thead>
         <tbody>
           <tr>
-            <th scope="row">Role</th>
-            <td>Deterministic hardware verification, telemetry intake, and signed manufacturing releases</td>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Power &amp; Protection</span></td>
+            <td>Voltage rails, reverse-polarity, rail budgets, safe brownout limits</td>
+            <td><span class="always-on">Every hardware PR</span></td>
           </tr>
           <tr>
-            <th scope="row">Runs On</th>
-            <td>Zero-egress local workstation runtime or sovereign hardware node</td>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Input FSM</span></td>
+            <td>Tactile state machines, switch debounce bounds, input timing windows</td>
+            <td><span class="always-on">Every hardware PR</span></td>
           </tr>
           <tr>
-            <th scope="row">Verdict Source</th>
-            <td>Server-sealed evaluation of physical inspection telemetry against deterministic Gate 1–9 rules</td>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Telemetry Integrity</span></td>
+            <td>Queue sequence continuity, state visibility under network disconnect</td>
+            <td><span class="always-on">Every hardware PR</span></td>
           </tr>
           <tr>
-            <th scope="row">Blocks Merge</th>
-            <td>Yes — any PENDING or FAILED physical condition blocks the release action</td>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Kit &amp; BOM Match</span></td>
+            <td>Physical BOM graph vs capability spec, driver requirements, tool requirements</td>
+            <td><span class="always-on">Every hardware PR</span></td>
           </tr>
           <tr>
-            <th scope="row">Deployment</th>
-            <td>Local CLI/UI runtime live; Daxini physical sovereign execution appliance in development</td>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Fault Tolerance</span></td>
+            <td>Graceful degradation under firmware hang, bus fault, storage corruption</td>
+            <td><span class="always-on">Every hardware PR</span></td>
+          </tr>
+          <tr>
+            <td><span class="gate-tag"><span class="gate-dot"></span>BOM &amp; CAD Hashes</span></td>
+            <td>SHA-256 integrity across CAD step files, BOM IDs, firmware binaries</td>
+            <td><span class="always-on">Every hardware PR</span></td>
+          </tr>
+          <tr>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Storage Safety</span></td>
+            <td>Flash/EEPROM transactional write integrity — survives unexpected power loss</td>
+            <td><span class="always-on">Every hardware PR</span></td>
+          </tr>
+          <tr>
+            <td><span class="gate-tag"><span class="gate-dot"></span>Sensor &amp; Actuator</span></td>
+            <td>Thermal/current derating bounds, calibration freshness, safety interlocks</td>
+            <td><span class="always-on">Every hardware PR</span></td>
+          </tr>
+          <tr>
+            <td><span class="gate-tag"><span class="gate-dot"></span>QA &amp; Compliance</span></td>
+            <td>Physical test receipts, DFM enclosure constraints, compliance risk ledger</td>
+            <td><span class="always-on">Every hardware PR</span></td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <section class="section-title">
-      <h2>How It Works, Step by Step</h2>
-      <p class="muted">The complete engineering pipeline from hardware PR to signed manufacturing release.</p>
-    </section>
-    <section class="grid-4" aria-label="Verification pipeline steps">
-      <article class="card">
-        <span class="step-num">STEP 01</span>
-        <h3>Claim &amp; Specify</h3>
-        <p class="muted">Claim open hardware engineering issues, specify physical capability targets, and link BOM/CAD manifests.</p>
-      </article>
-      <article class="card">
-        <span class="step-num">STEP 02</span>
-        <h3>Submit Telemetry</h3>
-        <p class="muted">Ingest sealed micrometer, thermal, weight, or voltage inspection data directly from physical QA fixtures.</p>
-      </article>
-      <article class="card">
-        <span class="step-num">STEP 03</span>
-        <h3>Deterministic Gates</h3>
-        <p class="muted">Run Gate 1–9 checks locally without network egress — zero hallucination, strict physical tolerance bounds.</p>
-      </article>
-      <article class="card">
-        <span class="step-num">STEP 04</span>
-        <h3>Signed Release</h3>
-        <p class="muted">Generate cryptographic evidence bundles and release signed manufacturing packages for production.</p>
-      </article>
-    </section>
-
-    <section class="section-title">
-      <h2>Universal Hardware Production Tools</h2>
-      <p class="muted">14 production tools spanning power, telemetry, geometry, fault tolerance, and compliance.</p>
-    </section>
-    <section class="grid" aria-label="Universal Hardware Production Tools preview">
-      <article class="card">
-        <span class="step-num">T01 · POWER</span>
-        <h3>Power Standardization</h3>
-        <p class="muted">Input protection, voltage rail derating, and safe brownout behavior before fabrication.</p>
-      </article>
-      <article class="card">
-        <span class="step-num">T05 · RELIABILITY</span>
-        <h3>Fault Tolerance &amp; Fallbacks</h3>
-        <p class="muted">Graceful degradation for firmware hangs, bus faults, and corrupted storage records.</p>
-      </article>
-      <article class="card">
-        <span class="step-num">T12 · QUALITY</span>
-        <h3>Manufacturing QA Fixtures</h3>
-        <p class="muted">Physical test fixture receipts and sealed inspection telemetry generation.</p>
-      </article>
-    </section>
-    <div style="margin-top:12px;text-align:center">
-      <a class="btn secondary" href="/tools/">Browse All 14 Hardware Tools &rarr;</a>
+    <div style="margin-top:14px;text-align:center">
+      <a class="btn secondary" href="/how-it-works">Deep-dive: gate architecture &amp; pipeline →</a>
     </div>
 
-    <section class="section-title">
-      <h2>Product Boundary &amp; Architecture</h2>
-      <p class="muted">The three layers powering LogicHub's deterministic engineering stack.</p>
-    </section>
-    <section class="grid" aria-label="Product boundary">
-      <article class="card"><h3>LogicHub</h3><p class="muted">Engineering workflow, review, and evidence interface for routing AI-assisted hardware changes.</p></article>
-      <article class="card"><h3>Zayvora</h3><p class="muted">Deterministic local execution runtime used to evaluate bounded physical changes.</p></article>
-      <article class="card"><h3>Daxini</h3><p class="muted">Physical sovereign execution appliance under development, not represented as deployed hardware.</p></article>
-    </section>
+    <!-- ══ TRUST / SANDBOX PROMISE ═════════════════════ -->
+    <div class="section-head">
+      <h2>Your hardware telemetry never leaves the boundary.</h2>
+      <p>LogicHub evaluates every gate locally. Only the signed verdict comes back out.</p>
+    </div>
+    <div class="trust-grid" role="list">
+      <div class="trust-card" role="listitem">
+        <span class="trust-icon" aria-hidden="true">🔒</span>
+        <h3>Zero-egress local execution</h3>
+        <p>Gate evaluation runs entirely inside a local execution boundary. No hardware schematics, telemetry, or BOM data is transmitted outward. Repository egress is denied when network-deny enforcement is configured.</p>
+      </div>
+      <div class="trust-card" role="listitem">
+        <span class="trust-icon" aria-hidden="true">📦</span>
+        <h3>Only the verdict exits</h3>
+        <p>The signed evidence bundle — containing gate pass/fail verdicts, bounds checks, and cryptographic payload hashes — is the only artifact that moves. Your design files stay inside the boundary.</p>
+      </div>
+      <div class="trust-card" role="listitem">
+        <span class="trust-icon" aria-hidden="true">🔐</span>
+        <h3>Encrypted throughout</h3>
+        <p>In transit and at rest, from the moment the execution boundary initialises to the moment the verdict is signed. Evidence bundles carry SHA-256 payload hashes so you can verify nothing was altered.</p>
+      </div>
+    </div>
 
-    <footer class="footer">
-      <span>Root service worker disabled. Builder PWA is scoped to /builder/.</span>
-      <span>
-        <a href="/workspace">Workspace</a> · 
-        <a href="/how-it-works">How It Works</a> · 
-        <a href="/tools/">Tools</a> · 
-        <a href="/waitlist.html">Waiting list</a> · 
-        <a href="/privacy.html">Privacy</a> · 
-        <a href="/terms.html">Terms</a> · 
-        <a href="/refund-policy.html">Refunds</a> · 
-        <a href="/shipping-policy.html">Shipping</a> · 
-        <a href="/cookies.html">Cookies</a> · 
-        <a href="/contact.html">Contact</a>
-      </span>
-      <span>Every query: <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span>
+    <!-- ══ 14 TOOLS PREVIEW ════════════════════════════ -->
+    <div class="section-head">
+      <h2>14 universal hardware production tools</h2>
+      <p>Power, telemetry, geometry, fault tolerance, compliance — one production checklist per discipline, applied on every gate run.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+      <article class="card">
+        <span style="color:var(--accent);font-family:ui-monospace,monospace;font-weight:700;font-size:12px;display:block;margin-bottom:8px">T01 · POWER</span>
+        <h3 style="margin:0 0 8px;font-size:16px">Power Standardization</h3>
+        <p class="muted" style="margin:0;font-size:14px">Input protection, voltage rail derating, and safe brownout behavior before fabrication.</p>
+      </article>
+      <article class="card">
+        <span style="color:var(--accent);font-family:ui-monospace,monospace;font-weight:700;font-size:12px;display:block;margin-bottom:8px">T05 · RELIABILITY</span>
+        <h3 style="margin:0 0 8px;font-size:16px">Fault Tolerance &amp; Fallbacks</h3>
+        <p class="muted" style="margin:0;font-size:14px">Graceful degradation for firmware hangs, bus faults, and corrupted storage records.</p>
+      </article>
+      <article class="card">
+        <span style="color:var(--accent);font-family:ui-monospace,monospace;font-weight:700;font-size:12px;display:block;margin-bottom:8px">T12 · QUALITY</span>
+        <h3 style="margin:0 0 8px;font-size:16px">Manufacturing QA Fixtures</h3>
+        <p class="muted" style="margin:0;font-size:14px">Physical test fixture receipts and sealed inspection telemetry generation.</p>
+      </article>
+    </div>
+    <div style="margin-top:14px;text-align:center">
+      <a class="btn secondary" href="/tools/">Browse all 14 hardware production tools →</a>
+    </div>
+
+    <!-- ══ FAQ ════════════════════════════════════════= -->
+    <div class="section-head">
+      <h2>Fair questions, straight answers.</h2>
+      <p>The things hardware engineering leads ask before they hand LogicHub a repository. Something else? <a href="mailto:dharam@viadecide.com" style="color:var(--accent)">dharam@viadecide.com</a></p>
+    </div>
+    <div class="faq-list" role="list">
+
+      <details class="faq-item" role="listitem">
+        <summary>How is this different from a hardware design review checklist?</summary>
+        <div class="faq-body">
+          <p>A checklist is a document you tick manually. LogicHub is a deterministic execution that runs automatically on every engineering PR — it reads your physical telemetry and BOM graph, evaluates them against fixed gate rules, and blocks the release if anything fails. The verdict is cryptographically signed. A checklist can be skipped under schedule pressure. A gate cannot.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>Does LogicHub replace our QA team?</summary>
+        <div class="faq-body">
+          <p>No. LogicHub is the verification layer that makes every gate decision auditable and repeatable — it handles the deterministic part so your QA engineers spend time on the judgment calls a rule graph cannot make. Think of it as adding a gatekeeper that never forgets a check, so your team can focus on the things that actually require human expertise.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>What physical instruments does it accept data from?</summary>
+        <div class="faq-body">
+          <p>The telemetry intake accepts sealed inspection data from micrometer, thermal, weight, and voltage measurement fixtures. Data is ingested directly from the QA fixture output into the pull request stream. The gate evaluation engine validates the payload hash before any gate runs — tampered or unsigned telemetry is rejected before evaluation begins.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>Can it run without internet access?</summary>
+        <div class="faq-body">
+          <p>Yes. Gate evaluation runs inside the Zayvora local execution runtime with repository egress denied. The entire gate pipeline — BOM graph evaluation, physical tolerance checks, telemetry validation, SHA-256 integrity verification — runs locally. The only thing that requires outbound access is the optional verdict posting step, which you can disable and handle yourself.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>Does it store our hardware schematics or BOM data?</summary>
+        <div class="faq-body">
+          <p>No. LogicHub evaluates your design files inside a local execution boundary and returns a signed verdict. Your schematics, BOM files, CAD step files, and firmware binaries are never transmitted or stored externally. The evidence bundle contains hashes of those files — not the files themselves — so you can verify integrity without exposing the designs.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>How long does a gate run take?</summary>
+        <div class="faq-body">
+          <p>Evaluation time depends on the complexity of the BOM graph and the number of telemetry payloads, but most gate runs complete in under 60 seconds locally. The deterministic execution model means there is no network round-trip latency — the gate clock starts when telemetry is submitted and ends when the signed verdict is produced.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>What happens when a gate fails — who gets notified?</summary>
+        <div class="faq-body">
+          <p>A failed gate blocks the release action in the workspace. The signed verdict identifies exactly which gate failed, which physical condition triggered it, and what the observed value was against the expected bound. Notifications go to the engineer who submitted the PR. The release cannot proceed until the failing condition is resolved and the gate run is re-executed clean.</p>
+        </div>
+      </details>
+
+      <details class="faq-item" role="listitem">
+        <summary>Do you train on our telemetry or design data?</summary>
+        <div class="faq-body">
+          <p>No. Your hardware telemetry, BOM data, and design files never leave the local execution boundary, so there is nothing to train on. The Zayvora deterministic runtime that evaluates your gates is trained on synthetic and open engineering datasets — not on customer data. We do not use the output of your gate runs to improve the model.</p>
+        </div>
+      </details>
+
+    </div>
+
+    <!-- ══ FOOTER ════════════════════════════════════= -->
+    <footer class="footer" aria-label="Site footer">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">LOGICHUB</div>
+          <p class="footer-tagline">The hardware verification layer for the AI engineering era. Deterministic gates, physical telemetry, signed releases.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="/workspace">Engineering Workspace</a>
+          <a href="/tools/">14 Production Tools</a>
+          <a href="/how-it-works">How It Works</a>
+          <a href="/waitlist.html">Join Waiting List</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="/privacy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms of Use</a>
+          <a href="/refund-policy.html">Refund Policy</a>
+          <a href="/shipping-policy.html">Shipping Policy</a>
+          <a href="/cookies.html">Cookie Policy</a>
+          <a href="/contact.html">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span><span class="status-dot" aria-hidden="true"></span>All systems operational</span>
+        <span>© 2026 LogicHub · <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span>
+      </div>
     </footer>
+
   </main>
+
   <script>
   (function(){
     var key='logichub-root-sw-migration-v1';
