@@ -1,0 +1,15 @@
+project,where_used,how,receipt_example
+Electronics research bundle,Lab exercises,Convert theory into repeatable bench tests for power electronics and embedded Linux experiments.,"bench_report.json, measurement_log.csv"
+Air-gapped 8MB module research pack,Cartridge validation,"Test flash ID, erase/write/read/verify, power-loss recovery, and manifest integrity.",cartridge_receipt.json
+Air-gapped 8MB CAD implementation bundle,PCBA test,"Run continuity, rail, USB-serial, flash ID, and object-store smoke tests before enclosure assembly.",pcba_receipt.json
+Drone CAD implementation bundle,Tether and bench test,"Validate no-prop power rails, IMU health, barometer, ESC signal, blackbox flash, and arming lockout.",flight_controller_evt_receipt.json
+Pupper V3 open-source research bundle,Robot commissioning,"Check leg direction, IMU baseline, controller mode, gait-safe pose, battery voltage, and E-stop response.",quadruped_commissioning.json
+FarmBot open-source research bundle,Field kit validation,"Test axis movement, endstops, toolhead connection, watering isolation, camera/tool calibration, and stall response.",farmbot_field_receipt.json
+OpenFlexure Microscope research bundle,Optical validation,"Record stage repeatability, focus, illumination baseline, camera exposure, resolution target, and API operation.",microscope_calibration_receipt.json
+SatNOGS satellite ground-station research bundle,Station commissioning,"Validate SDR detection, antenna chain, frequency correction, Linux service, observation log, and enclosure environment.",satnogs_station_receipt.json
+Voron 3D printer engineering bundle,Printer kit validation,"Run rail alignment, endstop, heater safety, bed mesh, input shaping, extrusion, and first-print proof.",voron_commissioning_receipt.json
+OpenEVSE research bundle,EVSE commissioning,"Verify GFCI, pilot, relay, ground, temperature sensing, controller fault handling, and API read-only evidence.",evse_safety_receipt.json
+OpenMV + OpenIPC local vision bundle,Camera validation,"Test boot, snapshot, stream, detection latency, credential hygiene, privacy LED/status, and local-only data flow.",vision_node_receipt.json
+BeagleV-Fire / Milk-V Duo RISC-V edge bundle,Board validation,"Verify boot, GPIO, network, camera, storage, benchmark, thermals, and image provenance.",riscv_edge_validation.json
+Precious Plastic machine ecosystem bundle,Machine commissioning,"Validate guards, motor direction, heater ramp, torque/current, emergency stop, fume control, and cycle log.",machine_safety_receipt.json
+NASA JPL Rover / OpenAMRobot research bundle,Robot bring-up,"Check wheel direction, encoders, IMU, LiDAR/camera, battery fuse, E-stop, Nav2, docking, and safe stop.",amr_rover_receipt.json

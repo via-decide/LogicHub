@@ -31,6 +31,7 @@ export const MOTION_STARTER_KIT: PhysicalKitDefinition = {
     'camera-slider',
     'conveyor-controller',
   ],
+  applicableToolIds: ['T01', 'T03', 'T05', 'T08', 'T10', 'T12'],
   requiredTools: ['Small Phillips screwdriver', 'Wire cutters', 'USB cable'],
   assemblySteps: [
     {

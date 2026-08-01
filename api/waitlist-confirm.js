@@ -8,7 +8,10 @@
 // It never creates an entry. A confirmation for an address that never signed up
 // is refused — otherwise the link would be a way to add people, which is the
 // thing it exists to prevent.
-import { getAdminDb, logRuntimeEvent } from './_sovereignAuth.js';
+// Postgres-backed getAdminDb (not _sovereignAuth.js's SQLite-backed one) --
+// must read the SAME store waitlist.js writes to, see api/_pg.js's header.
+import { logRuntimeEvent } from './_sovereignAuth.js';
+import { getAdminDb } from './_pg.js';
 import { normaliseEmail, tokenMatches, tokenSecret } from './_waitlist.js';
 
 const COLLECTION = 'cartridge_waitlist';

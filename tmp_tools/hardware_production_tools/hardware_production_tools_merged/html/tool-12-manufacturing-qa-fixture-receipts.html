@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool 12 — Manufacturing QA Fixture + Test Receipts</title>
+<style>
+:root {
+  --bg:#0b0f14; --panel:#111821; --panel2:#0f1620; --text:#e6edf3; --muted:#9fb0c0;
+  --line:#263241; --accent:#58a6ff; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+  --code:#0d1117;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+header{padding:34px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#101722,#0b0f14)}
+h1{margin:0 0 8px;font-size:28px;letter-spacing:.2px}
+h2{margin:30px 0 12px;font-size:20px}
+h3{margin:22px 0 8px;font-size:16px;color:#c9d7e5}
+p{max-width:1000px;color:var(--muted)}
+main{padding:26px;max-width:1280px;margin:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.kpi{background:var(--panel2);border:1px solid var(--line);padding:14px;border-radius:10px}
+.kpi b{display:block;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+table{width:100%;border-collapse:collapse;margin:12px 0;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:10px;vertical-align:top}
+th{background:#172131;text-align:left;color:#d8e5f2}
+tr:nth-child(even) td{background:#0f1722}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,monospace}
+code{background:var(--code);border:1px solid var(--line);padding:1px 5px;border-radius:5px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;color:#d8dee9}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin:2px;background:#101722;color:#b9c7d6}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+ul{color:var(--muted)} li{margin:7px 0}
+.footer{margin-top:34px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Tool 12 — Manufacturing QA Fixture + Test Receipts</h1>
+  <p>Reusable production tool for turning prototypes, open-source hardware builds, and local-first devices into repeatable, evidence-backed manufacturing checks.</p>
+  <span class="badge">Tool ID: T12</span>
+  <span class="badge">Scope: QA fixtures</span>
+  <span class="badge">Output: pass/fail receipts</span>
+  <span class="badge">Applies to: 14 project bundles</span>
+</header>
+<main>
+<section class="card">
+<h2>1. Tool purpose</h2>
+<p><strong>Manufacturing QA Fixture + Test Receipts</strong> makes hardware production repeatable. A prototype is not production-ready until another person can connect it to a fixture, run the same bounded test, capture the same evidence fields, and make a consistent release decision.</p>
+<div class="grid">
+  <div class="kpi"><b>Input</b> Unit under test, manifest, BOM, firmware, fixture script, operator, limits.</div>
+  <div class="kpi"><b>Process</b> Inspect, power, probe, command bounded actions, inject faults, capture logs.</div>
+  <div class="kpi"><b>Output</b> JSON receipt, CSV measurements, log hashes, PASS/FAIL/REWORK decision.</div>
+  <div class="kpi"><b>Production value</b> Converts manual confidence into machine-readable evidence.</div>
+</div>
+</section>
+
+<section class="card">
+<h2>2. When to use this tool</h2>
+<ul>
+<li>Before sending a PCB, robot, printer, charger, camera node, microscope, or machine to a user.</li>
+<li>When an open-source project is copied, localized, modified, or prepared for supplier review.</li>
+<li>After any firmware, BOM, CAD, wiring, enclosure, or power-path change.</li>
+<li>Before claiming a build is reproducible, safe to test, or ready for a pilot deployment.</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>3. Project applicability map</h2>
+<table>
+<thead><tr><th>#</th><th>Project ZIP</th><th>Where used</th><th>How</th><th>Receipt example</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Electronics research bundle</td><td>Lab exercises</td><td>Convert theory into repeatable bench tests for power electronics and embedded Linux experiments.</td><td><code>bench_report.json, measurement_log.csv</code></td></tr>
+<tr><td>2</td><td>Air-gapped 8MB module research pack</td><td>Cartridge validation</td><td>Test flash ID, erase/write/read/verify, power-loss recovery, and manifest integrity.</td><td><code>cartridge_receipt.json</code></td></tr>
+<tr><td>3</td><td>Air-gapped 8MB CAD implementation bundle</td><td>PCBA test</td><td>Run continuity, rail, USB-serial, flash ID, and object-store smoke tests before enclosure assembly.</td><td><code>pcba_receipt.json</code></td></tr>
+<tr><td>4</td><td>Drone CAD implementation bundle</td><td>Tether and bench test</td><td>Validate no-prop power rails, IMU health, barometer, ESC signal, blackbox flash, and arming lockout.</td><td><code>flight_controller_evt_receipt.json</code></td></tr>
+<tr><td>5</td><td>Pupper V3 open-source research bundle</td><td>Robot commissioning</td><td>Check leg direction, IMU baseline, controller mode, gait-safe pose, battery voltage, and E-stop response.</td><td><code>quadruped_commissioning.json</code></td></tr>
+<tr><td>6</td><td>FarmBot open-source research bundle</td><td>Field kit validation</td><td>Test axis movement, endstops, toolhead connection, watering isolation, camera/tool calibration, and stall response.</td><td><code>farmbot_field_receipt.json</code></td></tr>
+<tr><td>7</td><td>OpenFlexure Microscope research bundle</td><td>Optical validation</td><td>Record stage repeatability, focus, illumination baseline, camera exposure, resolution target, and API operation.</td><td><code>microscope_calibration_receipt.json</code></td></tr>
+<tr><td>8</td><td>SatNOGS satellite ground-station research bundle</td><td>Station commissioning</td><td>Validate SDR detection, antenna chain, frequency correction, Linux service, observation log, and enclosure environment.</td><td><code>satnogs_station_receipt.json</code></td></tr>
+<tr><td>9</td><td>Voron 3D printer engineering bundle</td><td>Printer kit validation</td><td>Run rail alignment, endstop, heater safety, bed mesh, input shaping, extrusion, and first-print proof.</td><td><code>voron_commissioning_receipt.json</code></td></tr>
+<tr><td>10</td><td>OpenEVSE research bundle</td><td>EVSE commissioning</td><td>Verify GFCI, pilot, relay, ground, temperature sensing, controller fault handling, and API read-only evidence.</td><td><code>evse_safety_receipt.json</code></td></tr>
+<tr><td>11</td><td>OpenMV + OpenIPC local vision bundle</td><td>Camera validation</td><td>Test boot, snapshot, stream, detection latency, credential hygiene, privacy LED/status, and local-only data flow.</td><td><code>vision_node_receipt.json</code></td></tr>
+<tr><td>12</td><td>BeagleV-Fire / Milk-V Duo RISC-V edge bundle</td><td>Board validation</td><td>Verify boot, GPIO, network, camera, storage, benchmark, thermals, and image provenance.</td><td><code>riscv_edge_validation.json</code></td></tr>
+<tr><td>13</td><td>Precious Plastic machine ecosystem bundle</td><td>Machine commissioning</td><td>Validate guards, motor direction, heater ramp, torque/current, emergency stop, fume control, and cycle log.</td><td><code>machine_safety_receipt.json</code></td></tr>
+<tr><td>14</td><td>NASA JPL Rover / OpenAMRobot research bundle</td><td>Robot bring-up</td><td>Check wheel direction, encoders, IMU, LiDAR/camera, battery fuse, E-stop, Nav2, docking, and safe stop.</td><td><code>amr_rover_receipt.json</code></td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>4. Production-stage map</h2>
+<table>
+<thead><tr><th>Stage</th><th>QA fixture role</th><th>Minimum evidence</th></tr></thead>
+<tbody>
+<tr><td>Concept / research</td><td>Define which physical claims must later be tested.</td><td>Hazard list, measurable claims, first receipt schema.</td></tr>
+<tr><td>EVT prototype</td><td>Catch power, bus, firmware, and assembly failures early.</td><td>Rail measurements, device IDs, smoke-test logs, photos.</td></tr>
+<tr><td>DVT validation</td><td>Prove repeatability across units and environmental conditions.</td><td>Multi-unit CSV, calibration drift, fault injection results.</td></tr>
+<tr><td>PVT / pilot build</td><td>Lock fixture and release gate for supplier/operator use.</td><td>Fixture version, operator procedure, PASS/FAIL rates.</td></tr>
+<tr><td>Field service</td><td>Diagnose returned units without guesswork.</td><td>Service receipt, repair action, post-repair retest.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>5. Checklist</h2>
+<ol>
+<li><strong>Fixture definition:</strong> Identify what the fixture touches, powers, measures, and refuses to operate.</li>
+<li><strong>Source version pinning:</strong> Record board revision, firmware commit, CAD revision, BOM version, operator, date, and fixture version.</li>
+<li><strong>Pre-power inspection:</strong> Visual inspection, polarity, fuse, connector orientation, fastener state, wiring strain relief, and known safety blockers.</li>
+<li><strong>Power rail test:</strong> Measure input, intermediate, and logic rails under no-load and controlled-load conditions.</li>
+<li><strong>Continuity and isolation:</strong> Confirm expected nets are connected and forbidden shorts are absent before firmware interaction.</li>
+<li><strong>Firmware identity:</strong> Read firmware version, bootloader/build ID, target profile, and configuration hash.</li>
+<li><strong>Peripheral smoke test:</strong> Probe required buses and devices: SPI, I2C, UART, USB, CAN, camera, storage, sensor, motor driver, relay, or heater.</li>
+<li><strong>Functional command test:</strong> Run bounded commands only: no-prop, wheels-on-blocks, heater-low-power, read-only API, or no-load motion first.</li>
+<li><strong>Fault injection:</strong> Unplug sensor, corrupt config, timeout command, brownout simulation, emergency stop press, watchdog hold, or over-temperature flag.</li>
+<li><strong>Evidence capture:</strong> Generate pass/fail JSON, CSV measurements, photos if needed, log hashes, and operator sign-off.</li>
+<li><strong>Release decision:</strong> Mark unit PASS, FAIL, QUARANTINE, REWORK, or ENGINEERING-ONLY with explicit reason.</li>
+</ol>
+</section>
+
+<section class="card">
+<h2>6. Pass/fail gates</h2>
+<table>
+<thead><tr><th>Gate</th><th>Requirement</th><th>Fail condition</th></tr></thead>
+<tbody>
+<tr><td><code>G01</code></td><td>No unprotected live power</td><td>FAIL if high-current battery, mains, heater, motor, relay, or actuator path lacks fuse/disconnect/interlock for the project class.</td></tr>
+<tr><td><code>G02</code></td><td>Fixture cannot command unsafe motion by default</td><td>FAIL if test software can arm motors, heaters, relays, or blades without explicit safety mode and operator confirmation.</td></tr>
+<tr><td><code>G03</code></td><td>All critical rails within tolerance</td><td>FAIL if measured rails are outside limits, sag during command, overshoot on boot, or brown out during workload.</td></tr>
+<tr><td><code>G04</code></td><td>All required device IDs match manifest</td><td>FAIL if flash chip, IMU, LiDAR, motor driver, camera, MCU, SBC, or controller identity does not match build manifest.</td></tr>
+<tr><td><code>G05</code></td><td>Faults enter safe state</td><td>FAIL if unplugged sensor, bus timeout, watchdog trigger, API loss, E-stop, or corrupt config does not land in a visible safe fault state.</td></tr>
+<tr><td><code>G06</code></td><td>Receipt is reproducible</td><td>FAIL if test cannot be repeated by another operator using the same fixture version and manifest.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>7. Risk table</h2>
+<table>
+<thead><tr><th>ID</th><th>Risk</th><th>Cause</th><th>Control</th></tr></thead>
+<tbody>
+<tr><td><code>QA-001</code></td><td>False pass</td><td>A script marks pass even though fixture coverage is incomplete.</td><td>Every pass condition must map to a measured evidence field.</td></tr>
+<tr><td><code>QA-002</code></td><td>Unsafe automated actuation</td><td>Fixture moves motors/heaters/relays/blades while operator is exposed.</td><td>Default to no-load/read-only; require explicit armed test mode and physical E-stop.</td></tr>
+<tr><td><code>QA-003</code></td><td>Version drift</td><td>Unit, firmware, BOM, and fixture are tested under mismatched versions.</td><td>Pin hashes and versions in the receipt.</td></tr>
+<tr><td><code>QA-004</code></td><td>Manual-only evidence</td><td>Operator claims test passed without machine-readable proof.</td><td>Require JSON/CSV/log files with hashes.</td></tr>
+<tr><td><code>QA-005</code></td><td>Golden sample bias</td><td>Fixture only works on one hand-tuned prototype.</td><td>Test at least three units or repeat cycles before accepting process.</td></tr>
+<tr><td><code>QA-006</code></td><td>Hidden environmental failure</td><td>Thermal, vibration, dust, RF, outdoor, or battery effects are ignored.</td><td>Add project-specific environmental checks.</td></tr>
+<tr><td><code>QA-007</code></td><td>No quarantine path</td><td>Failed units return to production flow.</td><td>Create HOLD/REWORK/FAIL labels and physical bin policy.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>8. Example fixture logic pattern</h2>
+<p>This pattern is intentionally conservative: identify, measure, test bounded function, inject one safe fault, and only then decide.</p>
+<pre><code>START
+  load build_manifest.json
+  scan unit serial / revision / operator
+  require current-limited supply or safe project-specific power source
+
+PRE_POWER
+  visual_check_required = true
+  verify fuse / disconnect / E-stop / no exposed live hazard
+  if blocker: decision = QUARANTINE
+
+POWER_ON
+  measure rails
+  if rail outside limits: decision = FAIL, power_off
+
+IDENTIFY
+  read MCU / SBC / firmware / device IDs
+  compare against manifest
+  if mismatch: decision = REWORK
+
+SMOKE_TEST
+  run read-only probes first
+  run bounded actuator/heater/motor command only if safe mode is enabled
+  record all measurements
+
+FAULT_TEST
+  inject safe timeout/unplug/config fault
+  require visible safe state and receipt entry
+
+DECIDE
+  PASS only if all required gates pass
+  write receipt JSON + CSV + log hashes
+END</code></pre>
+</section>
+
+<section class="card">
+<h2>9. JSON schema</h2>
+<pre><code>{
+  &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,
+  &quot;title&quot;: &quot;Manufacturing QA Fixture Receipt&quot;,
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;receipt_id&quot;,
+    &quot;tool_id&quot;,
+    &quot;project&quot;,
+    &quot;unit&quot;,
+    &quot;fixture&quot;,
+    &quot;operator&quot;,
+    &quot;timestamp_utc&quot;,
+    &quot;decision&quot;,
+    &quot;measurements&quot;,
+    &quot;gates&quot;,
+    &quot;artifacts&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;receipt_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;tool_id&quot;: {
+      &quot;const&quot;: &quot;T12&quot;
+    },
+    &quot;project&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;unit&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;serial&quot;,
+        &quot;hardware_revision&quot;,
+        &quot;bom_revision&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;serial&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;hardware_revision&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;bom_revision&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;firmware_version&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;configuration_hash&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;fixture&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;fixture_id&quot;,
+        &quot;fixture_revision&quot;,
+        &quot;software_hash&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;fixture_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;fixture_revision&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;software_hash&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;operator&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;timestamp_utc&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    },
+    &quot;decision&quot;: {
+      &quot;enum&quot;: [
+        &quot;PASS&quot;,
+        &quot;FAIL&quot;,
+        &quot;QUARANTINE&quot;,
+        &quot;REWORK&quot;,
+        &quot;ENGINEERING_ONLY&quot;
+      ]
+    },
+    &quot;measurements&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;
+      }
+    },
+    &quot;gates&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [
+          &quot;gate_id&quot;,
+          &quot;result&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;gate_id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;result&quot;: {
+            &quot;enum&quot;: [
+              &quot;PASS&quot;,
+              &quot;FAIL&quot;,
+              &quot;NA&quot;
+            ]
+          },
+          &quot;evidence&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;artifacts&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [
+          &quot;path&quot;,
+          &quot;sha256&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;path&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;sha256&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;notes&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  }
+}</code></pre>
+</section>
+
+<section class="card">
+<h2>10. Example receipt</h2>
+<pre><code>{
+  &quot;receipt_id&quot;: &quot;T12-20260731-0001&quot;,
+  &quot;tool_id&quot;: &quot;T12&quot;,
+  &quot;project&quot;: &quot;airgap8mb_cad_implementation_bundle&quot;,
+  &quot;unit&quot;: {
+    &quot;serial&quot;: &quot;AG8-EVT-001&quot;,
+    &quot;hardware_revision&quot;: &quot;EVT-A&quot;,
+    &quot;bom_revision&quot;: &quot;BOM-2026-07&quot;,
+    &quot;firmware_version&quot;: &quot;0.1.0&quot;,
+    &quot;configuration_hash&quot;: &quot;sha256:replace-with-real-config-hash&quot;
+  },
+  &quot;fixture&quot;: {
+    &quot;fixture_id&quot;: &quot;QA-FIXTURE-USB-SPI-001&quot;,
+    &quot;fixture_revision&quot;: &quot;revA&quot;,
+    &quot;software_hash&quot;: &quot;sha256:replace-with-real-script-hash&quot;
+  },
+  &quot;operator&quot;: &quot;operator-name&quot;,
+  &quot;timestamp_utc&quot;: &quot;2026-07-31T02:30:00Z&quot;,
+  &quot;decision&quot;: &quot;ENGINEERING_ONLY&quot;,
+  &quot;measurements&quot;: [
+    {
+      &quot;name&quot;: &quot;vcc_3v3_idle&quot;,
+      &quot;value&quot;: 3.31,
+      &quot;unit&quot;: &quot;V&quot;,
+      &quot;limit_min&quot;: 3.2,
+      &quot;limit_max&quot;: 3.4,
+      &quot;result&quot;: &quot;PASS&quot;
+    },
+    {
+      &quot;name&quot;: &quot;flash_jedec_id&quot;,
+      &quot;value&quot;: &quot;EF4017&quot;,
+      &quot;unit&quot;: &quot;hex&quot;,
+      &quot;expected&quot;: &quot;W25Q64-family&quot;,
+      &quot;result&quot;: &quot;PASS&quot;
+    }
+  ],
+  &quot;gates&quot;: [
+    {
+      &quot;gate_id&quot;: &quot;G01&quot;,
+      &quot;result&quot;: &quot;PASS&quot;,
+      &quot;evidence&quot;: &quot;fuse and current-limited bench supply used&quot;
+    },
+    {
+      &quot;gate_id&quot;: &quot;G05&quot;,
+      &quot;result&quot;: &quot;PASS&quot;,
+      &quot;evidence&quot;: &quot;SPI timeout displayed as human-readable fault&quot;
+    }
+  ],
+  &quot;artifacts&quot;: [
+    {
+      &quot;path&quot;: &quot;logs/serial.log&quot;,
+      &quot;sha256&quot;: &quot;replace-with-log-hash&quot;
+    },
+    {
+      &quot;path&quot;: &quot;photos/top_view.jpg&quot;,
+      &quot;sha256&quot;: &quot;replace-with-photo-hash&quot;
+    }
+  ],
+  &quot;notes&quot;: &quot;Engineering fixture run. Not production certification.&quot;
+}</code></pre>
+</section>
+
+<section class="card">
+<h2>11. LogicHub / GN8R handoff</h2>
+<pre><code>/task
+repo: via-decide/LogicHub
+mode: logichub-v0.1
+tier: T5
+estimated_time: 480
+version: 1
+depends_on: source_manifest_bom_cad_hash_intake
+task: Build manufacturing QA fixture receipt domain. Model unit, fixture, manifest, measurements, gates, artifacts, decision. Validate PASS/FAIL/REWORK/QUARANTINE receipts. Reject unsafe fixture claims without evidence.
+
+CAUSATION:
+Open hardware becomes usable only when builds are repeatable. Repeatability requires machine-readable evidence, not memory or manual confidence.
+
+CONVERGENCE PROOF:
+Variables:
+$U$ = unit under test
+$F$ = fixture version
+$M$ = manifest
+$R$ = receipt
+$G$ = gates
+Invariant: PASS requires all required gates have measured evidence.
+
+Why naive fails:
+- A: Manual checklist only. No hashes. Cannot reproduce.
+- B: Fixture can move motors by default. Unsafe.
+- C: Firmware version not pinned. False pass.
+
+EPISTEMIC_BOUNDARIES:
+Facts:
+- Receipt schema is local contract.
+- Project-specific limits must come from source manifest/BOM/datasheets.
+Unknowns:
+- Final production limits per project.
+- Regulatory certification status.
+
+EXECUTION_CONTRACT:
+Create schemas, validators, example receipts, negative tests, and project mapping for all 14 hardware bundles.</code></pre>
+</section>
+
+<div class="footer">
+Generated for the hardware research progress sequence. Next tool: Tool 13 — Enclosure / Environmental DFM.
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 05 — Fault Tolerance & Fallbacks</title>
+  <style>
+    :root{
+      --bg:#0A1220;
+      --panel:#101b2f;
+      --panel2:#0f1728;
+      --text:#eef4ff;
+      --muted:#aebbd0;
+      --line:#263956;
+      --gold:#D4AF37;
+      --saffron:#FF9933;
+      --green:#138808;
+      --red:#ff6b6b;
+      --blue:#74b9ff;
+      --code:#07101d;
+      --ok:#1fc77e;
+      --warn:#ffc857;
+      --bad:#ff5c5c;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#07101d 0%,var(--bg) 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+    a{color:var(--blue)}
+    .wrap{max-width:1180px;margin:auto;padding:28px 18px 64px}
+    header{border:1px solid var(--line);background:radial-gradient(circle at top right,rgba(255,153,51,.16),transparent 30%),linear-gradient(135deg,rgba(212,175,55,.13),rgba(16,27,47,.88));border-radius:24px;padding:28px;margin-bottom:20px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+    .kicker{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:.78rem}
+    h1{font-size:clamp(2rem,4vw,4rem);line-height:1.05;margin:.35rem 0 .65rem}
+    h2{font-size:1.55rem;margin:30px 0 12px;border-left:5px solid var(--gold);padding-left:12px}
+    h3{font-size:1.1rem;margin:18px 0 8px;color:#fff}
+    p{margin:.5rem 0;color:var(--muted)}
+    .lead{font-size:1.07rem;max-width:920px;color:#dfe8f8}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{grid-column:span 4;border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,27,47,.94),rgba(12,21,37,.96));border-radius:18px;padding:16px;min-height:130px}
+    .card.wide{grid-column:span 6}.card.full{grid-column:1/-1}
+    .tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.78rem;color:#d8e6ff;background:#0b1628;margin:2px 4px 2px 0}
+    .tag.ok{border-color:rgba(31,199,126,.5);color:#baffde}.tag.warn{border-color:rgba(255,200,87,.55);color:#ffe8a8}.tag.bad{border-color:rgba(255,92,92,.55);color:#ffc2c2}
+    table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:rgba(10,18,32,.72);border-radius:14px;overflow:hidden;margin:12px 0}
+    th,td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left;vertical-align:top;font-size:.92rem}
+    th{background:#14233b;color:#fff;font-weight:700}
+    tr:last-child td{border-bottom:none}
+    code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:#dff1ff}
+    pre{overflow:auto;background:var(--code);border:1px solid var(--line);border-radius:16px;padding:16px;color:#dff1ff;font-size:.9rem;line-height:1.45}
+    .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+    .node{border:1px solid var(--line);border-radius:14px;padding:8px 10px;background:#0d1a2e;color:#eaf2ff;font-size:.9rem}
+    .arrow{color:var(--gold);font-weight:800}
+    .checklist li{margin:.45rem 0;color:#d9e4f5}
+    .small{font-size:.86rem;color:var(--muted)}
+    .section{border:1px solid var(--line);background:rgba(12,21,37,.74);border-radius:22px;padding:18px;margin:16px 0}
+    .status{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .metric{border:1px solid var(--line);background:#0b1628;border-radius:16px;padding:14px}
+    .metric strong{display:block;color:var(--gold);font-size:1.7rem;line-height:1}
+    .footer{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted)}
+    @media(max-width:880px){.card,.card.wide{grid-column:1/-1}.status{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.status{grid-template-columns:1fr}.wrap{padding:18px 12px 44px}header{padding:20px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">Universal Hardware Production Stack · Tool 05</div>
+      <h1>Fault Tolerance &amp; Fallbacks</h1>
+      <p class="lead">Design every device so a firmware hang, bus failure, missing sensor, corrupted storage record, network drop, or unsafe actuator command becomes a controlled state instead of a crash, silent corruption, or dangerous motion.</p>
+      <div class="status">
+        <div class="metric"><strong>T05</strong><span>Tool number</span></div>
+        <div class="metric"><strong>14</strong><span>Mapped projects</span></div>
+        <div class="metric"><strong>PASS/FAIL</strong><span>Gate style</span></div>
+        <div class="metric"><strong>LOCAL</strong><span>No cloud required</span></div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>1. Tool purpose</h2>
+      <p><strong>Fault tolerance</strong> means the product expects failures and has deterministic fallback behavior. The user should see a clear state, the hardware should protect itself, and the system should preserve evidence.</p>
+      <div class="flow">
+        <span class="node">Normal operation</span><span class="arrow">→</span>
+        <span class="node">Fault detected</span><span class="arrow">→</span>
+        <span class="node">Unsafe outputs disabled</span><span class="arrow">→</span>
+        <span class="node">State shown locally</span><span class="arrow">→</span>
+        <span class="node">Evidence logged</span><span class="arrow">→</span>
+        <span class="node">Recovery or service gate</span>
+      </div>
+      <p>This tool is used whenever firmware, storage, sensors, bus communication, boot flow, motors, heaters, chargers, cameras, robots, or machines can fail in a way that affects usability or safety.</p>
+    </section>
+
+    <section class="section">
+      <h2>2. Core fault classes</h2>
+      <div class="grid">
+        <div class="card"><h3>Bus timeout</h3><p>SPI/I2C/UART/CAN/USB device stops responding. Use timeout, retry budget, bus reset, and fault display.</p><span class="tag warn">Common</span></div>
+        <div class="card"><h3>Storage corruption</h3><p>Manifest, config, firmware, rootfs, calibration, or log becomes invalid. Use CRC/SHA, dual records, rollback.</p><span class="tag bad">Critical</span></div>
+        <div class="card"><h3>Sensor invalid</h3><p>IMU, LiDAR, camera, encoder, microscope, RF chain, or temperature sensor returns missing or impossible data.</p><span class="tag warn">Commissioning gate</span></div>
+        <div class="card"><h3>Actuator stuck</h3><p>Motor, relay, heater, valve, gantry, charger relay, or drone ESC remains active when it should stop.</p><span class="tag bad">Safety gate</span></div>
+        <div class="card"><h3>Watchdog reset</h3><p>Firmware or service hangs. Hardware/software watchdog resets into known safe boot mode.</p><span class="tag ok">Recoverable</span></div>
+        <div class="card"><h3>Brownout / power sag</h3><p>Supply droop causes MCU/SBC/storage failure. Detect, stop write, log reason, prevent partial update.</p><span class="tag bad">Corruption risk</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. Project applicability cards</h2>
+      <div class="grid">
+        <div class="card"><h3>Electronics research</h3><p>Use to turn power-device and embedded Linux study into lab-safe bench routines and failure-mode tables.</p></div>
+        <div class="card"><h3>8MB module research</h3><p>Use SPI timeout, atomic commit, dual manifest, brownout handling, and human-readable flash fault display.</p></div>
+        <div class="card"><h3>8MB CAD implementation</h3><p>Use watchdog, flash ID check, write/verify gate, last-known-good manifest, and USB service recovery mode.</p></div>
+        <div class="card"><h3>Drone FC EVT</h3><p>Use IMU timeout, barometer sanity, blackbox flash failure isolation, arming lockout, and failsafe state.</p></div>
+        <div class="card"><h3>Pupper V3</h3><p>Use ROS2 control watchdog, safe pose fallback, motor disable, low-battery warning, and gait abort.</p></div>
+        <div class="card"><h3>FarmBot</h3><p>Use axis timeout, missed step/stall response, toolhead fault, water/irrigation fail-safe, and local recovery.</p></div>
+        <div class="card"><h3>OpenFlexure</h3><p>Use stage motion timeout, camera capture failure handling, calibration invalidation, and non-diagnostic lockout.</p></div>
+        <div class="card"><h3>SatNOGS</h3><p>Use SDR missing-device recovery, observation retry, rotator timeout, network failure queueing, and station logs.</p></div>
+        <div class="card"><h3>Voron</h3><p>Use heater runaway stop, thermistor fault, MCU disconnect, endstop failure, print pause, and chamber alerts.</p></div>
+        <div class="card"><h3>OpenEVSE</h3><p>Use RAPI timeout, stuck relay fault, GFCI/ground/temperature failure lockout, and no-charge fault mode.</p></div>
+        <div class="card"><h3>OpenMV + OpenIPC</h3><p>Use camera boot recovery, stream restart, snapshot timeout, privacy lockout, and firmware rollback.</p></div>
+        <div class="card"><h3>BeagleV-Fire / Milk-V Duo</h3><p>Use boot rollback, service watchdog, rootfs integrity, GPIO self-test, thermal fallback, and network hardening.</p></div>
+        <div class="card wide"><h3>Precious Plastic</h3><p>Use heater fault, motor overload, shredder jam timeout, guard interlock, E-stop latch, and cycle abort evidence.</p></div>
+        <div class="card wide"><h3>NASA JPL Rover / OpenAMRobot</h3><p>Use command watchdog, motor inhibit, ROS2/micro-ROS timeout, encoder sanity, docking abort, and physical E-stop gate.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4. Production-stage map</h2>
+      <table>
+        <thead><tr><th>Stage</th><th>Fault tolerance work</th><th>Required evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Concept</td><td>List every unsafe or user-visible failure mode.</td><td>Fault inventory with severity and recovery path.</td></tr>
+          <tr><td>Architecture</td><td>Define safe states, retry budgets, watchdog owner, and fallback outputs.</td><td>State machine diagram and error-code table.</td></tr>
+          <tr><td>Schematic / wiring</td><td>Add reset lines, fault inputs, pullups, fuses, interlocks, and debug ports.</td><td>Net-level fault review and test-point list.</td></tr>
+          <tr><td>Firmware</td><td>Implement timeout, watchdog, assert-safe outputs, atomic commit, and diagnostics.</td><td>Unit tests, negative tests, and simulated fault logs.</td></tr>
+          <tr><td>EVT prototype</td><td>Inject bus, sensor, power, network, and actuator faults.</td><td>EVT validation receipt JSON.</td></tr>
+          <tr><td>DVT / product</td><td>Run repeated recovery, power-cycle, thermal, and operator-fault tests.</td><td>Pass/fail matrix and release waiver ledger.</td></tr>
+          <tr><td>Manufacturing</td><td>Make fixture catch assembly faults before shipping.</td><td>Per-unit QA receipt with serial number.</td></tr>
+          <tr><td>Field service</td><td>Provide readable error state, recovery procedure, and safe service mode.</td><td>Service log and return-material diagnosis.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>5. Implementation checklist</h2>
+      <div class="grid">
+        <div class="card wide">
+          <h3>Firmware rules</h3>
+          <ul class="checklist">
+            <li>Every peripheral transaction has a timeout.</li>
+            <li>Every retry loop has a maximum retry count.</li>
+            <li>Every critical process feeds the watchdog only after passing health checks.</li>
+            <li>Every unsafe output has a single default-safe value.</li>
+            <li>Every recoverable fault has a clear error code and recovery path.</li>
+            <li>Every non-recoverable fault latches until user/service acknowledgement.</li>
+          </ul>
+        </div>
+        <div class="card wide">
+          <h3>Hardware rules</h3>
+          <ul class="checklist">
+            <li>Reset, boot, chip-select, enable, and hold pins have defined states.</li>
+            <li>Motor/heater/relay enables default to OFF during reset.</li>
+            <li>Brownout state cannot produce a half-write or half-energized output.</li>
+            <li>Test points exist for power rails, reset, bus lines, and fault inputs.</li>
+            <li>Physical E-stop exists wherever motion, heater, relay, blade, or charger risk exists.</li>
+            <li>Fault handling does not depend only on a browser or cloud UI.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>6. Pass / fail gates</h2>
+      <table>
+        <thead><tr><th>Gate</th><th>PASS</th><th>FAIL</th></tr></thead>
+        <tbody>
+          <tr><td>Watchdog</td><td>Device resets into safe state after simulated hang.</td><td>Device hangs indefinitely or resumes unsafe output.</td></tr>
+          <tr><td>Bus timeout</td><td>Missing SPI/I2C/UART device produces readable fault.</td><td>Firmware blocks forever or reports success with bad data.</td></tr>
+          <tr><td>Storage integrity</td><td>Corrupted manifest/config is rejected and rollback works.</td><td>Corrupted data is accepted silently.</td></tr>
+          <tr><td>Power loss</td><td>Power-cut during write/update leaves valid old or new state.</td><td>Device boots with half-written state.</td></tr>
+          <tr><td>Actuator safety</td><td>Fault disables motor/heater/relay/charger output.</td><td>Actuator remains powered after controller fault.</td></tr>
+          <tr><td>User visibility</td><td>OLED/LED/API displays error code and next safe action.</td><td>User sees nothing or ambiguous behavior.</td></tr>
+          <tr><td>Evidence</td><td>Fault injection creates timestamped receipt/log.</td><td>Fault is not reproducible or not recorded.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>7. Risk table</h2>
+      <table>
+        <thead><tr><th>Risk</th><th>Projects affected</th><th>Control</th><th>Release blocker?</th></tr></thead>
+        <tbody>
+          <tr><td>Silent storage corruption</td><td>8MB cartridge, RISC-V edge, drone logs, Voron configs</td><td>CRC/SHA, dual manifest, atomic commit, rollback</td><td><span class="tag bad">Yes</span></td></tr>
+          <tr><td>Motor continues after command loss</td><td>Drone, Pupper, FarmBot, Precious Plastic, rover/AMR</td><td>Command watchdog, motor inhibit, physical E-stop</td><td><span class="tag bad">Yes</span></td></tr>
+          <tr><td>Heater remains active</td><td>Voron, Precious Plastic, OpenEVSE thermal systems</td><td>Thermistor plausibility, heater timeout, hardware cutoff</td><td><span class="tag bad">Yes</span></td></tr>
+          <tr><td>Sensor lies or disappears</td><td>Drone, OpenFlexure, SatNOGS, AMR, OpenMV</td><td>Sanity bounds, calibration validity, stale-data detection</td><td><span class="tag warn">Usually</span></td></tr>
+          <tr><td>Network/cloud loss</td><td>FarmBot, SatNOGS, OpenIPC, OpenAMRobot, OpenEVSE</td><td>Local control, queued jobs, no-cloud safe mode</td><td><span class="tag warn">Depends</span></td></tr>
+          <tr><td>Browser/UI stop treated as safety stop</td><td>OpenAMRobot, EVSE dashboards, local machine UIs</td><td>Physical independent E-stop and hardware interlock</td><td><span class="tag bad">Yes</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>8. Example wiring / logic pattern</h2>
+      <h3>Hardware pattern</h3>
+      <pre><code>MCU_RESET_N  ← supervisor / manual reset / watchdog reset
+FAULT_LED    ← MCU GPIO, default OFF until firmware owns it
+ACT_EN       ← MCU GPIO with pulldown, default DISABLED
+SPI_CS_N     ← pullup, never float during reset
+FLASH_WP_N   ← defined level, no accidental writes during boot
+ESTOP_IN     ← normally-closed chain, independent of browser/cloud
+FAULT_OUT    → optional latch / relay driver / motor inhibit</code></pre>
+      <h3>Firmware pattern</h3>
+      <pre><code>boot():
+  set_all_outputs_safe()
+  read_reset_reason()
+  validate_config_crc()
+  validate_required_peripherals()
+  if fault:
+    enter_latched_fault_mode(error_code)
+  else:
+    enable_runtime_watchdog()
+    enter_idle_ready_state()
+
+transaction_with_timeout(device, command):
+  start_timer(TIMEOUT_MS)
+  while not complete:
+    if timer_expired:
+      record_fault(device, TIMEOUT)
+      set_all_outputs_safe()
+      return ERROR_TIMEOUT
+  return validate_response()</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>9. Error-code model</h2>
+      <table>
+        <thead><tr><th>Code range</th><th>Class</th><th>Examples</th><th>User message</th></tr></thead>
+        <tbody>
+          <tr><td>F100–F199</td><td>Power / boot</td><td>Brownout, watchdog reset, invalid config</td><td>“Power fault. Restarted safely.”</td></tr>
+          <tr><td>F200–F299</td><td>Storage</td><td>CRC mismatch, manifest invalid, flash timeout</td><td>“Storage check failed. Using last valid record.”</td></tr>
+          <tr><td>F300–F399</td><td>Sensor</td><td>IMU stale, camera missing, encoder impossible</td><td>“Sensor fault. Recalibrate or service.”</td></tr>
+          <tr><td>F400–F499</td><td>Actuator</td><td>Motor overcurrent, heater stuck, relay fault</td><td>“Output disabled. Clear area and inspect hardware.”</td></tr>
+          <tr><td>F500–F599</td><td>Network / API</td><td>MQTT down, ROS bridge stale, RTSP failed</td><td>“Local service degraded. Hardware remains safe.”</td></tr>
+          <tr><td>F900–F999</td><td>Service lockout</td><td>E-stop active, guard open, compliance blocked</td><td>“Service lockout. Manual reset required.”</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>10. JSON / LogicHub export schema</h2>
+      <pre><code>{
+  "$schema": "https://example.local/schemas/fault_tolerance_gate.schema.json",
+  "tool_id": "T05",
+  "tool_name": "Fault Tolerance & Fallbacks",
+  "project": "example-project-name",
+  "subsystem": "storage|sensor|motor|heater|network|boot|power",
+  "fault_id": "F200_FLASH_TIMEOUT",
+  "fault_class": "storage",
+  "severity": "info|warning|critical|release_blocker",
+  "detection_method": "timeout|crc|sanity_check|watchdog|operator_input|fixture_probe",
+  "safe_state": {
+    "outputs_disabled": true,
+    "rollback_required": false,
+    "user_ack_required": true,
+    "physical_estop_required": false
+  },
+  "recovery": {
+    "automatic_retry_count": 2,
+    "fallback_mode": "last_known_good",
+    "manual_service_step": "Inspect SPI flash wiring and rerun fixture test"
+  },
+  "evidence": {
+    "receipt_file": "validation/fault_injection_receipt.json",
+    "log_hash_sha256": "",
+    "test_operator": "",
+    "timestamp_utc": ""
+  },
+  "gate_result": "pass|fail|waived",
+  "waiver_id": null
+}</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>11. GN8R task seed</h2>
+      <pre><code>/task
+repo: via-decide/electronics
+mode: universal-hardware-production-tools-v0.1
+tier: T5
+estimated_time: 360
+version: 1
+depends_on: tool-04-poka-yoke-interface-geometry
+task: Implement Tool 05 fault tolerance and fallback contract. Define fault classes, safe states, watchdog behavior, bus timeouts, storage rollback, actuator inhibit, user-visible errors, and validation receipts across the 14 hardware research bundles.
+
+CAUSATION:
+If hardware fails silently, users lose trust and safety risk increases. Every device must convert failure into a visible, bounded, recoverable state.
+
+CONVERGENCE PROOF:
+Variables:
+F = enumerated faults
+S = safe states
+E = evidence receipts
+Constraint = every release-blocking fault has detection + safe output + user-visible error + test evidence.</code></pre>
+    </section>
+
+    <footer class="footer">
+      <p><strong>Next tool:</strong> Tool 06 — Source Manifest + BOM/CAD Hash Intake.</p>
+      <p class="small">Generated for the universal hardware production stack across 14 research ZIP projects.</p>
+    </footer>
+  </div>
+</body>
+</html>

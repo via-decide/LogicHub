@@ -13,6 +13,11 @@ import { defineConfig, devices } from '@playwright/test';
 
 const SITE_URL = process.env.SITE_BASE_URL || 'http://127.0.0.1:5173';
 const APP_URL = process.env.APP_BASE_URL || 'http://127.0.0.1:3001';
+// scripts/dev-marketplace-server.mjs, not Vercel's own routing -- see that
+// script's header for why (no live DATABASE_URL / confirmed `vercel dev`
+// setup to verify against in this environment). Real api/marketplace/*
+// handlers, fake in-memory db.
+const MARKETPLACE_URL = process.env.MARKETPLACE_BASE_URL || 'http://127.0.0.1:5174';
 
 /**
  * Where this environment keeps Chromium.
@@ -70,6 +75,11 @@ export default defineConfig({
         '**/product-accessibility.spec.ts',
       ],
     },
+    {
+      name: 'marketplace',
+      use: { ...chromium, baseURL: MARKETPLACE_URL },
+      testMatch: ['**/workspace.spec.ts'],
+    },
   ],
 
   webServer: [
@@ -86,6 +96,12 @@ export default defineConfig({
       url: APP_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 240_000,
+    },
+    {
+      command: 'node scripts/build-workspace.mjs && node scripts/dev-marketplace-server.mjs',
+      url: MARKETPLACE_URL,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
     },
   ],
 });

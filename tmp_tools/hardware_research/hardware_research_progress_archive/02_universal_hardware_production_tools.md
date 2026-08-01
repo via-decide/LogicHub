@@ -1,0 +1,20 @@
+# Universal Hardware Production Tools
+
+The first five tools come from the supplied core electronics topic list. Tools T06–T14 extend them into a reusable hardware production stack.
+
+| Tool | Production tool | Use when | How it is used | Production part |
+|---|---|---|---|---|
+| T01 | Power Standardization & Protection | Any board, module, robot, charger, camera, printer, or machine needs safe power input | USB-C, barrel jack, battery input, reverse-polarity protection, fuse, TVS, power-path, current budget | PCB, wiring harness, power board, battery interface |
+| T02 | Tactile Determinism / Input FSM | User presses button, turns knob, inserts cartridge, toggles E-stop, selects mode | Hardware/software debounce, interrupt FSM, long-press, double-press, rotary encoder state handling | UI board, control panel, cartridge reader, robot operator panel |
+| T03 | State Visibility & Offline Telemetry | Device must explain state without cloud dashboard | OLED, TFT, RGB LED, buzzer, local log, error code, status pattern | Local UI, maintenance screen, commissioning display |
+| T04 | Physical Interface Geometry / Poka-yoke Docking | User inserts cartridge, toolhead, module, sensor, panel, dock, cable, or mechanical part | Keyed slot, asymmetric rail, labelled connector, guide funnel, chamfer, captive fastener | Enclosure, connector, fixture, cartridge slot, docking station |
+| T05 | Fault Tolerance & Fallbacks | Firmware, bus, sensor, flash, network, or motor process may hang/fail | Watchdog timer, SPI/I2C timeout, safe reset, fault state, last-known-good config | Firmware, boot logic, bus drivers, error display |
+| T06 | Source Manifest + BOM/CAD Hash Intake | Any open-source project is turned into production evidence | Hash every CAD/BOM/firmware/manual file, record source URL, version, license, owner | LogicHub intake, manufacturing release, revision control |
+| T07 | Storage Integrity + Transactional Updates | Device stores manifests, logs, firmware, rule files, G-code, calibration, or receipts | CRC/SHA, dual manifest, rollback, atomic commit, wear/error logging | Cartridge, flash memory, SD/eMMC storage, config persistence |
+| T08 | Sensor Calibration + Health Evidence | Device depends on IMU, camera, LiDAR, microscope optics, RF, encoder, temperature, current, or voltage | Calibration routine, baseline capture, drift check, self-test, evidence receipt | Test station, commissioning workflow, field service |
+| T09 | Actuator / Motor / Heater Safety Interlock | Motors, heaters, relays, blades, gantries, drones, robot wheels, chargers, or hotends are involved | Arm/disarm state, relay lockout, heater watchdog, physical E-stop, motor inhibit | Motion controller, heater controller, EVSE controller, machine control |
+| T10 | Thermal / Current / Power Derating | Device can overheat, brown out, overload, or melt enclosure | Current limit, thermal throttle, fuse sizing, heatsink margin, battery runtime model | Power system, enclosure, motor system, charger, printer, edge board |
+| T11 | Local API / Edge Service Interface | Hardware needs local control without cloud dependency | HTTP, WebSocket, MQTT, serial, USB, BLE, local dashboard, service shell | Operator app, maintenance app, local-first UI, firmware bridge |
+| T12 | Manufacturing QA Fixture + Test Receipts | Prototype becomes repeatable build or saleable kit | Fixture script, probe test, continuity check, calibration receipt, pass/fail JSON | PCBA test, assembly line, commissioning, supplier acceptance |
+| T13 | Enclosure / Environmental DFM | Device must survive handling, heat, dust, water, vibration, outdoor use, lab use, or kids/users | Wall thickness, bosses, airflow, cable strain relief, gasket, service access | 3D print, injection-moulded case, machine frame, control box |
+| T14 | Compliance / Safety Risk Ledger | Product may touch mains, battery, RF, medical/lab use, robotics, EV charging, public operation, or industrial machines | Standards map, hazard log, waiver ledger, certification readiness, blocked claims | Productization, India launch, supplier review, legal/compliance gate |

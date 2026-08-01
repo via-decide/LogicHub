@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 06 — Source Manifest + BOM/CAD Hash Intake</title>
+  <style>
+    :root{--bg:#0A1220;--panel:#101b2f;--panel2:#0f1728;--text:#eef4ff;--muted:#aebbd0;--line:#263956;--gold:#D4AF37;--saffron:#FF9933;--green:#138808;--red:#ff6b6b;--blue:#74b9ff;--code:#07101d;--ok:#1fc77e;--warn:#ffc857;--bad:#ff5c5c;}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#07101d 0%,var(--bg) 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+    a{color:var(--blue)}
+    .wrap{max-width:1180px;margin:auto;padding:28px 18px 64px}
+    header{border:1px solid var(--line);background:radial-gradient(circle at top right,rgba(255,153,51,.16),transparent 30%),linear-gradient(135deg,rgba(212,175,55,.13),rgba(16,27,47,.88));border-radius:24px;padding:28px;margin-bottom:20px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+    .kicker{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:.78rem}
+    h1{font-size:clamp(2rem,4vw,4rem);line-height:1.05;margin:.35rem 0 .65rem}
+    h2{font-size:1.55rem;margin:30px 0 12px;border-left:5px solid var(--gold);padding-left:12px}
+    h3{font-size:1.1rem;margin:18px 0 8px;color:#fff}
+    p{margin:.5rem 0;color:var(--muted)}
+    .lead{font-size:1.07rem;max-width:920px;color:#dfe8f8}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{grid-column:span 4;border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,27,47,.94),rgba(12,21,37,.96));border-radius:18px;padding:16px;min-height:130px}
+    .card.wide{grid-column:span 6}.card.full{grid-column:1/-1}
+    .tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.78rem;color:#d8e6ff;background:#0b1628;margin:2px 4px 2px 0}
+    .tag.ok{border-color:rgba(31,199,126,.5);color:#baffde}.tag.warn{border-color:rgba(255,200,87,.55);color:#ffe8a8}.tag.bad{border-color:rgba(255,92,92,.55);color:#ffc2c2}
+    table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:rgba(10,18,32,.72);border-radius:14px;overflow:hidden;margin:12px 0}
+    th,td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left;vertical-align:top;font-size:.92rem}
+    th{background:#14233b;color:#fff;font-weight:700}
+    tr:last-child td{border-bottom:none}
+    code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:#dff1ff}
+    pre{overflow:auto;background:var(--code);border:1px solid var(--line);border-radius:16px;padding:16px;color:#dff1ff;font-size:.9rem;line-height:1.45}
+    .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+    .node{border:1px solid var(--line);border-radius:14px;padding:8px 10px;background:#0d1a2e;color:#eaf2ff;font-size:.9rem}
+    .arrow{color:var(--gold);font-weight:800}
+    .checklist li{margin:.45rem 0;color:#d9e4f5}
+    .small{font-size:.86rem;color:var(--muted)}
+    .section{border:1px solid var(--line);background:rgba(12,21,37,.74);border-radius:22px;padding:18px;margin:16px 0}
+    .status{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .metric{border:1px solid var(--line);background:#0b1628;border-radius:16px;padding:14px}
+    .metric strong{display:block;color:var(--gold);font-size:1.7rem;line-height:1}
+    .footer{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted)}
+    @media(max-width:880px){.card,.card.wide{grid-column:1/-1}.status{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.status{grid-template-columns:1fr}.wrap{padding:18px 12px 44px}header{padding:20px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">Universal Hardware Production Stack · Tool 06</div>
+      <h1>Source Manifest + BOM/CAD Hash Intake</h1>
+      <p class="lead">Turn every open-source hardware project, CAD folder, BOM spreadsheet, firmware tree, manual, binary image, test log, and generated artifact into a deterministic evidence object before it enters design, fabrication, or productization.</p>
+      <div class="status">
+        <div class="metric"><strong>T06</strong><span>Tool number</span></div>
+        <div class="metric"><strong>14</strong><span>Mapped projects</span></div>
+        <div class="metric"><strong>SHA-256</strong><span>Primary identity</span></div>
+        <div class="metric"><strong>RELEASE</strong><span>Manufacturing gate</span></div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>1. Tool purpose</h2>
+      <p><strong>Source Manifest + BOM/CAD Hash Intake</strong> is the production-control layer that prevents random files, stale forks, edited CAD, mixed licenses, unpinned firmware, and undocumented vendor blobs from entering the build.</p>
+      <p>The tool creates one canonical ledger for every input: source URL, repository, commit or release, file path, file type, owner, license, checksum, production role, and approval status.</p>
+      <div class="flow">
+        <span class="node">Find source</span><span class="arrow">→</span><span class="node">Classify artifact</span><span class="arrow">→</span><span class="node">Preserve bytes</span><span class="arrow">→</span><span class="node">Hash file</span><span class="arrow">→</span><span class="node">Record license</span><span class="arrow">→</span><span class="node">Map to BOM/CAD/firmware</span><span class="arrow">→</span><span class="node">Approve or block</span>
+      </div>
+      <p>This tool is used before fabrication, flashing, purchasing, supplier handoff, grant/demo submission, safety review, or LogicHub/GN8R task execution.</p>
+    </section>
+
+    <section class="section"><h2>2. When to use this tool</h2><div class="grid">
+      <div class="card"><h3>Open-source project intake</h3><p>Use when importing FarmBot, Voron, OpenFlexure, OpenEVSE, SatNOGS, OpenMV/OpenIPC, or any external ecosystem into your build plan.</p><span class="tag ok">Start here</span></div>
+      <div class="card"><h3>CAD/BOM freeze</h3><p>Use before ordering parts, cutting panels, printing enclosures, making PCBs, or sending files to suppliers.</p><span class="tag warn">Pre-fabrication</span></div>
+      <div class="card"><h3>Firmware/image release</h3><p>Use before flashing firmware, Linux images, FPGA bitstreams, camera firmware, SD-card images, or microcontroller binaries.</p><span class="tag bad">Do not skip</span></div>
+      <div class="card"><h3>License review</h3><p>Use when assets include mixed licenses, GPL, MIT, Apache-2.0, CERN-OHL, Creative Commons, proprietary blobs, datasheets, or vendor examples.</p></div>
+      <div class="card"><h3>Revision comparison</h3><p>Use when deciding whether two builds are identical, whether a supplier changed a file, or whether a fork has diverged from upstream.</p></div>
+      <div class="card"><h3>Evidence receipt</h3><p>Use after validation so every test receipt can point back to the exact BOM, CAD, firmware, config, and machine revision tested.</p></div>
+    </div></section>
+
+    <section class="section"><h2>3. Artifact classes</h2><table><thead><tr><th>Class</th><th>Examples</th><th>Required identity fields</th><th>Production use</th></tr></thead><tbody>
+      <tr><td>Hardware CAD</td><td>STEP, STL, DXF, SLDPRT, OpenSCAD, Onshape export</td><td>source URL, export date, version, hash, units, author/license</td><td>Enclosure, frame, fixture, panel, mould, machine part</td></tr>
+      <tr><td>PCB / electronics</td><td>KiCad, Eagle, Gerber, drill, netlist, placement, schematic PDF</td><td>repo/ref, generated-by tool, board revision, hash, electrical scope</td><td>PCBA production, inspection, ERC/DRC evidence</td></tr>
+      <tr><td>BOM / sourcing</td><td>CSV, XLSX, vendor list, MPN list, alternates, cost model</td><td>currency, MPN, supplier, quantity, lifecycle, substitution rule</td><td>Procurement, supplier review, kit build</td></tr>
+      <tr><td>Firmware / software</td><td>source tree, scripts, firmware image, SD image, rootfs, boot config</td><td>commit SHA, branch/tag, toolchain, build command, binary hash</td><td>Flashing, boot, edge service, robot runtime</td></tr>
+      <tr><td>Protocol / interface</td><td>RAPI, REST, MQTT, USB serial, SPI flash map, ROS topics, GPIO map</td><td>version, endpoint/topic/pin names, schema, owner, compatibility</td><td>Integration, service app, validation fixture</td></tr>
+      <tr><td>Validation evidence</td><td>test matrix, calibration receipt, commissioning JSON, scope captures, photos</td><td>device serial, artifact manifest id, operator, timestamp, pass/fail</td><td>Release gate, field service, support proof</td></tr>
+      <tr><td>Legal/safety docs</td><td>license, compliance notes, datasheets, safety checklist, risk register</td><td>owner, license, source, jurisdiction, review status</td><td>Go/no-go decision, blocked claims, productization</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>4. Project applicability cards</h2><div class="grid">
+        <div class="card"><h3>Electronics research bundle</h3><p>Convert study reports into traceable design inputs before reusing any claim in hardware design.</p><p class="small"><strong>Capture:</strong> reports, notes, datasheets, lab captures</p><span class="tag">learning pack → evidence source ledger</span></div>
+        <div class="card"><h3>Air-gapped 8MB module research pack</h3><p>Pin ATmega328P/W25Q64 assumptions, firmware protocol notes, KiCad requirements, validation schemas, and threat model sources.</p><p class="small"><strong>Capture:</strong> datasheets, protocol docs, assumptions, BOM candidates</p><span class="tag">concept → defensible hardware requirements</span></div>
+        <div class="card"><h3>Air-gapped 8MB CAD implementation bundle</h3><p>Hash preliminary KiCad, Gerber-like files, drill, BOM, OpenSCAD, STL/STEP references, firmware scaffold, and host tools.</p><p class="small"><strong>Capture:</strong> KiCad, Gerber, drill, BOM, firmware, enclosure</p><span class="tag">EVT source freeze → correction queue</span></div>
+        <div class="card"><h3>Drone CAD implementation bundle</h3><p>Separate flight-controller evidence from unsafe flyable claims; hash net contracts, firmware, frame/enclosure CAD, tether-test plans.</p><p class="small"><strong>Capture:</strong> schematic, PCB, firmware, frame CAD, validation docs</p><span class="tag">EVT flight controller → tethered validation</span></div>
+        <div class="card"><h3>Pupper V3 research bundle</h3><p>Track which files come from Pupper V3/current docs versus older StanfordQuadruped references and local generated analysis.</p><p class="small"><strong>Capture:</strong> ROS2 workspace refs, docs, CAD/BOM placeholders, evidence</p><span class="tag">robot research → build-intake ledger</span></div>
+        <div class="card"><h3>FarmBot open-source research bundle</h3><p>Map gantry CAD/BOM/software/API sources into one manufacturing-intake ledger for local agriculture robot adaptation.</p><p class="small"><strong>Capture:</strong> CAD, BOM, firmware, web app, API, toolhead docs</p><span class="tag">field robot kit → local service build</span></div>
+        <div class="card"><h3>OpenFlexure Microscope bundle</h3><p>Preserve optical/mechanical/software source provenance so calibration and diagnostic boundaries stay visible.</p><p class="small"><strong>Capture:</strong> OpenSCAD/STL refs, microscope server, optics notes</p><span class="tag">lab instrument → calibration-ready kit</span></div>
+        <div class="card"><h3>SatNOGS ground-station bundle</h3><p>Track RF hardware, antenna, SDR, rotator, station image, client, and observation evidence without mixing transmit and receive-only scope.</p><p class="small"><strong>Capture:</strong> SDR, antenna CAD, station config, observation receipts</p><span class="tag">RF station → legal receive-only build</span></div>
+        <div class="card"><h3>Voron 3D printer bundle</h3><p>Pin printer release, CAD/STLs, config, BOM, printed-part rules, and Klipper/Moonraker source boundaries.</p><p class="small"><strong>Capture:</strong> CAD, STL, config, BOM, manual, firmware</p><span class="tag">printer kit → QA/manufacturing review</span></div>
+        <div class="card"><h3>OpenEVSE bundle</h3><p>Separate safety controller, ESP32 gateway, RAPI/API, hardware revisions, and compliance evidence before any powered work.</p><p class="small"><strong>Capture:</strong> schematics, firmware, safety docs, test matrix</p><span class="tag">EVSE research → certification evidence path</span></div>
+        <div class="card"><h3>OpenMV + OpenIPC bundle</h3><p>Prevent mixing camera firmware, vendor blobs, OpenMV code, OpenIPC firmware, privacy policies, and board-specific flashing assets.</p><p class="small"><strong>Capture:</strong> firmware, camera image, model, config, probes</p><span class="tag">local vision appliance → privacy-safe build</span></div>
+        <div class="card"><h3>BeagleV-Fire / Milk-V Duo RISC-V bundle</h3><p>Pin board revision, boot image, SDK, gateware/bitstream, examples, rootfs, and binary blob provenance.</p><p class="small"><strong>Capture:</strong> SDK, Linux image, FPGA/gateware, board docs</p><span class="tag">edge board → reproducible runtime</span></div>
+        <div class="card"><h3>Precious Plastic ecosystem bundle</h3><p>Track machine packs, CAD/BOM/process recipes, guarding assumptions, material batch logs, and safety checklists.</p><p class="small"><strong>Capture:</strong> CAD, DXF, BOM, process log, safety docs</p><span class="tag">workspace build → machine commissioning</span></div>
+        <div class="card"><h3>NASA JPL Rover / OpenAMRobot bundle</h3><p>Keep NASA OSR mechanics and OpenAMRobot ROS2 AMR stack distinct while mapping both into CAD/BOM/software/firmware release evidence.</p><p class="small"><strong>Capture:</strong> Onshape/STEP, ROS2, firmware, UI, wiring, BOM</p><span class="tag">rover/AMR → safe robot commissioning</span></div>
+    </div></section>
+
+    <section class="section"><h2>5. Production-stage map</h2><table><thead><tr><th>Stage</th><th>Action</th><th>Output</th><th>Gate</th></tr></thead><tbody>
+      <tr><td>Discovery</td><td>List repositories, official docs, release archives, CAD portals, datasheets, vendor pages, and generated local files.</td><td><code>source_candidates.csv</code></td><td>Every input has a source or is marked generated/local.</td></tr>
+      <tr><td>Intake</td><td>Download/export/copy files into read-only intake folder. Do not rename destructively.</td><td><code>raw_intake/</code></td><td>Original bytes preserved.</td></tr>
+      <tr><td>Classification</td><td>Assign type: CAD, PCB, BOM, firmware, software, docs, safety, validation, binary, generated.</td><td><code>artifact_class</code></td><td>No unknown class in release manifest.</td></tr>
+      <tr><td>Hashing</td><td>Compute SHA-256 for every accepted file.</td><td><code>file_hashes.csv</code></td><td>Every accepted file has exactly one hash.</td></tr>
+      <tr><td>License ownership</td><td>Record license and copyright owner. Flag missing, mixed, non-commercial, or proprietary items.</td><td><code>license_inventory.csv</code></td><td>No commercial use without license clearance.</td></tr>
+      <tr><td>Relationship map</td><td>Connect BOM item to CAD part, schematic symbol, footprint, firmware pin, test step, and risk item.</td><td><code>relationship_graph.json</code></td><td>Critical parts trace across domains.</td></tr>
+      <tr><td>Release manifest</td><td>Freeze the exact artifact set used for build/test/release.</td><td><code>source_manifest.json</code></td><td>Release is reproducible from manifest.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>6. Clean checklist</h2><ul class="checklist">
+      <li>Use official upstream first; forks are allowed only when explicitly justified.</li><li>Record whether an artifact is upstream, generated, modified, vendor, datasheet, or local analysis.</li><li>Preserve original filenames and add canonical IDs separately.</li><li>Hash every file using SHA-256 before editing.</li><li>Keep generated outputs separate from source files.</li><li>Do not mix CAD versions, BOM versions, and firmware versions without a compatibility note.</li><li>Never send unreviewed generated Gerbers, STEP, STL, or firmware binaries to production.</li><li>Do not claim open-source commercial freedom until the file-level license inventory is complete.</li><li>Record all blocked files: missing license, binary-only, unsafe, stale, unsupported, or unverified.</li><li>Attach validation receipts to the exact manifest ID that was tested.</li>
+    </ul></section>
+
+    <section class="section"><h2>7. Pass / fail gates</h2><table><thead><tr><th>Gate</th><th>PASS</th><th>FAIL</th><th>Required action</th></tr></thead><tbody>
+      <tr><td>Source identity</td><td>Every file has source URL/repo/ref or generated-local label.</td><td>Unknown origin file enters release.</td><td>Block release; locate source or remove file.</td></tr><tr><td>Hash coverage</td><td>Every accepted file has SHA-256 and size.</td><td>Any accepted file missing hash.</td><td>Re-run hash manifest.</td></tr><tr><td>License coverage</td><td>License and owner recorded or explicit unknown flag exists.</td><td>Commercial use assumed without evidence.</td><td>Create file-level license inventory.</td></tr><tr><td>BOM/CAD consistency</td><td>BOM part maps to CAD/PCB/mechanical role.</td><td>BOM part cannot be traced to design use.</td><td>Resolve or mark as spare/optional.</td></tr><tr><td>Generated artifact trace</td><td>Generated Gerber/STL/binary points to source and tool version.</td><td>Output cannot be regenerated.</td><td>Regenerate from source or quarantine.</td></tr><tr><td>Safety artifact gate</td><td>Safety-critical items have datasheet, test plan, and risk entry.</td><td>Motor/heater/mains/battery item lacks risk entry.</td><td>Block powered test.</td></tr><tr><td>Release freeze</td><td>Manifest version, timestamp, author, and approval state present.</td><td>Files changed after approval without revision bump.</td><td>Invalidate release and create new revision.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>8. Risk table</h2><table><thead><tr><th>Risk</th><th>Failure mode</th><th>Affected projects</th><th>Mitigation</th></tr></thead><tbody>
+      <tr><td>Stale fork</td><td>Build uses old, unsupported, or unsafe files.</td><td>All open-source bundles</td><td>Prefer official upstream; record fork rationale and date.</td></tr>
+      <tr><td>Generated/source mixing</td><td>Gerbers/STLs/binaries cannot be regenerated or audited.</td><td>8MB CAD, drone, Voron, OpenEVSE, robots</td><td>Separate <code>source/</code>, <code>generated/</code>, and <code>release/</code>.</td></tr>
+      <tr><td>License mismatch</td><td>Commercial use blocked by GPL, CC-SA, non-commercial, proprietary, or datasheet restrictions.</td><td>OpenMV, Voron, Precious Plastic, BeagleV/Milk-V, Pupper</td><td>File-level inventory before selling kits or redistributing binaries.</td></tr>
+      <tr><td>Unpinned firmware</td><td>Same build command produces different image later.</td><td>OpenIPC, BeagleV/Milk-V, OpenAMRobot, OpenEVSE</td><td>Pin commit, toolchain, submodules, packages, build container.</td></tr>
+      <tr><td>Wrong CAD revision</td><td>Mechanical part does not fit PCB, wiring, slot, or fixture.</td><td>8MB cartridge, FarmBot, OpenFlexure, Voron, Precious Plastic, OSR</td><td>Map CAD revision to BOM and assembly step.</td></tr>
+      <tr><td>Unsafe substitution</td><td>Supplier swaps motor, heater, relay, battery, PSU, or sensor without validation.</td><td>Drone, EVSE, Voron, Precious Plastic, robots</td><td>Substitution requires equivalence evidence and retest receipt.</td></tr>
+      <tr><td>Binary blob opacity</td><td>Camera/board image includes unknown services or licensing constraints.</td><td>OpenIPC, RISC-V edge, OpenMV</td><td>List blobs, hashes, network exposure, and redistribution rights.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>9. Example manifest CSV</h2><pre>project_id,artifact_id,artifact_class,source_type,source_url,repo,ref,path,sha256,size_bytes,license,owner,production_role,approval_state,risk_flags
+8mb-cad,pcb-gerber-fcu,pcb,generated-local,,via-decide/electronics,evt-a,gerbers/revA-F_Cu.gbr,PLACEHOLDER,0,internal,ViaDecide,pcb-fabrication,BLOCKED_PRE_DRC,"generated,needs_erc_drc"
+voron,trident-manual,documentation,upstream,https://github.com/VoronDesign/Voron-Trident,VoronDesign/Voron-Trident,release-tag,Manual.pdf,PLACEHOLDER,0,GPL-3.0,VoronDesign,assembly-reference,REVIEW,"source_not_embedded"
+openevse,rapi-probe,software,generated-local,,local,tooling,scripts/rapi_read_only_probe.py,PLACEHOLDER,0,internal,ViaDecide,read-only-validation,APPROVED_READONLY,"no_live_control"</pre></section>
+
+    <section class="section"><h2>10. Minimal hashing commands</h2><p>Use these commands only on files you are legally allowed to store locally. Keep raw intake files read-only after hashing.</p><pre># Linux/macOS: create SHA-256 manifest
+find raw_intake -type f -print0 | sort -z | xargs -0 shasum -a 256 > file_hashes.sha256
+
+# Python fallback: deterministic CSV manifest
+python3 - <<'PY'
+from pathlib import Path
+import hashlib, csv
+root = Path('raw_intake')
+rows = []
+for p in sorted(root.rglob('*')):
+    if p.is_file():
+        rows.append({
+            'path': str(p),
+            'size_bytes': p.stat().st_size,
+            'sha256': hashlib.sha256(p.read_bytes()).hexdigest()
+        })
+with open('file_hashes.csv','w',newline='') as f:
+    w = csv.DictWriter(f, fieldnames=['path','size_bytes','sha256'])
+    w.writeheader(); w.writerows(rows)
+PY</pre></section>
+
+    <section class="section"><h2>11. JSON / LogicHub export schema</h2><pre>{
+  "tool_id": "T06",
+  "tool_name": "Source Manifest + BOM/CAD Hash Intake",
+  "manifest_id": "source-manifest-YYYYMMDD-revA",
+  "project_id": "string",
+  "release_stage": "research|evt|dvt|pvt|manufacturing|field",
+  "artifacts": [
+    {
+      "artifact_id": "string",
+      "artifact_class": "cad|pcb|bom|firmware|software|documentation|safety|validation|binary|generated",
+      "source_type": "upstream|fork|vendor|datasheet|generated-local|user-supplied",
+      "source_url": "string|null",
+      "repo": "owner/name|null",
+      "ref": "commit|tag|release|null",
+      "path": "string",
+      "sha256": "hex-string",
+      "size_bytes": 0,
+      "license": "string|unknown",
+      "owner": "string|unknown",
+      "production_role": "string",
+      "approval_state": "accepted|review|blocked|deprecated",
+      "risk_flags": ["string"]
+    }
+  ],
+  "relationships": [
+    {"from": "bom:item", "relation": "maps_to", "to": "cad:part"},
+    {"from": "schematic:symbol", "relation": "uses_footprint", "to": "pcb:footprint"},
+    {"from": "firmware:pin", "relation": "drives", "to": "hardware:net"},
+    {"from": "test:receipt", "relation": "validates", "to": "manifest:artifact"}
+  ],
+  "release_gate": {
+    "hash_coverage": "pass|fail",
+    "license_coverage": "pass|fail",
+    "source_traceability": "pass|fail",
+    "safety_artifact_coverage": "pass|fail",
+    "approved_for_manufacturing": false
+  }
+}</pre></section>
+
+    <section class="section"><h2>12. Production rule</h2><p>A project is not production-ready because files exist. It becomes production-controllable only when every source file, generated file, BOM item, CAD part, firmware image, configuration, and validation receipt can be traced back to a versioned manifest.</p><p><strong>Default decision:</strong> if the file cannot be traced, hashed, regenerated, licensed, or safety-reviewed, it is not part of the release.</p></section>
+
+    <div class="footer"><p>Tool 06 of 14. Next file: <code>tool-07-storage-integrity-transactional-updates.html</code></p></div>
+  </div>
+</body>
+</html>

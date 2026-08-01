@@ -20,6 +20,7 @@ export const MOTION_AND_VISION_KIT: PhysicalKitDefinition = {
     { componentId: 'wiring-jumper-set', quantity: 1, role: 'Interconnect' },
   ],
   supportedProductTemplateIds: ['obstacle-avoider', 'educational-robot', 'camera-slider'],
+  applicableToolIds: ['T01', 'T03', 'T05', 'T08', 'T11', 'T12', 'T14'],
   requiredTools: [
     'Small Phillips screwdriver',
     'Wire cutters',

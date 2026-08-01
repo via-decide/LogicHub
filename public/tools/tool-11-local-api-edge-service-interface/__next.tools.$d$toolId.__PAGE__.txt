@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-3:I[484,[],"OutletBoundary"]
+2:I[5136,["649","static/chunks/649-7043afff7deefc63.js","934","static/chunks/app/tools/%5BtoolId%5D/page-bd6ee440451c062f.js"],"ToolWorkspace"]
+3:I[2402,[],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":["$L2",null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"TTcWzdm-W6QZXPcj1iU9V"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"tool":{"id":"tool-11-local-api-edge-service-interface","title":"Local API / Edge Service Interface","eyebrow":"Tool","lead":"","contractFields":[],"projects":[],"stages":[],"checklist":[]}}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"o1tvU2gmQ8De2aXHh7q2J"}
 5:null
-2:E{"digest":"NEXT_HTTP_ERROR_FALLBACK;404"}

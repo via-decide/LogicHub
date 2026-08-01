@@ -1,0 +1,25 @@
+{
+  "tool_id": "T06",
+  "title": "Tool 06 \u2014 Source Manifest + BOM/CAD Hash Intake",
+  "slug": "tool-06-source-manifest-bom-cad-intake",
+  "created_utc": "2026-07-30T21:53:45.392018+00:00",
+  "html_file": "tool-06-source-manifest-bom-cad-intake.html",
+  "schema_file": "tool-06-source-manifest.schema.json",
+  "mapped_projects": [
+    "Electronics research bundle",
+    "Air-gapped 8MB module research pack",
+    "Air-gapped 8MB CAD implementation bundle",
+    "Drone CAD implementation bundle",
+    "Pupper V3 research bundle",
+    "FarmBot open-source research bundle",
+    "OpenFlexure Microscope bundle",
+    "SatNOGS ground-station bundle",
+    "Voron 3D printer bundle",
+    "OpenEVSE bundle",
+    "OpenMV + OpenIPC bundle",
+    "BeagleV-Fire / Milk-V Duo RISC-V bundle",
+    "Precious Plastic ecosystem bundle",
+    "NASA JPL Rover / OpenAMRobot bundle"
+  ],
+  "next_tool": "tool-07-storage-integrity-transactional-updates.html"
+}

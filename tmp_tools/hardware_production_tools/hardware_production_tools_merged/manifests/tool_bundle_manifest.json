@@ -1,0 +1,352 @@
+{
+  "bundle_name": "hardware_production_tools_merged",
+  "created_utc": "2026-07-31T02:40:14.574334+00:00",
+  "tool_count_expected": 14,
+  "tool_count_present": 14,
+  "source": "Generated from the 14 hardware production HTML tools created after the hardware research progress archive.",
+  "contains": {
+    "html": "Standalone HTML files for all tools",
+    "individual_zips": "Original ZIP packages for each tool",
+    "tools_extracted": "Extracted contents of each tool ZIP for direct browsing",
+    "manifests": "CSV/JSON manifest files and SHA256 file hash report"
+  },
+  "tools": [
+    {
+      "order": 1,
+      "tool_id": "T01",
+      "slug": "tool-01-power-standardization-protection",
+      "title": "Power Standardization & Protection",
+      "scope": "USB-C, battery input, fuse, reverse protection, power tree",
+      "html": "html/tool-01-power-standardization-protection.html",
+      "zip": "individual_zips/tool-01-power-standardization-protection.zip",
+      "extracted_dir": "tools_extracted/tool-01-power-standardization-protection/"
+    },
+    {
+      "order": 2,
+      "tool_id": "T02",
+      "slug": "tool-02-tactile-determinism-input-fsm",
+      "title": "Tactile Determinism / Input FSM",
+      "scope": "Buttons, encoders, E-stop input, debounce, interrupt FSM",
+      "html": "html/tool-02-tactile-determinism-input-fsm.html",
+      "zip": "individual_zips/tool-02-tactile-determinism-input-fsm.zip",
+      "extracted_dir": "tools_extracted/tool-02-tactile-determinism-input-fsm/"
+    },
+    {
+      "order": 3,
+      "tool_id": "T03",
+      "slug": "tool-03-state-visibility-offline-telemetry",
+      "title": "State Visibility & Offline Telemetry",
+      "scope": "OLED, LEDs, buzzer, local logs, state codes",
+      "html": "html/tool-03-state-visibility-offline-telemetry.html",
+      "zip": "individual_zips/tool-03-state-visibility-offline-telemetry.zip",
+      "extracted_dir": "tools_extracted/tool-03-state-visibility-offline-telemetry/"
+    },
+    {
+      "order": 4,
+      "tool_id": "T04",
+      "slug": "tool-04-poka-yoke-interface-geometry",
+      "title": "Poka-yoke Interface Geometry",
+      "scope": "Cartridge slot, docking, keyed connectors, guide rails",
+      "html": "html/tool-04-poka-yoke-interface-geometry.html",
+      "zip": "individual_zips/tool-04-poka-yoke-interface-geometry.zip",
+      "extracted_dir": "tools_extracted/tool-04-poka-yoke-interface-geometry/"
+    },
+    {
+      "order": 5,
+      "tool_id": "T05",
+      "slug": "tool-05-fault-tolerance-fallbacks",
+      "title": "Fault Tolerance & Fallbacks",
+      "scope": "Watchdog, SPI/I2C timeout, safe reset, fault display",
+      "html": "html/tool-05-fault-tolerance-fallbacks.html",
+      "zip": "individual_zips/tool-05-fault-tolerance-fallbacks.zip",
+      "extracted_dir": "tools_extracted/tool-05-fault-tolerance-fallbacks/"
+    },
+    {
+      "order": 6,
+      "tool_id": "T06",
+      "slug": "tool-06-source-manifest-bom-cad-intake",
+      "title": "Source Manifest + BOM/CAD Hash Intake",
+      "scope": "Hashing, manifest, license, CAD/BOM source tracking",
+      "html": "html/tool-06-source-manifest-bom-cad-intake.html",
+      "zip": "individual_zips/tool-06-source-manifest-bom-cad-intake.zip",
+      "extracted_dir": "tools_extracted/tool-06-source-manifest-bom-cad-intake/"
+    },
+    {
+      "order": 7,
+      "tool_id": "T07",
+      "slug": "tool-07-storage-integrity-transactional-updates",
+      "title": "Storage Integrity + Transactional Updates",
+      "scope": "CRC/SHA, dual manifest, rollback, flash layout",
+      "html": "html/tool-07-storage-integrity-transactional-updates.html",
+      "zip": "individual_zips/tool-07-storage-integrity-transactional-updates.zip",
+      "extracted_dir": "tools_extracted/tool-07-storage-integrity-transactional-updates/"
+    },
+    {
+      "order": 8,
+      "tool_id": "T08",
+      "slug": "tool-08-sensor-calibration-health-evidence",
+      "title": "Sensor Calibration + Health Evidence",
+      "scope": "IMU, camera, LiDAR, optics, RF, encoder calibration",
+      "html": "html/tool-08-sensor-calibration-health-evidence.html",
+      "zip": "individual_zips/tool-08-sensor-calibration-health-evidence.zip",
+      "extracted_dir": "tools_extracted/tool-08-sensor-calibration-health-evidence/"
+    },
+    {
+      "order": 9,
+      "tool_id": "T09",
+      "slug": "tool-09-actuator-motor-heater-safety",
+      "title": "Actuator / Motor / Heater Safety Interlock",
+      "scope": "Motors, heaters, relays, gantry, E-stop, arm/disarm",
+      "html": "html/tool-09-actuator-motor-heater-safety.html",
+      "zip": "individual_zips/tool-09-actuator-motor-heater-safety.zip",
+      "extracted_dir": "tools_extracted/tool-09-actuator-motor-heater-safety/"
+    },
+    {
+      "order": 10,
+      "tool_id": "T10",
+      "slug": "tool-10-thermal-current-power-derating",
+      "title": "Thermal / Current / Power Derating",
+      "scope": "Heat, current, runtime, regulator, chamber, battery",
+      "html": "html/tool-10-thermal-current-power-derating.html",
+      "zip": "individual_zips/tool-10-thermal-current-power-derating.zip",
+      "extracted_dir": "tools_extracted/tool-10-thermal-current-power-derating/"
+    },
+    {
+      "order": 11,
+      "tool_id": "T11",
+      "slug": "tool-11-local-api-edge-service-interface",
+      "title": "Local API / Edge Service Interface",
+      "scope": "HTTP, MQTT, serial, WebSocket, local-first dashboard",
+      "html": "html/tool-11-local-api-edge-service-interface.html",
+      "zip": "individual_zips/tool-11-local-api-edge-service-interface.zip",
+      "extracted_dir": "tools_extracted/tool-11-local-api-edge-service-interface/"
+    },
+    {
+      "order": 12,
+      "tool_id": "T12",
+      "slug": "tool-12-manufacturing-qa-fixture-receipts",
+      "title": "Manufacturing QA Fixture + Test Receipts",
+      "scope": "PCBA tests, commissioning, supplier acceptance",
+      "html": "html/tool-12-manufacturing-qa-fixture-receipts.html",
+      "zip": "individual_zips/tool-12-manufacturing-qa-fixture-receipts.zip",
+      "extracted_dir": "tools_extracted/tool-12-manufacturing-qa-fixture-receipts/"
+    },
+    {
+      "order": 13,
+      "tool_id": "T13",
+      "slug": "tool-13-enclosure-environmental-dfm",
+      "title": "Enclosure / Environmental DFM",
+      "scope": "3D print, injection moulding, guards, weatherproofing",
+      "html": "html/tool-13-enclosure-environmental-dfm.html",
+      "zip": "individual_zips/tool-13-enclosure-environmental-dfm.zip",
+      "extracted_dir": "tools_extracted/tool-13-enclosure-environmental-dfm/"
+    },
+    {
+      "order": 14,
+      "tool_id": "T14",
+      "slug": "tool-14-compliance-safety-risk-ledger",
+      "title": "Compliance / Safety Risk Ledger",
+      "scope": "Product safety, India compliance, blocked claims, waivers",
+      "html": "html/tool-14-compliance-safety-risk-ledger.html",
+      "zip": "individual_zips/tool-14-compliance-safety-risk-ledger.zip",
+      "extracted_dir": "tools_extracted/tool-14-compliance-safety-risk-ledger/"
+    }
+  ],
+  "projects_mapped": [
+    {
+      "project": "electronics_research_bundle",
+      "role": "Foundation study: power electronics, embedded Linux, lab discipline",
+      "tools": [
+        "T06",
+        "T10",
+        "T12",
+        "T14"
+      ]
+    },
+    {
+      "project": "air_gapped_8mb_module_research_pack",
+      "role": "Offline cartridge architecture and integrity model",
+      "tools": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T07",
+        "T12"
+      ]
+    },
+    {
+      "project": "airgap8mb_cad_implementation_bundle",
+      "role": "EVT implementation for cartridge PCB/enclosure/firmware",
+      "tools": [
+        "T01",
+        "T04",
+        "T05",
+        "T07",
+        "T12",
+        "T13"
+      ]
+    },
+    {
+      "project": "drone_cad_implementation_bundle",
+      "role": "Flight-controller EVT and tether validation",
+      "tools": [
+        "T01",
+        "T03",
+        "T05",
+        "T08",
+        "T09",
+        "T10",
+        "T12",
+        "T14"
+      ]
+    },
+    {
+      "project": "pupper_v3_open_source_research_bundle",
+      "role": "Quadruped robot kit/productization study",
+      "tools": [
+        "T01",
+        "T03",
+        "T05",
+        "T08",
+        "T09",
+        "T10",
+        "T11",
+        "T12"
+      ]
+    },
+    {
+      "project": "farmbot_open_source_research_bundle",
+      "role": "Agriculture gantry robot and tool ecosystem",
+      "tools": [
+        "T01",
+        "T03",
+        "T04",
+        "T05",
+        "T08",
+        "T09",
+        "T11",
+        "T13"
+      ]
+    },
+    {
+      "project": "openflexure_microscope_research_bundle",
+      "role": "Lab microscope and precision positioning platform",
+      "tools": [
+        "T01",
+        "T03",
+        "T04",
+        "T08",
+        "T11",
+        "T12",
+        "T14"
+      ]
+    },
+    {
+      "project": "satnogs_ground_station_research_bundle",
+      "role": "Receive-only satellite ground-station learning appliance",
+      "tools": [
+        "T01",
+        "T03",
+        "T05",
+        "T08",
+        "T10",
+        "T11",
+        "T13",
+        "T14"
+      ]
+    },
+    {
+      "project": "voron_3d_printer_engineering_bundle",
+      "role": "CoreXY 3D printer engineering and kit QA",
+      "tools": [
+        "T01",
+        "T02",
+        "T03",
+        "T05",
+        "T08",
+        "T09",
+        "T10",
+        "T12",
+        "T13"
+      ]
+    },
+    {
+      "project": "openevse_research_bundle",
+      "role": "Open EVSE charger platform and safety split",
+      "tools": [
+        "T01",
+        "T03",
+        "T05",
+        "T09",
+        "T10",
+        "T11",
+        "T12",
+        "T14"
+      ]
+    },
+    {
+      "project": "openmv_openipc_local_vision_bundle",
+      "role": "Local-first camera/vision appliance stack",
+      "tools": [
+        "T01",
+        "T03",
+        "T05",
+        "T08",
+        "T11",
+        "T12",
+        "T14"
+      ]
+    },
+    {
+      "project": "riscv_edge_beaglev_fire_milkv_duo_bundle",
+      "role": "RISC-V edge compute, FPGA, AIoT, embedded Linux",
+      "tools": [
+        "T01",
+        "T03",
+        "T05",
+        "T07",
+        "T08",
+        "T10",
+        "T11",
+        "T12",
+        "T14"
+      ]
+    },
+    {
+      "project": "precious_plastic_machine_ecosystem_bundle",
+      "role": "Plastic recycling and small manufacturing machines",
+      "tools": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T09",
+        "T10",
+        "T12",
+        "T13",
+        "T14"
+      ]
+    },
+    {
+      "project": "nasa_jpl_rover_openamrobot_research_bundle",
+      "role": "Rover mechanics plus ROS2 AMR stack",
+      "tools": [
+        "T01",
+        "T03",
+        "T04",
+        "T05",
+        "T08",
+        "T09",
+        "T10",
+        "T11",
+        "T12",
+        "T14"
+      ]
+    }
+  ],
+  "missing_sources": [],
+  "completion_state": "All 14 tools complete"
+}

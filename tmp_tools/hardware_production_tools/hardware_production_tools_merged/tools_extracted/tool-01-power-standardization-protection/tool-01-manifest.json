@@ -1,0 +1,8 @@
+{
+  "tool": "T01",
+  "title": "Power Standardization & Protection",
+  "html_file": "tool-01-power-standardization-protection.html",
+  "sha256": "dac170142ff2bc996660d3b5661a2abc0efd5632e1b2a0b346510a5c9c43fa49",
+  "next_tool": "T02 Tactile Determinism / Input FSM",
+  "next_html": "tool-02-tactile-determinism-input-fsm.html"
+}

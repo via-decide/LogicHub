@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool 09 — Actuator / Motor / Heater Safety Interlock</title>
+<style>
+:root {
+  --bg:#090d12; --panel:#111821; --panel2:#0d131b; --ink:#e6edf3; --muted:#9aa8b6;
+  --line:#26313d; --accent:#f59e0b; --red:#ef4444; --green:#22c55e; --blue:#38bdf8;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:linear-gradient(180deg,#080b10,#0b1118 42%,#080b10); color:var(--ink); font-family:var(--sans); }
+header { border-bottom:1px solid var(--line); background:rgba(9,13,18,.92); position:sticky; top:0; z-index:2; backdrop-filter:blur(8px); }
+.wrap { max-width:1220px; margin:0 auto; padding:22px; }
+.hero { display:grid; grid-template-columns:1.4fr .8fr; gap:18px; align-items:stretch; }
+h1 { margin:0 0 8px; font-size:34px; letter-spacing:-.04em; }
+h2 { margin:34px 0 14px; font-size:22px; letter-spacing:-.02em; }
+h3 { margin:0 0 8px; font-size:16px; }
+p { color:var(--muted); line-height:1.55; }
+.kicker { color:var(--accent); font-family:var(--mono); font-size:13px; text-transform:uppercase; letter-spacing:.12em; }
+.panel,.card { background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line); border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,.25); }
+.panel { padding:20px; }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.grid2 { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.card { padding:16px; }
+.cardTop { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+.pill { display:inline-flex; align-items:center; border:1px solid var(--line); background:#0b1220; color:#cbd5e1; border-radius:999px; padding:3px 8px; font:12px var(--mono); white-space:nowrap; }
+.pill.hot { color:#fed7aa; border-color:#92400e; background:#1c1207; }
+.pill.block { color:#fecaca; border-color:#7f1d1d; background:#1c0909; }
+.pill.go { color:#bbf7d0; border-color:#14532d; background:#071b10; }
+table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px; border:1px solid var(--line); }
+th,td { padding:12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { color:#cbd5e1; background:#111827; font:12px var(--mono); text-transform:uppercase; letter-spacing:.08em; }
+td { color:var(--muted); }
+code,pre { font-family:var(--mono); }
+pre { background:#05080c; border:1px solid var(--line); border-radius:12px; padding:14px; overflow:auto; color:#dbeafe; line-height:1.45; }
+.check { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid rgba(38,49,61,.55); color:var(--muted); }
+.check input { width:18px; height:18px; accent-color:var(--accent); }
+.toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+button,.btn { border:1px solid var(--line); background:#111827; color:var(--ink); border-radius:10px; padding:9px 12px; cursor:pointer; font:13px var(--mono); }
+button:hover,.btn:hover { border-color:var(--accent); }
+input.search { width:100%; background:#05080c; border:1px solid var(--line); color:var(--ink); border-radius:12px; padding:12px; margin:10px 0 14px; }
+footer { border-top:1px solid var(--line); margin-top:42px; color:var(--muted); }
+.badgeRow { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; }
+.diagram { background:#05080c; border:1px dashed #334155; border-radius:12px; padding:16px; color:#d1d5db; }
+.node { display:inline-block; padding:8px 10px; margin:5px; border:1px solid #334155; border-radius:8px; background:#0f172a; font-family:var(--mono); font-size:12px; }
+.arrow { color:var(--accent); font-family:var(--mono); margin:0 4px; }
+.small { font-size:13px; }
+@media (max-width:900px) { .hero,.grid,.grid2 { grid-template-columns:1fr; } h1 { font-size:28px; } .wrap { padding:16px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="kicker">Universal Hardware Production Stack · T09</div>
+    <h1>Actuator / Motor / Heater Safety Interlock</h1>
+    <p class="small">Use when a project can move, heat, switch mains, spin, charge, cut, crush, or energize something hazardous. The rule: software may request energy, but independent safety gates decide whether energy is allowed.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="panel">
+      <span class="pill hot">High-energy output boundary</span>
+      <h2>Purpose</h2>
+      <p>This tool converts actuator, motor, heater, relay, charger, blade, gantry, wheel, propeller, and hotend hazards into a repeatable production checklist. It forces each project to declare energy source, default-off behavior, physical stop path, firmware safe state, sensor-valid gates, commissioning receipts, and release blockers.</p>
+      <div class="badgeRow">
+        <span class="pill">arm / disarm</span>
+        <span class="pill">physical E-stop</span>
+        <span class="pill">watchdog</span>
+        <span class="pill">heater cutoff</span>
+        <span class="pill">motor inhibit</span>
+        <span class="pill">relay lockout</span>
+        <span class="pill">test receipt</span>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="pill block">Safety boundary</span>
+      <p>This HTML is a planning and evidence tool. It is not a safety-rated controller, certified EVSE, certified machine guard, flight controller approval, industrial PLC design, or legal compliance certificate.</p>
+      <p>For real products, use qualified review, physical interlocks, fuses/breakers, isolation, wiring standards, certification where applicable, and local operating rules.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>When to use this tool</h2>
+    <div class="grid">
+      <div class="card"><h3>Motion</h3><p>Wheels, legs, gantries, belts, rotators, drones, toolheads, pumps, servos, steppers, BLDC motors.</p></div>
+      <div class="card"><h3>Heat</h3><p>Hotends, heated beds, barrels, injection heaters, sheetpress heaters, thermal chambers, soldering/curing rigs.</p></div>
+      <div class="card"><h3>Power switching</h3><p>Relays, SSRs, contactors, EVSE outputs, solenoids, VFDs, machine control boxes, battery outputs.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Project applicability across the 14 ZIP bundles</h2>
+    <input class="search" id="search" placeholder="Filter projects, e.g. drone, EVSE, heater, robot, printer, plastic...">
+    <div class="grid" id="projectGrid">
+      <article class="card project" data-risk="low">
+      <div class="cardTop">
+        <span class="pill">Low</span>
+        <h3>01. Electronics research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use as theory-to-lab safety discipline for high-power switching, MOSFET loads, thermal benches, and embedded Linux-controlled fixtures.</p>
+      <p><strong>Gate:</strong> Avoid treating learning notes as production approval.</p>
+    </article>
+<article class="card project" data-risk="low">
+      <div class="cardTop">
+        <span class="pill">Low</span>
+        <h3>02. Air-gapped 8MB module research pack</h3>
+      </div>
+      <p><strong>Use:</strong> Usually no actuator. Use only if adding motorized cartridge eject, relay-controlled power, or heater-free test fixture.</p>
+      <p><strong>Gate:</strong> Keep flash storage operations separated from powered motion.</p>
+    </article>
+<article class="card project" data-risk="low">
+      <div class="cardTop">
+        <span class="pill">Low</span>
+        <h3>03. Air-gapped 8MB CAD implementation bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for relay-controlled test jigs, fixture clamps, solenoids, or cartridge dock assist if added later.</p>
+      <p><strong>Gate:</strong> No actuator should be able to corrupt flash during commit.</p>
+    </article>
+<article class="card project" data-risk="critical">
+      <div class="cardTop">
+        <span class="pill">Critical</span>
+        <h3>04. Drone CAD implementation bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for ESC arming, motor inhibit, no-prop bench mode, tethered test mode, command timeout, IMU-valid gate, and LiPo fault handling.</p>
+      <p><strong>Gate:</strong> Untethered spin is blocked until sensor, failsafe, and arming gates pass.</p>
+    </article>
+<article class="card project" data-risk="critical">
+      <div class="cardTop">
+        <span class="pill">Critical</span>
+        <h3>05. Pupper V3 open-source research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for leg motor enable, torque limits, safe pose, fall/fault state, battery undervoltage stop, and E-stop boundary.</p>
+      <p><strong>Gate:</strong> Robot must default to motor-disabled until explicit arm and calibration pass.</p>
+    </article>
+<article class="card project" data-risk="high">
+      <div class="cardTop">
+        <span class="pill">High</span>
+        <h3>06. FarmBot open-source research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for gantry axis limits, endstops, stall/obstruction handling, toolhead lockout, water/tool safety, and field E-stop.</p>
+      <p><strong>Gate:</strong> Outdoor unattended motion needs obstruction and weather-aware stop logic.</p>
+    </article>
+<article class="card project" data-risk="medium">
+      <div class="cardTop">
+        <span class="pill">Medium</span>
+        <h3>07. OpenFlexure Microscope research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for stage motor current limits, objective/sample collision prevention, illumination thermal guard, and safe homing.</p>
+      <p><strong>Gate:</strong> Avoid lens/sample collision and false measurement confidence.</p>
+    </article>
+<article class="card project" data-risk="medium">
+      <div class="cardTop">
+        <span class="pill">Medium</span>
+        <h3>08. SatNOGS satellite ground-station research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for rotator motor limits, mast service lockout, weather/wind inhibit, and receive-only RF boundary.</p>
+      <p><strong>Gate:</strong> Antenna movement and outdoor installations need physical isolation and grounding.</p>
+    </article>
+<article class="card project" data-risk="critical">
+      <div class="cardTop">
+        <span class="pill">Critical</span>
+        <h3>09. Voron 3D printer engineering bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for heater watchdog, thermal runaway, bed/hotend lockout, chamber fan, CoreXY motion inhibit, door/service mode, and PSU relay safety.</p>
+      <p><strong>Gate:</strong> Heater control must fail off; firmware alone is not enough without wiring/fuse correctness.</p>
+    </article>
+<article class="card project" data-risk="critical">
+      <div class="cardTop">
+        <span class="pill">Critical</span>
+        <h3>10. OpenEVSE research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for relay/contactor lockout, pilot-state gate, GFCI/ground fault, stuck relay detection, temperature throttle, and charge inhibit.</p>
+      <p><strong>Gate:</strong> A faulted charger must not be commandable into charging.</p>
+    </article>
+<article class="card project" data-risk="low">
+      <div class="cardTop">
+        <span class="pill">Low/Medium</span>
+        <h3>11. OpenMV + OpenIPC local vision bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use when camera controls motors, door locks, lights, relays, or pan/tilt mechanisms; otherwise focus on privacy/security.</p>
+      <p><strong>Gate:</strong> Do not allow AI detection alone to energize hazardous actuators.</p>
+    </article>
+<article class="card project" data-risk="medium">
+      <div class="cardTop">
+        <span class="pill">Medium</span>
+        <h3>12. BeagleV-Fire / Milk-V Duo RISC-V edge bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for edge-controlled relays, robotics carriers, GPIO output gates, FPGA IO enable, and watchdog-supervised services.</p>
+      <p><strong>Gate:</strong> Linux userspace should not be the only safety layer for hazardous outputs.</p>
+    </article>
+<article class="card project" data-risk="critical">
+      <div class="cardTop">
+        <span class="pill">Critical</span>
+        <h3>13. Precious Plastic machine ecosystem bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for shredder reverse/jam logic, heater barrel interlocks, VFD/motor enable, guards, fume controls, E-stop, and lockout/tagout.</p>
+      <p><strong>Gate:</strong> Blades, torque, mains, heaters, fumes, and molten plastic require industrial controls.</p>
+    </article>
+<article class="card project" data-risk="critical">
+      <div class="cardTop">
+        <span class="pill">Critical</span>
+        <h3>14. NASA JPL Rover / OpenAMRobot research bundle</h3>
+      </div>
+      <p><strong>Use:</strong> Use for mobile-base motor inhibit, physical E-stop, battery fuse/disconnect, command timeout, speed limits, docking gates, and ROS2 watchdog.</p>
+      <p><strong>Gate:</strong> Software dashboard stop is not a physical E-stop.</p>
+    </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Production-stage map</h2>
+    <table>
+      <thead><tr><th>Stage</th><th>Action</th><th>Pass condition</th></tr></thead>
+      <tbody><tr><td>Concept</td><td>Classify hazard: motor / heater / relay / blade / gantry / wheel / propeller / charger.</td><td>Hazard class exists before any actuator is wired.</td></tr>
+<tr><td>Architecture</td><td>Separate physical safety chain from UI/software command path.</td><td>MCU/browser/Linux cannot override physical stop.</td></tr>
+<tr><td>Schematic</td><td>Add fuse/breaker, disconnect, E-stop input, enable line, pull-downs, TVS/driver protection.</td><td>Default electrical state is off/disabled.</td></tr>
+<tr><td>Firmware</td><td>Implement explicit arm, heartbeat, command timeout, safe-state, sensor-valid gate, fault latch.</td><td>Any missing heartbeat or invalid sensor disables output.</td></tr>
+<tr><td>Mechanical</td><td>Add guards, covers, shields, service access, pinch-point avoidance, thermal barriers.</td><td>No accessible moving/hot/blade hazard in normal operation.</td></tr>
+<tr><td>Bring-up</td><td>Use no-load/no-prop/wheels-up/cold-heater mode first.</td><td>Energy is introduced gradually after dry tests pass.</td></tr>
+<tr><td>Commissioning</td><td>Run E-stop, watchdog, limit switch, thermal, jam, relay-off, and fault-recovery tests.</td><td>Pass/fail receipt is recorded.</td></tr>
+<tr><td>Production</td><td>Freeze validated interlock configuration and block undocumented changes.</td><td>Release contains evidence, wiring, firmware hash, and open risk ledger.</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2>Checklist</h2>
+      <label class='check'><input type='checkbox'> <span>All hazardous outputs default to OFF/DISABLED after reset, boot, crash, brownout, cable removal, and watchdog expiry.</span></label>
+<label class='check'><input type='checkbox'> <span>Physical E-stop or disconnect removes actuator/heater/relay energy independently of browser, cloud, ROS, Linux, WiFi, USB, or app.</span></label>
+<label class='check'><input type='checkbox'> <span>Firmware requires explicit ARM before motion/heating/charging and returns to DISARMED after fault.</span></label>
+<label class='check'><input type='checkbox'> <span>Command stream has a heartbeat timeout with a defined safe state.</span></label>
+<label class='check'><input type='checkbox'> <span>Sensor validity is required before enable: IMU for drone/robot, thermistor for heater, pilot/GFCI for EVSE, endstops for gantry.</span></label>
+<label class='check'><input type='checkbox'> <span>Motor/heater power path has fuse/breaker/current limit appropriate to expected short-circuit energy.</span></label>
+<label class='check'><input type='checkbox'> <span>High-risk machines include guarding, cable strain relief, lockout/tagout/service mode, and labelled danger zones.</span></label>
+<label class='check'><input type='checkbox'> <span>Commissioning begins with no-load/no-prop/wheels-up/cold tests before full-energy operation.</span></label>
+<label class='check'><input type='checkbox'> <span>Faults are latched and human-readable until intentionally cleared.</span></label>
+<label class='check'><input type='checkbox'> <span>Every test produces a receipt with hardware revision, firmware hash, operator, and pass/fail result.</span></label>
+      <div class="toolbar">
+        <button onclick="checkAll(true)">Check all</button>
+        <button onclick="checkAll(false)">Clear</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Pass / fail gates</h2>
+      <table>
+        <thead><tr><th>Gate</th><th>Required proof</th><th>Blocked if missing</th></tr></thead>
+        <tbody><tr><td>G0 — Hazard declared</td><td>Hazard class, energy source, maximum current/temperature/force, and user exposure are documented.</td><td>No hazardous output can be wired.</td></tr>
+<tr><td>G1 — Default-off proof</td><td>On reset and firmware crash, actuator/heater/relay output is physically disabled.</td><td>Board cannot enter powered test.</td></tr>
+<tr><td>G2 — Physical stop proof</td><td>E-stop/disconnect/fuse path is independent of software UI and network.</td><td>No user-facing operation.</td></tr>
+<tr><td>G3 — Firmware safe-state proof</td><td>Watchdog, heartbeat timeout, explicit arm, and fault latch verified.</td><td>No autonomous behavior.</td></tr>
+<tr><td>G4 — Sensor-valid proof</td><td>Required sensors/endstops/thermistors/GFCI/IMU/encoders are checked before enable.</td><td>No closed-loop operation.</td></tr>
+<tr><td>G5 — Commissioning receipt</td><td>No-load and loaded tests produce signed/hashed pass receipts.</td><td>No production release.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Risk table</h2>
+    <table>
+      <thead><tr><th>Risk</th><th>Common cause</th><th>Required mitigation</th></tr></thead>
+      <tbody><tr><td>Unexpected motion on boot</td><td>Pull-ups, floating GPIO, retained state, Linux service restart</td><td>Hardware pull-down, enable gate default off, arming latch</td></tr>
+<tr><td>Software E-stop false confidence</td><td>Dashboard button only sends a command</td><td>Physical E-stop or contactor/disconnect independent of software</td></tr>
+<tr><td>Heater runaway</td><td>Thermistor disconnect, SSR stuck, firmware hang</td><td>Thermal fuse, heater watchdog, independent cutoff, stuck-output test</td></tr>
+<tr><td>Motor jam / blade stall</td><td>Material jam, obstruction, tool collision</td><td>Current limit, reverse routine, torque limit, guard interlock</td></tr>
+<tr><td>Command loss</td><td>WiFi/USB/ROS bridge/network crash</td><td>Heartbeat timeout and safe-stop latch</td></tr>
+<tr><td>Relay/contactor weld</td><td>High current switching, arc, overload</td><td>Stuck-relay detection, upstream breaker, periodic test</td></tr>
+<tr><td>Battery short/fire</td><td>No fuse/disconnect, damaged wiring</td><td>Fuse close to battery, strain relief, service disconnect</td></tr>
+<tr><td>Human access during hazard</td><td>Open guard, exposed hotend/blade/gantry</td><td>Guard switch, lockout, cover design, warning state</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Example safety-chain pattern</h2>
+    <div class="diagram">
+      <span class="node">Battery / mains</span><span class="arrow">→</span>
+      <span class="node">Fuse / breaker</span><span class="arrow">→</span>
+      <span class="node">Physical E-stop / disconnect</span><span class="arrow">→</span>
+      <span class="node">Safety relay / enable</span><span class="arrow">→</span>
+      <span class="node">Motor driver / heater SSR / contactor</span><span class="arrow">→</span>
+      <span class="node">Actuator / load</span>
+      <p class="small">Control path is separate: UI → MCU/Linux/ROS → command request → firmware gate → enable request. The physical safety chain must still be able to remove energy without trusting software.</p>
+    </div>
+    <pre><code>// Firmware-side pattern: request energy only after physical and logical gates pass.
+enum State { BOOT, DISARMED, SELFTEST, ARMED, ACTIVE, FAULT_LATCHED };
+
+safe_output_off();
+
+if (reset_or_boot) state = DISARMED;
+
+while (true) {
+  read_estop();
+  read_sensors();
+  read_command_heartbeat();
+
+  if (estop_open || watchdog_expired || sensor_invalid || overcurrent || overtemp) {
+    safe_output_off();
+    latch_fault();
+    state = FAULT_LATCHED;
+  }
+
+  switch (state) {
+    case DISARMED:
+      safe_output_off();
+      if (operator_arm && physical_gate_ok && selftest_required) state = SELFTEST;
+      break;
+
+    case SELFTEST:
+      if (selftest_pass && heartbeat_present) state = ARMED;
+      else if (selftest_fail) state = FAULT_LATCHED;
+      break;
+
+    case ARMED:
+      if (valid_motion_or_heat_command && limits_ok) state = ACTIVE;
+      break;
+
+    case ACTIVE:
+      apply_limited_output();
+      if (command_timeout) state = DISARMED;
+      break;
+
+    case FAULT_LATCHED:
+      safe_output_off();
+      if (fault_cleared_by_human && physical_gate_ok) state = DISARMED;
+      break;
+  }
+}</code></pre>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2>LogicHub / GN8R export manifest</h2>
+      <pre id="manifest"><code>{
+  "tool_id": "T09",
+  "tool_name": "Actuator / Motor / Heater Safety Interlock",
+  "html_file": "tool-09-actuator-motor-heater-safety.html",
+  "version": "1.0",
+  "created_at": "2026-07-31T02:24:40.706406+00:00",
+  "resume_next": "tool-10-thermal-current-power-derating.html",
+  "scope": [
+    "arm/disarm state machines",
+    "physical emergency stop boundary",
+    "motor inhibit",
+    "heater watchdog",
+    "relay/contactor lockout",
+    "motion and thermal safety receipts",
+    "project applicability across 14 hardware bundles"
+  ],
+  "safety_note": "This planning tool is not a safety-rated controller design. Safety-critical machines require qualified engineering review, tested hardware interlocks, certification where applicable, and local regulatory compliance."
+}</code></pre>
+      <button onclick="copyText('manifest')">Copy manifest</button>
+    </div>
+    <div class="panel">
+      <h2>Validation receipt schema</h2>
+      <pre id="schema"><code>{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logichub.local/schemas/actuator-motor-heater-safety-receipt.schema.json",
+  "title": "Actuator Motor Heater Safety Interlock Receipt",
+  "type": "object",
+  "required": [
+    "project",
+    "hardware_revision",
+    "operator",
+    "test_datetime_utc",
+    "hazard_classes",
+    "interlocks",
+    "firmware_gates",
+    "physical_gates",
+    "pass"
+  ],
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "hardware_revision": {
+      "type": "string"
+    },
+    "operator": {
+      "type": "string"
+    },
+    "test_datetime_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hazard_classes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "motor",
+          "heater",
+          "relay",
+          "blade",
+          "gantry",
+          "wheel",
+          "propeller",
+          "charger",
+          "battery",
+          "mains",
+          "pinch",
+          "thermal",
+          "fume"
+        ]
+      }
+    },
+    "interlocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "default_state",
+          "test_method",
+          "result"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "physical",
+              "electrical",
+              "firmware",
+              "software-ui",
+              "procedural"
+            ]
+          },
+          "default_state": {
+            "enum": [
+              "disabled",
+              "open",
+              "off",
+              "safe",
+              "unknown"
+            ]
+          },
+          "test_method": {
+            "type": "string"
+          },
+          "measured_value": {
+            "type": [
+              "string",
+              "number",
+              "null"
+            ]
+          },
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "blocked",
+              "not_applicable"
+            ]
+          }
+        }
+      }
+    },
+    "firmware_gates": {
+      "type": "object",
+      "properties": {
+        "watchdog_enabled": {
+          "type": "boolean"
+        },
+        "command_timeout_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requires_explicit_arm": {
+          "type": "boolean"
+        },
+        "safe_state_on_timeout": {
+          "type": "string"
+        },
+        "safe_state_on_sensor_fault": {
+          "type": "string"
+        },
+        "motion_limit_profile": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "physical_gates": {
+      "type": "object",
+      "properties": {
+        "physical_estop_present": {
+          "type": "boolean"
+        },
+        "estop_independent_of_browser_network_controller": {
+          "type": "boolean"
+        },
+        "fuse_or_breaker_present": {
+          "type": "boolean"
+        },
+        "guarding_present": {
+          "type": "boolean"
+        },
+        "lockout_tagout_procedure": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pass": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}</code></pre>
+      <button onclick="copyText('schema')">Copy schema</button>
+    </div>
+  </section>
+
+  <footer class="wrap">
+    <p>Next tool in sequence: <code>tool-10-thermal-current-power-derating.html</code></p>
+  </footer>
+</main>
+
+<script>
+function checkAll(v) {
+  document.querySelectorAll('.check input').forEach(cb => cb.checked = v);
+}
+function copyText(id) {
+  const txt = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(txt);
+}
+document.getElementById('search').addEventListener('input', function(e) {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('#projectGrid .project').forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

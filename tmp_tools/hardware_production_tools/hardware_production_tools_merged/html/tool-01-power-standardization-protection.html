@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 01 — Power Standardization & Protection</title>
+  <style>
+    :root {
+      --bg: #0A1220;
+      --panel: #111B2E;
+      --panel-2: #162238;
+      --text: #F4F7FB;
+      --muted: #AEB9C8;
+      --gold: #C9A84C;
+      --saffron: #FF9933;
+      --green: #138808;
+      --danger: #FF5C5C;
+      --line: rgba(255,255,255,0.12);
+      --code: #07101D;
+      --ok: #41D675;
+      --warn: #FFCF5C;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(255,153,51,0.12), transparent 32rem), var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header {
+      padding: 40px 24px 28px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(201,168,76,0.16), rgba(10,18,32,0.3));
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px; font-weight: 800; }
+    h1 { margin: 10px 0 10px; font-size: clamp(32px, 5vw, 58px); line-height: 1.02; }
+    h2 { margin-top: 38px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+    h3 { margin-bottom: 8px; color: #fff; }
+    p { color: var(--muted); }
+    .lead { max-width: 900px; font-size: 18px; color: #DCE5F2; }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
+    .card strong { color: var(--text); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+    .pill {
+      border: 1px solid rgba(201,168,76,0.45);
+      background: rgba(201,168,76,0.08);
+      color: #FFE4A3;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .accent { color: var(--gold); }
+    .warning { color: var(--warn); }
+    .danger { color: var(--danger); }
+    .ok { color: var(--ok); }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; overflow: hidden; border-radius: 14px; }
+    th, td { border: 1px solid var(--line); padding: 12px; vertical-align: top; }
+    th { background: rgba(201,168,76,0.12); color: #FFF4CC; text-align: left; }
+    td { color: var(--muted); background: rgba(255,255,255,0.02); }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    pre {
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      overflow: auto;
+      color: #E9F1FF;
+      font-size: 13px;
+    }
+    .checklist li, .ordered li { margin: 8px 0; color: var(--muted); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 800; letter-spacing: 0.05em;
+      padding: 5px 9px; border-radius: 999px; margin-bottom: 10px;
+    }
+    .badge.ok { background: rgba(65,214,117,0.12); border: 1px solid rgba(65,214,117,0.35); }
+    .badge.warn { background: rgba(255,207,92,0.12); border: 1px solid rgba(255,207,92,0.35); color: var(--warn); }
+    .badge.danger { background: rgba(255,92,92,0.12); border: 1px solid rgba(255,92,92,0.35); color: var(--danger); }
+    .stage {
+      display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: start;
+      border-left: 3px solid var(--gold); padding: 10px 0 10px 14px;
+    }
+    .stage .num { color: var(--gold); font-weight: 900; }
+    .small { font-size: 13px; color: var(--muted); }
+    footer { margin-top: 50px; padding: 24px; color: var(--muted); border-top: 1px solid var(--line); }
+    .toc a { color: #F7D67D; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">Universal Hardware Production Tool · T01</div>
+      <h1>Power Standardization & Protection</h1>
+      <p class="lead">Design pattern for hardware that “just works” when powered: protected inputs, known rails, current budget, safe brownout behaviour, and clear production gates before any user or supplier touches the device.</p>
+      <div class="pill-row">
+        <span class="pill">USB-C power</span>
+        <span class="pill">Battery input</span>
+        <span class="pill">Reverse-polarity protection</span>
+        <span class="pill">Fuse / PTC</span>
+        <span class="pill">TVS / ESD</span>
+        <span class="pill">Power tree</span>
+        <span class="pill">Brownout</span>
+        <span class="pill">Derating</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="grid grid-3" style="margin-top:24px">
+      <div class="card"><div class="badge ok">PURPOSE</div><p>Make every board, module, robot, charger, camera, printer, and machine accept power safely without requiring the user to understand voltage, polarity, rail sequencing, or current limits.</p></div>
+      <div class="card"><div class="badge warn">USE WHEN</div><p>A project has USB-C, barrel jack, battery, external PSU, motor power, heater power, Raspberry Pi/SBC input, camera rails, flash rails, sensors, relays, or field wiring.</p></div>
+      <div class="card"><div class="badge danger">BLOCKER</div><p>No prototype should be powered until input voltage range, fuse/limit device, reverse protection, rail budget, brownout state, and first-power test procedure are documented.</p></div>
+    </section>
+
+    <section class="toc card" style="margin-top:18px">
+      <strong>Sections:</strong>
+      <div class="pill-row">
+        <a href="#model" class="pill">Design model</a>
+        <a href="#projects" class="pill">14 project map</a>
+        <a href="#stages" class="pill">Production stages</a>
+        <a href="#checklist" class="pill">Checklist</a>
+        <a href="#gates" class="pill">Pass/fail gates</a>
+        <a href="#risks" class="pill">Risk table</a>
+        <a href="#patterns" class="pill">Wiring patterns</a>
+        <a href="#schema" class="pill">JSON schema</a>
+      </div>
+    </section>
+
+    <section id="model">
+      <h2>1. Design model</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>SOURCE → ENTRY → INTENT → STATE/LOGIC → ACTIONS → OUTPUT/METRICS</h3>
+          <table>
+            <tr><th>Layer</th><th>T01 meaning</th></tr>
+            <tr><td>SOURCE</td><td>USB-C receptacle, DC jack, battery pack, bench PSU, EVSE supply, solar/battery system, robot pack, machine mains input.</td></tr>
+            <tr><td>ENTRY</td><td>Connector, fuse/PTC, reverse-protection MOSFET/diode, TVS, ESD, EMI filter, ideal diode, power switch.</td></tr>
+            <tr><td>INTENT</td><td>Power the system safely while rejecting wrong polarity, overcurrent, overvoltage, ESD, brownout, and unsafe plug/unplug states.</td></tr>
+            <tr><td>STATE/LOGIC</td><td>Rails good, rails bad, brownout, overload, thermal throttle, battery low, charger connected, USB-only, external PSU, service mode.</td></tr>
+            <tr><td>ACTIONS</td><td>Enable regulator, latch fault, reset MCU, cut motor/heater relay, show status, log event, block write/commit, enter safe mode.</td></tr>
+            <tr><td>OUTPUT/METRICS</td><td>Measured rail voltage, ripple, current, temperature, inrush, reset count, runtime, fuse trip margin, pass/fail receipt.</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Default rule</h3>
+          <p><strong>Every hardware product needs one written power contract.</strong> The contract defines acceptable inputs, protected paths, rail sequence, maximum current, thermal margin, brownout behaviour, and what the user sees when power is wrong.</p>
+          <pre>Power Contract Minimum Fields
+- input_connector
+- nominal_input_voltage
+- allowed_voltage_range
+- max_input_current
+- fuse_or_limiter
+- reverse_polarity_method
+- surge_esd_protection
+- rails[]
+- load_budget[]
+- brownout_thresholds
+- safe_shutdown_action
+- first_power_test_steps
+- evidence_receipt_schema</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2>2. Project applicability cards</h2>
+      <div class="grid grid-2">
+        <div class="card"><h3>1. Electronics research bundle</h3><p><strong>Use T01 when:</strong> converting SiC/power-electronics learning into lab boards.</p><p><strong>Production part:</strong> power-board checklist, gate-driver power assumptions, bench safety plan.</p><p><strong>Action:</strong> never move from study to powered hardware without voltage/current/thermal derating evidence.</p></div>
+        <div class="card"><h3>2. Air-gapped 8MB module research pack</h3><p><strong>Use T01 when:</strong> defining the cartridge reader and protected 3.3V flash rail.</p><p><strong>Production part:</strong> USB-C or protected DC input, regulator, flash VCC, MCU rail.</p><p><strong>Action:</strong> block writes below safe brownout threshold.</p></div>
+        <div class="card"><h3>3. Air-gapped 8MB CAD implementation</h3><p><strong>Use T01 when:</strong> reviewing the preliminary PCB before any factory order.</p><p><strong>Production part:</strong> power input, level-shifted SPI, flash rail, programming header.</p><p><strong>Action:</strong> run first-power test before inserting W25Q64 flash.</p></div>
+        <div class="card"><h3>4. Drone CAD implementation</h3><p><strong>Use T01 when:</strong> validating flight-controller rails and LiPo/ESC separation.</p><p><strong>Production part:</strong> 5V input, 3.3V MCU/sensor rails, ESC signal reference, blackbox flash power.</p><p><strong>Action:</strong> no motor arming if rail check or brownout log fails.</p></div>
+        <div class="card"><h3>5. Pupper V3</h3><p><strong>Use T01 when:</strong> sizing battery, compute rails, servo/actuator rails, and undervoltage response.</p><p><strong>Production part:</strong> battery pack, main fuse, regulator, Pi rail, motor controller rail.</p><p><strong>Action:</strong> show low-battery and disable gait before brownout.</p></div>
+        <div class="card"><h3>6. FarmBot</h3><p><strong>Use T01 when:</strong> designing outdoor power and toolhead/motor power routing.</p><p><strong>Production part:</strong> controller enclosure, gantry motor harness, outdoor connector, waterproof power entry.</p><p><strong>Action:</strong> isolate irrigation/water routing from electronics and power cables.</p></div>
+        <div class="card"><h3>7. OpenFlexure Microscope</h3><p><strong>Use T01 when:</strong> powering Raspberry Pi, illumination, motor stage, and camera.</p><p><strong>Production part:</strong> Pi supply, LED driver, motor rail, cable strain relief.</p><p><strong>Action:</strong> verify illumination stability before measurement claims.</p></div>
+        <div class="card"><h3>8. SatNOGS Ground Station</h3><p><strong>Use T01 when:</strong> powering outdoor Raspberry Pi/SDR/rotator equipment.</p><p><strong>Production part:</strong> weatherproof PSU, grounded enclosure, SDR rail, rotator supply.</p><p><strong>Action:</strong> separate receive-only low-risk station from transmit/rotator expansion.</p></div>
+        <div class="card"><h3>9. Voron 3D Printer</h3><p><strong>Use T01 when:</strong> building mains/24V electronics and heater power wiring.</p><p><strong>Production part:</strong> PSU, bed heater, hotend heater, MCU rail, grounding, fuse.</p><p><strong>Action:</strong> verify heater power and thermal protection before first print.</p></div>
+        <div class="card"><h3>10. OpenEVSE</h3><p><strong>Use T01 when:</strong> handling low-voltage control power, mains isolation, relay power, GFCI, and earth.</p><p><strong>Production part:</strong> EVSE controller, contactor, GFCI, enclosure, service disconnect.</p><p><strong>Action:</strong> no commercial use without certified electrical review.</p></div>
+        <div class="card"><h3>11. OpenMV + OpenIPC</h3><p><strong>Use T01 when:</strong> powering camera modules, edge boards, and PoE/DC adapters.</p><p><strong>Production part:</strong> camera rail, WiFi/ethernet power, sensor accessories, local edge appliance.</p><p><strong>Action:</strong> prevent undervoltage causing corrupted video or firmware writes.</p></div>
+        <div class="card"><h3>12. BeagleV-Fire / Milk-V Duo</h3><p><strong>Use T01 when:</strong> designing carrier power, USB-C input, edge-board supply, camera/sensor rails.</p><p><strong>Production part:</strong> SBC carrier, boot media power, GPIO rail, FPGA/SERDES accessory power.</p><p><strong>Action:</strong> benchmark thermal/current margin under real workloads.</p></div>
+        <div class="card"><h3>13. Precious Plastic</h3><p><strong>Use T01 when:</strong> designing control box, motor/heater supply, VFD, emergency cutoff.</p><p><strong>Production part:</strong> mains panel, heater controller, motor protection, E-stop loop.</p><p><strong>Action:</strong> block machine operation without fuse, grounding, guarding, and disconnect.</p></div>
+        <div class="card"><h3>14. NASA JPL Rover / OpenAMRobot</h3><p><strong>Use T01 when:</strong> powering battery, Pi, motor drivers, sensors, and E-stop loop.</p><p><strong>Production part:</strong> 24V battery fuse, disconnect, 5V Pi rail, motor driver supply.</p><p><strong>Action:</strong> physical E-stop and fuse are mandatory before mobile operation.</p></div>
+      </div>
+    </section>
+
+    <section id="stages">
+      <h2>3. Production-stage map</h2>
+      <div class="card">
+        <div class="stage"><div class="num">Stage 0</div><div><strong>Input contract freeze.</strong><br><span class="small">Define exact power sources: USB-C 5V only, USB-C PD, battery, 12V/24V DC, mains-derived PSU, PoE, solar/battery, bench-only.</span></div></div>
+        <div class="stage"><div class="num">Stage 1</div><div><strong>Protection topology.</strong><br><span class="small">Choose fuse/PTC, reverse-polarity method, TVS/ESD, connector rating, switch, ideal diode, soft-start/inrush control.</span></div></div>
+        <div class="stage"><div class="num">Stage 2</div><div><strong>Rail architecture.</strong><br><span class="small">Map all rails, regulator efficiency, dropout, sequencing, always-on rail, switched rail, analog/digital/noisy-motor separation.</span></div></div>
+        <div class="stage"><div class="num">Stage 3</div><div><strong>Load budget.</strong><br><span class="small">List every load with idle, typical, peak, startup/inrush, stall, heater max, RF peak, camera peak, motor transient.</span></div></div>
+        <div class="stage"><div class="num">Stage 4</div><div><strong>Brownout and fault policy.</strong><br><span class="small">Define what shuts down first, what logs, what remains powered, and what the user sees.</span></div></div>
+        <div class="stage"><div class="num">Stage 5</div><div><strong>Layout and wiring release.</strong><br><span class="small">Validate trace width, copper, connector current rating, creepage/clearance where relevant, star ground, motor/heater separation.</span></div></div>
+        <div class="stage"><div class="num">Stage 6</div><div><strong>First-power procedure.</strong><br><span class="small">Power with current-limited bench supply, no expensive modules inserted, record rail voltages and thermal rise.</span></div></div>
+        <div class="stage"><div class="num">Stage 7</div><div><strong>Evidence receipt.</strong><br><span class="small">Save measured voltages, currents, temperatures, pass/fail gates, photos, instrument IDs, operator, date, revision.</span></div></div>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <h2>4. Design checklist</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Electrical checklist</h3>
+          <ul class="checklist">
+            <li>Input connector current and voltage rating confirmed.</li>
+            <li>Fuse/PTC/eFuse sized below wire/trace/connector damage limit.</li>
+            <li>Reverse-polarity path tested, not only simulated.</li>
+            <li>TVS/ESD part placed close to connector.</li>
+            <li>All rails have expected load, regulator margin, and test points.</li>
+            <li>Motor/heater/noisy loads separated from MCU/sensor rails.</li>
+            <li>Brownout threshold is above flash-write corruption region.</li>
+            <li>Thermal rise measured at worst expected load.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>User/product checklist</h3>
+          <ul class="checklist">
+            <li>User cannot plug power backward or into the wrong connector without protection.</li>
+            <li>Power error shows a visible state: LED/OLED/buzzer/log.</li>
+            <li>No exposed live/mains terminals in user-accessible areas.</li>
+            <li>Battery projects include fuse, disconnect, charger boundary, and low-voltage handling.</li>
+            <li>Outdoor products include weatherproofing, grounding, strain relief, and service access.</li>
+            <li>High-power products include physical emergency cutoff and inspection checklist.</li>
+            <li>Every production unit produces a power validation receipt.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="gates">
+      <h2>5. Pass/fail gates</h2>
+      <table>
+        <tr><th>Gate</th><th>Pass condition</th><th>Fail condition</th></tr>
+        <tr><td>Input identity</td><td>Connector, voltage range, current limit, polarity, and source type are documented.</td><td>“5V/12V/24V” is stated without tolerance, source, connector, or limit.</td></tr>
+        <tr><td>Protection</td><td>Fuse/eFuse/PTC and reverse-polarity protection are present and rated.</td><td>Protection omitted to save cost or assumed inside user adapter.</td></tr>
+        <tr><td>Rail budget</td><td>Every load has idle/typical/peak/startup values and regulator margin.</td><td>Only MCU current is counted; motors, heaters, radios, cameras, and LEDs ignored.</td></tr>
+        <tr><td>Brownout</td><td>Device enters safe state before corrupting storage or driving actuators unpredictably.</td><td>MCU resets randomly, flash writes during droop, or actuator remains enabled.</td></tr>
+        <tr><td>Thermal</td><td>Worst-case current test passes with enclosure closed or with defined airflow.</td><td>Only open-bench thermal test done; no enclosure or hot-environment margin.</td></tr>
+        <tr><td>Evidence</td><td>Measured voltages/current/temperature recorded with date, unit ID, operator, and revision.</td><td>No repeatable test receipt exists.</td></tr>
+      </table>
+    </section>
+
+    <section id="risks">
+      <h2>6. Risk table</h2>
+      <table>
+        <tr><th>Risk</th><th>Typical cause</th><th>Projects affected</th><th>Mitigation</th></tr>
+        <tr><td>Board destroyed at plug-in</td><td>Reverse polarity, wrong barrel adapter, no input clamp</td><td>8MB, Drone, OpenFlexure, SatNOGS, RISC-V, robots</td><td>Keyed connector, reverse MOSFET, fuse/eFuse, TVS, labelled input</td></tr>
+        <tr><td>Silent flash corruption</td><td>Brownout during write or weak regulator</td><td>8MB, Drone blackbox, RISC-V boot media, OpenEVSE config</td><td>Brownout detector, write inhibit, dual manifest, last-known-good config</td></tr>
+        <tr><td>Motor/heater runaway</td><td>MCU reset while output remains active</td><td>Drone, Pupper, FarmBot, Voron, Precious Plastic, Rover</td><td>Hardware enable line, pull-downs, relay default-off, watchdog cutout</td></tr>
+        <tr><td>Thermal enclosure failure</td><td>Regulator, SBC, heater, or PSU heat trapped in plastic box</td><td>Voron, RISC-V, OpenEVSE, SatNOGS, FarmBot, Precious Plastic</td><td>Thermal model, closed-case test, derating, airflow, high-temp material</td></tr>
+        <tr><td>User shock/fire hazard</td><td>Mains, EVSE, heaters, outdoor power, poor grounding</td><td>OpenEVSE, Voron, Precious Plastic, FarmBot, SatNOGS</td><td>Certified PSU, enclosure, earth bonding, RCD/GFCI, qualified review</td></tr>
+      </table>
+    </section>
+
+    <section id="patterns">
+      <h2>7. Example wiring and logic patterns</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Low-voltage USB-C 5V-only input</h3>
+          <pre>USB-C Receptacle
+  VBUS ── Fuse/eFuse ── Reverse/ideal diode ── TVS ── 5V_SYS
+  CC1 ── 5.1kΩ ── GND
+  CC2 ── 5.1kΩ ── GND
+  GND ─────────────────────────────────────── GND
+
+5V_SYS ── Buck/LDO ── 3V3_SYS
+3V3_SYS ── MCU / Flash / Sensors
+
+Required tests:
+- plug orientation A/B
+- no-load voltage
+- max-load voltage
+- inrush
+- brownout reset
+- thermal rise</pre>
+          <p class="small">Use for low-voltage prototypes such as cartridge readers, OpenMV accessories, small displays, and microcontroller boards. USB-C PD negotiation is a separate design path; do not imply PD without a PD controller.</p>
+        </div>
+        <div class="card">
+          <h3>Firmware power-fault policy</h3>
+          <pre>BOOT:
+  read rail_adc
+  if rail_adc < SAFE_BOOT_MIN:
+      show("POWER LOW")
+      disable_actuators()
+      block_flash_writes()
+      wait_or_reset()
+
+RUN:
+  every 100 ms:
+      sample rails, temp, current
+      if brownout_warning:
+          stop new transactions
+          save small fault marker only if safe
+          show amber fault
+      if critical_fault:
+          disable motors/heaters/relays
+          show red fault
+          require user reset
+
+FLASH WRITE:
+  require rail_good_for_write == true
+  require reserve_energy_or_stable_input == true
+  write staging
+  verify hash
+  commit manifest pointer</pre>
+          <p class="small">Use for 8MB cartridge, drone blackbox, RISC-V image/config updates, OpenEVSE config, and any local-first hardware that must not corrupt state.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="schema">
+      <h2>8. LogicHub/GN8R export-ready schema</h2>
+      <pre>{
+  "$schema": "https://example.local/schemas/power-contract.schema.json",
+  "title": "T01 Power Standardization & Protection Contract",
+  "type": "object",
+  "required": [
+    "project_id",
+    "revision",
+    "input_sources",
+    "protection",
+    "rails",
+    "load_budget",
+    "brownout_policy",
+    "first_power_test",
+    "evidence"
+  ],
+  "properties": {
+    "project_id": { "type": "string" },
+    "revision": { "type": "string" },
+    "input_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "connector", "nominal_voltage_v", "min_voltage_v", "max_voltage_v", "max_current_a"],
+        "properties": {
+          "name": { "type": "string" },
+          "connector": { "type": "string" },
+          "nominal_voltage_v": { "type": "number" },
+          "min_voltage_v": { "type": "number" },
+          "max_voltage_v": { "type": "number" },
+          "max_current_a": { "type": "number" }
+        }
+      }
+    },
+    "protection": {
+      "type": "object",
+      "properties": {
+        "fuse_or_limiter": { "type": "string" },
+        "reverse_polarity": { "type": "string" },
+        "tvs_esd": { "type": "string" },
+        "disconnect_or_switch": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "rails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "voltage_v", "max_current_a", "source", "loads"],
+        "properties": {
+          "name": { "type": "string" },
+          "voltage_v": { "type": "number" },
+          "max_current_a": { "type": "number" },
+          "source": { "type": "string" },
+          "loads": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "load_budget": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["load", "rail", "idle_a", "typical_a", "peak_a"],
+        "properties": {
+          "load": { "type": "string" },
+          "rail": { "type": "string" },
+          "idle_a": { "type": "number" },
+          "typical_a": { "type": "number" },
+          "peak_a": { "type": "number" },
+          "startup_or_stall_a": { "type": "number" }
+        }
+      }
+    },
+    "brownout_policy": {
+      "type": "object",
+      "properties": {
+        "warning_threshold_v": { "type": "number" },
+        "shutdown_threshold_v": { "type": "number" },
+        "flash_write_min_v": { "type": "number" },
+        "safe_outputs_on_reset": { "type": "array", "items": { "type": "string" } },
+        "user_message": { "type": "string" }
+      }
+    },
+    "first_power_test": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "receipt_file": { "type": "string" },
+        "operator": { "type": "string" },
+        "date": { "type": "string" },
+        "unit_id": { "type": "string" },
+        "pass": { "type": "boolean" }
+      }
+    }
+  }
+}</pre>
+    </section>
+
+    <section>
+      <h2>9. Next HTML tool</h2>
+      <div class="card">
+        <p><strong>Next file:</strong> <code>tool-02-tactile-determinism-input-fsm.html</code></p>
+        <p><strong>Scope:</strong> Buttons, rotary encoders, E-stop input, debounce, interrupt-driven finite-state machines, deterministic user intent capture.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap small">Generated as part of the hardware research progress archive. Tool 01 of 14.</div>
+  </footer>
+</body>
+</html>

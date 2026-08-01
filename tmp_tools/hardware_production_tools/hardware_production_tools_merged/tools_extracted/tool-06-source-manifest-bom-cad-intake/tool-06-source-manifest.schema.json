@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tool 06 Source Manifest Schema",
+  "type": "object",
+  "required": [
+    "tool_id",
+    "project_id",
+    "manifest_id",
+    "artifacts",
+    "release_gate"
+  ],
+  "properties": {
+    "tool_id": {
+      "const": "T06"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": "string"
+    },
+    "release_stage": {
+      "enum": [
+        "research",
+        "evt",
+        "dvt",
+        "pvt",
+        "manufacturing",
+        "field"
+      ]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "artifact_id",
+          "artifact_class",
+          "source_type",
+          "path",
+          "sha256",
+          "size_bytes",
+          "approval_state"
+        ],
+        "properties": {
+          "artifact_id": {
+            "type": "string"
+          },
+          "artifact_class": {
+            "enum": [
+              "cad",
+              "pcb",
+              "bom",
+              "firmware",
+              "software",
+              "documentation",
+              "safety",
+              "validation",
+              "binary",
+              "generated"
+            ]
+          },
+          "source_type": {
+            "enum": [
+              "upstream",
+              "fork",
+              "vendor",
+              "datasheet",
+              "generated-local",
+              "user-supplied"
+            ]
+          },
+          "source_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "license": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "production_role": {
+            "type": "string"
+          },
+          "approval_state": {
+            "enum": [
+              "accepted",
+              "review",
+              "blocked",
+              "deprecated"
+            ]
+          },
+          "risk_flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array"
+    },
+    "release_gate": {
+      "type": "object"
+    }
+  }
+}

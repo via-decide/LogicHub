@@ -1,0 +1,8 @@
+{
+  "tool_id": "T03",
+  "tool_name": "State Visibility & Offline Telemetry",
+  "html_file": "tool-03-state-visibility-offline-telemetry.html",
+  "created_at": "2026-07-30T21:41:14.085201+00:00",
+  "next_tool": "tool-04-poka-yoke-interface-geometry.html",
+  "sha256": "f98668efdfa25e04e939c5fc6655d4b8b95696448ab189aaf9aefcc83fbcd7c7"
+}

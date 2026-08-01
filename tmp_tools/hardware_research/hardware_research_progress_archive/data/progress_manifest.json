@@ -1,0 +1,460 @@
+{
+  "archive_name": "hardware_research_progress_archive",
+  "created_at_local": "2026-07-31T02:41:00+05:30",
+  "verified_zip_count": 14,
+  "included_bundle_zip_count": 14,
+  "selected_scope_remaining": [
+    "Libre Solar BMS / charge-controller bundle — best remaining energy-electronics bundle; should cover BMS, charge controller, solar/battery safety, firmware, hardware source intake, validation, India productization, and compliance risk."
+  ],
+  "optional_scope_remaining": [
+    "OpenEnergyMonitor",
+    "Opentrons OT-2 / lab automation",
+    "Maslow CNC",
+    "Open Source Ecology GVCS",
+    "PX4 Autopilot",
+    "ArduPilot",
+    "Agilicious drone",
+    "OmniNxt aerial robot",
+    "MNT Reform / Pocket Reform",
+    "System76 Launch Keyboard",
+    "FluidNC",
+    "GRBL",
+    "Klipper",
+    "Marlin",
+    "Open Dynamic Robot Initiative / Solo",
+    "Mini Pupper",
+    "OpenCat / Petoi",
+    "Stanford Doggo",
+    "ROMR / SMARTmBOT-style ROS mobile robots",
+    "Acorn Precision Farming Rover",
+    "LibreCube / CubeSat electronics-style projects",
+    "PowerSensor3 / AEMS-style energy-monitoring research projects"
+  ],
+  "next_command_behavior": "When the user says next, generate one HTML tool at a time, starting with Tool 01.",
+  "html_tool_order": [
+    {
+      "order": 1,
+      "tool": "T01",
+      "filename": "tool-01-power-standardization-protection.html",
+      "scope": "USB-C, battery, fuse, reverse protection, power tree"
+    },
+    {
+      "order": 2,
+      "tool": "T02",
+      "filename": "tool-02-tactile-determinism-input-fsm.html",
+      "scope": "Buttons, encoders, E-stop input, debounce, interrupt FSM"
+    },
+    {
+      "order": 3,
+      "tool": "T03",
+      "filename": "tool-03-state-visibility-offline-telemetry.html",
+      "scope": "OLED, LEDs, buzzer, local logs, state codes"
+    },
+    {
+      "order": 4,
+      "tool": "T04",
+      "filename": "tool-04-poka-yoke-interface-geometry.html",
+      "scope": "Cartridge slot, docking, keyed connectors, guide rails"
+    },
+    {
+      "order": 5,
+      "tool": "T05",
+      "filename": "tool-05-fault-tolerance-fallbacks.html",
+      "scope": "Watchdog, SPI/I2C timeout, safe reset, fault display"
+    },
+    {
+      "order": 6,
+      "tool": "T06",
+      "filename": "tool-06-source-manifest-bom-cad-intake.html",
+      "scope": "Hashing, manifest, license, CAD/BOM source tracking"
+    },
+    {
+      "order": 7,
+      "tool": "T07",
+      "filename": "tool-07-storage-integrity-transactional-updates.html",
+      "scope": "CRC/SHA, dual manifest, rollback, flash layout"
+    },
+    {
+      "order": 8,
+      "tool": "T08",
+      "filename": "tool-08-sensor-calibration-health-evidence.html",
+      "scope": "IMU, camera, LiDAR, optics, RF, encoder calibration"
+    },
+    {
+      "order": 9,
+      "tool": "T09",
+      "filename": "tool-09-actuator-motor-heater-safety.html",
+      "scope": "Motors, heaters, relays, gantry, E-stop, arm/disarm"
+    },
+    {
+      "order": 10,
+      "tool": "T10",
+      "filename": "tool-10-thermal-current-power-derating.html",
+      "scope": "Heat, current, runtime, regulator, chamber, battery"
+    },
+    {
+      "order": 11,
+      "tool": "T11",
+      "filename": "tool-11-local-api-edge-service-interface.html",
+      "scope": "HTTP, MQTT, serial, WebSocket, local-first dashboard"
+    },
+    {
+      "order": 12,
+      "tool": "T12",
+      "filename": "tool-12-manufacturing-qa-fixture-receipts.html",
+      "scope": "PCBA tests, commissioning, supplier acceptance"
+    },
+    {
+      "order": 13,
+      "tool": "T13",
+      "filename": "tool-13-enclosure-environmental-dfm.html",
+      "scope": "3D print, injection moulding, guards, weatherproofing"
+    },
+    {
+      "order": 14,
+      "tool": "T14",
+      "filename": "tool-14-compliance-safety-risk-ledger.html",
+      "scope": "Product safety, India compliance, blocked claims, waivers"
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "Electronics research bundle",
+      "filename": "electronics_research_bundle.zip",
+      "role": "Foundation study bundle for electronics, SiC MOSFETs, and embedded Linux.",
+      "done_work": "Combined two technical reports into one downloadable bundle: SiC MOSFET Basics and Embedded Linux Engineering Report, with a README for navigation.",
+      "key_finding": "This is a learning/research bundle, not a product bundle. It supports the electronics foundation: power-device behavior, embedded Linux architecture, boot chain, kernel/userspace, drivers, and deployment logic.",
+      "safety_finding": "SiC MOSFET work is high-risk when moved from theory to hardware because fast switching, high voltage, high dV/dt, thermal design, gate-drive mistakes, and layout parasitics can destroy parts or create shock/fire hazards.",
+      "limitation": "No schematics, KiCad files, BOM, PCB, test jig, or CAD assets are included. It is source study material only.",
+      "production_use": "learning pack → lab standard → design checklist",
+      "key_production_part": "future power boards, embedded Linux boards, lab fixtures",
+      "included_in_archive": true,
+      "sha256": "4368b952dfca124edb7951cc0f795501f19b59c5806f8d562003ccd0926a99fc",
+      "size_bytes": 25997
+    },
+    {
+      "id": 2,
+      "name": "Air-gapped 8MB module research pack",
+      "filename": "air_gapped_8mb_module_research_pack.zip",
+      "role": "Architecture research for offline cartridge, manifest, local-first storage, and integrity.",
+      "done_work": "Created a deep research pack for the ATmega328P + W25Q64 8MB SPI NOR cartridge concept. Included architecture, firmware protocol, manifest/integrity model, power-tree and level-shifting notes, BOM freeze, KiCad requirements, PCBA test plan, threat model, validation plan, schemas, cost model, compliance checklist, and enclosure DFM notes.",
+      "key_finding": "The module is feasible as an offline storage cartridge / manifest token / rule asset holder / integrity-checked local state anchor, but not as a modern AI/LLM compute device. The 8MB flash is useful for manifests, logs, policies, rule tables, receipts, and firmware assets.",
+      "safety_finding": "The main engineering risk is silent data corruption from brownout, partial writes, floating flash control pins, level-shifting mistakes, and unsafe commit logic.",
+      "limitation": "This research pack is not a fabrication package. It does not contain finished KiCad schematics, verified Gerbers, or enclosure STEP files.",
+      "production_use": "concept → cartridge protocol → offline hardware module",
+      "key_production_part": "8MB cartridge, reader board, manifest firmware",
+      "included_in_archive": true,
+      "sha256": "9e3aa6009d51e579d2dd761142a23f1cbca5a8c74552585dcd7e2c6086584032",
+      "size_bytes": 37778
+    },
+    {
+      "id": 3,
+      "name": "Air-gapped 8MB CAD implementation bundle",
+      "filename": "airgap8mb_cad_implementation_bundle.zip",
+      "role": "First EVT/CAD implementation of the 8MB module.",
+      "done_work": "Created an EVT-style CAD/implementation bundle with preliminary KiCad project files, schematic placeholder, PCB layout, Gerber-like manufacturing outputs, drill file, BOM CSV, firmware scaffold, host validation tool, storage protocol, OpenSCAD enclosure, STL/STEP reference envelopes, DFM checklist, EVT test plan, PCBA test plan, cartridge manifest schema, and risk register.",
+      "key_finding": "Prototype planning can start from this bundle, but it is not ready for commercial production. It frames the device as a physical offline storage cartridge with deterministic flash-object handling.",
+      "safety_finding": "The design must protect against power-loss corruption, 5V/3.3V interface mistakes, incorrect flash writes, USB serial misuse, and brownout during manifest update.",
+      "limitation": "The Gerbers and STEP files are preliminary/reference outputs, not KiCad-verified or CAD-manufacturing-certified. Do not send them directly to a PCB factory without ERC/DRC, footprint validation, supplier review, and regenerated outputs.",
+      "production_use": "EVT prototype → KiCad correction → test fixture → supplier-ready rev",
+      "key_production_part": "PCB, enclosure, firmware, fixture",
+      "included_in_archive": true,
+      "sha256": "c761ddf3a66e65ccf18ad0bba8fd1db6f96a7d04b8b9c4434c39759546ee7d78",
+      "size_bytes": 41210
+    },
+    {
+      "id": 4,
+      "name": "Drone CAD implementation bundle",
+      "filename": "drone_cad_implementation_bundle.zip",
+      "role": "Bounded drone flight-controller EVT platform.",
+      "done_work": "Created a drone flight-controller EVT bundle with preliminary KiCad files, Gerber-like outputs, drill file, STM32-based FC architecture, IMU/barometer/flash/USB/SWD/UART/ESC net contract, firmware bring-up scaffold, blackbox flash protocol, target manifest, enclosure/frame OpenSCAD, STL/STEP reference files, India drone-rule notes, DFM checklist, tether-test plan, EVT bench-test plan, schemas, BOM, cost model, and validation tooling.",
+      "key_finding": "The safe first product is not a complete autonomous drone; it is a flight-controller module + logging + validation fixture + tethered test platform.",
+      "safety_finding": "Untethered flight is not safe from this bundle. Propellers, LiPo batteries, failsafe behavior, IMU calibration, ESC behavior, RF link loss, and motor arming logic must be validated before any real flight.",
+      "limitation": "The board files are preliminary and not factory-ready. It does not provide a flight-certified product, finished ESC design, RF system, GPS/autonomy stack, or regulatory-compliant drone.",
+      "production_use": "flight-controller research → tethered validation → drone electronics platform",
+      "key_production_part": "FC PCB, firmware, tether fixture, motor-safety state machine",
+      "included_in_archive": true,
+      "sha256": "a737bc7c994c6ef5694ad680a248c748f2f0fc07072d84a20763785e193764c5",
+      "size_bytes": 42948
+    },
+    {
+      "id": 5,
+      "name": "Pupper V3 open-source research bundle",
+      "filename": "pupper_v3_open_source_research_bundle.zip",
+      "role": "Open-source quadruped robot research and productization study.",
+      "done_work": "Created a Pupper V3 research bundle with deep report, official docs summary, Pupper V3 monorepo summary, older StanfordQuadruped summary, architecture maps, BOM/CAD intake plan, build/validation plan, productization strategy, prior-work integration, next-phase tasks, source manifest, evidence table, bibliography, and original Instagram context image. It also bundled prior generated 8MB/drone ZIPs for cross-project continuity.",
+      "key_finding": "The older StanfordQuadruped repo points to Pupper v1 as end-of-life and describes Pupper V3 as the current direction; the current software authority is the Pupper V3 monorepo and ROS2 workspace. The neural controller is built around real-time ROS2 control and avoids Torch-style runtime latency/jitter in the control loop.",
+      "safety_finding": "Pupper has real moving legs, torque, pinch/contact hazards, motor heating, battery risk, and E-stop requirements. It also needs careful battery-voltage monitoring because the operating docs noted no hardware low-voltage cutoff in the prior research pass.",
+      "limitation": "The bundle does not embed official CAD, PCB manufacturing files, BOM spreadsheets, Onshape/Fusion exports, or kit supplier assets. Those must be downloaded directly from official sources and pinned by version/hash.",
+      "production_use": "robot kit research → safe quadruped build process → local service/education platform",
+      "key_production_part": "power system, leg actuator safety, calibration workflow",
+      "included_in_archive": true,
+      "sha256": "44222fba357613f6f7dac4a7ef50d5246d74acc1e7154cf9febee068e051b8ea",
+      "size_bytes": 328187
+    },
+    {
+      "id": 6,
+      "name": "FarmBot open-source research bundle",
+      "filename": "farmbot_open_source_research_bundle.zip",
+      "role": "Agriculture automation, CNC-style gantry, electronics, firmware, web app, and tool ecosystem.",
+      "done_work": "Created a FarmBot bundle with deep research report, architecture map, GitHub repository map, CAD/BOM/manufacturing intake plan, software stack analysis, LogicHub/GN8R tasks, risk register, licensing/commercialization notes, validation plan, India productization strategy, prior-project alignment, source manifest, JSON schema, graph seed, and README.",
+      "key_finding": "FarmBot is one of the strongest wide-domain open-source hardware/software products because it joins mechanics, electronics, firmware, web app, APIs, agriculture automation, and commercial open-source positioning in one ecosystem.",
+      "safety_finding": "The machine combines outdoor power, moving gantry axes, belts, water/irrigation, tools, and user-accessible garden operation. Any India-local version needs electrical isolation, cable routing, weatherproofing, emergency stop, stall detection, and safe toolhead rules.",
+      "limitation": "Official CAD exports, full production drawings, live BOM, and fabrication files were not embedded. The bundle is a source-intake/research package, not a verified fabrication archive.",
+      "production_use": "agricultural robot → field kit → serviceable MSME product",
+      "key_production_part": "outdoor electronics box, toolhead dock, gantry safety, service app",
+      "included_in_archive": true,
+      "sha256": "a87012f67d79b8ec534c355d4c452396a06d67099c1413d48cc6cb71acb724b7",
+      "size_bytes": 19963
+    },
+    {
+      "id": 7,
+      "name": "OpenFlexure Microscope research bundle",
+      "filename": "openflexure_microscope_research_bundle.zip",
+      "role": "Open-source lab microscope and precision positioning platform.",
+      "done_work": "Created an OpenFlexure bundle with deep research report, system architecture map, source/repository map, CAD/BOM/manufacturing intake plan, software/API analysis, optics/mechanics/electronics analysis, LogicHub/GN8R tasks, risk register, licensing/commercial/regulatory notes, validation test plan, India productization strategy, prior-project alignment, source manifest, file hashes, JSON schemas, graph seed, Python validation receipt scaffold, and source-intake hash script.",
+      "key_finding": "OpenFlexure is a strong lab-hardware target because it combines 3D-printed precision mechanics, optics, Raspberry Pi control, microscope software, and reproducible scientific-instrument documentation.",
+      "safety_finding": "The biggest risk is not high-force mechanical danger; it is false measurement confidence. Optical calibration, stage accuracy, illumination, sample handling, contamination, and diagnostic claims must be controlled.",
+      "limitation": "It is not automatically a medical or diagnostic product. The bundle does not embed official STL/source ZIPs or SD-card images; those must be pulled from OpenFlexure’s official build/documentation sources and hashed.",
+      "production_use": "lab instrument → validated education/lab kit → calibration service",
+      "key_production_part": "optics calibration, stage validation, sample interface, local software",
+      "included_in_archive": true,
+      "sha256": "2a731647de578b185734eca5634676e971c94765bffb9d8ac23a36dd66685c8b",
+      "size_bytes": 32046
+    },
+    {
+      "id": 8,
+      "name": "SatNOGS satellite ground-station research bundle",
+      "filename": "satnogs_ground_station_research_bundle.zip",
+      "role": "Open satellite ground-station stack: antenna, SDR, Linux station, observation workflow.",
+      "done_work": "Created a SatNOGS bundle with deep research report, architecture map, repository map, RF hardware/CAD/BOM intake plan, software stack analysis, validation plan, India regulatory/safety notes, risk register, commercialization strategy, prior-project alignment, license/contribution notes, bibliography, reference BOM, CAD-intake folder, graph seed, observation receipt schema, station config schema, source manifest schema, RTL-SDR smoke-test script, hashing script, observation-receipt validator, and GN8R tasks.",
+      "key_finding": "The best first product is a receive-only fixed SatNOGS learning station, not a transmit station or rotator-first product. This keeps RF/legal risk lower and validates antenna, SDR, Linux service, observation workflow, and station evidence first.",
+      "safety_finding": "RF transmit capability, mast/antenna mounting, lightning protection, outdoor cabling, rotator pinch/load risk, and local spectrum rules matter. Receive-only is safer, but still needs grounding and weatherproofing.",
+      "limitation": "No official SatNOGS CAD, rotator files, firmware images, station images, or manufacturing files are embedded. The bundle is a research/intake package.",
+      "production_use": "receive-only learning station → RF education kit → observatory appliance",
+      "key_production_part": "antenna/SDR box, rotator fixture, grounding/weather enclosure",
+      "included_in_archive": true,
+      "sha256": "4c421c8d7d5b5f5f62f1d2f048af64576a329031ef46e7e97160e9db5e550219",
+      "size_bytes": 28095
+    },
+    {
+      "id": 9,
+      "name": "Voron 3D printer engineering bundle",
+      "filename": "voron_3d_printer_engineering_bundle.zip",
+      "role": "High-performance open-source 3D printer engineering and kit/productization study.",
+      "done_work": "Created a Voron bundle with deep research report, printer-family architecture map, source/repository map, CAD/STL/BOM/manual/config intake plan, Klipper software/firmware stack analysis, validation and commissioning plan, risk register, GPLv3 commercialization notes, India productization strategy, LogicHub/GN8R tasks, prior-project alignment, source manifest, schemas, relationship graph seed, hashing script, and asset-manifest validator.",
+      "key_finding": "The best first engineering target is Voron Trident 300 for serious CoreXY productization study, while Voron 0.2r1 is better for compact/low-cost kit workflow study. Voron Trident’s repo identifies recommended sizes of 250×250×250, 300×300×250, and 350×350×250. Voron Zero V0.2r1 is compact, CoreXY, enclosed, 24V bed, Klipper-based, and 120×120×120 build volume.",
+      "safety_finding": "Voron-class machines involve heaters, hotend, heated bed, enclosed chamber, mains/24V wiring, moving CoreXY gantry, firmware configuration, thermal runaway protection, and printed-part quality.",
+      "limitation": "Official CAD, STL, manuals, panel DXFs, and printer configs were not embedded. Those must be downloaded from official VoronDesign sources and pinned by release/commit.",
+      "production_use": "kit workflow → printer QA → localized manufacturing and service",
+      "key_production_part": "power box, heater safety, chamber design, calibration procedure",
+      "included_in_archive": true,
+      "sha256": "654c3e0a12b9dde6aae6cb0c67edd26363d6d113ba1f4d4bc5e4e0b24a8eb8fa",
+      "size_bytes": 24974
+    },
+    {
+      "id": 10,
+      "name": "OpenEVSE research bundle",
+      "filename": "openevse_research_bundle.zip",
+      "role": "Open EV charging hardware/software platform.",
+      "done_work": "Created an OpenEVSE bundle with deep research report, architecture map, repository map, hardware/CAD/BOM intake plan, firmware/software stack analysis, India safety/compliance notes, validation and commissioning plan, risk register, licensing/commercialization notes, LogicHub/GN8R tasks, prior-project alignment, bibliography, source manifest, file hashes, JSON schemas, graph seed, read-only RAPI probe scaffold, HTTP API probe scaffold, validation receipt generator, BOM/test/cost templates.",
+      "key_finding": "OpenEVSE has a good architecture split: safety-critical EVSE controller below, ESP32 WiFi/API/MQTT/OCPP/web UI above. The ESP32 firmware README says the gateway communicates with the controller over serial RAPI and serves the web UI locally.",
+      "safety_finding": "The safety docs list diode check, GFCI self-test, ground monitoring, stuck-relay detection, vent-required detection, and temperature monitoring as controller safety checks. A faulted charger must not be commandable into charging.",
+      "limitation": "This is not a fabrication-ready EV charger. Mains voltage, earth/ground protection, GFCI behavior, relay/contactors, enclosure, thermal behavior, EV standards, and India electrical compliance require qualified engineering review and certification.",
+      "production_use": "EVSE research → certified charger pathway → service platform",
+      "key_production_part": "safety controller, GFCI/relay logic, enclosure, test fixture",
+      "included_in_archive": true,
+      "sha256": "62eec6401ac1dd934d1145c54ceff773b7773b502b3ab5bc96f03de61b8f95b8",
+      "size_bytes": 32197
+    },
+    {
+      "id": 11,
+      "name": "OpenMV + OpenIPC local vision bundle",
+      "filename": "openmv_openipc_local_vision_bundle.zip",
+      "role": "Local-first camera/vision appliance stack.",
+      "done_work": "Created a local-first vision bundle covering OpenMV and OpenIPC with deep research report, OpenMV architecture analysis, OpenIPC architecture analysis, local-first system architecture diagrams, privacy/data-flow boundary model, firmware/IDE/RPC/board intake plan, camera firmware/streaming/flashing intake plan, validation matrix, reliability matrix, India productization strategy, monetization model, licensing notes, LogicHub/GN8R tasks, prior-project alignment, source manifest, file hashes, JSON schemas, USB VCP probe, RTSP/HTTP snapshot probes, validation receipt generator, BOM/device/privacy templates.",
+      "key_finding": "Treat this as a two-layer local vision appliance, not one merged firmware project. OpenMV is best for MCU-class AI/event detection and control loops; OpenIPC is best for replacing opaque IP-camera firmware with local/open camera firmware. OpenMV’s README describes Python3 programmability, TensorFlow/ST Edge AI/NPU support, QR/barcode decoding, AprilTag recognition, MJPEG/GIF, and streaming. OpenIPC describes itself as alternative open firmware for IP cameras based on Buildroot.",
+      "safety_finding": "The core safety issue is privacy/security, not physical force. Camera firmware can leak video, expose credentials, or create surveillance risk. Flashing unsupported IP-camera hardware can also brick devices.",
+      "limitation": "No official firmware binaries, camera images, vendor blobs, OpenMV/OpenIPC source archives, or CAD files are embedded. OpenMV also needs a file-level license review because its README notes MIT code plus GPL image code, third-party licenses, and proprietary/non-commercial components.",
+      "production_use": "camera appliance → local AI vision node → privacy-first monitoring",
+      "key_production_part": "camera module, firmware image, local dashboard, privacy proof",
+      "included_in_archive": true,
+      "sha256": "63562164e15bd706db17eb684cde42cf48682070c5e799e6f7fdf093a8eb769c",
+      "size_bytes": 33257
+    },
+    {
+      "id": 12,
+      "name": "BeagleV-Fire / Milk-V Duo RISC-V edge bundle",
+      "filename": "riscv_edge_beaglev_fire_milkv_duo_bundle.zip",
+      "role": "RISC-V edge computing, FPGA, AIoT, embedded Linux, deterministic IO.",
+      "done_work": "Created a RISC-V edge bundle with deep research report, architecture maps, source/repository map, hardware/CAD/BOM intake plan, firmware/software stack analysis, edge AI + FPGA use-case map, validation plan, security/reliability risk register, license/commercialization notes, India productization strategy, LogicHub/GN8R tasks, prior-project alignment, bibliography, source manifest, JSON schemas, graph seed, board probe script, GPIO smoke test, benchmark script, and BOM/CAD/compliance/benchmark templates.",
+      "key_finding": "These are two different product paths. BeagleV-Fire is for RISC-V + FPGA/gateware, deterministic IO, and custom accelerators; its README describes 4× RV64GC application cores, 1× RV64IMAC monitor/boot core, and FPGA fabric. Milk-V Duo is better for low-cost AIoT, camera, sensor, and embedded Linux/RTOS-style edge products.",
+      "safety_finding": "Main risks are power integrity, thermal throttling, firmware-image provenance, peripheral-voltage mistakes, insecure default network services, and unverified boot/update flows.",
+      "limitation": "The ZIP does not embed official schematics, CAD, firmware images, FPGA bitstreams, SDK tarballs, Linux images, or vendor binaries. These must be downloaded, pinned, hashed, and license-reviewed.",
+      "production_use": "edge compute carrier → local AI/automation gateway → deterministic hardware node",
+      "key_production_part": "carrier board, boot image, edge runtime, validation fixture",
+      "included_in_archive": true,
+      "sha256": "d8e8d1538ec0760ad1d79aa9d108f65da7ad7fe860e294cba2e06325751c60c1",
+      "size_bytes": 32486
+    },
+    {
+      "id": 13,
+      "name": "Precious Plastic machine ecosystem bundle",
+      "filename": "precious_plastic_machine_ecosystem_bundle.zip",
+      "role": "Plastic recycling and small manufacturing machine ecosystem.",
+      "done_work": "Created a Precious Plastic bundle with deep research report, ecosystem architecture map, basic/pro machine family map, CAD/BOM/manufacturing intake plan, materials/process/QC notes, workspace/business model, India productization strategy, safety/compliance risk register, validation and commissioning plan, licensing notes, LogicHub/GN8R tasks, prior-project alignment, bibliography, source manifest, file hashes, JSON schemas, relationship graph, source-intake templates, BOM template, material batch log, process run log, safety checklist, hashing script, and validation receipt script.",
+      "key_finding": "The best product path is a verified recycling workspace, not immediate machine resale. Injection workspace, sheetpress product experiments, and process-quality services are safer first steps than selling shredder/pro machines.",
+      "safety_finding": "Shredders/extruders/injection/compression machines involve blades, high torque, pinch points, hot barrels, fumes, heaters, motors, VFDs, 230/400V wiring, guarding, and material contamination hazards.",
+      "limitation": "Official CAD, STEP/F3D, DXF, schematics, manuals, and Google Drive machine packs were not embedded. They must be downloaded from official sources and hashed before fabrication.",
+      "production_use": "verified recycling workspace → product experiments → machine service/build business",
+      "key_production_part": "control box, guard system, heater/motor controller, safety checklist",
+      "included_in_archive": true,
+      "sha256": "6ec1ff6c458f6f6fc6fa8af8e5b0ac494c46e6c7133cd7d0dc0c0af066133465",
+      "size_bytes": 29541
+    },
+    {
+      "id": 14,
+      "name": "NASA JPL Rover / OpenAMRobot research bundle",
+      "filename": "nasa_jpl_rover_openamrobot_research_bundle.zip",
+      "role": "Rover mechanics + modern AMR/ROS2 robot stack.",
+      "done_work": "Created a combined rover/mobile-robot bundle with deep research report, architecture comparison, NASA JPL OSR source map, OpenAMRobot source map, CAD/BOM/manufacturing intake plan, software/firmware stack analysis, validation and commissioning plan, safety/compliance risk register, India productization strategy, licensing notes, LogicHub/GN8R tasks, prior-project alignment, bibliography, source manifest, schemas, BOM/safety/test/graph templates, hashing script, and validation receipt script.",
+      "key_finding": "These are two distinct robot paths. NASA JPL Open Source Rover is best for a six-wheel rocker-bogie rugged-terrain education/mechanics platform; its README describes it as a scaled-down Mars-rover-style robot made from COTS parts. OpenAMRobot is better for modern ROS2 AMR software, simulation, Nav2, UI, docking, firmware, and product-level repository structure.",
+      "safety_finding": "OpenAMRobot is still experimental. Its hardware README lists missing safety items: no 24V battery fuse, no battery-side disconnect/hardware E-stop, Pi 5 thermal throttling, Pi brownout risk, and warns that the firmware watchdog is not a substitute for physical E-stop. Its UI README also says the dashboard E-stop is only a software stop, not a latched or safety-rated independent stop.",
+      "limitation": "No official CAD, Onshape exports, STEP files, firmware binaries, ROS workspaces, release archives, PCB files, or vendor datasheets were embedded. Those need upstream download, pinning, hashing, and safety validation before powered operation.",
+      "production_use": "education rover → AMR prototype → local warehouse/logistics robot platform",
+      "key_production_part": "battery safety, E-stop, motor control, ROS2 commissioning, docking validation",
+      "included_in_archive": true,
+      "sha256": "795cfeaac0a36d245602253e459e977425c2a12037266a382eb0ad3304e421ed",
+      "size_bytes": 24759
+    }
+  ],
+  "tools": [
+    {
+      "tool": "T01",
+      "production_tool": "Power Standardization & Protection",
+      "use_when": "Any board, module, robot, charger, camera, printer, or machine needs safe power input",
+      "how_used": "USB-C, barrel jack, battery input, reverse-polarity protection, fuse, TVS, power-path, current budget",
+      "production_part": "PCB, wiring harness, power board, battery interface",
+      "html_file": "tool-01-power-standardization-protection.html",
+      "scope": "USB-C, battery, fuse, reverse protection, power tree"
+    },
+    {
+      "tool": "T02",
+      "production_tool": "Tactile Determinism / Input FSM",
+      "use_when": "User presses button, turns knob, inserts cartridge, toggles E-stop, selects mode",
+      "how_used": "Hardware/software debounce, interrupt FSM, long-press, double-press, rotary encoder state handling",
+      "production_part": "UI board, control panel, cartridge reader, robot operator panel",
+      "html_file": "tool-02-tactile-determinism-input-fsm.html",
+      "scope": "Buttons, encoders, E-stop input, debounce, interrupt FSM"
+    },
+    {
+      "tool": "T03",
+      "production_tool": "State Visibility & Offline Telemetry",
+      "use_when": "Device must explain state without cloud dashboard",
+      "how_used": "OLED, TFT, RGB LED, buzzer, local log, error code, status pattern",
+      "production_part": "Local UI, maintenance screen, commissioning display",
+      "html_file": "tool-03-state-visibility-offline-telemetry.html",
+      "scope": "OLED, LEDs, buzzer, local logs, state codes"
+    },
+    {
+      "tool": "T04",
+      "production_tool": "Physical Interface Geometry / Poka-yoke Docking",
+      "use_when": "User inserts cartridge, toolhead, module, sensor, panel, dock, cable, or mechanical part",
+      "how_used": "Keyed slot, asymmetric rail, labelled connector, guide funnel, chamfer, captive fastener",
+      "production_part": "Enclosure, connector, fixture, cartridge slot, docking station",
+      "html_file": "tool-04-poka-yoke-interface-geometry.html",
+      "scope": "Cartridge slot, docking, keyed connectors, guide rails"
+    },
+    {
+      "tool": "T05",
+      "production_tool": "Fault Tolerance & Fallbacks",
+      "use_when": "Firmware, bus, sensor, flash, network, or motor process may hang/fail",
+      "how_used": "Watchdog timer, SPI/I2C timeout, safe reset, fault state, last-known-good config",
+      "production_part": "Firmware, boot logic, bus drivers, error display",
+      "html_file": "tool-05-fault-tolerance-fallbacks.html",
+      "scope": "Watchdog, SPI/I2C timeout, safe reset, fault display"
+    },
+    {
+      "tool": "T06",
+      "production_tool": "Source Manifest + BOM/CAD Hash Intake",
+      "use_when": "Any open-source project is turned into production evidence",
+      "how_used": "Hash every CAD/BOM/firmware/manual file, record source URL, version, license, owner",
+      "production_part": "LogicHub intake, manufacturing release, revision control",
+      "html_file": "tool-06-source-manifest-bom-cad-intake.html",
+      "scope": "Hashing, manifest, license, CAD/BOM source tracking"
+    },
+    {
+      "tool": "T07",
+      "production_tool": "Storage Integrity + Transactional Updates",
+      "use_when": "Device stores manifests, logs, firmware, rule files, G-code, calibration, or receipts",
+      "how_used": "CRC/SHA, dual manifest, rollback, atomic commit, wear/error logging",
+      "production_part": "Cartridge, flash memory, SD/eMMC storage, config persistence",
+      "html_file": "tool-07-storage-integrity-transactional-updates.html",
+      "scope": "CRC/SHA, dual manifest, rollback, flash layout"
+    },
+    {
+      "tool": "T08",
+      "production_tool": "Sensor Calibration + Health Evidence",
+      "use_when": "Device depends on IMU, camera, LiDAR, microscope optics, RF, encoder, temperature, current, or voltage",
+      "how_used": "Calibration routine, baseline capture, drift check, self-test, evidence receipt",
+      "production_part": "Test station, commissioning workflow, field service",
+      "html_file": "tool-08-sensor-calibration-health-evidence.html",
+      "scope": "IMU, camera, LiDAR, optics, RF, encoder calibration"
+    },
+    {
+      "tool": "T09",
+      "production_tool": "Actuator / Motor / Heater Safety Interlock",
+      "use_when": "Motors, heaters, relays, blades, gantries, drones, robot wheels, chargers, or hotends are involved",
+      "how_used": "Arm/disarm state, relay lockout, heater watchdog, physical E-stop, motor inhibit",
+      "production_part": "Motion controller, heater controller, EVSE controller, machine control",
+      "html_file": "tool-09-actuator-motor-heater-safety.html",
+      "scope": "Motors, heaters, relays, gantry, E-stop, arm/disarm"
+    },
+    {
+      "tool": "T10",
+      "production_tool": "Thermal / Current / Power Derating",
+      "use_when": "Device can overheat, brown out, overload, or melt enclosure",
+      "how_used": "Current limit, thermal throttle, fuse sizing, heatsink margin, battery runtime model",
+      "production_part": "Power system, enclosure, motor system, charger, printer, edge board",
+      "html_file": "tool-10-thermal-current-power-derating.html",
+      "scope": "Heat, current, runtime, regulator, chamber, battery"
+    },
+    {
+      "tool": "T11",
+      "production_tool": "Local API / Edge Service Interface",
+      "use_when": "Hardware needs local control without cloud dependency",
+      "how_used": "HTTP, WebSocket, MQTT, serial, USB, BLE, local dashboard, service shell",
+      "production_part": "Operator app, maintenance app, local-first UI, firmware bridge",
+      "html_file": "tool-11-local-api-edge-service-interface.html",
+      "scope": "HTTP, MQTT, serial, WebSocket, local-first dashboard"
+    },
+    {
+      "tool": "T12",
+      "production_tool": "Manufacturing QA Fixture + Test Receipts",
+      "use_when": "Prototype becomes repeatable build or saleable kit",
+      "how_used": "Fixture script, probe test, continuity check, calibration receipt, pass/fail JSON",
+      "production_part": "PCBA test, assembly line, commissioning, supplier acceptance",
+      "html_file": "tool-12-manufacturing-qa-fixture-receipts.html",
+      "scope": "PCBA tests, commissioning, supplier acceptance"
+    },
+    {
+      "tool": "T13",
+      "production_tool": "Enclosure / Environmental DFM",
+      "use_when": "Device must survive handling, heat, dust, water, vibration, outdoor use, lab use, or kids/users",
+      "how_used": "Wall thickness, bosses, airflow, cable strain relief, gasket, service access",
+      "production_part": "3D print, injection-moulded case, machine frame, control box",
+      "html_file": "tool-13-enclosure-environmental-dfm.html",
+      "scope": "3D print, injection moulding, guards, weatherproofing"
+    },
+    {
+      "tool": "T14",
+      "production_tool": "Compliance / Safety Risk Ledger",
+      "use_when": "Product may touch mains, battery, RF, medical/lab use, robotics, EV charging, public operation, or industrial machines",
+      "how_used": "Standards map, hazard log, waiver ledger, certification readiness, blocked claims",
+      "production_part": "Productization, India launch, supplier review, legal/compliance gate",
+      "html_file": "tool-14-compliance-safety-risk-ledger.html",
+      "scope": "Product safety, India compliance, blocked claims, waivers"
+    }
+  ]
+}

@@ -4,13 +4,25 @@ import { PhysicalKitDefinitionSchema } from '../src/schemas/kit.schema.js';
 import { getComponent } from '../src/catalogue/components.js';
 
 describe('Gate 4 — reference kit definitions', () => {
-  it('defines the four canonical kits', () => {
-    expect(REFERENCE_KITS).toHaveLength(4);
+  it('defines the canonical kits', () => {
+    expect(REFERENCE_KITS).toHaveLength(16);
     expect(REFERENCE_KITS.map(k => k.id)).toEqual([
       'motion-starter',
       'environment-starter',
       'motion-and-vision',
       'product-interface',
+      'electronics_research_bundle',
+      'drone_cad_implementation_bundle',
+      'pupper_v3_open_source_research_bundle',
+      'farmbot_open_source_research_bundle',
+      'openflexure_microscope_research_bundle',
+      'satnogs_ground_station_research_bundle',
+      'voron_3d_printer_engineering_bundle',
+      'openevse_research_bundle',
+      'openmv_openipc_local_vision_bundle',
+      'riscv_edge_beaglev_fire_milkv_duo_bundle',
+      'precious_plastic_machine_ecosystem_bundle',
+      'nasa_jpl_rover_openamrobot_research_bundle',
     ]);
   });
 

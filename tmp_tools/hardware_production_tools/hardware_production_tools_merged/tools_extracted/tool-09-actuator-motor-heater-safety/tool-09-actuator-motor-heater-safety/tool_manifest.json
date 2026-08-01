@@ -1,0 +1,18 @@
+{
+  "tool_id": "T09",
+  "tool_name": "Actuator / Motor / Heater Safety Interlock",
+  "html_file": "tool-09-actuator-motor-heater-safety.html",
+  "version": "1.0",
+  "created_at": "2026-07-31T02:24:40.706406+00:00",
+  "resume_next": "tool-10-thermal-current-power-derating.html",
+  "scope": [
+    "arm/disarm state machines",
+    "physical emergency stop boundary",
+    "motor inhibit",
+    "heater watchdog",
+    "relay/contactor lockout",
+    "motion and thermal safety receipts",
+    "project applicability across 14 hardware bundles"
+  ],
+  "safety_note": "This planning tool is not a safety-rated controller design. Safety-critical machines require qualified engineering review, tested hardware interlocks, certification where applicable, and local regulatory compliance."
+}

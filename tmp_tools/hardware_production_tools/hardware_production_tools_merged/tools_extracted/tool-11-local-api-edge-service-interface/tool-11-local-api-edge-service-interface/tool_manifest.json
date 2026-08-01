@@ -1,0 +1,396 @@
+{
+  "tool": {
+    "tool_id": "T11",
+    "name": "Local API / Edge Service Interface",
+    "file": "tool-11-local-api-edge-service-interface.html",
+    "purpose": "Define the local-first service surface that lets hardware be operated, inspected, configured, updated, and diagnosed without depending on cloud infrastructure.",
+    "scope": [
+      "HTTP/WebSocket/MQTT/serial/USB/BLE service boundaries",
+      "Local dashboard and maintenance app interface",
+      "Offline telemetry and event logs",
+      "Safe command routing for robots, chargers, machines, cameras, printers, and instruments",
+      "Versioned API contracts, schemas, receipts, and health endpoints"
+    ]
+  },
+  "projects": [
+    {
+      "id": "P01",
+      "project": "Electronics research bundle",
+      "role": "Foundation study bundle for electronics, SiC MOSFETs, and embedded Linux.",
+      "use_when": "A future board or Linux device needs a clean service model before hardware/software split is frozen.",
+      "how": "Use embedded Linux concepts to design a minimal local service: /health, /version, /logs, /config, /diagnostics. Treat this as a lab standard before implementing on real boards.",
+      "production_part": "Embedded Linux boards, lab fixtures, power-board diagnostics.",
+      "priority": "Medium"
+    },
+    {
+      "id": "P02",
+      "project": "Air-gapped 8MB module research pack",
+      "role": "Offline cartridge architecture, manifest, local-first storage, and integrity.",
+      "use_when": "The cartridge reader must expose status, verify/commit actions, and error receipts to the host without cloud dependency.",
+      "how": "Expose a serial/USB local protocol for cartridge_inserted, manifest_verified, commit_started, commit_done, rollback, and fault states. Provide JSON receipts for every read/write/verify cycle.",
+      "production_part": "Cartridge reader service, host validator, local maintenance UI.",
+      "priority": "High"
+    },
+    {
+      "id": "P03",
+      "project": "Air-gapped 8MB CAD implementation bundle",
+      "role": "First EVT/CAD implementation of the 8MB module.",
+      "use_when": "The prototype needs a PC test utility or browser-facing local service for bench validation.",
+      "how": "Map firmware serial commands to a small local API and generate validation receipts: flash_id, read_verify, write_verify, power_loss_recovery.",
+      "production_part": "PCBA test service, fixture app, cartridge service bridge.",
+      "priority": "High"
+    },
+    {
+      "id": "P04",
+      "project": "Drone CAD implementation bundle",
+      "role": "Bounded drone flight-controller EVT platform.",
+      "use_when": "The flight controller needs safe local diagnostics before any tethered or powered motor test.",
+      "how": "Expose read-only health endpoints first: imu_state, barometer_state, flash_log_state, arming_state, battery_state. Keep motor/arming commands behind a physical-safe gate.",
+      "production_part": "Ground test dashboard, tether-test service, blackbox log extractor.",
+      "priority": "High"
+    },
+    {
+      "id": "P05",
+      "project": "Pupper V3 open-source research bundle",
+      "role": "Open-source quadruped robot research and productization study.",
+      "use_when": "The robot needs local operation, gait state visibility, calibration, and service diagnostics.",
+      "how": "Bridge ROS2 topics/services into a local dashboard with strict command permissions: observe, calibrate, enable torque, safe pose, walk mode, emergency stop.",
+      "production_part": "ROS2 service UI, field maintenance interface, education dashboard.",
+      "priority": "High"
+    },
+    {
+      "id": "P06",
+      "project": "FarmBot open-source research bundle",
+      "role": "Agriculture automation, CNC-style gantry, electronics, firmware, web app, and tool ecosystem.",
+      "use_when": "A farm-side system must keep working with poor internet or no cloud access.",
+      "how": "Provide local queue, axis status, tool status, water state, job receipt, manual jog, stop command, and offline sync boundary.",
+      "production_part": "Local farm controller, maintenance app, toolhead service interface.",
+      "priority": "High"
+    },
+    {
+      "id": "P07",
+      "project": "OpenFlexure Microscope research bundle",
+      "role": "Open-source lab microscope and precision positioning platform.",
+      "use_when": "The microscope must expose capture, focus, illumination, stage movement, and calibration locally.",
+      "how": "Use local HTTP/API commands for image capture, focus sweep, stage move, illumination level, objective profile, and calibration receipt export.",
+      "production_part": "Microscope local server, calibration dashboard, lab evidence API.",
+      "priority": "High"
+    },
+    {
+      "id": "P08",
+      "project": "SatNOGS satellite ground-station research bundle",
+      "role": "Open satellite ground-station stack: antenna, SDR, Linux station, observation workflow.",
+      "use_when": "The station must be monitored locally for RF chain, observations, scheduler, disk, network, and rotator state.",
+      "how": "Expose local status page and API for sdr_detected, antenna_profile, observation_active, last_pass, decode_status, storage_free, and fault history.",
+      "production_part": "Ground-station dashboard, RF commissioning service, observation receipt generator.",
+      "priority": "High"
+    },
+    {
+      "id": "P09",
+      "project": "Voron 3D printer engineering bundle",
+      "role": "High-performance open-source 3D printer engineering and kit/productization study.",
+      "use_when": "A printer kit needs local control, status, and calibration without depending on remote services.",
+      "how": "Treat Moonraker/Klipper-like local API surfaces as the pattern: printer_state, heaters, bed_mesh, print_job, emergency_stop, config snapshot, first-print receipt.",
+      "production_part": "Printer local UI, commissioning dashboard, service workflow.",
+      "priority": "High"
+    },
+    {
+      "id": "P10",
+      "project": "OpenEVSE research bundle",
+      "role": "Open EV charging hardware/software platform.",
+      "use_when": "The charger needs local status, diagnostics, and integration while never allowing unsafe remote enablement.",
+      "how": "Use a strict safety hierarchy: local API may request charging settings, but the safety controller owns diode/GFCI/ground/stuck relay/temp fault decisions. Expose RAPI/MQTT/HTTP read-only status first.",
+      "production_part": "EVSE local dashboard, commissioning probe, charge log service.",
+      "priority": "Critical"
+    },
+    {
+      "id": "P11",
+      "project": "OpenMV + OpenIPC local vision bundle",
+      "role": "Local-first camera/vision appliance stack.",
+      "use_when": "A vision product needs video, events, model thresholds, and privacy state without cloud dependency.",
+      "how": "Expose RTSP/HTTP/snapshot/event endpoints plus privacy controls, local-only mode indicator, camera health, model version, and storage retention settings.",
+      "production_part": "Camera appliance UI, local AI event bridge, privacy evidence API.",
+      "priority": "High"
+    },
+    {
+      "id": "P12",
+      "project": "BeagleV-Fire / Milk-V Duo RISC-V edge bundle",
+      "role": "RISC-V edge computing, FPGA, AIoT, embedded Linux, deterministic IO.",
+      "use_when": "An edge board becomes a gateway, accelerator, or deterministic IO node.",
+      "how": "Create a board agent with /health, /temperature, /gpio, /camera, /fpga, /benchmark, /update_status, and signed local evidence receipts.",
+      "production_part": "Edge service daemon, local web UI, factory validation endpoint.",
+      "priority": "High"
+    },
+    {
+      "id": "P13",
+      "project": "Precious Plastic machine ecosystem bundle",
+      "role": "Plastic recycling and small manufacturing machine ecosystem.",
+      "use_when": "A machine control box needs local recipes, cycle state, heater/motor telemetry, and guarded commands.",
+      "how": "Expose recipe view, temperature status, cycle counters, fault history, guard state, maintenance timers, and receipt export. Gate start/reverse/heater commands behind physical interlocks.",
+      "production_part": "Machine HMI, workshop dashboard, process-run logger.",
+      "priority": "Critical"
+    },
+    {
+      "id": "P14",
+      "project": "NASA JPL Rover / OpenAMRobot research bundle",
+      "role": "Rover mechanics plus modern AMR/ROS2 robot stack.",
+      "use_when": "A mobile robot needs local operation, diagnostics, route/docking state, and safe command control.",
+      "how": "Bridge ROS2/Nav2/micro-ROS into a local UI with health topics, pose/map state, wheel/encoder diagnostics, E-stop state, docking result, and commissioning receipts.",
+      "production_part": "AMR local operator dashboard, docking validation app, field service tool.",
+      "priority": "Critical"
+    }
+  ],
+  "stages": [
+    [
+      "S0",
+      "Source intake",
+      "Record which repo/firmware/API docs define the service. Pin commit/release and license."
+    ],
+    [
+      "S1",
+      "Command inventory",
+      "Classify every operation as observe, configure, calibrate, actuate, update, or emergency."
+    ],
+    [
+      "S2",
+      "Safety boundary",
+      "Decide which commands are read-only, physically gated, software-gated, or prohibited."
+    ],
+    [
+      "S3",
+      "Transport choice",
+      "Choose serial, USB, HTTP, WebSocket, MQTT, BLE, ROS2 bridge, or local Unix socket."
+    ],
+    [
+      "S4",
+      "Schema contract",
+      "Define request/response JSON, error codes, version, timestamps, and device identity."
+    ],
+    [
+      "S5",
+      "Offline dashboard",
+      "Build local UI pages for health, state, logs, settings, calibration, and receipts."
+    ],
+    [
+      "S6",
+      "Receipt logging",
+      "Store command result, safety state, operator action, firmware version, and pass/fail evidence."
+    ],
+    [
+      "S7",
+      "Factory validation",
+      "Run fixture tests through the same API used by field service and generate a signed receipt."
+    ],
+    [
+      "S8",
+      "Field service",
+      "Use the service to diagnose without opening the product unless a hardware fault is proven."
+    ]
+  ],
+  "checklist": [
+    [
+      "Identity",
+      "Device exposes product_id, hardware_rev, firmware_rev, serial_number, api_version."
+    ],
+    [
+      "Health",
+      "Device exposes power, thermal, storage, network, sensor, actuator, and fault state."
+    ],
+    [
+      "Safety gate",
+      "All dangerous commands require local preconditions and cannot bypass hardware interlocks."
+    ],
+    [
+      "Read-only first",
+      "Initial bring-up API is read-only until basic electrical and mechanical safety is validated."
+    ],
+    [
+      "Offline-first",
+      "All core operation and diagnostics work with no internet connection."
+    ],
+    [
+      "Error vocabulary",
+      "Every failure has a stable code, human message, recovery instruction, and severity."
+    ],
+    [
+      "Command audit",
+      "Every configuration, calibration, update, and actuation request generates a receipt."
+    ],
+    [
+      "Rate limits",
+      "Commands cannot be spammed fast enough to destabilize motors, heaters, flash, relays, or UI."
+    ],
+    [
+      "Timeouts",
+      "Every API call has a deterministic timeout and fallback state."
+    ],
+    [
+      "Versioning",
+      "API changes are explicit and backward compatibility is tracked."
+    ],
+    [
+      "Update boundary",
+      "Firmware/config updates require hash verification and rollback path."
+    ],
+    [
+      "Privacy",
+      "Camera/log/network APIs disclose what data is captured, stored, and exported."
+    ],
+    [
+      "Local credentials",
+      "Admin commands require local authentication or physical-presence confirmation."
+    ],
+    [
+      "Factory mode",
+      "Factory/test commands are disabled or locked out in normal user mode."
+    ]
+  ],
+  "pass_gates": [
+    [
+      "PASS-01",
+      "The device can be identified locally without cloud access."
+    ],
+    [
+      "PASS-02",
+      "The operator can see health, state, fault, and version locally."
+    ],
+    [
+      "PASS-03",
+      "Dangerous commands are impossible unless physical and software gates are satisfied."
+    ],
+    [
+      "PASS-04",
+      "Every command returns a structured response with status, code, message, and timestamp."
+    ],
+    [
+      "PASS-05",
+      "Power cycle does not erase fault history needed for diagnosis."
+    ],
+    [
+      "PASS-06",
+      "A factory test receipt can be generated from a clean device using only local tools."
+    ],
+    [
+      "PASS-07",
+      "Network loss does not leave motors/heaters/relays/charging in an unsafe state."
+    ],
+    [
+      "PASS-08",
+      "A failed firmware/config update rolls back or enters a clearly visible recovery state."
+    ]
+  ],
+  "risks": [
+    [
+      "API-001",
+      "Remote command moves hardware unexpectedly",
+      "Critical",
+      "Default to read-only; require physical enable; enforce command allowlist."
+    ],
+    [
+      "API-002",
+      "Dashboard E-stop treated as real safety stop",
+      "Critical",
+      "Label software stop clearly; require hardware E-stop for robots/machines/EVSE."
+    ],
+    [
+      "API-003",
+      "Cloud dependency blocks field repair",
+      "High",
+      "All diagnostics and receipts must run offline on LAN/USB/serial."
+    ],
+    [
+      "API-004",
+      "Unauthenticated local network command",
+      "High",
+      "Require local credentials, pairing, physical button, or signed service token."
+    ],
+    [
+      "API-005",
+      "Version drift between UI and firmware",
+      "Medium",
+      "Expose api_version and compatible_min/max in every response."
+    ],
+    [
+      "API-006",
+      "Log contains private camera/GPS/user data",
+      "High",
+      "Classify logs; provide export redaction and retention controls."
+    ],
+    [
+      "API-007",
+      "MQTT/WebSocket floods MCU or ROS graph",
+      "High",
+      "Rate-limit, queue, backpressure, and command timeout."
+    ],
+    [
+      "API-008",
+      "Factory debug mode leaks into production",
+      "High",
+      "Factory mode flag, build-time lock, physical jumper, audit event."
+    ],
+    [
+      "API-009",
+      "Receipt is not trustworthy",
+      "Medium",
+      "Hash inputs, include firmware/source versions, use monotonic sequence, optional signature."
+    ],
+    [
+      "API-010",
+      "Local update bricks device",
+      "High",
+      "Dual image/dual manifest, hash check, rollback, visible recovery UI."
+    ]
+  ],
+  "endpoints": [
+    [
+      "GET",
+      "/api/v1/identity",
+      "Read product identity, serial, hardware revision, firmware revision, API version."
+    ],
+    [
+      "GET",
+      "/api/v1/health",
+      "Read aggregate health state: ok/warn/fault/lockout."
+    ],
+    [
+      "GET",
+      "/api/v1/state",
+      "Read current operating mode and state-machine node."
+    ],
+    [
+      "GET",
+      "/api/v1/faults",
+      "Read active and historical fault codes."
+    ],
+    [
+      "GET",
+      "/api/v1/logs?limit=100",
+      "Read bounded local event log."
+    ],
+    [
+      "POST",
+      "/api/v1/command/stop",
+      "Request software stop; not a substitute for hardware E-stop."
+    ],
+    [
+      "POST",
+      "/api/v1/calibration/start",
+      "Start a calibration routine when safety preconditions are true."
+    ],
+    [
+      "GET",
+      "/api/v1/receipts/latest",
+      "Read latest validation or command receipt."
+    ],
+    [
+      "POST",
+      "/api/v1/config",
+      "Write configuration only after schema validation and compatibility check."
+    ],
+    [
+      "POST",
+      "/api/v1/update/stage",
+      "Stage signed firmware/config update; do not activate until verified."
+    ]
+  ]
+}

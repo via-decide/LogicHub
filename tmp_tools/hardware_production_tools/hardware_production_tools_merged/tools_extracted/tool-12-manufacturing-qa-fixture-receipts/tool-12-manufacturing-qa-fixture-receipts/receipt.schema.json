@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manufacturing QA Fixture Receipt",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "tool_id",
+    "project",
+    "unit",
+    "fixture",
+    "operator",
+    "timestamp_utc",
+    "decision",
+    "measurements",
+    "gates",
+    "artifacts"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string"
+    },
+    "tool_id": {
+      "const": "T12"
+    },
+    "project": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "object",
+      "required": [
+        "serial",
+        "hardware_revision",
+        "bom_revision"
+      ],
+      "properties": {
+        "serial": {
+          "type": "string"
+        },
+        "hardware_revision": {
+          "type": "string"
+        },
+        "bom_revision": {
+          "type": "string"
+        },
+        "firmware_version": {
+          "type": "string"
+        },
+        "configuration_hash": {
+          "type": "string"
+        }
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "required": [
+        "fixture_id",
+        "fixture_revision",
+        "software_hash"
+      ],
+      "properties": {
+        "fixture_id": {
+          "type": "string"
+        },
+        "fixture_revision": {
+          "type": "string"
+        },
+        "software_hash": {
+          "type": "string"
+        }
+      }
+    },
+    "operator": {
+      "type": "string"
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "QUARANTINE",
+        "REWORK",
+        "ENGINEERING_ONLY"
+      ]
+    },
+    "measurements": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gate_id",
+          "result"
+        ],
+        "properties": {
+          "gate_id": {
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NA"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

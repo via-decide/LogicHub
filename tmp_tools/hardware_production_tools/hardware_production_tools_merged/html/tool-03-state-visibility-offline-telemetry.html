@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 03 — State Visibility & Offline Telemetry</title>
+  <meta name="description" content="Universal hardware production tool for local status displays, LEDs, buzzers, error codes, local logs and air-gapped telemetry across 14 hardware research projects." />
+  <style>
+    :root{
+      --bg:#0A1220; --panel:#0f1d32; --panel2:#13243d; --ink:#edf4ff; --muted:#a9bbd6;
+      --gold:#D4AF37; --saffron:#FF9933; --green:#138808; --red:#ff5c5c; --line:#284465;
+      --blue:#74a7ff; --cyan:#5de2d1; --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:radial-gradient(circle at top left,#16345a 0,#0A1220 38%,#070d18 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
+    a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+    header{border:1px solid rgba(212,175,55,.35);background:linear-gradient(135deg,rgba(15,29,50,.94),rgba(10,18,32,.78));box-shadow:var(--shadow);border-radius:24px;padding:30px;position:relative;overflow:hidden}
+    header:before{content:"";position:absolute;inset:auto -80px -120px auto;width:300px;height:300px;background:radial-gradient(circle,rgba(255,153,51,.28),transparent 70%)}
+    .kicker{color:var(--gold);letter-spacing:.14em;text-transform:uppercase;font-weight:800;font-size:.78rem}
+    h1{font-size:clamp(2rem,4vw,4.2rem);line-height:1.02;margin:.35rem 0 1rem}
+    h2{font-size:1.7rem;margin:2.2rem 0 .75rem;color:#fff}
+    h3{font-size:1.12rem;margin:1rem 0 .5rem;color:#fff}
+    p{margin:.5rem 0;color:var(--muted)}
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .hero-card,.card,.panel{background:rgba(15,29,50,.86);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+    .badge{border:1px solid rgba(116,167,255,.35);background:rgba(116,167,255,.08);color:#dce9ff;border-radius:999px;padding:6px 10px;font-size:.82rem;font-weight:700}
+    .badge.gold{border-color:rgba(212,175,55,.45);background:rgba(212,175,55,.10);color:#ffe69a}
+    .badge.green{border-color:rgba(19,136,8,.45);background:rgba(19,136,8,.12);color:#baf1b3}
+    .nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}.nav a{padding:8px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04);color:var(--ink);font-size:.88rem}
+    .grid{display:grid;gap:14px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .metric{padding:14px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+    .metric strong{display:block;font-size:1.35rem;color:var(--gold)}.metric span{color:var(--muted);font-size:.9rem}
+    table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid var(--line);background:rgba(15,29,50,.7)}
+    th,td{padding:12px 13px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;text-align:left}th{background:rgba(212,175,55,.12);color:#ffe9a8;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}td{color:#dbe7fb}td small{color:var(--muted)}
+    .section{margin-top:26px}.callout{border-left:4px solid var(--saffron);padding:14px 16px;background:rgba(255,153,51,.08);border-radius:12px;color:#ffe6cc}.ok{border-left-color:var(--green);background:rgba(19,136,8,.10)}.danger{border-left-color:var(--red);background:rgba(255,92,92,.09)}
+    .timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.step{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.045)}.step b{color:var(--gold)}
+    .project-card{display:flex;flex-direction:column;gap:8px}.project-card .name{font-weight:900;color:#fff}.project-card .tag{font-size:.78rem;color:#a9bbd6}.project-card ul{margin:.3rem 0 0 1.05rem;padding:0;color:#dbe7fb}.project-card li{margin:.2rem 0}.pill{display:inline-block;border-radius:999px;padding:3px 8px;margin:2px 4px 2px 0;background:rgba(93,226,209,.1);border:1px solid rgba(93,226,209,.28);font-size:.76rem;color:#c8fff8}
+    details{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.035);padding:12px 14px}summary{cursor:pointer;font-weight:800;color:#fff}.code{white-space:pre-wrap;background:#07101d;border:1px solid #203a58;border-radius:16px;padding:15px;overflow:auto;color:#d7e7ff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem}
+    .footer{margin-top:30px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);padding-top:18px}.search{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:#07101d;color:var(--ink);font-size:1rem}.hidden{display:none!important}
+    @media (max-width:900px){.hero-grid,.grid.two,.grid.three,.grid.four{grid-template-columns:1fr}.timeline{grid-template-columns:1fr}header{padding:22px}.wrap{padding:18px 12px 60px}table{font-size:.9rem}th,td{padding:9px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Universal Hardware Production Tool · T03</div>
+    <h1>State Visibility & Offline Telemetry</h1>
+    <div class="hero-grid">
+      <div>
+        <p><strong>Purpose:</strong> make every local-first hardware system explain what it is doing without depending on a cloud dashboard, phone app, or developer console.</p>
+        <p>This tool standardizes OLED/TFT screens, RGB LEDs, buzzers, local logs, error codes, and commissioning receipts across the 14 hardware research bundles.</p>
+        <div class="badge-row">
+          <span class="badge gold">Air-gapped ready</span>
+          <span class="badge">OLED / TFT / RGB LED</span>
+          <span class="badge">Error-code contract</span>
+          <span class="badge green">Local-first UX</span>
+          <span class="badge">Manufacturing receipts</span>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="grid two">
+          <div class="metric"><strong>14</strong><span>projects mapped</span></div>
+          <div class="metric"><strong>5</strong><span>core states minimum</span></div>
+          <div class="metric"><strong>0</strong><span>cloud required</span></div>
+          <div class="metric"><strong>1</strong><span>human-readable fault code per failure</span></div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#when">Use When</a><a href="#architecture">Architecture</a><a href="#projects">Projects</a><a href="#stages">Production Stages</a><a href="#checklist">Checklist</a><a href="#gates">Pass/Fail</a><a href="#risks">Risks</a><a href="#patterns">Patterns</a><a href="#schema">Schema</a>
+    </nav>
+  </header>
+
+  <section id="when" class="section grid two">
+    <div class="card">
+      <h2>Use when</h2>
+      <p>Use this tool whenever the device must show status, warnings, progress, readiness, or failure locally.</p>
+      <div class="callout ok"><strong>Rule:</strong> if the user has to ask “what is the hardware doing?”, the telemetry design is incomplete.</div>
+      <ul>
+        <li>Air-gapped modules cannot rely on cloud dashboards.</li>
+        <li>Robots and machines must show safe/unsafe states before motion.</li>
+        <li>Chargers, heaters, and power systems must show fault states immediately.</li>
+        <li>Lab instruments must show calibration and measurement confidence.</li>
+        <li>Manufacturing fixtures must emit pass/fail evidence.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Minimum local state vocabulary</h2>
+      <table>
+        <tr><th>State</th><th>Meaning</th><th>User action</th></tr>
+        <tr><td>IDLE</td><td>Powered, safe, waiting.</td><td>Insert module / start task.</td></tr>
+        <tr><td>READY</td><td>Inputs valid, interlocks clear.</td><td>Proceed.</td></tr>
+        <tr><td>BUSY</td><td>Operation in progress.</td><td>Do not remove or interrupt.</td></tr>
+        <tr><td>WARN</td><td>Usable but degraded.</td><td>Inspect or service soon.</td></tr>
+        <tr><td>FAULT</td><td>Operation blocked.</td><td>Read code, fix cause, reset.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="architecture" class="section panel">
+    <h2>Reference architecture</h2>
+    <div class="timeline">
+      <div class="step"><b>1. Event</b><br/>Button, cartridge, sensor, bus, motor, API, or safety transition occurs.</div>
+      <div class="step"><b>2. State reducer</b><br/>Firmware converts raw event into canonical device state.</div>
+      <div class="step"><b>3. Priority resolver</b><br/>FAULT overrides BUSY; safety overrides user command.</div>
+      <div class="step"><b>4. Local output</b><br/>OLED/TFT/LED/buzzer/log updates immediately.</div>
+      <div class="step"><b>5. Receipt</b><br/>The state transition is recorded for QA or field service.</div>
+    </div>
+    <pre class="code">EVENT → STATE_REDUCER → PRIORITY_RESOLVER → LOCAL_OUTPUTS → RECEIPT
+
+Fault priority:
+ERROR / SAFETY_LOCKOUT
+  > OVER_TEMP / OVER_CURRENT / LOW_BATTERY
+  > BUSY / CALIBRATING / WRITING
+  > READY
+  > IDLE</pre>
+  </section>
+
+  <section id="projects" class="section">
+    <h2>Project applicability cards</h2>
+    <input class="search" id="projectSearch" placeholder="Filter projects: cartridge, drone, EVSE, robot, camera, microscope, printer..." />
+    <div class="grid two" id="projectGrid" style="margin-top:14px">
+      <div class="card project-card" data-key="electronics sic embedded linux power study"><div class="name">1. Electronics research bundle</div><div class="tag">Learning foundation</div><p>Use status LEDs and bench-log templates for lab tests derived from SiC and embedded Linux study.</p><div><span class="pill">bench state</span><span class="pill">test log</span><span class="pill">hazard indicator</span></div></div>
+      <div class="card project-card" data-key="8mb cartridge air gapped nor oled led"><div class="name">2. Air-gapped 8MB module research pack</div><div class="tag">Offline storage cartridge</div><p>OLED/RGB output must show cartridge loaded, verify running, commit complete, rollback, and flash error.</p><div><span class="pill">cartridge loaded</span><span class="pill">writing</span><span class="pill">rollback</span></div></div>
+      <div class="card project-card" data-key="8mb cad pcb cartridge spi nor"><div class="name">3. Air-gapped 8MB CAD implementation bundle</div><div class="tag">EVT cartridge PCB</div><p>Board bring-up needs LED/OLED codes for USB power, MCU boot, flash ID pass, write failure, and manifest mismatch.</p><div><span class="pill">PCBA bring-up</span><span class="pill">flash ID</span><span class="pill">manifest mismatch</span></div></div>
+      <div class="card project-card" data-key="drone flight controller imu barometer blackbox"><div class="name">4. Drone CAD implementation bundle</div><div class="tag">Tethered flight-controller EVT</div><p>Status outputs must show disarmed, armed, IMU fail, logger fail, failsafe, battery warning, and no-prop bench mode.</p><div><span class="pill">armed/disarmed</span><span class="pill">IMU fault</span><span class="pill">failsafe</span></div></div>
+      <div class="card project-card" data-key="pupper quadruped robot ros2 legs motors"><div class="name">5. Pupper V3 open-source research bundle</div><div class="tag">Quadruped robot</div><p>Local telemetry should show gait mode, controller state, battery, motor temperature, IMU health, and E-stop state.</p><div><span class="pill">gait mode</span><span class="pill">motor temp</span><span class="pill">E-stop</span></div></div>
+      <div class="card project-card" data-key="farmbot agriculture gantry toolhead outdoor"><div class="name">6. FarmBot open-source research bundle</div><div class="tag">Outdoor gantry agriculture robot</div><p>Field-facing display should show homed/not-homed, watering/tool state, gantry fault, weatherproof enclosure fault, and maintenance due.</p><div><span class="pill">homing</span><span class="pill">tool state</span><span class="pill">field fault</span></div></div>
+      <div class="card project-card" data-key="openflexure microscope optics stage lab"><div class="name">7. OpenFlexure Microscope research bundle</div><div class="tag">Lab microscope</div><p>Telemetry must show focus/calibration status, illumination level, stage motion, image capture, and measurement-confidence warnings.</p><div><span class="pill">calibration</span><span class="pill">focus</span><span class="pill">confidence</span></div></div>
+      <div class="card project-card" data-key="satnogs satellite ground station sdr rf antenna"><div class="name">8. SatNOGS satellite ground-station research bundle</div><div class="tag">Receive-only RF station</div><p>Local indicators should show station online, SDR detected, observation scheduled, signal present, network failure, and enclosure/thermal warnings.</p><div><span class="pill">SDR status</span><span class="pill">signal</span><span class="pill">observation</span></div></div>
+      <div class="card project-card" data-key="voron printer klipper heater corexy"><div class="name">9. Voron 3D printer engineering bundle</div><div class="tag">CoreXY printer workflow</div><p>Display/LED states should show heating, homing, printing, paused, filament/tool fault, MCU disconnect, and thermal runaway lockout.</p><div><span class="pill">heater</span><span class="pill">printing</span><span class="pill">MCU fault</span></div></div>
+      <div class="card project-card" data-key="openevse ev charger gfci pilot relay"><div class="name">10. OpenEVSE research bundle</div><div class="tag">EV charging system</div><p>Local status must show ready, charging, pilot state, GFCI trip, ground fault, stuck relay, over-temperature, and network/gateway degraded.</p><div><span class="pill">GFCI</span><span class="pill">pilot</span><span class="pill">relay fault</span></div></div>
+      <div class="card project-card" data-key="openmv openipc camera vision privacy"><div class="name">11. OpenMV + OpenIPC local vision bundle</div><div class="tag">Local vision appliance</div><p>Visual feedback must show recording, inference running, no-cloud mode, stream offline, storage full, and privacy shutter/disable state.</p><div><span class="pill">privacy</span><span class="pill">stream</span><span class="pill">inference</span></div></div>
+      <div class="card project-card" data-key="beaglev fire milkv duo risc-v fpga edge"><div class="name">12. BeagleV-Fire / Milk-V Duo RISC-V edge bundle</div><div class="tag">Edge compute / FPGA / AIoT</div><p>Board-level telemetry should show boot stage, service health, thermal throttle, storage health, network, GPIO test, and update state.</p><div><span class="pill">boot</span><span class="pill">thermal</span><span class="pill">service</span></div></div>
+      <div class="card project-card" data-key="precious plastic shredder extrusion injection sheetpress"><div class="name">13. Precious Plastic machine ecosystem bundle</div><div class="tag">Recycling machine workspace</div><p>Machine status must show heater ready, blade/motor locked, jam, guard open, fume warning, cycle complete, and emergency stop.</p><div><span class="pill">guard</span><span class="pill">jam</span><span class="pill">heater ready</span></div></div>
+      <div class="card project-card" data-key="nasa jpl rover openamrobot amr ros2"><div class="name">14. NASA JPL Rover / OpenAMRobot bundle</div><div class="tag">Rover + AMR platform</div><p>Robot indicators must show ROS connected, localization valid, battery, motor inhibit, E-stop, docking state, and command timeout.</p><div><span class="pill">ROS</span><span class="pill">battery</span><span class="pill">docking</span></div></div>
+    </div>
+  </section>
+
+  <section id="stages" class="section panel">
+    <h2>Production-stage map</h2>
+    <table>
+      <tr><th>Stage</th><th>Telemetry goal</th><th>Required output</th><th>Evidence</th></tr>
+      <tr><td>Concept</td><td>Define user-visible states.</td><td>State vocabulary and priority table.</td><td><code>state_contract.json</code></td></tr>
+      <tr><td>EVT</td><td>Expose electrical/firmware bring-up states.</td><td>Power LED, boot LED, serial/OLED diagnostics.</td><td>Boot and fault screenshots/logs.</td></tr>
+      <tr><td>DVT</td><td>Validate every fault maps to a human-readable code.</td><td>Fault injection matrix.</td><td>Pass/fail telemetry receipt.</td></tr>
+      <tr><td>PVT</td><td>Ensure manufacturing can verify telemetry consistently.</td><td>Fixture-readable output + operator-readable display.</td><td>QA receipt per unit.</td></tr>
+      <tr><td>Field service</td><td>Help non-engineers identify corrective action.</td><td>Short code, plain message, recovery instruction.</td><td>Local service log.</td></tr>
+    </table>
+  </section>
+
+  <section id="checklist" class="section grid two">
+    <div class="card">
+      <h2>Design checklist</h2>
+      <ul>
+        <li>Every state has a short name, human message, color/pattern, and recovery action.</li>
+        <li>FAULT states override all cosmetic animations and normal progress indicators.</li>
+        <li>Display works without internet, app login, or cloud dashboard.</li>
+        <li>LED pattern is readable even if OLED/TFT fails.</li>
+        <li>Critical errors persist long enough for the user to read them.</li>
+        <li>State transitions are logged with timestamp or monotonic counter.</li>
+        <li>Manufacturing fixture can read status via serial/USB/API.</li>
+        <li>Error messages never expose secrets, WiFi credentials, private images, or tokens.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Output channel selection</h2>
+      <table>
+        <tr><th>Channel</th><th>Best for</th><th>Avoid when</th></tr>
+        <tr><td>Single LED</td><td>Power/boot/fault minimum.</td><td>Many detailed states.</td></tr>
+        <tr><td>RGB LED</td><td>Fast state visibility.</td><td>Color-blind-only UX without text/pattern.</td></tr>
+        <tr><td>Buzzer</td><td>Immediate hazard/attention.</td><td>Quiet labs/classrooms unless mute exists.</td></tr>
+        <tr><td>OLED</td><td>Air-gapped modules and small appliances.</td><td>High vibration/wet/public abuse unless protected.</td></tr>
+        <tr><td>TFT</td><td>Rich local dashboards.</td><td>Very low-power nodes.</td></tr>
+        <tr><td>Local log</td><td>QA and debugging evidence.</td><td>Only user feedback; logs are not enough.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="gates" class="section panel">
+    <h2>Pass / fail gates</h2>
+    <div class="grid two">
+      <div class="callout ok"><strong>PASS:</strong> A first-time user can identify IDLE, READY, BUSY, WARN, and FAULT without a manual, internet, or serial console.</div>
+      <div class="callout danger"><strong>FAIL:</strong> Any safety-critical fault is visible only in logs, cloud UI, debug console, or hidden internal state.</div>
+    </div>
+    <table style="margin-top:14px">
+      <tr><th>Gate</th><th>Pass condition</th><th>Fail condition</th></tr>
+      <tr><td>Boot visibility</td><td>Power-on sequence shows power, MCU/app boot, and ready/fault.</td><td>Blank or ambiguous startup.</td></tr>
+      <tr><td>Fault mapping</td><td>Every fault has unique code + plain message.</td><td>Multiple faults show same generic error.</td></tr>
+      <tr><td>Offline operation</td><td>State visible without cloud, phone, or network.</td><td>User needs external dashboard for basic state.</td></tr>
+      <tr><td>Safety priority</td><td>Safety/fault overrides normal UI.</td><td>Animation or progress hides fault.</td></tr>
+      <tr><td>Manufacturing QA</td><td>Fixture can force and verify each state.</td><td>States cannot be tested deterministically.</td></tr>
+    </table>
+  </section>
+
+  <section id="risks" class="section panel">
+    <h2>Risk table</h2>
+    <table>
+      <tr><th>Risk</th><th>Failure mode</th><th>Mitigation</th><th>Projects most affected</th></tr>
+      <tr><td>Ambiguous colors</td><td>User cannot distinguish state.</td><td>Pair color with blink pattern and text.</td><td>All</td></tr>
+      <tr><td>Hidden fault</td><td>System remains dangerous while appearing normal.</td><td>FAULT priority lockout, latched error display.</td><td>Drone, OpenEVSE, Voron, robots, Precious Plastic</td></tr>
+      <tr><td>Cloud dependency</td><td>Air-gapped device becomes opaque.</td><td>Local OLED/LED/log first; cloud optional.</td><td>8MB, OpenMV/OpenIPC, SatNOGS, edge boards</td></tr>
+      <tr><td>Log overflow</td><td>Useful evidence lost.</td><td>Ring buffer, severity filter, export receipt.</td><td>8MB, RISC-V, OpenEVSE, robots</td></tr>
+      <tr><td>Privacy leak</td><td>Status screen/log reveals sensitive data.</td><td>Never display tokens, SSIDs, private image names, user identifiers.</td><td>OpenMV/OpenIPC, OpenEVSE, OpenAMRobot</td></tr>
+      <tr><td>Display failure</td><td>User loses all visibility.</td><td>LED fallback code and serial/API fallback.</td><td>All physical products</td></tr>
+    </table>
+  </section>
+
+  <section id="patterns" class="section grid two">
+    <div class="card">
+      <h2>Example state contract</h2>
+      <pre class="code">enum DeviceState {
+  STATE_IDLE,
+  STATE_READY,
+  STATE_BUSY,
+  STATE_WARN,
+  STATE_FAULT
+};
+
+typedef struct {
+  DeviceState state;
+  const char *code;       // e.g. E_SPI_TIMEOUT
+  const char *message;    // e.g. "Cartridge read failed"
+  const char *action;     // e.g. "Remove and reinsert cartridge"
+  uint8_t rgb_r, rgb_g, rgb_b;
+  uint16_t blink_ms;
+  bool latch_until_ack;
+} StatusFrame;</pre>
+    </div>
+    <div class="card">
+      <h2>Example output policy</h2>
+      <pre class="code">function publishStatus(frame):
+  if frame.state == FAULT:
+    stop_normal_animation()
+    set_rgb(RED, fast_blink)
+    oled_print(frame.code, frame.message, frame.action)
+    log_event(frame)
+    require_user_ack()
+  else if frame.state == BUSY:
+    set_rgb(BLUE, pulse)
+    oled_progress(current_operation)
+  else if frame.state == READY:
+    set_rgb(GREEN, steady)
+    oled_print("READY", "Safe to start")</pre>
+    </div>
+  </section>
+
+  <section id="schema" class="section panel">
+    <h2>LogicHub / GN8R export-ready schema</h2>
+    <p>Use this structure to register state-visibility requirements in project manifests, manufacturing receipts, or task cards.</p>
+    <pre class="code" id="jsonSchema">{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logichub.app/schemas/tool-03-state-visibility-offline-telemetry.schema.json",
+  "title": "Tool03StateVisibilityOfflineTelemetry",
+  "type": "object",
+  "required": ["project", "device", "states", "outputs", "fault_priority", "qa_gates"],
+  "properties": {
+    "project": {"type": "string"},
+    "device": {"type": "string"},
+    "revision": {"type": "string"},
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "message", "user_action", "severity"],
+        "properties": {
+          "name": {"enum": ["IDLE", "READY", "BUSY", "WARN", "FAULT"]},
+          "message": {"type": "string"},
+          "user_action": {"type": "string"},
+          "severity": {"enum": ["info", "warning", "critical"]},
+          "latch_until_ack": {"type": "boolean"}
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "oled": {"type": "boolean"},
+        "tft": {"type": "boolean"},
+        "rgb_led": {"type": "boolean"},
+        "buzzer": {"type": "boolean"},
+        "serial_log": {"type": "boolean"},
+        "local_api": {"type": "boolean"}
+      }
+    },
+    "fault_priority": {"type": "array", "items": {"type": "string"}},
+    "qa_gates": {"type": "array", "items": {"type": "string"}},
+    "privacy_rules": {"type": "array", "items": {"type": "string"}}
+  }
+}</pre>
+  </section>
+
+  <section class="section panel">
+    <h2>GN8R task seed</h2>
+    <pre class="code">/task
+repo: via-decide/electronics
+mode: universal-hardware-tools-v0.1
+tier: T5
+estimated_time: 300
+version: 1
+depends_on: tool-02-tactile-determinism-input-fsm
+task: Implement Tool 03 state visibility and offline telemetry contract. Define canonical state vocabulary, OLED/RGB/buzzer/log outputs, fault priority, QA receipts, and per-project mappings for the 14 research bundles.
+
+CAUSATION:
+Hardware that cannot explain itself locally becomes unusable when offline, air-gapped, faulted, or deployed without an engineer.
+
+CONVERGENCE PROOF:
+Every project has state contract, local output mapping, fault priority, pass/fail gates, and manufacturing receipt schema.
+
+EXECUTION_CONTRACT:
+Emit state_contract.schema.json, examples, checklist, project mapping, and HTML dashboard.</pre>
+  </section>
+
+  <div class="footer">
+    <p><strong>Resume point:</strong> next tool is <code>tool-04-poka-yoke-interface-geometry.html</code>.</p>
+    <p>Generated for the 14-bundle hardware research workflow. Standalone HTML; no external scripts or cloud dependency.</p>
+  </div>
+</div>
+<script>
+  const search = document.getElementById('projectSearch');
+  const cards = [...document.querySelectorAll('.project-card')];
+  search.addEventListener('input', () => {
+    const q = search.value.toLowerCase().trim();
+    cards.forEach(c => {
+      const hay = (c.textContent + ' ' + c.dataset.key).toLowerCase();
+      c.classList.toggle('hidden', q && !hay.includes(q));
+    });
+  });
+</script>
+</body>
+</html>

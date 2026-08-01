@@ -1,0 +1,26 @@
+{
+  "tool_id": "T04",
+  "tool_name": "Poka-yoke Interface Geometry",
+  "created_at_local": "2026-07-31T03:11:00+05:30",
+  "html_file": "tool-04-poka-yoke-interface-geometry.html",
+  "schema_file": "tool-04-poka-yoke-interface.schema.json",
+  "next_tool": "tool-05-fault-tolerance-fallbacks.html",
+  "projects_mapped": 14,
+  "files": [
+    {
+      "name": "tool-04-poka-yoke-interface-geometry.html",
+      "sha256": "e2f930bb597e3e441dcd0c00efd4609de698f01768361e6c78b3e3ff6c1f3d99",
+      "bytes": 29750
+    },
+    {
+      "name": "tool-04-README.md",
+      "sha256": "18741174460ad2a65f02e543e3d6170367bb67f2879f43b0dac055fa18667482",
+      "bytes": 429
+    },
+    {
+      "name": "tool-04-poka-yoke-interface.schema.json",
+      "sha256": "36420e2b457b19436ef90ee9fa97402309c6544f022e64a1200d6f280ca2000d",
+      "bytes": 3386
+    }
+  ]
+}

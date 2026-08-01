@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logichub.app/schemas/tool-08-calibration-receipt.schema.json",
+  "title": "T08 Sensor Calibration Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "tool_id",
+    "project",
+    "unit_serial",
+    "timestamp",
+    "sensor",
+    "calibration",
+    "result"
+  ],
+  "properties": {
+    "tool_id": {
+      "const": "T08"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unit_serial": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "operator": {
+      "type": "string"
+    },
+    "fixture_id": {
+      "type": "string"
+    },
+    "source_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "ambient_c": {
+          "type": "number"
+        },
+        "humidity_percent": {
+          "type": "number"
+        },
+        "supply_voltage_v": {
+          "type": "number"
+        }
+      }
+    },
+    "sensor": {
+      "type": "object",
+      "required": [
+        "name",
+        "expected_part",
+        "interface",
+        "identity_result"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "expected_part": {
+          "type": "string"
+        },
+        "actual_part": {
+          "type": "string"
+        },
+        "serial": {
+          "type": "string"
+        },
+        "interface": {
+          "enum": [
+            "I2C",
+            "SPI",
+            "UART",
+            "USB",
+            "CSI",
+            "GPIO",
+            "ADC",
+            "ROS2",
+            "RTSP",
+            "OTHER"
+          ]
+        },
+        "bus_address": {
+          "type": "string"
+        },
+        "identity_result": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_applicable"
+          ]
+        }
+      }
+    },
+    "raw_baseline": {
+      "type": "object",
+      "properties": {
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sample_rate_hz": {
+          "type": "number"
+        },
+        "max_sample_age_ms": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "stddev": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "min": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "max": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "outlier_rate": {
+          "type": "number"
+        }
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string"
+        },
+        "offsets": {
+          "type": "object"
+        },
+        "scale_factors": {
+          "type": "object"
+        },
+        "matrix": {
+          "type": "array"
+        },
+        "artifact_hash": {
+          "type": "string"
+        }
+      }
+    },
+    "health_limits": {
+      "type": "object",
+      "properties": {
+        "max_stale_ms": {
+          "type": "number"
+        },
+        "max_outlier_rate": {
+          "type": "number"
+        },
+        "max_stddev": {
+          "type": "number"
+        },
+        "min_value": {
+          "type": "number"
+        },
+        "max_value": {
+          "type": "number"
+        }
+      }
+    },
+    "result": {
+      "enum": [
+        "pass",
+        "fail",
+        "blocked",
+        "degraded"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logichub.local/schemas/actuator-motor-heater-safety-receipt.schema.json",
+  "title": "Actuator Motor Heater Safety Interlock Receipt",
+  "type": "object",
+  "required": [
+    "project",
+    "hardware_revision",
+    "operator",
+    "test_datetime_utc",
+    "hazard_classes",
+    "interlocks",
+    "firmware_gates",
+    "physical_gates",
+    "pass"
+  ],
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "hardware_revision": {
+      "type": "string"
+    },
+    "operator": {
+      "type": "string"
+    },
+    "test_datetime_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hazard_classes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "motor",
+          "heater",
+          "relay",
+          "blade",
+          "gantry",
+          "wheel",
+          "propeller",
+          "charger",
+          "battery",
+          "mains",
+          "pinch",
+          "thermal",
+          "fume"
+        ]
+      }
+    },
+    "interlocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "default_state",
+          "test_method",
+          "result"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "physical",
+              "electrical",
+              "firmware",
+              "software-ui",
+              "procedural"
+            ]
+          },
+          "default_state": {
+            "enum": [
+              "disabled",
+              "open",
+              "off",
+              "safe",
+              "unknown"
+            ]
+          },
+          "test_method": {
+            "type": "string"
+          },
+          "measured_value": {
+            "type": [
+              "string",
+              "number",
+              "null"
+            ]
+          },
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "blocked",
+              "not_applicable"
+            ]
+          }
+        }
+      }
+    },
+    "firmware_gates": {
+      "type": "object",
+      "properties": {
+        "watchdog_enabled": {
+          "type": "boolean"
+        },
+        "command_timeout_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requires_explicit_arm": {
+          "type": "boolean"
+        },
+        "safe_state_on_timeout": {
+          "type": "string"
+        },
+        "safe_state_on_sensor_fault": {
+          "type": "string"
+        },
+        "motion_limit_profile": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "physical_gates": {
+      "type": "object",
+      "properties": {
+        "physical_estop_present": {
+          "type": "boolean"
+        },
+        "estop_independent_of_browser_network_controller": {
+          "type": "boolean"
+        },
+        "fuse_or_breaker_present": {
+          "type": "boolean"
+        },
+        "guarding_present": {
+          "type": "boolean"
+        },
+        "lockout_tagout_procedure": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pass": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

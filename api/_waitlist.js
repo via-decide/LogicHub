@@ -15,8 +15,6 @@
 
 import { createHmac, createHash, timingSafeEqual } from 'node:crypto';
 
-export const RATE_LIMIT_COLLECTION = 'waitlist_rate_limit';
-
 /** One hour, fixed window. Not a sliding window: a counter is enough here. */
 export const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
@@ -108,22 +106,27 @@ export function windowStart(now = Date.now()) {
  *
  * Returns `{ allowed, count, max }`. Throws if the counter cannot be read or
  * written — the caller refuses the signup rather than proceeding uncounted.
- * A read-then-write can undercount under concurrency; that is acceptable for a
- * courtesy limit and is not relied on for anything but abuse control.
+ *
+ * Atomic: a single `INSERT ... ON CONFLICT DO UPDATE ... RETURNING count`
+ * against `db.raw` (the real Postgres client `_pg.js`'s `getAdminDb()`
+ * exposes for exactly this — see `PostgresFirestoreCompat.raw`). The
+ * generic document get-then-merge-set interface used elsewhere in this file
+ * cannot express an atomic increment; a prior version of this function did
+ * read-then-write through that interface, which could undercount under
+ * concurrency. This version cannot, since the increment happens inside one
+ * statement the database itself serializes.
  */
 export async function countRequest(db, bucket, now = Date.now()) {
   const start = windowStart(now);
-  const ref = db.collection(RATE_LIMIT_COLLECTION).doc(`${bucket.key}_${start}`);
-
-  const snapshot = await ref.get();
-  const stored = snapshot.exists ? snapshot.data() : null;
-  const previous = stored && Number.isFinite(stored.count) ? stored.count : 0;
-  const count = previous + 1;
-
-  await ref.set(
-    { count, windowStart: start, expiresAfter: start + RATE_LIMIT_WINDOW_MS },
-    { merge: true },
-  );
+  const sql = db.raw;
+  const rows = await sql`
+    INSERT INTO waitlist_rate_limit_counters (bucket_key, window_start, count)
+    VALUES (${bucket.key}, ${start}, 1)
+    ON CONFLICT (bucket_key, window_start)
+    DO UPDATE SET count = waitlist_rate_limit_counters.count + 1
+    RETURNING count
+  `;
+  const count = rows[0].count;
 
   return { allowed: count <= bucket.max, count, max: bucket.max };
 }

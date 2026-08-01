@@ -1,0 +1,86 @@
+{
+  "$schema": "https://logichub.app/schemas/enclosure_environmental_dfm_v1.json",
+  "tool_id": "T13",
+  "tool_name": "Enclosure / Environmental DFM",
+  "type": "object",
+  "required": [
+    "project",
+    "revision",
+    "enclosure",
+    "hazard_boundaries",
+    "evidence",
+    "decision"
+  ],
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "string"
+    },
+    "enclosure": {
+      "type": "object",
+      "properties": {
+        "cad_source_uri": {
+          "type": "string"
+        },
+        "cad_hash_sha256": {
+          "type": "string"
+        },
+        "material": {
+          "type": "string"
+        },
+        "process": {
+          "enum": [
+            "3d_print",
+            "cnc",
+            "sheet_metal",
+            "injection_moulding",
+            "laser_cut",
+            "mixed"
+          ]
+        },
+        "wall_thickness_mm": {
+          "type": "number"
+        },
+        "fasteners": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "service_panels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hazard_boundaries": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "decision": {
+      "enum": [
+        "release",
+        "revise",
+        "block"
+      ]
+    },
+    "blocked_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ComplianceSafetyRiskLedgerEntry",
+  "type": "object",
+  "required": [
+    "project_id",
+    "hazard_id",
+    "hazard",
+    "severity",
+    "likelihood",
+    "mitigation",
+    "evidence_required",
+    "release_gate"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "hazard_id": {
+      "type": "string"
+    },
+    "hazard": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "likelihood": {
+      "type": "string",
+      "enum": [
+        "rare",
+        "possible",
+        "likely",
+        "frequent"
+      ]
+    },
+    "mitigation": {
+      "type": "string"
+    },
+    "evidence_required": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "release_gate": {
+      "type": "string",
+      "enum": [
+        "allowed",
+        "hold",
+        "blocked"
+      ]
+    },
+    "owner": {
+      "type": "string"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "needs_review",
+        "approved",
+        "rejected"
+      ]
+    },
+    "last_reviewed": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

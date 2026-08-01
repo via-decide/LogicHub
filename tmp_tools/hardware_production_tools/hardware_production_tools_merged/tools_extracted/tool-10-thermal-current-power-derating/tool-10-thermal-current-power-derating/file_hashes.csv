@@ -1,0 +1,5 @@
+file,sha256,size_bytes
+README.md,1c01c63e024e6298fb398f72ab748c5a9e416f4a9bfb889afa3ff70b9e4c38a9,560
+tool-10-derating-receipt.schema.json,e523177fd20ab9785a961b602bdb03a686723180ac86f0bfee4ed19ca08cc09b,839
+tool-10-manifest.json,841916e8beebebacfa6786ddc957ac6d7ba362c091187e8a0f64a780b0ebe696,437
+tool-10-thermal-current-power-derating.html,66f81073926752c3cc61cdb7f69c279ef073a492096b0533f1cf20d61ad4efe6,28603

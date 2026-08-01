@@ -1,0 +1,30 @@
+{
+  "package": "tool-07-storage-integrity-transactional-updates",
+  "created_local_time": "2026-07-31T04:28:00+05:30",
+  "tool_id": "T07",
+  "tool_name": "Storage Integrity + Transactional Updates",
+  "previous_tool": "tool-06-source-manifest-bom-cad-intake.html",
+  "next_tool": "tool-08-sensor-calibration-health-evidence.html",
+  "files": [
+    {
+      "path": "tool-07-storage-integrity-transactional-updates.html",
+      "size_bytes": 28976,
+      "sha256": "de6c62036ecec2aa2baa8799bb703d5d9d7863d32e026cc20127e20243bf61f6"
+    },
+    {
+      "path": "tool-07-README.md",
+      "size_bytes": 632,
+      "sha256": "8c93038dc1a39a52d448c4147eaf666136ef989536c2aa344f8050b9eff6088a"
+    },
+    {
+      "path": "tool-07-storage-transaction.schema.json",
+      "size_bytes": 4233,
+      "sha256": "a6c3f3a48b3e03011907bfe01c08589f289729007bd2ca345121f8ff29eabd89"
+    },
+    {
+      "path": "tool-07-manifest.json",
+      "size_bytes": 876,
+      "sha256": "35e409c17756f848d01dacae188672cc40d696739b86a2ea62a8b1f235aef3d2"
+    }
+  ]
+}

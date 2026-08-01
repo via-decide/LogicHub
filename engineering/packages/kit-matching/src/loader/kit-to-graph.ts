@@ -21,9 +21,17 @@ const COMPONENT_PARAMETERS: Record<string, Record<string, unknown>> = {
   'controller-rp2040': { controller: 'rp2040', supplyEntry: 'board-vin' },
   'controller-rp2350': { controller: 'rp2350', supplyEntry: 'board-vin' },
   'controller-esp32-camera': { controller: 'esp32', supplyEntry: 'board-vin' },
+  'controller-linux': { controller: 'stm32f4', supplyEntry: 'board-vin' },
+  'controller-flight': { controller: 'stm32f4', supplyEntry: 'board-vin' },
+  'controller-riscv': { controller: 'stm32f4', supplyEntry: 'board-vin' },
+  'controller-ros2': { controller: 'stm32f4', supplyEntry: 'board-vin' },
 
   'motor-dc-gearbox': {
-    motorType: 'dc-brushed', ratedVoltageV: 6, noLoadRpm: 200,
+    motorType: 'dc-brushed', ratedVoltageV: 12, noLoadRpm: 200,
+    stallTorqueNcm: 8, stallCurrentA: 1.5, gearRatio: 1, wheelDiameterMm: 65,
+  },
+  'motor-stepper': {
+    motorType: 'stepper', ratedVoltageV: 12, noLoadRpm: 200,
     stallTorqueNcm: 8, stallCurrentA: 1.5, gearRatio: 1, wheelDiameterMm: 65,
   },
   'actuator-micro-servo': {
@@ -40,6 +48,9 @@ const COMPONENT_PARAMETERS: Record<string, Record<string, unknown>> = {
   'battery-module-lowvoltage': {
     chemistry: 'lipo', cellCount: 2, capacityMah: 2200, dischargeRating: 5,
   },
+  'battery-lipo-3s': {
+    chemistry: 'lipo', cellCount: 3, capacityMah: 2200, dischargeRating: 15,
+  },
 
   'sensor-distance-ultrasonic': {
     sensorType: 'distance', interfaceType: 'gpio', currentDrawMa: 15,
@@ -51,6 +62,7 @@ const COMPONENT_PARAMETERS: Record<string, Record<string, unknown>> = {
 
   'connectivity-onboard-bluetooth': { connectivityType: 'bluetooth', rangeMEstimate: 10 },
   'connectivity-onboard-wifi': { connectivityType: 'wifi', rangeMEstimate: 30 },
+  'radio-sdr': { connectivityType: 'radio', rangeMEstimate: 100000 },
 };
 
 export interface KitToGraphOptions {

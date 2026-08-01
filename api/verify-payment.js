@@ -12,7 +12,9 @@ import {
   paymentsDisabledResponse,
   razorpayCredentials,
 } from './_payments-config.js';
-import { getAdminDb } from './_sovereignAuth.js';
+// Postgres-backed, not the SQLite-backed _sovereignAuth.js getAdminDb() --
+// this endpoint's write path was broken on Vercel (see api/_pg.js's header).
+import { getAdminDb } from './_pg.js';
 import { markOrderPaid, recordVerificationRejection } from './_orders.js';
 
 export default async function handler(req, res) {

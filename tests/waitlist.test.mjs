@@ -10,7 +10,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  RATE_LIMIT_COLLECTION,
   RATE_LIMIT_MAX,
   RATE_LIMIT_UNKNOWN_MAX,
   RATE_LIMIT_WINDOW_MS,
@@ -42,25 +41,24 @@ function withEnv(values, run) {
   }
 }
 
+/**
+ * `countRequest` no longer reads through `.collection().doc()` — it does a
+ * single atomic `INSERT ... ON CONFLICT DO UPDATE ... RETURNING count`
+ * against `db.raw` (see `api/_waitlist.js`'s real query, and
+ * `api/_pg.js`'s `PostgresFirestoreCompat.raw` getter that exposes the real
+ * postgres.js tagged-template client for exactly this). This fake mirrors
+ * only that one query shape — `bucket.key` and `start` are the second and
+ * third tagged-template values, matching the real
+ * `VALUES (${bucket.key}, ${start}, 1)` clause — not a general SQL mock.
+ */
 function fakeDb() {
   const store = new Map();
   return {
-    collection(name) {
-      assert.equal(name, RATE_LIMIT_COLLECTION);
-      return {
-        doc(id) {
-          return {
-            async get() {
-              const data = store.get(id);
-              return { exists: data !== undefined, data: () => ({ ...data }) };
-            },
-            async set(data, options = {}) {
-              const base = options.merge ? store.get(id) || {} : {};
-              store.set(id, { ...base, ...data });
-            },
-          };
-        },
-      };
+    raw(strings, bucketKey, windowStartValue) {
+      const key = `${bucketKey}::${windowStartValue}`;
+      const next = (store.get(key) || 0) + 1;
+      store.set(key, next);
+      return Promise.resolve([{ count: next }]);
     },
     ids() {
       return [...store.keys()];
@@ -196,9 +194,7 @@ test('the window is a fixed boundary, not the time of first request', () => {
 
 test('a counter failure propagates so the caller can fail closed', async () => {
   const broken = {
-    collection() {
-      return { doc() { return { async get() { throw new Error('firestore down'); } }; } };
-    },
+    raw() { throw new Error('firestore down'); },
   };
 
   await assert.rejects(

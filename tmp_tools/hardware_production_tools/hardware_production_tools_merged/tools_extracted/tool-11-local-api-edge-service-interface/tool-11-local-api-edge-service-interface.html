@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool 11 — Local API / Edge Service Interface</title>
+<style>
+:root {
+  --bg:#090d14; --panel:#0f1623; --panel2:#121b2b; --text:#e6edf3; --muted:#8b949e;
+  --line:#263244; --blue:#58a6ff; --green:#3fb950; --amber:#d29922; --red:#f85149;
+  --purple:#a371f7; --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top left,#111b2c 0,#090d14 38rem);color:var(--text);font-family:var(--sans);line-height:1.55}
+header{border-bottom:1px solid var(--line);background:rgba(9,13,20,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+.wrap{max-width:1240px;margin:0 auto;padding:24px}
+.kicker{font-family:var(--mono);font-size:13px;color:var(--blue);letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:38px;line-height:1.05;margin:8px 0 10px}
+h2{font-size:24px;margin:36px 0 14px;border-bottom:1px solid var(--line);padding-bottom:8px}
+h3{margin:10px 0 8px;font-size:18px}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+.badge,.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-family:var(--mono);font-size:12px;background:#0b1220;color:#c9d1d9}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.priority,.severity{border-radius:999px;padding:3px 8px;font-family:var(--mono);font-size:12px;border:1px solid var(--line)}
+.high{color:var(--amber);border-color:rgba(210,153,34,.5)}.critical{color:var(--red);border-color:rgba(248,81,73,.5)}.medium{color:var(--blue);border-color:rgba(88,166,255,.5)}
+.low{color:var(--green);border-color:rgba(63,185,80,.5)}
+dl{display:grid;grid-template-columns:120px 1fr;gap:8px;margin:10px 0 0}
+dt{color:var(--muted);font-family:var(--mono);font-size:12px} dd{margin:0}
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px 12px}
+th{background:#0c1320;color:#c9d1d9;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+tr:last-child td{border-bottom:0}
+code,pre{font-family:var(--mono)}
+pre{background:#050810;border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto;color:#dbeafe}
+.check{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(38,50,68,.55)}
+.check:last-child{border-bottom:0}
+input[type="checkbox"]{width:18px;height:18px;accent-color:#58a6ff;margin-top:3px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+button{background:#182235;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer}
+button:hover{border-color:var(--blue)}
+.search{flex:1;min-width:220px;background:#050810;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.nav a{color:#c9d1d9;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-family:var(--mono);font-size:12px}
+.nav a:hover{border-color:var(--blue);color:white}
+.project.hidden{display:none}
+.footer{color:var(--muted);font-size:13px;margin:36px 0}
+@media(max-width:860px){.span-4,.span-6,.span-8{grid-column:span 12} h1{font-size:30px} dl{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <div class="kicker">Universal Hardware Production Tool · T11</div>
+        <h1>Local API / Edge Service Interface</h1>
+        <p class="muted">Local-first control, diagnostics, telemetry, maintenance, receipts, and safe command boundaries for hardware products.</p>
+      </div>
+      <span class="badge">Next: T12 QA Fixture</span>
+    </div>
+    <nav class="nav">
+      <a href="#purpose">Purpose</a><a href="#stages">Production stages</a><a href="#projects">14 projects</a>
+      <a href="#checklist">Checklist</a><a href="#gates">Pass gates</a><a href="#risks">Risks</a>
+      <a href="#api">API pattern</a><a href="#schema">Schema</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<section id="purpose">
+  <div class="grid">
+    <article class="card span-8">
+      <h2>Tool purpose</h2>
+      <p>Define the local-first service surface that lets hardware be operated, inspected, configured, updated, and diagnosed without depending on cloud infrastructure.</p>
+      <p>This tool is used when a device needs a trustworthy local service layer: a dashboard, USB/serial service shell, local HTTP API, MQTT bridge, ROS2 bridge, factory fixture endpoint, or offline maintenance panel.</p>
+      <p><b>Core rule:</b> the API may request actions, but hardware safety and firmware interlocks own final authority. A browser button is never a substitute for a physical E-stop, fuse, relay interlock, thermal cutoff, or safe power path.</p>
+    </article>
+    <aside class="card span-4">
+      <h2>Applies to</h2>
+      <p><span class="pill">robots</span> <span class="pill">EVSE</span> <span class="pill">cameras</span> <span class="pill">printers</span></p>
+      <p><span class="pill">microscopes</span> <span class="pill">RF stations</span> <span class="pill">edge boards</span> <span class="pill">cartridges</span></p>
+      <p><span class="pill">plastic machines</span> <span class="pill">farm gantries</span></p>
+    </aside>
+  </div>
+</section>
+
+<section id="stages">
+  <h2>Production-stage map</h2>
+  <table>
+    <thead><tr><th>Stage</th><th>Name</th><th>Gate</th></tr></thead>
+    <tbody><tr><td><code>S0</code></td><td>Source intake</td><td>Record which repo/firmware/API docs define the service. Pin commit/release and license.</td></tr>
+<tr><td><code>S1</code></td><td>Command inventory</td><td>Classify every operation as observe, configure, calibrate, actuate, update, or emergency.</td></tr>
+<tr><td><code>S2</code></td><td>Safety boundary</td><td>Decide which commands are read-only, physically gated, software-gated, or prohibited.</td></tr>
+<tr><td><code>S3</code></td><td>Transport choice</td><td>Choose serial, USB, HTTP, WebSocket, MQTT, BLE, ROS2 bridge, or local Unix socket.</td></tr>
+<tr><td><code>S4</code></td><td>Schema contract</td><td>Define request/response JSON, error codes, version, timestamps, and device identity.</td></tr>
+<tr><td><code>S5</code></td><td>Offline dashboard</td><td>Build local UI pages for health, state, logs, settings, calibration, and receipts.</td></tr>
+<tr><td><code>S6</code></td><td>Receipt logging</td><td>Store command result, safety state, operator action, firmware version, and pass/fail evidence.</td></tr>
+<tr><td><code>S7</code></td><td>Factory validation</td><td>Run fixture tests through the same API used by field service and generate a signed receipt.</td></tr>
+<tr><td><code>S8</code></td><td>Field service</td><td>Use the service to diagnose without opening the product unless a hardware fault is proven.</td></tr></tbody>
+  </table>
+</section>
+
+<section id="projects">
+  <div class="row">
+    <h2>Applicability across the 14 created ZIP projects</h2>
+    <div class="toolbar">
+      <input id="search" class="search" placeholder="Filter projects, e.g. EVSE, robot, camera, cartridge">
+      <button onclick="filterPriority('all')">All</button>
+      <button onclick="filterPriority('critical')">Critical</button>
+      <button onclick="filterPriority('high')">High</button>
+    </div>
+  </div>
+  <div id="projectGrid" class="grid">
+<article class="card project" data-priority="medium">
+  <div class="row"><span class="badge">P01</span><span class="priority medium">Medium</span></div>
+  <h3>Electronics research bundle</h3>
+  <p class="muted">Foundation study bundle for electronics, SiC MOSFETs, and embedded Linux.</p>
+  <dl>
+    <dt>Use when</dt><dd>A future board or Linux device needs a clean service model before hardware/software split is frozen.</dd>
+    <dt>How</dt><dd>Use embedded Linux concepts to design a minimal local service: /health, /version, /logs, /config, /diagnostics. Treat this as a lab standard before implementing on real boards.</dd>
+    <dt>Production part</dt><dd>Embedded Linux boards, lab fixtures, power-board diagnostics.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P02</span><span class="priority high">High</span></div>
+  <h3>Air-gapped 8MB module research pack</h3>
+  <p class="muted">Offline cartridge architecture, manifest, local-first storage, and integrity.</p>
+  <dl>
+    <dt>Use when</dt><dd>The cartridge reader must expose status, verify/commit actions, and error receipts to the host without cloud dependency.</dd>
+    <dt>How</dt><dd>Expose a serial/USB local protocol for cartridge_inserted, manifest_verified, commit_started, commit_done, rollback, and fault states. Provide JSON receipts for every read/write/verify cycle.</dd>
+    <dt>Production part</dt><dd>Cartridge reader service, host validator, local maintenance UI.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P03</span><span class="priority high">High</span></div>
+  <h3>Air-gapped 8MB CAD implementation bundle</h3>
+  <p class="muted">First EVT/CAD implementation of the 8MB module.</p>
+  <dl>
+    <dt>Use when</dt><dd>The prototype needs a PC test utility or browser-facing local service for bench validation.</dd>
+    <dt>How</dt><dd>Map firmware serial commands to a small local API and generate validation receipts: flash_id, read_verify, write_verify, power_loss_recovery.</dd>
+    <dt>Production part</dt><dd>PCBA test service, fixture app, cartridge service bridge.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P04</span><span class="priority high">High</span></div>
+  <h3>Drone CAD implementation bundle</h3>
+  <p class="muted">Bounded drone flight-controller EVT platform.</p>
+  <dl>
+    <dt>Use when</dt><dd>The flight controller needs safe local diagnostics before any tethered or powered motor test.</dd>
+    <dt>How</dt><dd>Expose read-only health endpoints first: imu_state, barometer_state, flash_log_state, arming_state, battery_state. Keep motor/arming commands behind a physical-safe gate.</dd>
+    <dt>Production part</dt><dd>Ground test dashboard, tether-test service, blackbox log extractor.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P05</span><span class="priority high">High</span></div>
+  <h3>Pupper V3 open-source research bundle</h3>
+  <p class="muted">Open-source quadruped robot research and productization study.</p>
+  <dl>
+    <dt>Use when</dt><dd>The robot needs local operation, gait state visibility, calibration, and service diagnostics.</dd>
+    <dt>How</dt><dd>Bridge ROS2 topics/services into a local dashboard with strict command permissions: observe, calibrate, enable torque, safe pose, walk mode, emergency stop.</dd>
+    <dt>Production part</dt><dd>ROS2 service UI, field maintenance interface, education dashboard.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P06</span><span class="priority high">High</span></div>
+  <h3>FarmBot open-source research bundle</h3>
+  <p class="muted">Agriculture automation, CNC-style gantry, electronics, firmware, web app, and tool ecosystem.</p>
+  <dl>
+    <dt>Use when</dt><dd>A farm-side system must keep working with poor internet or no cloud access.</dd>
+    <dt>How</dt><dd>Provide local queue, axis status, tool status, water state, job receipt, manual jog, stop command, and offline sync boundary.</dd>
+    <dt>Production part</dt><dd>Local farm controller, maintenance app, toolhead service interface.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P07</span><span class="priority high">High</span></div>
+  <h3>OpenFlexure Microscope research bundle</h3>
+  <p class="muted">Open-source lab microscope and precision positioning platform.</p>
+  <dl>
+    <dt>Use when</dt><dd>The microscope must expose capture, focus, illumination, stage movement, and calibration locally.</dd>
+    <dt>How</dt><dd>Use local HTTP/API commands for image capture, focus sweep, stage move, illumination level, objective profile, and calibration receipt export.</dd>
+    <dt>Production part</dt><dd>Microscope local server, calibration dashboard, lab evidence API.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P08</span><span class="priority high">High</span></div>
+  <h3>SatNOGS satellite ground-station research bundle</h3>
+  <p class="muted">Open satellite ground-station stack: antenna, SDR, Linux station, observation workflow.</p>
+  <dl>
+    <dt>Use when</dt><dd>The station must be monitored locally for RF chain, observations, scheduler, disk, network, and rotator state.</dd>
+    <dt>How</dt><dd>Expose local status page and API for sdr_detected, antenna_profile, observation_active, last_pass, decode_status, storage_free, and fault history.</dd>
+    <dt>Production part</dt><dd>Ground-station dashboard, RF commissioning service, observation receipt generator.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P09</span><span class="priority high">High</span></div>
+  <h3>Voron 3D printer engineering bundle</h3>
+  <p class="muted">High-performance open-source 3D printer engineering and kit/productization study.</p>
+  <dl>
+    <dt>Use when</dt><dd>A printer kit needs local control, status, and calibration without depending on remote services.</dd>
+    <dt>How</dt><dd>Treat Moonraker/Klipper-like local API surfaces as the pattern: printer_state, heaters, bed_mesh, print_job, emergency_stop, config snapshot, first-print receipt.</dd>
+    <dt>Production part</dt><dd>Printer local UI, commissioning dashboard, service workflow.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="critical">
+  <div class="row"><span class="badge">P10</span><span class="priority critical">Critical</span></div>
+  <h3>OpenEVSE research bundle</h3>
+  <p class="muted">Open EV charging hardware/software platform.</p>
+  <dl>
+    <dt>Use when</dt><dd>The charger needs local status, diagnostics, and integration while never allowing unsafe remote enablement.</dd>
+    <dt>How</dt><dd>Use a strict safety hierarchy: local API may request charging settings, but the safety controller owns diode/GFCI/ground/stuck relay/temp fault decisions. Expose RAPI/MQTT/HTTP read-only status first.</dd>
+    <dt>Production part</dt><dd>EVSE local dashboard, commissioning probe, charge log service.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P11</span><span class="priority high">High</span></div>
+  <h3>OpenMV + OpenIPC local vision bundle</h3>
+  <p class="muted">Local-first camera/vision appliance stack.</p>
+  <dl>
+    <dt>Use when</dt><dd>A vision product needs video, events, model thresholds, and privacy state without cloud dependency.</dd>
+    <dt>How</dt><dd>Expose RTSP/HTTP/snapshot/event endpoints plus privacy controls, local-only mode indicator, camera health, model version, and storage retention settings.</dd>
+    <dt>Production part</dt><dd>Camera appliance UI, local AI event bridge, privacy evidence API.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="high">
+  <div class="row"><span class="badge">P12</span><span class="priority high">High</span></div>
+  <h3>BeagleV-Fire / Milk-V Duo RISC-V edge bundle</h3>
+  <p class="muted">RISC-V edge computing, FPGA, AIoT, embedded Linux, deterministic IO.</p>
+  <dl>
+    <dt>Use when</dt><dd>An edge board becomes a gateway, accelerator, or deterministic IO node.</dd>
+    <dt>How</dt><dd>Create a board agent with /health, /temperature, /gpio, /camera, /fpga, /benchmark, /update_status, and signed local evidence receipts.</dd>
+    <dt>Production part</dt><dd>Edge service daemon, local web UI, factory validation endpoint.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="critical">
+  <div class="row"><span class="badge">P13</span><span class="priority critical">Critical</span></div>
+  <h3>Precious Plastic machine ecosystem bundle</h3>
+  <p class="muted">Plastic recycling and small manufacturing machine ecosystem.</p>
+  <dl>
+    <dt>Use when</dt><dd>A machine control box needs local recipes, cycle state, heater/motor telemetry, and guarded commands.</dd>
+    <dt>How</dt><dd>Expose recipe view, temperature status, cycle counters, fault history, guard state, maintenance timers, and receipt export. Gate start/reverse/heater commands behind physical interlocks.</dd>
+    <dt>Production part</dt><dd>Machine HMI, workshop dashboard, process-run logger.</dd>
+  </dl>
+</article>
+
+<article class="card project" data-priority="critical">
+  <div class="row"><span class="badge">P14</span><span class="priority critical">Critical</span></div>
+  <h3>NASA JPL Rover / OpenAMRobot research bundle</h3>
+  <p class="muted">Rover mechanics plus modern AMR/ROS2 robot stack.</p>
+  <dl>
+    <dt>Use when</dt><dd>A mobile robot needs local operation, diagnostics, route/docking state, and safe command control.</dd>
+    <dt>How</dt><dd>Bridge ROS2/Nav2/micro-ROS into a local UI with health topics, pose/map state, wheel/encoder diagnostics, E-stop state, docking result, and commissioning receipts.</dd>
+    <dt>Production part</dt><dd>AMR local operator dashboard, docking validation app, field service tool.</dd>
+  </dl>
+</article></div>
+</section>
+
+<section id="checklist">
+  <h2>Implementation checklist</h2>
+  <div class="card"><label class='check'><input type='checkbox'><span><b>Identity</b> — Device exposes product_id, hardware_rev, firmware_rev, serial_number, api_version.</span></label>
+<label class='check'><input type='checkbox'><span><b>Health</b> — Device exposes power, thermal, storage, network, sensor, actuator, and fault state.</span></label>
+<label class='check'><input type='checkbox'><span><b>Safety gate</b> — All dangerous commands require local preconditions and cannot bypass hardware interlocks.</span></label>
+<label class='check'><input type='checkbox'><span><b>Read-only first</b> — Initial bring-up API is read-only until basic electrical and mechanical safety is validated.</span></label>
+<label class='check'><input type='checkbox'><span><b>Offline-first</b> — All core operation and diagnostics work with no internet connection.</span></label>
+<label class='check'><input type='checkbox'><span><b>Error vocabulary</b> — Every failure has a stable code, human message, recovery instruction, and severity.</span></label>
+<label class='check'><input type='checkbox'><span><b>Command audit</b> — Every configuration, calibration, update, and actuation request generates a receipt.</span></label>
+<label class='check'><input type='checkbox'><span><b>Rate limits</b> — Commands cannot be spammed fast enough to destabilize motors, heaters, flash, relays, or UI.</span></label>
+<label class='check'><input type='checkbox'><span><b>Timeouts</b> — Every API call has a deterministic timeout and fallback state.</span></label>
+<label class='check'><input type='checkbox'><span><b>Versioning</b> — API changes are explicit and backward compatibility is tracked.</span></label>
+<label class='check'><input type='checkbox'><span><b>Update boundary</b> — Firmware/config updates require hash verification and rollback path.</span></label>
+<label class='check'><input type='checkbox'><span><b>Privacy</b> — Camera/log/network APIs disclose what data is captured, stored, and exported.</span></label>
+<label class='check'><input type='checkbox'><span><b>Local credentials</b> — Admin commands require local authentication or physical-presence confirmation.</span></label>
+<label class='check'><input type='checkbox'><span><b>Factory mode</b> — Factory/test commands are disabled or locked out in normal user mode.</span></label></div>
+</section>
+
+<section id="gates">
+  <h2>Pass / fail gates</h2>
+  <div class="card"><ol><li><code>PASS-01</code> The device can be identified locally without cloud access.</li>
+<li><code>PASS-02</code> The operator can see health, state, fault, and version locally.</li>
+<li><code>PASS-03</code> Dangerous commands are impossible unless physical and software gates are satisfied.</li>
+<li><code>PASS-04</code> Every command returns a structured response with status, code, message, and timestamp.</li>
+<li><code>PASS-05</code> Power cycle does not erase fault history needed for diagnosis.</li>
+<li><code>PASS-06</code> A factory test receipt can be generated from a clean device using only local tools.</li>
+<li><code>PASS-07</code> Network loss does not leave motors/heaters/relays/charging in an unsafe state.</li>
+<li><code>PASS-08</code> A failed firmware/config update rolls back or enters a clearly visible recovery state.</li></ol></div>
+</section>
+
+<section id="risks">
+  <h2>Risk table</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Risk</th><th>Severity</th><th>Control</th></tr></thead>
+    <tbody><tr><td><code>API-001</code></td><td>Remote command moves hardware unexpectedly</td><td><span class='severity critical'>Critical</span></td><td>Default to read-only; require physical enable; enforce command allowlist.</td></tr>
+<tr><td><code>API-002</code></td><td>Dashboard E-stop treated as real safety stop</td><td><span class='severity critical'>Critical</span></td><td>Label software stop clearly; require hardware E-stop for robots/machines/EVSE.</td></tr>
+<tr><td><code>API-003</code></td><td>Cloud dependency blocks field repair</td><td><span class='severity high'>High</span></td><td>All diagnostics and receipts must run offline on LAN/USB/serial.</td></tr>
+<tr><td><code>API-004</code></td><td>Unauthenticated local network command</td><td><span class='severity high'>High</span></td><td>Require local credentials, pairing, physical button, or signed service token.</td></tr>
+<tr><td><code>API-005</code></td><td>Version drift between UI and firmware</td><td><span class='severity medium'>Medium</span></td><td>Expose api_version and compatible_min/max in every response.</td></tr>
+<tr><td><code>API-006</code></td><td>Log contains private camera/GPS/user data</td><td><span class='severity high'>High</span></td><td>Classify logs; provide export redaction and retention controls.</td></tr>
+<tr><td><code>API-007</code></td><td>MQTT/WebSocket floods MCU or ROS graph</td><td><span class='severity high'>High</span></td><td>Rate-limit, queue, backpressure, and command timeout.</td></tr>
+<tr><td><code>API-008</code></td><td>Factory debug mode leaks into production</td><td><span class='severity high'>High</span></td><td>Factory mode flag, build-time lock, physical jumper, audit event.</td></tr>
+<tr><td><code>API-009</code></td><td>Receipt is not trustworthy</td><td><span class='severity medium'>Medium</span></td><td>Hash inputs, include firmware/source versions, use monotonic sequence, optional signature.</td></tr>
+<tr><td><code>API-010</code></td><td>Local update bricks device</td><td><span class='severity high'>High</span></td><td>Dual image/dual manifest, hash check, rollback, visible recovery UI.</td></tr></tbody>
+  </table>
+</section>
+
+<section id="api">
+  <h2>Minimal local API pattern</h2>
+  <p class="muted">Start read-only. Add configuration and actuation only after safety preconditions are validated.</p>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+    <tbody><tr><td><code>GET</code></td><td><code>/api/v1/identity</code></td><td>Read product identity, serial, hardware revision, firmware revision, API version.</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/health</code></td><td>Read aggregate health state: ok/warn/fault/lockout.</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/state</code></td><td>Read current operating mode and state-machine node.</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/faults</code></td><td>Read active and historical fault codes.</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/logs?limit=100</code></td><td>Read bounded local event log.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/v1/command/stop</code></td><td>Request software stop; not a substitute for hardware E-stop.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/v1/calibration/start</code></td><td>Start a calibration routine when safety preconditions are true.</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/receipts/latest</code></td><td>Read latest validation or command receipt.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/v1/config</code></td><td>Write configuration only after schema validation and compatibility check.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/v1/update/stage</code></td><td>Stage signed firmware/config update; do not activate until verified.</td></tr></tbody>
+  </table>
+
+  <h2>Example command gate pattern</h2>
+  <pre><code>// Local API command gate pattern: dangerous command routing
+// Rule: network/UI command can request motion, but hardware safety owns final authority.
+
+enum CommandClass { OBSERVE, CONFIGURE, CALIBRATE, ACTUATE, UPDATE, EMERGENCY };
+enum SafetyState { SAFE_OK, SAFE_WARN, SAFE_FAULT, SAFE_LOCKOUT };
+
+struct ApiCommand {
+  const char* name;
+  CommandClass klass;
+  bool requires_physical_enable;
+  bool requires_interlock_ok;
+};
+
+bool physical_enable_present();      // keyed switch, local button, service jumper, or safe fixture
+SafetyState read_interlocks();       // E-stop, guard, battery, thermal, relay, sensor freshness
+void emit_receipt(const char* command, const char* status, const char* code);
+
+bool authorize(ApiCommand cmd) {
+  if (cmd.klass == OBSERVE) return true;
+
+  if (cmd.requires_physical_enable &amp;&amp; !physical_enable_present()) {
+    emit_receipt(cmd.name, &quot;blocked&quot;, &quot;NO_PHYSICAL_ENABLE&quot;);
+    return false;
+  }
+
+  SafetyState s = read_interlocks();
+  if (cmd.requires_interlock_ok &amp;&amp; s != SAFE_OK) {
+    emit_receipt(cmd.name, &quot;blocked&quot;, &quot;INTERLOCK_NOT_OK&quot;);
+    return false;
+  }
+
+  return true;
+}
+
+// Example policy
+ApiCommand motor_enable = {&quot;motor_enable&quot;, ACTUATE, true, true};
+ApiCommand read_health  = {&quot;read_health&quot;,  OBSERVE, false, false};
+</code></pre>
+</section>
+
+<section id="schema">
+  <h2>LogicHub / GN8R export schema</h2>
+  <p class="muted">Use this receipt schema to make every local API operation auditable and reproducible.</p>
+  <div class="toolbar">
+    <button onclick="copyText('schemaBlock')">Copy schema</button>
+    <button onclick="copyText('manifestBlock')">Copy manifest</button>
+  </div>
+  <pre id="schemaBlock"><code>{
+  &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,
+  &quot;title&quot;: &quot;Local API Command Receipt&quot;,
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;receipt_id&quot;,
+    &quot;device&quot;,
+    &quot;api&quot;,
+    &quot;command&quot;,
+    &quot;result&quot;,
+    &quot;safety&quot;,
+    &quot;timestamp_utc&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;receipt_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;timestamp_utc&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    },
+    &quot;device&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;product_id&quot;,
+        &quot;hardware_rev&quot;,
+        &quot;firmware_rev&quot;,
+        &quot;serial_number&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;product_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;hardware_rev&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;firmware_rev&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;serial_number&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;source_manifest_hash&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;api&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;version&quot;,
+        &quot;transport&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;version&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;transport&quot;: {
+          &quot;enum&quot;: [
+            &quot;serial&quot;,
+            &quot;usb&quot;,
+            &quot;http&quot;,
+            &quot;websocket&quot;,
+            &quot;mqtt&quot;,
+            &quot;ble&quot;,
+            &quot;ros2_bridge&quot;,
+            &quot;unix_socket&quot;
+          ]
+        },
+        &quot;client&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;command&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;name&quot;,
+        &quot;class&quot;,
+        &quot;request_hash&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;name&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;class&quot;: {
+          &quot;enum&quot;: [
+            &quot;observe&quot;,
+            &quot;configure&quot;,
+            &quot;calibrate&quot;,
+            &quot;actuate&quot;,
+            &quot;update&quot;,
+            &quot;emergency&quot;
+          ]
+        },
+        &quot;request_hash&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;parameters_redacted&quot;: {
+          &quot;type&quot;: &quot;boolean&quot;
+        }
+      }
+    },
+    &quot;safety&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;physical_enable&quot;,
+        &quot;interlock_state&quot;,
+        &quot;risk_level&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;physical_enable&quot;: {
+          &quot;type&quot;: &quot;boolean&quot;
+        },
+        &quot;interlock_state&quot;: {
+          &quot;enum&quot;: [
+            &quot;ok&quot;,
+            &quot;warn&quot;,
+            &quot;fault&quot;,
+            &quot;lockout&quot;,
+            &quot;not_required&quot;
+          ]
+        },
+        &quot;risk_level&quot;: {
+          &quot;enum&quot;: [
+            &quot;low&quot;,
+            &quot;medium&quot;,
+            &quot;high&quot;,
+            &quot;critical&quot;
+          ]
+        },
+        &quot;blocked_reason&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;result&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;status&quot;,
+        &quot;code&quot;,
+        &quot;message&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;status&quot;: {
+          &quot;enum&quot;: [
+            &quot;pass&quot;,
+            &quot;fail&quot;,
+            &quot;blocked&quot;,
+            &quot;timeout&quot;,
+            &quot;rollback&quot;,
+            &quot;unknown&quot;
+          ]
+        },
+        &quot;code&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;message&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;next_action&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  }
+}</code></pre>
+  <h2>Tool manifest</h2>
+  <pre id="manifestBlock"><code>{
+  &quot;tool_id&quot;: &quot;T11&quot;,
+  &quot;name&quot;: &quot;Local API / Edge Service Interface&quot;,
+  &quot;next&quot;: &quot;tool-12-manufacturing-qa-fixture-receipts.html&quot;,
+  &quot;projects&quot;: [
+    &quot;P01&quot;,
+    &quot;P02&quot;,
+    &quot;P03&quot;,
+    &quot;P04&quot;,
+    &quot;P05&quot;,
+    &quot;P06&quot;,
+    &quot;P07&quot;,
+    &quot;P08&quot;,
+    &quot;P09&quot;,
+    &quot;P10&quot;,
+    &quot;P11&quot;,
+    &quot;P12&quot;,
+    &quot;P13&quot;,
+    &quot;P14&quot;
+  ]
+}</code></pre>
+</section>
+
+<p class="footer">Generated for the hardware research toolchain. Resume sequence: Tool 12 — Manufacturing QA Fixture + Test Receipts.</p>
+</main>
+
+<script>
+let activePriority = 'all';
+function filterPriority(p) {
+  activePriority = p;
+  applyFilters();
+}
+document.getElementById('search').addEventListener('input', applyFilters);
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.project').forEach(card => {
+    const priority = card.dataset.priority;
+    const text = card.innerText.toLowerCase();
+    const okPriority = activePriority === 'all' || priority === activePriority;
+    const okText = !q || text.includes(q);
+    card.classList.toggle('hidden', !(okPriority && okText));
+  });
+}
+function copyText(id) {
+  const el = document.getElementById(id);
+  const txt = el.innerText;
+  navigator.clipboard.writeText(txt).then(() => {
+    const old = document.title;
+    document.title = 'Copied';
+    setTimeout(() => document.title = old, 900);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 04 — Poka-yoke Interface Geometry</title>
+  <meta name="description" content="Universal hardware production tool for foolproof cartridge slots, keyed connectors, guide rails, docks, fixtures and electromechanical interface geometry across 14 hardware research projects." />
+  <style>
+    :root{
+      --bg:#0A1220; --panel:#0f1d32; --panel2:#13243d; --ink:#edf4ff; --muted:#a9bbd6;
+      --gold:#D4AF37; --saffron:#FF9933; --green:#138808; --red:#ff5c5c; --line:#284465;
+      --blue:#74a7ff; --cyan:#5de2d1; --shadow:0 20px 60px rgba(0,0,0,.35); --radius:18px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;background:radial-gradient(circle at top left,#16345a 0,#0A1220 38%,#070d18 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
+    a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+    header{border:1px solid rgba(212,175,55,.35);background:linear-gradient(135deg,rgba(15,29,50,.94),rgba(10,18,32,.78));box-shadow:var(--shadow);border-radius:24px;padding:30px;position:relative;overflow:hidden}
+    header:before{content:"";position:absolute;inset:auto -90px -130px auto;width:320px;height:320px;background:radial-gradient(circle,rgba(255,153,51,.28),transparent 70%)}
+    .kicker{color:var(--gold);letter-spacing:.14em;text-transform:uppercase;font-weight:800;font-size:.78rem}
+    h1{font-size:clamp(2rem,4vw,4.2rem);line-height:1.02;margin:.35rem 0 1rem}
+    h2{font-size:1.7rem;margin:2.2rem 0 .75rem;color:#fff} h3{font-size:1.12rem;margin:1rem 0 .5rem;color:#fff}
+    p{margin:.5rem 0;color:var(--muted)} li{margin:.25rem 0;color:#dbe7fb}
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .hero-card,.card,.panel{background:rgba(15,29,50,.86);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.badge{border:1px solid rgba(116,167,255,.35);background:rgba(116,167,255,.08);color:#dce9ff;border-radius:999px;padding:6px 10px;font-size:.82rem;font-weight:700}.badge.gold{border-color:rgba(212,175,55,.45);background:rgba(212,175,55,.10);color:#ffe69a}.badge.green{border-color:rgba(19,136,8,.45);background:rgba(19,136,8,.12);color:#baf1b3}
+    .nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}.nav a{padding:8px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04);color:var(--ink);font-size:.88rem}
+    .grid{display:grid;gap:14px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .metric{padding:14px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}.metric strong{display:block;font-size:1.35rem;color:var(--gold)}.metric span{color:var(--muted);font-size:.9rem}
+    table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid var(--line);background:rgba(15,29,50,.7)}
+    th,td{padding:12px 13px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;text-align:left}th{background:rgba(212,175,55,.12);color:#ffe9a8;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}td{color:#dbe7fb}td small{color:var(--muted)}
+    .section{margin-top:26px}.callout{border-left:4px solid var(--saffron);padding:14px 16px;background:rgba(255,153,51,.08);border-radius:12px;color:#ffe6cc}.ok{border-left-color:var(--green);background:rgba(19,136,8,.10)}.danger{border-left-color:var(--red);background:rgba(255,92,92,.09)}
+    .timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.step{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.045)}.step b{color:var(--gold)}
+    .project-card{display:flex;flex-direction:column;gap:8px}.project-card .name{font-weight:900;color:#fff}.project-card .tag{font-size:.78rem;color:#a9bbd6}.project-card ul{margin:.3rem 0 0 1.05rem;padding:0}.pill{display:inline-block;border-radius:999px;padding:3px 8px;margin:2px 4px 2px 0;background:rgba(93,226,209,.1);border:1px solid rgba(93,226,209,.28);font-size:.76rem;color:#c8fff8}
+    details{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.035);padding:12px 14px}summary{cursor:pointer;font-weight:800;color:#fff}.code{white-space:pre-wrap;background:#07101d;border:1px solid #203a58;border-radius:16px;padding:15px;overflow:auto;color:#d7e7ff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem}
+    .search{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:#07101d;color:var(--ink);font-size:1rem}.hidden{display:none!important}.footer{margin-top:30px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);padding-top:18px}
+    .diagram{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}.shape{height:150px;border:1px solid rgba(93,226,209,.28);border-radius:18px;background:linear-gradient(180deg,rgba(116,167,255,.10),rgba(255,255,255,.025));position:relative;overflow:hidden}.shape b{position:absolute;left:12px;top:10px;color:#fff}.slot{position:absolute;left:26%;right:26%;top:36%;height:52px;border:3px solid var(--gold);border-radius:8px;background:rgba(212,175,55,.06)}.key{position:absolute;width:34px;height:52px;right:26%;top:36%;background:rgba(255,153,51,.35);border-left:3px solid var(--saffron)}.rail{position:absolute;left:16%;right:16%;height:16px;border-radius:999px;background:rgba(93,226,209,.38)}.rail.r1{top:58px}.rail.r2{top:92px;width:48%;right:auto}.funnel{position:absolute;left:18%;right:18%;top:50px;height:56px;border-left:36px solid transparent;border-right:36px solid transparent;border-bottom:56px solid rgba(212,175,55,.28)}.pinrow{position:absolute;left:20%;right:20%;bottom:26px;display:flex;justify-content:space-between}.pinrow span{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px rgba(93,226,209,.6)}
+    @media (max-width:900px){.hero-grid,.grid.two,.grid.three,.grid.four,.diagram{grid-template-columns:1fr}.timeline{grid-template-columns:1fr}header{padding:22px}.wrap{padding:18px 12px 60px}table{font-size:.9rem}th,td{padding:9px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Universal Hardware Production Tool · T04</div>
+    <h1>Poka-yoke Interface Geometry</h1>
+    <div class="hero-grid">
+      <div>
+        <p><strong>Purpose:</strong> make every physical interface foolproof, repeatable, serviceable, and impossible to assemble in the wrong direction without visible damage or resistance.</p>
+        <p>This tool standardizes cartridge slots, guide rails, keyed connectors, docking funnels, captive fasteners, tool mounts, battery trays, sensor modules, machine guards, and robot docks across the 14 hardware research bundles.</p>
+        <div class="badge-row">
+          <span class="badge gold">Foolproof insertion</span>
+          <span class="badge">Keyed connector geometry</span>
+          <span class="badge">Cartridge / dock / fixture</span>
+          <span class="badge green">Service-safe design</span>
+          <span class="badge">Production tolerance gates</span>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="grid two">
+          <div class="metric"><strong>14</strong><span>projects mapped</span></div>
+          <div class="metric"><strong>0</strong><span>ambiguous insertion paths</span></div>
+          <div class="metric"><strong>3</strong><span>geometry checks minimum</span></div>
+          <div class="metric"><strong>1</strong><span>safe service action per interface</span></div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#when">Use When</a><a href="#geometry">Geometry Patterns</a><a href="#projects">Projects</a><a href="#stages">Production Stages</a><a href="#checklist">Checklist</a><a href="#gates">Pass/Fail</a><a href="#risks">Risks</a><a href="#patterns">Design Patterns</a><a href="#schema">Schema</a>
+    </nav>
+  </header>
+
+  <section id="when" class="section grid two">
+    <div class="card">
+      <h2>Use when</h2>
+      <p>Use this tool whenever a human, fixture, cartridge, cable, toolhead, battery, sensor, camera, board, sample, or robot must physically mate with another part.</p>
+      <div class="callout ok"><strong>Rule:</strong> a safe interface should make the correct action obvious and the wrong action mechanically difficult or impossible.</div>
+      <ul>
+        <li>A cartridge must only fit one way.</li>
+        <li>A connector must not be reversible unless it is electrically safe in both orientations.</li>
+        <li>A toolhead, sample holder, battery, or module must guide itself into alignment before pins touch.</li>
+        <li>A fixture must locate the unit before test probes apply force.</li>
+        <li>A guard or cover must expose enough service access without exposing moving blades, belts, hotends, high voltage, or pinch zones.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Minimum interface vocabulary</h2>
+      <table>
+        <tr><th>Term</th><th>Meaning</th><th>Production meaning</th></tr>
+        <tr><td>Datum</td><td>Reference face/edge/hole used for alignment.</td><td>Defines repeatable assembly and inspection.</td></tr>
+        <tr><td>Key</td><td>Asymmetric feature that blocks wrong orientation.</td><td>Prevents reversed insertion.</td></tr>
+        <tr><td>Lead-in</td><td>Chamfer/funnel/rail that guides insertion.</td><td>Reduces user force and pin damage.</td></tr>
+        <tr><td>Retention</td><td>Latch, screw, magnet, detent, clip, or friction feature.</td><td>Prevents accidental removal.</td></tr>
+        <tr><td>Service clearance</td><td>Space for fingers/tools/cables during maintenance.</td><td>Prevents destructive disassembly.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="geometry" class="section panel">
+    <h2>Core geometry patterns</h2>
+    <div class="diagram">
+      <div class="shape"><b>Asymmetric slot</b><div class="slot"></div><div class="key"></div><div class="pinrow"><span></span><span></span><span></span><span></span></div></div>
+      <div class="shape"><b>Unequal rails</b><div class="rail r1"></div><div class="rail r2"></div><div class="pinrow"><span></span><span></span><span></span></div></div>
+      <div class="shape"><b>Funnel before pins</b><div class="funnel"></div><div class="pinrow"><span></span><span></span><span></span><span></span><span></span></div></div>
+    </div>
+    <div class="timeline" style="margin-top:16px">
+      <div class="step"><b>1. Define user motion</b><br/>Insert, slide, rotate, dock, latch, screw, press, or align.</div>
+      <div class="step"><b>2. Pick datum</b><br/>Choose reference face/edge/hole before connector position.</div>
+      <div class="step"><b>3. Add keying</b><br/>Make the wrong orientation mechanically impossible.</div>
+      <div class="step"><b>4. Add lead-in</b><br/>Use chamfer, funnel, rail, boss, or pin guide before contacts engage.</div>
+      <div class="step"><b>5. Control tolerance</b><br/>Define clearance, stack-up, material shrink, print variance, and wear.</div>
+      <div class="step"><b>6. Validate service</b><br/>Test gloves, one-hand use, repeated cycles, dirty parts, and field repair.</div>
+    </div>
+    <pre class="code">INTERFACE CONTRACT
+human action → gross alignment → keyed geometry → fine alignment → electrical/mechanical contact → retention → release path
+
+Design invariant:
+wrong_orientation ∉ valid_insertions
+connector_contact happens only after mechanical_guidance == seated</pre>
+  </section>
+
+  <section id="projects" class="section">
+    <h2>Project applicability cards</h2>
+    <input class="search" id="projectSearch" placeholder="Filter projects: cartridge, drone, microscope, rover, EVSE, printer, plastic, camera..." />
+    <div class="grid two" id="projectGrid" style="margin-top:14px">
+      <div class="card project-card" data-key="electronics sic embedded linux lab fixture"><div class="name">1. Electronics research bundle</div><div class="tag">Foundation electronics study</div><p>Use interface geometry for lab jigs, test fixtures, probe holders, board carriers, and high-voltage separation training.</p><div><span class="pill">test jig</span><span class="pill">probe alignment</span><span class="pill">creepage habit</span></div></div>
+      <div class="card project-card" data-key="air gapped 8mb cartridge nor slot"><div class="name">2. Air-gapped 8MB module research pack</div><div class="tag">Offline cartridge concept</div><p>Highest priority use case: keyed 8MB cartridge slot with U-shaped guide, rail asymmetry, insertion stop, and pins protected until seated.</p><div><span class="pill">cartridge slot</span><span class="pill">one-way insert</span><span class="pill">pin protection</span></div></div>
+      <div class="card project-card" data-key="airgap cad implementation enclosure pcb cartridge"><div class="name">3. Air-gapped 8MB CAD implementation bundle</div><div class="tag">EVT cartridge hardware</div><p>Convert the reference enclosure into a measured connector dock with toleranced rails, datum features, screw bosses, and production inspection dimensions.</p><div><span class="pill">rails</span><span class="pill">bosses</span><span class="pill">inspection dims</span></div></div>
+      <div class="card project-card" data-key="drone flight controller imu esc battery usb swd"><div class="name">4. Drone CAD implementation bundle</div><div class="tag">Flight-controller EVT</div><p>Use keyed JST/DF13/GH-style harnesses, vibration-safe board mounts, USB/SWD service access, battery restraint, and no-prop bench fixture geometry.</p><div><span class="pill">harness keying</span><span class="pill">vibration mount</span><span class="pill">test fixture</span></div></div>
+      <div class="card project-card" data-key="pupper quadruped robot leg battery actuator"><div class="name">5. Pupper V3 open-source research bundle</div><div class="tag">Quadruped robot</div><p>Use keyed leg modules, battery tray orientation, cable strain relief, protective foot geometry, and service panels that avoid pinch zones.</p><div><span class="pill">leg module</span><span class="pill">battery tray</span><span class="pill">pinch avoidance</span></div></div>
+      <div class="card project-card" data-key="farmbot gantry agriculture toolhead outdoor"><div class="name">6. FarmBot open-source research bundle</div><div class="tag">Outdoor gantry agriculture robot</div><p>Apply foolproof geometry to toolhead mounts, seed/water attachments, weatherproof cable glands, belt guards, and outdoor electronics enclosure service access.</p><div><span class="pill">toolhead dock</span><span class="pill">cable gland</span><span class="pill">weatherproofing</span></div></div>
+      <div class="card project-card" data-key="openflexure microscope optics stage sample holder"><div class="name">7. OpenFlexure Microscope research bundle</div><div class="tag">Lab microscope</div><p>Use keyed objective holders, sample slides, camera mount datum, illumination module alignment, and travel stops to avoid optical collision.</p><div><span class="pill">sample holder</span><span class="pill">optical datum</span><span class="pill">travel stop</span></div></div>
+      <div class="card project-card" data-key="satnogs rf station antenna rotator sdr outdoor"><div class="name">8. SatNOGS satellite ground-station research bundle</div><div class="tag">RF ground station</div><p>Use mast clamps, antenna brackets, weatherproof enclosure seals, coax strain relief, SDR positioning, and rotator pinch-zone covers.</p><div><span class="pill">mast clamp</span><span class="pill">coax relief</span><span class="pill">rotator guard</span></div></div>
+      <div class="card project-card" data-key="voron 3d printer corexy panels toolhead"><div class="name">9. Voron 3D printer engineering bundle</div><div class="tag">CoreXY printer workflow</div><p>Use keyed panel placement, cable-chain routing, toolhead service access, bed connector strain relief, and chamber-safe plastic part geometry.</p><div><span class="pill">panel keying</span><span class="pill">toolhead access</span><span class="pill">cable chain</span></div></div>
+      <div class="card project-card" data-key="openevse ev charger connector enclosure contactor"><div class="name">10. OpenEVSE research bundle</div><div class="tag">EV charging system</div><p>Use service-safe enclosure geometry, connector strain relief, barrier separation, cable glands, relay clearance, and tamper-resistant access.</p><div><span class="pill">cable gland</span><span class="pill">barrier</span><span class="pill">tamper access</span></div></div>
+      <div class="card project-card" data-key="openmv openipc camera lens mount vision privacy"><div class="name">11. OpenMV + OpenIPC local vision bundle</div><div class="tag">Local vision appliance</div><p>Use keyed camera module mounts, lens access limits, privacy shutter geometry, PoE/USB strain relief, and bracket orientation marks.</p><div><span class="pill">camera mount</span><span class="pill">privacy shutter</span><span class="pill">orientation mark</span></div></div>
+      <div class="card project-card" data-key="beaglev fire milkv duo risc-v edge carrier board"><div class="name">12. BeagleV-Fire / Milk-V Duo RISC-V edge bundle</div><div class="tag">Edge compute / FPGA / AIoT</div><p>Use carrier-board keyed mezzanines, heatsink clearance, CSI/FFC restraint, GPIO header shrouds, and SD/eMMC service access.</p><div><span class="pill">mezzanine</span><span class="pill">FFC restraint</span><span class="pill">heatsink clearance</span></div></div>
+      <div class="card project-card" data-key="precious plastic shredder extrusion injection guard mould"><div class="name">13. Precious Plastic machine ecosystem bundle</div><div class="tag">Recycling machine workspace</div><p>Use guarded blade access, keyed mould/tooling, hopper geometry, heater barrel shields, lockout covers, and operator-safe control box layout.</p><div><span class="pill">guarding</span><span class="pill">mould keying</span><span class="pill">hopper</span></div></div>
+      <div class="card project-card" data-key="nasa jpl rover openamrobot battery dock lidar sensor"><div class="name">14. NASA JPL Rover / OpenAMRobot bundle</div><div class="tag">Rover + AMR platform</div><p>Use battery tray keying, sensor brackets, LiDAR height datum, camera tilt datum, docking-marker placement, and E-stop placement geometry.</p><div><span class="pill">battery tray</span><span class="pill">sensor bracket</span><span class="pill">dock datum</span></div></div>
+    </div>
+  </section>
+
+  <section id="stages" class="section panel">
+    <h2>Production-stage map</h2>
+    <table>
+      <tr><th>Stage</th><th>Geometry goal</th><th>Required output</th><th>Evidence</th></tr>
+      <tr><td>Concept</td><td>Identify all human-touch and service interfaces.</td><td>Interface list + risk ranking.</td><td><code>interface_inventory.csv</code></td></tr>
+      <tr><td>EVT</td><td>Prove the interface can be inserted/removed safely by hand.</td><td>3D-printed slot, bracket, dock, or fixture prototype.</td><td>Fit photos, cycle notes, blocked wrong-orientation test.</td></tr>
+      <tr><td>DVT</td><td>Validate tolerance stack-up and abuse cases.</td><td>Dimensioned drawing with clearance, retention, and insertion-force target.</td><td>Measurement report + 100-cycle wear test.</td></tr>
+      <tr><td>PVT</td><td>Make supplier/manufacturing inspection deterministic.</td><td>Go/no-go gauge, fixture, inspection drawing.</td><td>First-article inspection receipt.</td></tr>
+      <tr><td>Field service</td><td>Make replacement possible without wrong assembly.</td><td>Labels, keyed spares, service access, captive fasteners.</td><td>Service-time and mistake-rate log.</td></tr>
+    </table>
+  </section>
+
+  <section id="checklist" class="section grid two">
+    <div class="card">
+      <h2>Design checklist</h2>
+      <ul>
+        <li>Every connector, module, cartridge, dock, and service part has one defined datum.</li>
+        <li>Wrong orientation is blocked before electrical pins, optics, blades, belts, or hot parts are reached.</li>
+        <li>Contact pins engage only after mechanical lead-in has aligned the part.</li>
+        <li>There is a clear insertion stop: seated depth must not depend on user judgment.</li>
+        <li>Retention is deliberate: latch, screw, detent, magnet, clip, or bracket is documented.</li>
+        <li>Release path is visible and does not require prying against fragile PCB, lens, cable, or printed wall.</li>
+        <li>Connector labels are still readable after assembly.</li>
+        <li>Service access works with realistic fingers/tools and does not expose a hazard zone.</li>
+        <li>Material process is accounted for: 3D print shrink, injection-mould draft, metal bend radius, sheet tolerance.</li>
+        <li>Critical interfaces have pass/fail dimensions and can be checked by a fixture.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Interface pattern selection</h2>
+      <table>
+        <tr><th>Pattern</th><th>Best for</th><th>Avoid when</th></tr>
+        <tr><td>Asymmetric slot</td><td>8MB cartridge, battery tray, sensor module.</td><td>User needs reversible blind insertion.</td></tr>
+        <tr><td>Shrouded header</td><td>PCB-to-cable harnesses.</td><td>Board height is extremely constrained.</td></tr>
+        <tr><td>Unequal rails</td><td>Slide-in modules and cartridge cases.</td><td>Dust/debris will jam rails without clearance.</td></tr>
+        <tr><td>Funnel lead-in</td><td>Charging dock, probe fixture, robot dock.</td><td>Part must be sealed tightly at first contact.</td></tr>
+        <tr><td>Captive fastener</td><td>Service panels and safety covers.</td><td>Ultra-low-cost disposable part.</td></tr>
+        <tr><td>Guard interlock</td><td>Machines, printers, robots, EVSE enclosures.</td><td>Software-only sensing is used as safety substitute.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="gates" class="section panel">
+    <h2>Pass / fail gates</h2>
+    <div class="grid two">
+      <div class="callout ok"><strong>PASS:</strong> a first-time user can complete the correct insertion/connection/service action without guessing orientation, using force, or reading a long manual.</div>
+      <div class="callout danger"><strong>FAIL:</strong> any physically possible wrong insertion can short power, bend pins, break optics, expose a moving/hot/high-voltage hazard, or miscalibrate a system silently.</div>
+    </div>
+    <table style="margin-top:14px">
+      <tr><th>Gate</th><th>Pass condition</th><th>Fail condition</th></tr>
+      <tr><td>Wrong orientation block</td><td>Part cannot reach electrical/mechanical engagement when reversed.</td><td>Reversed insertion reaches pins, blades, belt path, optics, or latch.</td></tr>
+      <tr><td>Insertion force</td><td>Seats smoothly within defined force range.</td><td>User must wiggle, hammer, pry, or force the part.</td></tr>
+      <tr><td>Datum repeatability</td><td>Part lands in same location across repeated cycles and units.</td><td>Alignment depends on human skill or flexible cable position.</td></tr>
+      <tr><td>Retention and release</td><td>Part stays secure in operation and releases by intended action.</td><td>Falls out under vibration or requires destructive removal.</td></tr>
+      <tr><td>Service safety</td><td>Tool/finger access is available without opening hazard zones.</td><td>Service action exposes mains, hot barrel, blades, belts, props, or moving wheels.</td></tr>
+      <tr><td>Manufacturing inspection</td><td>Critical dimensions can be measured or checked with go/no-go gauge.</td><td>Supplier cannot verify fit before final assembly.</td></tr>
+    </table>
+  </section>
+
+  <section id="risks" class="section panel">
+    <h2>Risk table</h2>
+    <table>
+      <tr><th>Risk</th><th>Failure mode</th><th>Mitigation</th><th>Projects most affected</th></tr>
+      <tr><td>Reversed connector</td><td>Power short, MCU damage, flash corruption, sensor failure.</td><td>Use keyed/shrouded connector or make orientation electrically safe.</td><td>8MB cartridge, drones, RISC-V boards, OpenEVSE</td></tr>
+      <tr><td>Pin-first contact</td><td>Bent pins, intermittent SPI/I2C, false fixture failures.</td><td>Mechanical rails/chamfers align before pins touch.</td><td>8MB cartridge, QA fixtures, edge modules</td></tr>
+      <tr><td>Loose retention</td><td>Vibration disconnects battery, motor, sensor, or camera.</td><td>Latch, screw, clip, strain relief, connector lock.</td><td>Drone, Pupper, rover, SatNOGS, FarmBot</td></tr>
+      <tr><td>Over-tight tolerance</td><td>3D printed or molded parts jam in real production.</td><td>Define tolerance stack, material shrink, clearance bands, wear margin.</td><td>Cartridge, OpenFlexure, Voron, Precious Plastic</td></tr>
+      <tr><td>Service hazard</td><td>User opens dangerous area to access routine part.</td><td>Separate service panels from high-voltage/hot/moving zones.</td><td>OpenEVSE, Voron, Precious Plastic, robots</td></tr>
+      <tr><td>Silent misalignment</td><td>Optics, LiDAR, camera, docking tag, or encoder looks installed but is wrong.</td><td>Use datum features, witness marks, fixture check, calibration receipt.</td><td>OpenFlexure, OpenMV/OpenIPC, OpenAMRobot, SatNOGS</td></tr>
+      <tr><td>Ambiguous module variant</td><td>User installs incompatible module into same slot.</td><td>Mechanical coding by version, color, label, pin-count, or notch pattern.</td><td>Cartridge systems, edge boards, FarmBot tools, robot sensors</td></tr>
+    </table>
+  </section>
+
+  <section id="patterns" class="section grid two">
+    <div class="card">
+      <h2>Example cartridge slot pattern</h2>
+      <pre class="code">8MB CARTRIDGE SLOT GEOMETRY
+- datum_A: left rail inner wall
+- datum_B: rear seating stop
+- key_feature: right-side offset rib
+- lead_in: 1.0–1.5 mm chamfer on slot mouth
+- pin_protection: housing reaches guide depth before pogo/header contact
+- retention: detent or captive screw
+- label: TOP / INSERT direction molded or engraved
+
+Wrong insertion tests:
+1. upside-down blocked before pins touch
+2. reversed blocked before pins touch
+3. partial insertion cannot report READY
+4. forced insertion leaves visible mechanical interference before electrical damage</pre>
+    </div>
+    <div class="card">
+      <h2>Example fixture logic</h2>
+      <pre class="code">fixture_check:
+  locate_unit:
+    - confirm datum_A seated
+    - confirm datum_B seated
+    - confirm latch_closed == true
+  then_apply_power: true
+  then_probe:
+    - continuity
+    - flash_id
+    - i2c_device_scan
+    - led/display state
+  block_if:
+    - latch_open
+    - wrong_variant_key
+    - insertion_depth_out_of_range
+    - probe_force_over_limit</pre>
+    </div>
+  </section>
+
+  <section id="schema" class="section panel">
+    <h2>JSON/export-ready schema for LogicHub/GN8R</h2>
+    <pre class="code">{
+  "tool_id": "T04",
+  "tool_name": "Poka-yoke Interface Geometry",
+  "interface_id": "cartridge_slot_revA",
+  "project": "airgap8mb_cad_implementation_bundle",
+  "interface_type": "cartridge_slot | connector | dock | toolhead | battery_tray | sensor_mount | guard | fixture",
+  "human_action": "insert | slide | dock | latch | screw | press | align | service",
+  "datums": [
+    {"id": "A", "feature": "left_rail_inner_wall", "tolerance_mm": 0.20},
+    {"id": "B", "feature": "rear_seating_stop", "tolerance_mm": 0.15}
+  ],
+  "keying": {
+    "method": "asymmetric_rib",
+    "wrong_orientations_blocked": ["upside_down", "reversed", "wrong_variant"],
+    "electrical_contact_before_alignment": false
+  },
+  "lead_in": {
+    "method": "chamfered_slot_mouth",
+    "chamfer_mm": 1.2,
+    "guide_depth_before_contact_mm": 4.0
+  },
+  "retention": {
+    "method": "detent_or_captive_screw",
+    "release_tool_required": false,
+    "vibration_test_required": true
+  },
+  "safety_constraints": [
+    "no exposed high_voltage during routine service",
+    "wrong insertion cannot short power",
+    "partial insertion cannot report READY"
+  ],
+  "inspection": {
+    "critical_dimensions": ["rail_width", "slot_depth", "key_offset", "pin_setback"],
+    "go_no_go_gauge_required": true,
+    "cycle_test_count": 100
+  },
+  "pass_fail_gate": "wrong orientation blocked before electrical or hazardous engagement"
+}</pre>
+  </section>
+
+  <section class="section panel">
+    <h2>Next tool in sequence</h2>
+    <p>After this tool, continue with <strong>T05 — Fault Tolerance & Fallbacks</strong>: watchdog timers, SPI/I2C timeouts, safe reset, fault display, last-known-good state, and degraded-mode operation.</p>
+  </section>
+
+  <div class="footer">Tool 04 generated for the 14-project hardware research stack. Local standalone HTML. No cloud dependency.</div>
+</div>
+<script>
+  const search = document.getElementById('projectSearch');
+  const cards = [...document.querySelectorAll('.project-card')];
+  search.addEventListener('input', () => {
+    const q = search.value.toLowerCase().trim();
+    cards.forEach(c => {
+      const t = (c.innerText + ' ' + c.dataset.key).toLowerCase();
+      c.classList.toggle('hidden', q && !t.includes(q));
+    });
+  });
+</script>
+</body>
+</html>

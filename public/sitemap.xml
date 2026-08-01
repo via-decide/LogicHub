@@ -11,8 +11,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://logichub.app/how-it-works</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://logichub.app/</loc>
-    <lastmod>2026-07-30</lastmod>
+    <lastmod>2026-07-31</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -52,6 +56,7 @@
   </url>
   <url>
     <loc>https://logichub.app/workspace</loc>
+    <lastmod>2026-07-31</lastmod>
     <priority>0.5</priority>
   </url>
   <url>

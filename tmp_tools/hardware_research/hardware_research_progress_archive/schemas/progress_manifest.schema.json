@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hardware Research Progress Manifest",
+  "type": "object",
+  "required": [
+    "archive_name",
+    "verified_zip_count",
+    "projects",
+    "tools",
+    "html_tool_order"
+  ],
+  "properties": {
+    "archive_name": {
+      "type": "string"
+    },
+    "created_at_local": {
+      "type": "string"
+    },
+    "verified_zip_count": {
+      "type": "integer"
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "filename",
+          "done_work",
+          "key_finding",
+          "safety_finding",
+          "limitation"
+        ]
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tool",
+          "production_tool",
+          "use_when",
+          "how_used",
+          "production_part"
+        ]
+      }
+    },
+    "html_tool_order": {
+      "type": "array"
+    }
+  }
+}

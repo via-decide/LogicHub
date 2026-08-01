@@ -1,0 +1,15 @@
+order,tool_id,title,html_file,zip_file,scope,status
+1,T01,Power Standardization & Protection,html/tool-01-power-standardization-protection.html,individual_zips/tool-01-power-standardization-protection.zip,"USB-C, battery input, fuse, reverse protection, power tree",complete
+2,T02,Tactile Determinism / Input FSM,html/tool-02-tactile-determinism-input-fsm.html,individual_zips/tool-02-tactile-determinism-input-fsm.zip,"Buttons, encoders, E-stop input, debounce, interrupt FSM",complete
+3,T03,State Visibility & Offline Telemetry,html/tool-03-state-visibility-offline-telemetry.html,individual_zips/tool-03-state-visibility-offline-telemetry.zip,"OLED, LEDs, buzzer, local logs, state codes",complete
+4,T04,Poka-yoke Interface Geometry,html/tool-04-poka-yoke-interface-geometry.html,individual_zips/tool-04-poka-yoke-interface-geometry.zip,"Cartridge slot, docking, keyed connectors, guide rails",complete
+5,T05,Fault Tolerance & Fallbacks,html/tool-05-fault-tolerance-fallbacks.html,individual_zips/tool-05-fault-tolerance-fallbacks.zip,"Watchdog, SPI/I2C timeout, safe reset, fault display",complete
+6,T06,Source Manifest + BOM/CAD Hash Intake,html/tool-06-source-manifest-bom-cad-intake.html,individual_zips/tool-06-source-manifest-bom-cad-intake.zip,"Hashing, manifest, license, CAD/BOM source tracking",complete
+7,T07,Storage Integrity + Transactional Updates,html/tool-07-storage-integrity-transactional-updates.html,individual_zips/tool-07-storage-integrity-transactional-updates.zip,"CRC/SHA, dual manifest, rollback, flash layout",complete
+8,T08,Sensor Calibration + Health Evidence,html/tool-08-sensor-calibration-health-evidence.html,individual_zips/tool-08-sensor-calibration-health-evidence.zip,"IMU, camera, LiDAR, optics, RF, encoder calibration",complete
+9,T09,Actuator / Motor / Heater Safety Interlock,html/tool-09-actuator-motor-heater-safety.html,individual_zips/tool-09-actuator-motor-heater-safety.zip,"Motors, heaters, relays, gantry, E-stop, arm/disarm",complete
+10,T10,Thermal / Current / Power Derating,html/tool-10-thermal-current-power-derating.html,individual_zips/tool-10-thermal-current-power-derating.zip,"Heat, current, runtime, regulator, chamber, battery",complete
+11,T11,Local API / Edge Service Interface,html/tool-11-local-api-edge-service-interface.html,individual_zips/tool-11-local-api-edge-service-interface.zip,"HTTP, MQTT, serial, WebSocket, local-first dashboard",complete
+12,T12,Manufacturing QA Fixture + Test Receipts,html/tool-12-manufacturing-qa-fixture-receipts.html,individual_zips/tool-12-manufacturing-qa-fixture-receipts.zip,"PCBA tests, commissioning, supplier acceptance",complete
+13,T13,Enclosure / Environmental DFM,html/tool-13-enclosure-environmental-dfm.html,individual_zips/tool-13-enclosure-environmental-dfm.zip,"3D print, injection moulding, guards, weatherproofing",complete
+14,T14,Compliance / Safety Risk Ledger,html/tool-14-compliance-safety-risk-ledger.html,individual_zips/tool-14-compliance-safety-risk-ledger.zip,"Product safety, India compliance, blocked claims, waivers",complete

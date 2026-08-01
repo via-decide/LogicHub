@@ -163,4 +163,148 @@ export const PRODUCT_TEMPLATES: readonly ProductTemplate[] = [
       { capability: 'app.present', operator: 'exists', value: true, weight: 0.5, required: false },
     ],
   },
+  
+  // --- New Research Bundle Templates ---
+
+  {
+    id: 'power-electronics-study',
+    name: 'Power Electronics Study',
+    description: 'A bench setup for analyzing power delivery and switching.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'sensing.present', operator: 'exists', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'quadcopter-drone',
+    name: 'Quadcopter Drone',
+    description: 'A four-rotor flying vehicle.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'quadruped-robot',
+    name: 'Quadruped Robot',
+    description: 'A four-legged walking robot.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'mechanical.chassis', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'agriculture-gantry',
+    name: 'Agriculture Gantry',
+    description: 'A multi-axis gantry for precise farming operations.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'mechanical.chassis', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'lab-microscope',
+    name: 'Lab Microscope',
+    description: 'An automated or assisted microscopy platform.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'mechanical.chassis', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'satellite-ground-station',
+    name: 'Satellite Ground Station',
+    description: 'A receiver for downlinking satellite telemetry.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'link.present', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'corexy-3d-printer',
+    name: 'CoreXY 3D Printer',
+    description: 'A high-speed precision manufacturing tool.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'mechanical.chassis', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'evse-charger',
+    name: 'EVSE Charger',
+    description: 'An electric vehicle supply equipment controller.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'actuator.switch', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'local-vision-appliance',
+    name: 'Local Vision Appliance',
+    description: 'A smart camera running local inference.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'vision.present', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'riscv-edge-compute',
+    name: 'RISC-V Edge Compute',
+    description: 'A high-performance RISC-V application board.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'plastic-recycling-machine',
+    name: 'Plastic Recycling Machine',
+    description: 'A mechanical processor for waste plastics.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'mechanical.chassis', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
+  {
+    id: 'ros2-amr-rover',
+    name: 'ROS2 AMR Rover',
+    description: 'An autonomous mobile robot running ROS2.',
+    difficulty: 'advanced',
+    requiredCapabilities: [
+      { capability: 'power.available', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'controller.present', operator: 'exists', value: true, weight: 1, required: true },
+      { capability: 'motion.present', operator: 'eq', value: true, weight: 1, required: true },
+    ],
+    optionalCapabilities: [],
+  },
 ];

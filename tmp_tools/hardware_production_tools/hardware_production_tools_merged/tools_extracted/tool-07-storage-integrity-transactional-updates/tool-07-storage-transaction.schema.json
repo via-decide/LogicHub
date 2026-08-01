@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tool 07 Storage Integrity + Transactional Updates Export Schema",
+  "type": "object",
+  "required": [
+    "tool_id",
+    "tool_name",
+    "project_id",
+    "release_stage",
+    "storage_systems",
+    "gates"
+  ],
+  "properties": {
+    "tool_id": {
+      "const": "T07"
+    },
+    "tool_name": {
+      "const": "Storage Integrity + Transactional Updates"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "release_stage": {
+      "enum": [
+        "research",
+        "evt",
+        "dvt",
+        "pvt",
+        "manufacturing",
+        "field"
+      ]
+    },
+    "storage_systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "storage_id",
+          "medium",
+          "persistent_objects",
+          "criticality",
+          "transaction_model",
+          "integrity_checks",
+          "rollback_available",
+          "user_visible_errors"
+        ],
+        "properties": {
+          "storage_id": {
+            "type": "string"
+          },
+          "medium": {
+            "enum": [
+              "spi_nor",
+              "spi_nand",
+              "eeprom",
+              "fram",
+              "sd",
+              "emmc",
+              "mcu_flash",
+              "linux_fs",
+              "database",
+              "cloudless_local_store"
+            ]
+          },
+          "capacity_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "erase_block_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "write_granularity_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "persistent_objects": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "identity",
+                "manifest",
+                "config",
+                "calibration",
+                "firmware",
+                "log",
+                "user_content"
+              ]
+            }
+          },
+          "criticality": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "safety_critical"
+            ]
+          },
+          "transaction_model": {
+            "enum": [
+              "dual_slot",
+              "copy_on_write",
+              "append_only",
+              "ab_image",
+              "journal",
+              "none"
+            ]
+          },
+          "integrity_checks": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "crc32",
+                "sha256",
+                "schema_validation",
+                "signature_optional"
+              ]
+            }
+          },
+          "rollback_available": {
+            "type": "boolean"
+          },
+          "wear_strategy": {
+            "enum": [
+              "rate_limit",
+              "rotation",
+              "wear_leveling",
+              "replaceable_media",
+              "not_required"
+            ]
+          },
+          "user_visible_errors": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "power_loss_safe",
+        "corruption_detected",
+        "rollback_verified",
+        "approved_for_user_data"
+      ],
+      "properties": {
+        "power_loss_safe": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_tested"
+          ]
+        },
+        "corruption_detected": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_tested"
+          ]
+        },
+        "rollback_verified": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_tested"
+          ]
+        },
+        "full_storage_behavior_verified": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_tested"
+          ]
+        },
+        "wear_budget_documented": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_tested"
+          ]
+        },
+        "approved_for_user_data": {
+          "type": "boolean"
+        }
+      }
+    },
+    "receipts": {
+      "type": "array"
+    }
+  }
+}

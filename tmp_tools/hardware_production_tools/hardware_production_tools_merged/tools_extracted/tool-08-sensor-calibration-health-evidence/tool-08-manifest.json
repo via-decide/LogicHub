@@ -1,0 +1,23 @@
+{
+  "tool_id": "T08",
+  "title": "Sensor Calibration + Health Evidence",
+  "created_at_local": "2026-07-31T07:42:00+05:30",
+  "next_tool": "tool-09-actuator-motor-heater-safety.html",
+  "files": [
+    {
+      "path": "tool-08-sensor-calibration-health-evidence.html",
+      "bytes": 28894,
+      "sha256": "457f0f6dbf28e12ccce53f435c6abacc27373a15d0b8042e83bcb2945156db3d"
+    },
+    {
+      "path": "tool-08-README.md",
+      "bytes": 828,
+      "sha256": "3dca8ff0de7eb0aa9d6df71814f27aa199fefe31e1a8f4c552c8943a3991cb0b"
+    },
+    {
+      "path": "tool-08-calibration-receipt.schema.json",
+      "bytes": 3862,
+      "sha256": "aaa09fd6cf51c754d8840ed7193136136e53510b6850cfe60f3627f7f7cd7185"
+    }
+  ]
+}

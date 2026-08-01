@@ -65,6 +65,7 @@ export const PhysicalKitDefinitionSchema = z.object({
   description: z.string(),
   components: z.array(KitComponentRefSchema).min(1),
   supportedProductTemplateIds: z.array(z.string().min(1)),
+  applicableToolIds: z.array(z.string().min(1)),
   requiredTools: z.array(z.string().min(1)),
   assemblySteps: z.array(AssemblyStepSchema),
   testProcedure: z.array(TestStepSchema),

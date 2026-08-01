@@ -1,0 +1,9 @@
+domain,checklist,evidence_required
+mechanical_fit,"PCB mount holes, connector access, cable bend radius, battery retention, sensor line-of-sight",annotated CAD/screenshots/photos
+wall_boss_design,"wall thickness, bosses, ribs, fastener supports, snap fits",section drawing + print notes
+thermal_path,"heat source map, vents, heatsink, fan/filter, material softening",temperature receipt
+electrical_safety,"separated mains/battery/LV zones, strain relief, fuse access, touch-safe cover",wiring photo + fuse note
+environmental_exposure,"dust, splash, UV, fumes, condensation, mud, lab contamination",ingress/material/gasket plan
+user_handling,"no sharp edges, labels, E-stop visible, no hidden hot/moving surfaces",user handling notes
+maintenance,"replaceable fuse/battery/storage, service ports, diagnostic window",service-time measurement
+manufacturing,"CAD/STL/STEP versioned, process chosen, tolerances assigned, supplier notes",CAD hash + release package

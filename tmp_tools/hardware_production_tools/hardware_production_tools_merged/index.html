@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hardware Production Tools — Merged Bundle</title>
+  <style>
+    :root {
+      --bg:#0b1020; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb; --line:#293241; --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:32px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#101827,#0b1020); }
+    .kicker { color:var(--accent); font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:10px 0 8px; font-size:34px; line-height:1.05; }
+    p { color:var(--muted); line-height:1.55; }
+    main { padding:28px 32px 60px; max-width:1280px; margin:0 auto; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:22px 0 28px; }
+    .metric { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; }
+    .metric b { display:block; font-size:28px; color:#fff; }
+    .metric span { color:var(--muted); font-size:13px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px; }
+    .tool-id { color:var(--ok); font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; }
+    h2 { margin:8px 0; font-size:20px; }
+    .links { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    a { color:#0ea5e9; text-decoration:none; }
+    .links a { border:1px solid var(--line); padding:7px 10px; border-radius:999px; background:#0f172a; }
+    table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    th,td { border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+    th { color:#fff; font-size:13px; background:#0f172a; }
+    td { color:var(--muted); font-size:14px; }
+    section { margin-top:34px; }
+    code { color:#bfdbfe; }
+    @media (max-width:900px) { .summary,.grid { grid-template-columns:1fr; } header,main { padding-left:18px; padding-right:18px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="kicker">Merged archive</div>
+    <h1>Hardware Production Tools</h1>
+    <p>Complete merged package of the 14 reusable production tools generated from the research ZIP workflow. Use this as the navigation root before opening individual HTML tools.</p>
+  </header>
+  <main>
+    <div class="summary">
+      <div class="metric"><b>14</b><span>tools complete</span></div>
+      <div class="metric"><b>14</b><span>HTML files</span></div>
+      <div class="metric"><b>14</b><span>individual ZIPs</span></div>
+      <div class="metric"><b>14</b><span>research projects mapped</span></div>
+    </div>
+
+    <section>
+      <h2>Tool library</h2>
+      <div class="grid">
+        
+      <article class="card">
+        <div class="tool-id">T01</div>
+        <h2>Power Standardization &amp; Protection</h2>
+        <p>USB-C, battery input, fuse, reverse protection, power tree</p>
+        <div class="links">
+          <a href="html/tool-01-power-standardization-protection.html">Open HTML</a>
+          <a href="individual_zips/tool-01-power-standardization-protection.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-01-power-standardization-protection/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T02</div>
+        <h2>Tactile Determinism / Input FSM</h2>
+        <p>Buttons, encoders, E-stop input, debounce, interrupt FSM</p>
+        <div class="links">
+          <a href="html/tool-02-tactile-determinism-input-fsm.html">Open HTML</a>
+          <a href="individual_zips/tool-02-tactile-determinism-input-fsm.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-02-tactile-determinism-input-fsm/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T03</div>
+        <h2>State Visibility &amp; Offline Telemetry</h2>
+        <p>OLED, LEDs, buzzer, local logs, state codes</p>
+        <div class="links">
+          <a href="html/tool-03-state-visibility-offline-telemetry.html">Open HTML</a>
+          <a href="individual_zips/tool-03-state-visibility-offline-telemetry.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-03-state-visibility-offline-telemetry/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T04</div>
+        <h2>Poka-yoke Interface Geometry</h2>
+        <p>Cartridge slot, docking, keyed connectors, guide rails</p>
+        <div class="links">
+          <a href="html/tool-04-poka-yoke-interface-geometry.html">Open HTML</a>
+          <a href="individual_zips/tool-04-poka-yoke-interface-geometry.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-04-poka-yoke-interface-geometry/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T05</div>
+        <h2>Fault Tolerance &amp; Fallbacks</h2>
+        <p>Watchdog, SPI/I2C timeout, safe reset, fault display</p>
+        <div class="links">
+          <a href="html/tool-05-fault-tolerance-fallbacks.html">Open HTML</a>
+          <a href="individual_zips/tool-05-fault-tolerance-fallbacks.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-05-fault-tolerance-fallbacks/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T06</div>
+        <h2>Source Manifest + BOM/CAD Hash Intake</h2>
+        <p>Hashing, manifest, license, CAD/BOM source tracking</p>
+        <div class="links">
+          <a href="html/tool-06-source-manifest-bom-cad-intake.html">Open HTML</a>
+          <a href="individual_zips/tool-06-source-manifest-bom-cad-intake.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-06-source-manifest-bom-cad-intake/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T07</div>
+        <h2>Storage Integrity + Transactional Updates</h2>
+        <p>CRC/SHA, dual manifest, rollback, flash layout</p>
+        <div class="links">
+          <a href="html/tool-07-storage-integrity-transactional-updates.html">Open HTML</a>
+          <a href="individual_zips/tool-07-storage-integrity-transactional-updates.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-07-storage-integrity-transactional-updates/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T08</div>
+        <h2>Sensor Calibration + Health Evidence</h2>
+        <p>IMU, camera, LiDAR, optics, RF, encoder calibration</p>
+        <div class="links">
+          <a href="html/tool-08-sensor-calibration-health-evidence.html">Open HTML</a>
+          <a href="individual_zips/tool-08-sensor-calibration-health-evidence.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-08-sensor-calibration-health-evidence/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T09</div>
+        <h2>Actuator / Motor / Heater Safety Interlock</h2>
+        <p>Motors, heaters, relays, gantry, E-stop, arm/disarm</p>
+        <div class="links">
+          <a href="html/tool-09-actuator-motor-heater-safety.html">Open HTML</a>
+          <a href="individual_zips/tool-09-actuator-motor-heater-safety.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-09-actuator-motor-heater-safety/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T10</div>
+        <h2>Thermal / Current / Power Derating</h2>
+        <p>Heat, current, runtime, regulator, chamber, battery</p>
+        <div class="links">
+          <a href="html/tool-10-thermal-current-power-derating.html">Open HTML</a>
+          <a href="individual_zips/tool-10-thermal-current-power-derating.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-10-thermal-current-power-derating/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T11</div>
+        <h2>Local API / Edge Service Interface</h2>
+        <p>HTTP, MQTT, serial, WebSocket, local-first dashboard</p>
+        <div class="links">
+          <a href="html/tool-11-local-api-edge-service-interface.html">Open HTML</a>
+          <a href="individual_zips/tool-11-local-api-edge-service-interface.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-11-local-api-edge-service-interface/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T12</div>
+        <h2>Manufacturing QA Fixture + Test Receipts</h2>
+        <p>PCBA tests, commissioning, supplier acceptance</p>
+        <div class="links">
+          <a href="html/tool-12-manufacturing-qa-fixture-receipts.html">Open HTML</a>
+          <a href="individual_zips/tool-12-manufacturing-qa-fixture-receipts.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-12-manufacturing-qa-fixture-receipts/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T13</div>
+        <h2>Enclosure / Environmental DFM</h2>
+        <p>3D print, injection moulding, guards, weatherproofing</p>
+        <div class="links">
+          <a href="html/tool-13-enclosure-environmental-dfm.html">Open HTML</a>
+          <a href="individual_zips/tool-13-enclosure-environmental-dfm.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-13-enclosure-environmental-dfm/">Extracted folder</a>
+        </div>
+      </article>
+    
+      <article class="card">
+        <div class="tool-id">T14</div>
+        <h2>Compliance / Safety Risk Ledger</h2>
+        <p>Product safety, India compliance, blocked claims, waivers</p>
+        <div class="links">
+          <a href="html/tool-14-compliance-safety-risk-ledger.html">Open HTML</a>
+          <a href="individual_zips/tool-14-compliance-safety-risk-ledger.zip">Download ZIP</a>
+          <a href="tools_extracted/tool-14-compliance-safety-risk-ledger/">Extracted folder</a>
+        </div>
+      </article>
+    
+      </div>
+    </section>
+
+    <section>
+      <h2>Project mapping</h2>
+      <table>
+        <thead><tr><th>Project</th><th>Production role</th><th>Applicable tools</th></tr></thead>
+        <tbody><tr><td>electronics_research_bundle</td><td>Foundation study: power electronics, embedded Linux, lab discipline</td><td>T06, T10, T12, T14</td></tr><tr><td>air_gapped_8mb_module_research_pack</td><td>Offline cartridge architecture and integrity model</td><td>T01, T02, T03, T04, T05, T07, T12</td></tr><tr><td>airgap8mb_cad_implementation_bundle</td><td>EVT implementation for cartridge PCB/enclosure/firmware</td><td>T01, T04, T05, T07, T12, T13</td></tr><tr><td>drone_cad_implementation_bundle</td><td>Flight-controller EVT and tether validation</td><td>T01, T03, T05, T08, T09, T10, T12, T14</td></tr><tr><td>pupper_v3_open_source_research_bundle</td><td>Quadruped robot kit/productization study</td><td>T01, T03, T05, T08, T09, T10, T11, T12</td></tr><tr><td>farmbot_open_source_research_bundle</td><td>Agriculture gantry robot and tool ecosystem</td><td>T01, T03, T04, T05, T08, T09, T11, T13</td></tr><tr><td>openflexure_microscope_research_bundle</td><td>Lab microscope and precision positioning platform</td><td>T01, T03, T04, T08, T11, T12, T14</td></tr><tr><td>satnogs_ground_station_research_bundle</td><td>Receive-only satellite ground-station learning appliance</td><td>T01, T03, T05, T08, T10, T11, T13, T14</td></tr><tr><td>voron_3d_printer_engineering_bundle</td><td>CoreXY 3D printer engineering and kit QA</td><td>T01, T02, T03, T05, T08, T09, T10, T12, T13</td></tr><tr><td>openevse_research_bundle</td><td>Open EVSE charger platform and safety split</td><td>T01, T03, T05, T09, T10, T11, T12, T14</td></tr><tr><td>openmv_openipc_local_vision_bundle</td><td>Local-first camera/vision appliance stack</td><td>T01, T03, T05, T08, T11, T12, T14</td></tr><tr><td>riscv_edge_beaglev_fire_milkv_duo_bundle</td><td>RISC-V edge compute, FPGA, AIoT, embedded Linux</td><td>T01, T03, T05, T07, T08, T10, T11, T12, T14</td></tr><tr><td>precious_plastic_machine_ecosystem_bundle</td><td>Plastic recycling and small manufacturing machines</td><td>T01, T02, T03, T04, T05, T09, T10, T12, T13, T14</td></tr><tr><td>nasa_jpl_rover_openamrobot_research_bundle</td><td>Rover mechanics plus ROS2 AMR stack</td><td>T01, T03, T04, T05, T08, T09, T10, T11, T12, T14</td></tr></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Manifests</h2>
+      <p>Use <code>manifests/tools_index.csv</code>, <code>manifests/project_tool_matrix.csv</code>, <code>manifests/tool_bundle_manifest.json</code>, and <code>manifests/file_hashes.csv</code> for tracking and import into LogicHub/GN8R workflows.</p>
+    </section>
+  </main>
+</body>
+</html>

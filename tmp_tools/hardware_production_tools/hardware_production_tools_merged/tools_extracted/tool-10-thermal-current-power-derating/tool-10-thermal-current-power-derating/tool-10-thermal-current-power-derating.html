@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool 10 — Thermal / Current / Power Derating</title>
+<style>
+:root {
+  --bg:#090d12; --panel:#111821; --panel2:#0d131b; --ink:#e6edf3; --muted:#9aa8b6;
+  --line:#26313d; --accent:#f59e0b; --red:#ef4444; --green:#22c55e; --blue:#38bdf8;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:linear-gradient(180deg,#080b10,#0b1118 42%,#080b10); color:var(--ink); font-family:var(--sans); }
+header { border-bottom:1px solid var(--line); background:rgba(9,13,18,.92); position:sticky; top:0; z-index:2; backdrop-filter:blur(8px); }
+.wrap { max-width:1220px; margin:0 auto; padding:22px; }
+.hero { display:grid; grid-template-columns:1.35fr .85fr; gap:18px; align-items:stretch; }
+h1 { margin:0 0 8px; font-size:34px; letter-spacing:-.04em; }
+h2 { margin:34px 0 14px; font-size:22px; letter-spacing:-.02em; }
+h3 { margin:0 0 8px; font-size:16px; }
+p { color:var(--muted); line-height:1.55; }
+.kicker { color:var(--accent); font-family:var(--mono); font-size:13px; text-transform:uppercase; letter-spacing:.12em; }
+.panel,.card { background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line); border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,.25); }
+.panel { padding:20px; }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.grid2 { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.card { padding:16px; }
+.cardTop { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+.pill { display:inline-flex; align-items:center; border:1px solid var(--line); background:#0b1220; color:#cbd5e1; border-radius:999px; padding:3px 8px; font:12px var(--mono); white-space:nowrap; }
+.pill.hot { color:#fed7aa; border-color:#92400e; background:#1c1207; }
+.pill.block { color:#fecaca; border-color:#7f1d1d; background:#1c0909; }
+.pill.go { color:#bbf7d0; border-color:#14532d; background:#071b10; }
+table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px; border:1px solid var(--line); }
+th,td { padding:12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { color:#cbd5e1; background:#111827; font:12px var(--mono); text-transform:uppercase; letter-spacing:.08em; }
+td { color:var(--muted); }
+code,pre { font-family:var(--mono); }
+pre { background:#05080c; border:1px solid var(--line); border-radius:12px; padding:14px; overflow:auto; color:#dbeafe; line-height:1.45; }
+.check { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid rgba(38,49,61,.55); color:var(--muted); }
+.check input { width:18px; height:18px; accent-color:var(--accent); }
+.toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+button,.btn { border:1px solid var(--line); background:#111827; color:var(--ink); border-radius:10px; padding:9px 12px; cursor:pointer; font:13px var(--mono); }
+button:hover,.btn:hover { border-color:var(--accent); }
+input.search { width:100%; background:#05080c; border:1px solid var(--line); color:var(--ink); border-radius:12px; padding:12px; margin:10px 0 14px; }
+footer { border-top:1px solid var(--line); margin-top:42px; color:var(--muted); }
+.badgeRow { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; }
+.diagram { background:#05080c; border:1px dashed #334155; border-radius:12px; padding:16px; color:#d1d5db; }
+.node { display:inline-block; padding:8px 10px; margin:5px; border:1px solid #334155; border-radius:8px; background:#0f172a; font-family:var(--mono); font-size:12px; }
+.arrow { color:var(--accent); font-family:var(--mono); margin:0 4px; }
+.small { font-size:13px; }
+.metric { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:10px; border:1px solid rgba(38,49,61,.75); border-radius:12px; background:#0a1018; }
+.metric b { font-family:var(--mono); color:#e5e7eb; }
+@media (max-width:900px) { .hero,.grid,.grid2 { grid-template-columns:1fr; } h1 { font-size:28px; } .wrap { padding:16px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="kicker">Universal Hardware Production Stack · T10</div>
+    <h1>Thermal / Current / Power Derating</h1>
+    <p class="small">Use when a device can overheat, brown out, overload, melt an enclosure, reset under peak load, mislabel its current rating, or fail in field ambient conditions.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="panel">
+      <span class="pill hot">Power integrity + heat boundary</span>
+      <h2>Purpose</h2>
+      <p>This tool converts every power and heat assumption into a release gate. It requires each project to close its rail budget, input-envelope, fuse/wire/connector current path, thermal path, brownout behavior, enclosure heat-soak, and derated operating claim before production.</p>
+      <div class="badgeRow">
+        <span class="pill">rail budget</span>
+        <span class="pill">current path</span>
+        <span class="pill">fuse / breaker</span>
+        <span class="pill">dropout</span>
+        <span class="pill">heat soak</span>
+        <span class="pill">brownout</span>
+        <span class="pill">derating</span>
+        <span class="pill">receipt</span>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="pill block">Do not skip</span>
+      <p>A device that works on a bench supply can still fail in a real enclosure, long cable, hot room, battery sag, startup spike, sealed plastic case, moving robot, heater chamber, EVSE relay box, or outdoor station.</p>
+      <p>This tool is a planning and evidence artifact, not a certification, simulation replacement, or permission to energize mains, batteries, motors, heaters, or high-voltage systems.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Core derating model</h2>
+    <div class="grid">
+      <div class="card"><h3>Electrical</h3><p>Input source, fuse, reverse protection, TVS, regulator, rail loads, inrush, cable drop, connector current, PCB trace current, brownout threshold.</p></div>
+      <div class="card"><h3>Thermal</h3><p>Regulator dissipation, MOSFET/driver heat, heater duty cycle, motor driver temperature, enclosure airflow, chamber heat, ambient range.</p></div>
+      <div class="card"><h3>Product claim</h3><p>The label must rate the assembled path, not a single component. Claim only the current, ambient, runtime, and duty cycle proven by evidence.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Quick equations</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Linear regulator heat</h3>
+        <pre>P_diss = (V_in - V_out) × I_load
+T_junction ≈ T_ambient + (P_diss × θJA)
+Rule: pass only if T_junction stays below derated limit.</pre>
+      </div>
+      <div class="card">
+        <h3>Cable voltage drop</h3>
+        <pre>V_drop = I_load × R_cable_total
+V_load = V_source - V_drop
+Rule: pass only if V_load remains above regulator dropout + brownout margin.</pre>
+      </div>
+      <div class="card">
+        <h3>Battery runtime</h3>
+        <pre>runtime_hours ≈ usable_capacity_Ah / average_current_A
+Use derating: usable_capacity = rated_capacity × 0.6 to 0.8
+Rule: publish realistic runtime, not ideal runtime.</pre>
+      </div>
+      <div class="card">
+        <h3>Complete current path</h3>
+        <pre>rating = min(source, fuse, wire, connector, PCB trace, switch, relay, driver, load, enclosure thermal limit)
+Rule: weakest link defines product rating.</pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Project applicability across the 14 ZIP bundles</h2>
+    <input class="search" id="search" placeholder="Filter projects, e.g. drone, EVSE, printer, robot, camera, Pi, battery, heater...">
+    <div class="grid" id="projectGrid">
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">High theory-to-hardware risk</span>
+          <h3>01. Electronics research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Use for SiC/MOSFET learning, embedded Linux power budgeting, regulator sizing, thermal margin discipline, and lab derating checklists.</p>
+        <p><strong>Production part:</strong> Future power boards, embedded Linux carrier boards, benchtop fixtures, high-current experiments.</p>
+        <p><strong>Gate:</strong> No energized high-voltage or high-current experiment without fuse, isolation plan, temperature measurement, and current-limited supply.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Storage integrity risk</span>
+          <h3>02. Air-gapped 8MB module research pack</h3>
+        </div>
+        <p><strong>Use:</strong> Estimate cartridge reader current, flash write current, MCU brownout margin, USB 5V conversion, and enclosure temperature rise.</p>
+        <p><strong>Production part:</strong> Reader board power tree, flash rail, brownout thresholds, USB-C/5V input.</p>
+        <p><strong>Gate:</strong> Flash commit is blocked if voltage margin is below threshold or regulator thermal margin is unknown.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Prototype power risk</span>
+          <h3>03. Air-gapped 8MB CAD implementation bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Validate 5V-to-3.3V rail, ATmega/flash current, level-shifter loading, regulator dissipation, and sealed-cartridge thermal assumptions.</p>
+        <p><strong>Production part:</strong> EVT PCB, enclosure, cartridge slot, PCBA test fixture.</p>
+        <p><strong>Gate:</strong> No PCB release until regulator dropout, flash voltage limits, USB input current, and enclosure thermal path are recorded.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill block">Very high energy risk</span>
+          <h3>04. Drone CAD implementation bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate LiPo current, regulator capacity, ESC/motor current, IMU brownout margin, blackbox flash current, and thermal behavior during no-prop and tether tests.</p>
+        <p><strong>Production part:</strong> Flight-controller PCB, power module, battery harness, tether-test fixture.</p>
+        <p><strong>Gate:</strong> No motor arming unless battery, 5V rail, ESC signal, IMU, and failsafe current/thermal limits pass bench gates.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Motor/battery thermal risk</span>
+          <h3>05. Pupper V3 open-source research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Set battery-current envelope, motor temperature checks, servo/BLDC thermal limits, Pi/SBC power margin, and gait-runtime derating.</p>
+        <p><strong>Production part:</strong> Quadruped power harness, compute rail, motor rail, battery monitor, service checklist.</p>
+        <p><strong>Gate:</strong> No walking test until low-voltage behavior, current peak, motor heating, and emergency stop behavior are verified.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Outdoor power risk</span>
+          <h3>06. FarmBot open-source research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate outdoor controller power, stepper/axis current, cable voltage drop, irrigation-valve load, sun/ambient enclosure heat, and weatherproof box ventilation.</p>
+        <p><strong>Production part:</strong> Outdoor electronics box, gantry wiring, toolhead power, motor drivers.</p>
+        <p><strong>Gate:</strong> No field operation until enclosure temperature, cable drop, grounding/isolation, and motor stall current are validated.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Measurement drift risk</span>
+          <h3>07. OpenFlexure Microscope research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Control Pi power stability, illumination heat, stepper driver heating, camera thermal noise, and stage drift from local heating.</p>
+        <p><strong>Production part:</strong> Microscope power input, illumination module, motor board, optics enclosure.</p>
+        <p><strong>Gate:</strong> No calibration claim unless temperature and illumination stability are recorded with the optical validation receipt.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Outdoor thermal/weather risk</span>
+          <h3>08. SatNOGS satellite ground-station research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate Pi/SDR enclosure temperature, rotator motor load, mast-cable voltage drop, lightning/grounding exposure, and uninterrupted observation power.</p>
+        <p><strong>Production part:</strong> Outdoor SDR box, antenna/rotator power, station power supply, weatherproof enclosure.</p>
+        <p><strong>Gate:</strong> No outdoor station release until grounding, heat soak, cable loss/drop, and power recovery behavior are tested.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Heater/mains/24V risk</span>
+          <h3>09. Voron 3D printer engineering bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate PSU, bed heater, hotend, chamber temperature, wire gauge, connector current, fan cooling, and printed-part heat exposure.</p>
+        <p><strong>Production part:</strong> Printer power box, bed wiring, hotend wiring, chamber panels, controller bay.</p>
+        <p><strong>Gate:</strong> No unattended print until thermal runaway, wire/connector temperature, PSU margin, and chamber airflow pass commissioning.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill block">Mains charging risk</span>
+          <h3>10. OpenEVSE research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate EV charging current, relay/contactor heat, GFCI/self-test power, enclosure temperature, pilot behavior, and temperature-based current throttling.</p>
+        <p><strong>Production part:</strong> EVSE controller, relay/contactor box, power path, enclosure, validation fixture.</p>
+        <p><strong>Gate:</strong> No live EV charging without qualified mains review, earth/GFCI validation, relay temperature check, and standards-compliance pathway.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Edge thermal/privacy risk</span>
+          <h3>11. OpenMV + OpenIPC local vision bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate camera board power, IR illumination, IP-camera SoC temperature, PoE/5V conversion, local AI workload heat, and enclosure ventilation.</p>
+        <p><strong>Production part:</strong> Camera node, edge vision enclosure, local AI appliance, PoE/USB power input.</p>
+        <p><strong>Gate:</strong> No sealed camera product until worst-case image workload and ambient heat soak pass.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">SBC/FPGA thermal risk</span>
+          <h3>12. BeagleV-Fire / Milk-V Duo RISC-V edge bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate board input, FPGA/AI workload heat, camera/peripheral current, SD/eMMC writes, active/passive cooling, and brownout behavior under edge workloads.</p>
+        <p><strong>Production part:</strong> Carrier board, edge compute enclosure, gateway power supply, field validation rig.</p>
+        <p><strong>Gate:</strong> No product demo claim until boot, load, peripheral, and thermal-throttle behavior are logged.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill block">Industrial motor/heater risk</span>
+          <h3>13. Precious Plastic machine ecosystem bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate shredder motor current, extruder/injection barrel heaters, VFD/motor wiring, sheetpress heaters, control box ventilation, and machine duty cycle.</p>
+        <p><strong>Production part:</strong> Machine control box, heater controller, motor/VFD cabinet, guard/enclosure, workshop QA.</p>
+        <p><strong>Gate:</strong> No public machine operation until guarding, E-stop, motor overload, heater runaway, fumes, and wiring temperature are validated.</p>
+      </article>
+      <article class="card project">
+        <div class="cardTop">
+          <span class="pill hot">Mobile robot power risk</span>
+          <h3>14. NASA JPL Rover / OpenAMRobot research bundle</h3>
+        </div>
+        <p><strong>Use:</strong> Derate battery current, motor-driver heat, Raspberry Pi 5 thermal behavior, 5V brownout, fuse/disconnect sizing, and runtime under navigation workloads.</p>
+        <p><strong>Production part:</strong> Mobile robot battery box, motor driver bay, compute mount, service panel, docking/charge area.</p>
+        <p><strong>Gate:</strong> No autonomous driving until fuse/disconnect, Pi cooling, command-watchdog, battery sag, and motor-driver temperature pass.</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Production-stage map</h2>
+    <table>
+      <thead><tr><th>Stage</th><th>Derating work</th></tr></thead>
+      <tbody>
+<tr><td><strong>Concept</strong></td><td>Choose input source and load class. Decide whether USB-C, battery, mains adapter, PoE, solar, or bench supply is allowed.</td></tr>
+<tr><td><strong>Architecture</strong></td><td>Draw rail tree, load table, protection blocks, disconnect path, brownout thresholds, and thermal boundary.</td></tr>
+<tr><td><strong>Prototype</strong></td><td>Measure idle/active/peak current. Log regulator temperature and voltage sag during worst-case workload.</td></tr>
+<tr><td><strong>EVT</strong></td><td>Run load-step, heat-soak, startup, low-voltage, cable-drop, and fault-injection tests.</td></tr>
+<tr><td><strong>DVT</strong></td><td>Repeat across enclosure, high ambient, manufacturing tolerances, alternate adapters/batteries, and long-duration duty cycle.</td></tr>
+<tr><td><strong>PVT / Release</strong></td><td>Lock rating label, fuse values, wire gauge, connector type, thermal limits, validation receipt, and blocked-use claims.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Pass checklist</h2>
+    <div class="panel" id="checklist">
+      <label class="check"><input type="checkbox" data-check="1"><span><strong>Input envelope declared:</strong> Nominal voltage/current, min/max input, peak current, ambient range, duty cycle, and load profile are recorded.</span></label>
+      <label class="check"><input type="checkbox" data-check="2"><span><strong>Protection selected:</strong> Fuse/breaker, reverse polarity, TVS, inrush strategy, current limiting, and disconnect path are selected for the actual energy source.</span></label>
+      <label class="check"><input type="checkbox" data-check="3"><span><strong>Rail budget closed:</strong> Every rail lists load current: idle, active, peak, fault, and startup. Sum includes sensors, displays, radios, motors, heaters, storage, and SBCs.</span></label>
+      <label class="check"><input type="checkbox" data-check="4"><span><strong>Thermal path proven:</strong> Regulator, MOSFET, driver, relay, heater, enclosure, connector, and cable temperature rise are measured or conservatively calculated.</span></label>
+      <label class="check"><input type="checkbox" data-check="5"><span><strong>Derating factor applied:</strong> Parts are not run at absolute max. Production target uses safety margin for temperature, current, voltage, and duty cycle.</span></label>
+      <label class="check"><input type="checkbox" data-check="6"><span><strong>Brownout behavior tested:</strong> Device fails safe under sag, startup spike, battery low, USB current limit, load transient, and cable drop.</span></label>
+      <label class="check"><input type="checkbox" data-check="7"><span><strong>Human-visible fault state:</strong> Thermal/current/power fault is displayed locally with a code and a safe recovery instruction.</span></label>
+      <label class="check"><input type="checkbox" data-check="8"><span><strong>Evidence receipt generated:</strong> Test values, instrument IDs, ambient temperature, firmware version, hardware revision, and pass/fail result are saved.</span></label>
+      <div class="toolbar"><button onclick="copyChecklist()">Copy checklist result</button><button onclick="resetChecks()">Reset checks</button></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pass / fail gates</h2>
+    <div class="grid2">
+      <div class="card">
+        <span class="pill go">PASS</span>
+        <p>Measured values prove the device survives worst-case load, high ambient, startup, sag, cable drop, enclosure heat-soak, and declared duty cycle with safe temperature and voltage margins.</p>
+      </div>
+      <div class="card">
+        <span class="pill block">FAIL</span>
+        <p>Any rail browns out, any connector/wire/regulator overheats, any fuse value is guessed, any battery/runtime claim is ideal-only, or any live mains/motor/heater path lacks qualified safety review.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Risk table</h2>
+    <table>
+      <thead><tr><th>Risk</th><th>Failure mode</th><th>Mitigation</th></tr></thead>
+      <tbody>
+<tr><td><strong>Undersized regulator</strong></td><td>Board resets or overheats when display, radio, flash, motor, or camera turns on.</td><td>Budget peak current, check dropout, compute Pdiss, heat-soak test.</td></tr>
+<tr><td><strong>Cable voltage drop</strong></td><td>Device passes bench test but browns out in enclosure or field cable.</td><td>Measure load voltage at far end under peak current; size cable and connectors.</td></tr>
+<tr><td><strong>Connector overheating</strong></td><td>Rated current ignored because pin count, contact resistance, airflow, and crimp quality are unknown.</td><td>Use connector derating, inspect crimps, measure temperature under load.</td></tr>
+<tr><td><strong>Thermal runaway or chamber creep</strong></td><td>Heater or enclosed electronics raises plastic/printed-part temperature beyond safe margin.</td><td>Independent thermal cutoff, chamber measurement, material softening check.</td></tr>
+<tr><td><strong>Battery sag / inrush reset</strong></td><td>Motors/SBC startup spike pulls rail below brownout threshold.</td><td>Soft-start, bulk capacitance, separate rails, current-limited bring-up.</td></tr>
+<tr><td><strong>Unsafe current claim</strong></td><td>Product says it supports current that is only valid for a component, not the whole assembled path.</td><td>Rate the complete path: source, fuse, wire, connector, PCB trace, switch, load, enclosure.</td></tr>
+<tr><td><strong>Ambient mismatch</strong></td><td>Lab at 25°C passes; India summer enclosure fails.</td><td>Test at high ambient or model/derate to expected field temperature.</td></tr>
+<tr><td><strong>No fault visibility</strong></td><td>User sees dead device, not thermal/current fault.</td><td>Local LED/OLED code and retained fault log.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Example power derating pattern</h2>
+    <div class="diagram">
+      <span class="node">INPUT</span><span class="arrow">→</span>
+      <span class="node">FUSE / BREAKER</span><span class="arrow">→</span>
+      <span class="node">REVERSE / TVS</span><span class="arrow">→</span>
+      <span class="node">POWER PATH</span><span class="arrow">→</span>
+      <span class="node">REGULATORS</span><span class="arrow">→</span>
+      <span class="node">LOADS</span><span class="arrow">→</span>
+      <span class="node">TEMP + CURRENT TELEMETRY</span><span class="arrow">→</span>
+      <span class="node">SAFE STATE</span>
+    </div>
+    <pre>// Minimal firmware-side derating state machine
+state POWER_BOOT:
+  sample vin, rail_5v, rail_3v3, board_temp
+  if rail_invalid: enter FAULT_POWER_RAIL
+  if temp_high: enter FAULT_THERMAL
+  enter POWER_READY
+
+state POWER_READY:
+  allow low-energy UI and diagnostics
+  block motor/heater/charger/high-load until calibration and derating gates pass
+
+state LOAD_ACTIVE:
+  every 100 ms:
+    sample current, voltage, temperature
+    if voltage_sag or over_current: disable load; enter FAULT_POWER_LOAD
+    if temp_warning: reduce duty cycle / current limit
+    if temp_critical: disable load; enter FAULT_THERMAL
+
+state FAULT_*:
+  output safe state
+  retain fault code
+  show local message
+  require explicit reset after cause is removed</pre>
+  </section>
+
+  <section>
+    <h2>Minimum test receipt fields</h2>
+    <div class="grid">
+      <div class="metric"><span>Hardware revision</span><b>required</b></div>
+      <div class="metric"><span>Firmware/software revision</span><b>required</b></div>
+      <div class="metric"><span>Input source and cable</span><b>required</b></div>
+      <div class="metric"><span>Ambient temperature</span><b>required</b></div>
+      <div class="metric"><span>Idle/active/peak current</span><b>required</b></div>
+      <div class="metric"><span>Rail min/max voltage</span><b>required</b></div>
+      <div class="metric"><span>Hotspot temperatures</span><b>required</b></div>
+      <div class="metric"><span>Fault behavior result</span><b>required</b></div>
+      <div class="metric"><span>Pass/fail verdict</span><b>required</b></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>LogicHub / GN8R export schema</h2>
+    <pre id="schema"></pre>
+    <div class="toolbar"><button onclick="copySchema()">Copy JSON schema</button></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap small">Tool 10 of 14 · Next: tool-11-local-api-edge-service-interface.html</div>
+</footer>
+
+<script>
+const schema = {
+  tool_id: "T10",
+  tool_name: "Thermal / Current / Power Derating",
+  release_status: "planning-evidence-tool",
+  required_inputs: [
+    "project_id", "hardware_revision", "firmware_revision", "input_source",
+    "rail_budget", "load_profile", "ambient_range", "enclosure_type",
+    "fuse_or_breaker", "wire_and_connector_rating", "thermal_measurements"
+  ],
+  required_tests: [
+    "idle_current", "active_current", "peak_current", "startup_inrush",
+    "cable_voltage_drop", "brownout_sag", "heat_soak", "fault_state",
+    "recovery_after_fault"
+  ],
+  pass_gates: [
+    "input_envelope_declared", "protection_selected", "rail_budget_closed",
+    "thermal_path_proven", "derating_factor_applied", "brownout_behavior_tested",
+    "human_visible_fault_state", "evidence_receipt_generated"
+  ],
+  release_blockers: [
+    "unknown_peak_current", "unknown_hotspot_temperature", "unverified_fuse_value",
+    "unverified_wire_or_connector_rating", "regulator_overheating", "brownout_under_load",
+    "claim_exceeds_weakest_path_rating", "mains_or_battery_product_without_qualified_review"
+  ],
+  evidence_receipt: {
+    receipt_id: "uuid",
+    timestamp_utc: "ISO-8601",
+    measured_by: "string",
+    instrument_ids: ["string"],
+    ambient_c: "number",
+    rails: [{ name:"string", nominal_v:"number", min_v:"number", max_v:"number", idle_a:"number", peak_a:"number" }],
+    hotspots: [{ location:"string", temp_c:"number", limit_c:"number", pass:"boolean" }],
+    verdict: "pass | fail | blocked"
+  }
+};
+document.getElementById('schema').textContent = JSON.stringify(schema, null, 2);
+
+const search = document.getElementById('search');
+search.addEventListener('input', () => {
+  const q = search.value.toLowerCase();
+  document.querySelectorAll('.project').forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+function copySchema(){ navigator.clipboard.writeText(JSON.stringify(schema,null,2)); }
+function resetChecks(){ document.querySelectorAll('#checklist input').forEach(x=>x.checked=false); }
+function copyChecklist(){
+  const rows = [...document.querySelectorAll('#checklist .check')].map(x => (x.querySelector('input').checked ? '[x] ' : '[ ] ') + x.innerText.trim());
+  navigator.clipboard.writeText('Tool 10 — Thermal / Current / Power Derating\n' + rows.join('\n'));
+}
+</script>
+</body>
+</html>

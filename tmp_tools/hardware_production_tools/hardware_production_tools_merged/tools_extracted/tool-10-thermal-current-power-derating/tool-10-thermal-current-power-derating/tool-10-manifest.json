@@ -1,0 +1,17 @@
+{
+  "tool_id": "T10",
+  "tool_name": "Thermal / Current / Power Derating",
+  "html_file": "tool-10-thermal-current-power-derating.html",
+  "next_tool": "tool-11-local-api-edge-service-interface.html",
+  "projects_mapped": 14,
+  "sections": [
+    "purpose",
+    "project_applicability_cards",
+    "production_stage_map",
+    "checklist",
+    "pass_fail_gates",
+    "risk_table",
+    "example_logic_pattern",
+    "json_export_schema"
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Local API Command Receipt",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "device",
+    "api",
+    "command",
+    "result",
+    "safety",
+    "timestamp_utc"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string"
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "product_id",
+        "hardware_rev",
+        "firmware_rev",
+        "serial_number"
+      ],
+      "properties": {
+        "product_id": {
+          "type": "string"
+        },
+        "hardware_rev": {
+          "type": "string"
+        },
+        "firmware_rev": {
+          "type": "string"
+        },
+        "serial_number": {
+          "type": "string"
+        },
+        "source_manifest_hash": {
+          "type": "string"
+        }
+      }
+    },
+    "api": {
+      "type": "object",
+      "required": [
+        "version",
+        "transport"
+      ],
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "transport": {
+          "enum": [
+            "serial",
+            "usb",
+            "http",
+            "websocket",
+            "mqtt",
+            "ble",
+            "ros2_bridge",
+            "unix_socket"
+          ]
+        },
+        "client": {
+          "type": "string"
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "required": [
+        "name",
+        "class",
+        "request_hash"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "class": {
+          "enum": [
+            "observe",
+            "configure",
+            "calibrate",
+            "actuate",
+            "update",
+            "emergency"
+          ]
+        },
+        "request_hash": {
+          "type": "string"
+        },
+        "parameters_redacted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "required": [
+        "physical_enable",
+        "interlock_state",
+        "risk_level"
+      ],
+      "properties": {
+        "physical_enable": {
+          "type": "boolean"
+        },
+        "interlock_state": {
+          "enum": [
+            "ok",
+            "warn",
+            "fault",
+            "lockout",
+            "not_required"
+          ]
+        },
+        "risk_level": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "blocked_reason": {
+          "type": "string"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": [
+        "status",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "blocked",
+            "timeout",
+            "rollback",
+            "unknown"
+          ]
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "next_action": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

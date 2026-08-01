@@ -1,0 +1,60 @@
+{
+  "receipt_id": "T12-20260731-0001",
+  "tool_id": "T12",
+  "project": "airgap8mb_cad_implementation_bundle",
+  "unit": {
+    "serial": "AG8-EVT-001",
+    "hardware_revision": "EVT-A",
+    "bom_revision": "BOM-2026-07",
+    "firmware_version": "0.1.0",
+    "configuration_hash": "sha256:replace-with-real-config-hash"
+  },
+  "fixture": {
+    "fixture_id": "QA-FIXTURE-USB-SPI-001",
+    "fixture_revision": "revA",
+    "software_hash": "sha256:replace-with-real-script-hash"
+  },
+  "operator": "operator-name",
+  "timestamp_utc": "2026-07-31T02:30:00Z",
+  "decision": "ENGINEERING_ONLY",
+  "measurements": [
+    {
+      "name": "vcc_3v3_idle",
+      "value": 3.31,
+      "unit": "V",
+      "limit_min": 3.2,
+      "limit_max": 3.4,
+      "result": "PASS"
+    },
+    {
+      "name": "flash_jedec_id",
+      "value": "EF4017",
+      "unit": "hex",
+      "expected": "W25Q64-family",
+      "result": "PASS"
+    }
+  ],
+  "gates": [
+    {
+      "gate_id": "G01",
+      "result": "PASS",
+      "evidence": "fuse and current-limited bench supply used"
+    },
+    {
+      "gate_id": "G05",
+      "result": "PASS",
+      "evidence": "SPI timeout displayed as human-readable fault"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "logs/serial.log",
+      "sha256": "replace-with-log-hash"
+    },
+    {
+      "path": "photos/top_view.jpg",
+      "sha256": "replace-with-photo-hash"
+    }
+  ],
+  "notes": "Engineering fixture run. Not production certification."
+}

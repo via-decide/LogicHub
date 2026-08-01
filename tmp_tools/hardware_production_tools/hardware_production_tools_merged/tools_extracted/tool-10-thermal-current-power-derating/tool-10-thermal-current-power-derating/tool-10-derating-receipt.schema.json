@@ -1,0 +1,38 @@
+{
+  "tool_id": "T10",
+  "tool_name": "Thermal / Current / Power Derating",
+  "required_inputs": [
+    "project_id",
+    "hardware_revision",
+    "firmware_revision",
+    "input_source",
+    "rail_budget",
+    "load_profile",
+    "ambient_range",
+    "enclosure_type",
+    "fuse_or_breaker",
+    "wire_and_connector_rating",
+    "thermal_measurements"
+  ],
+  "required_tests": [
+    "idle_current",
+    "active_current",
+    "peak_current",
+    "startup_inrush",
+    "cable_voltage_drop",
+    "brownout_sag",
+    "heat_soak",
+    "fault_state",
+    "recovery_after_fault"
+  ],
+  "pass_gates": [
+    "input_envelope_declared",
+    "protection_selected",
+    "rail_budget_closed",
+    "thermal_path_proven",
+    "derating_factor_applied",
+    "brownout_behavior_tested",
+    "human-visible_fault_state",
+    "evidence_receipt_generated"
+  ]
+}

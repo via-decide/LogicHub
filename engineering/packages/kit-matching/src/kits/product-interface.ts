@@ -21,6 +21,7 @@ export const PRODUCT_INTERFACE_KIT: PhysicalKitDefinition = {
     { componentId: 'wiring-jumper-set', quantity: 1, role: 'Interconnect' },
   ],
   supportedProductTemplateIds: ['room-monitor', 'portable-diagnostic'],
+  applicableToolIds: ['T01', 'T02', 'T03', 'T04', 'T12', 'T14'],
   requiredTools: ['Soldering iron', 'Small Phillips screwdriver', 'Wire strippers', 'USB cable'],
   assemblySteps: [
     {

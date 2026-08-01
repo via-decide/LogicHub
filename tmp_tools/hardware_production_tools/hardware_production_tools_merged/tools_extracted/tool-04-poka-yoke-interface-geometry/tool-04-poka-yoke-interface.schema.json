@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tool 04 Poka-yoke Interface Geometry Contract",
+  "type": "object",
+  "required": [
+    "tool_id",
+    "tool_name",
+    "interface_id",
+    "project",
+    "interface_type",
+    "human_action",
+    "datums",
+    "keying",
+    "inspection",
+    "pass_fail_gate"
+  ],
+  "properties": {
+    "tool_id": {
+      "const": "T04"
+    },
+    "tool_name": {
+      "const": "Poka-yoke Interface Geometry"
+    },
+    "interface_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interface_type": {
+      "type": "string",
+      "enum": [
+        "cartridge_slot",
+        "connector",
+        "dock",
+        "toolhead",
+        "battery_tray",
+        "sensor_mount",
+        "guard",
+        "fixture",
+        "enclosure_service_panel",
+        "sample_holder",
+        "camera_mount",
+        "antenna_mount",
+        "robot_dock"
+      ]
+    },
+    "human_action": {
+      "type": "string",
+      "enum": [
+        "insert",
+        "slide",
+        "dock",
+        "latch",
+        "screw",
+        "press",
+        "align",
+        "service",
+        "remove",
+        "replace"
+      ]
+    },
+    "datums": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "feature"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "feature": {
+            "type": "string"
+          },
+          "tolerance_mm": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "keying": {
+      "type": "object",
+      "required": [
+        "method",
+        "wrong_orientations_blocked",
+        "electrical_contact_before_alignment"
+      ],
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "wrong_orientations_blocked": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "electrical_contact_before_alignment": {
+          "type": "boolean"
+        }
+      }
+    },
+    "lead_in": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "chamfer_mm": {
+          "type": "number"
+        },
+        "guide_depth_before_contact_mm": {
+          "type": "number"
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "release_tool_required": {
+          "type": "boolean"
+        },
+        "vibration_test_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "safety_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inspection": {
+      "type": "object",
+      "required": [
+        "critical_dimensions",
+        "go_no_go_gauge_required"
+      ],
+      "properties": {
+        "critical_dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "go_no_go_gauge_required": {
+          "type": "boolean"
+        },
+        "cycle_test_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "pass_fail_gate": {
+      "type": "string"
+    }
+  }
+}

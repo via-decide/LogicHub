@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 07 — Storage Integrity + Transactional Updates</title>
+  <style>
+    :root{--bg:#0A1220;--panel:#101b2f;--panel2:#0f1728;--text:#eef4ff;--muted:#aebbd0;--line:#263956;--gold:#D4AF37;--saffron:#FF9933;--green:#138808;--red:#ff6b6b;--blue:#74b9ff;--code:#07101d;--ok:#1fc77e;--warn:#ffc857;--bad:#ff5c5c;--violet:#b58cff;}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#07101d 0%,var(--bg) 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+    a{color:var(--blue)}
+    .wrap{max-width:1180px;margin:auto;padding:28px 18px 64px}
+    header{border:1px solid var(--line);background:radial-gradient(circle at top right,rgba(255,153,51,.16),transparent 30%),linear-gradient(135deg,rgba(212,175,55,.13),rgba(16,27,47,.88));border-radius:24px;padding:28px;margin-bottom:20px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+    .kicker{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:.78rem}
+    h1{font-size:clamp(2rem,4vw,4rem);line-height:1.05;margin:.35rem 0 .65rem}
+    h2{font-size:1.55rem;margin:30px 0 12px;border-left:5px solid var(--gold);padding-left:12px}
+    h3{font-size:1.1rem;margin:18px 0 8px;color:#fff}
+    p{margin:.5rem 0;color:var(--muted)}
+    .lead{font-size:1.07rem;max-width:940px;color:#dfe8f8}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{grid-column:span 4;border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,27,47,.94),rgba(12,21,37,.96));border-radius:18px;padding:16px;min-height:130px}
+    .card.wide{grid-column:span 6}.card.full{grid-column:1/-1}
+    .tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.78rem;color:#d8e6ff;background:#0b1628;margin:2px 4px 2px 0}
+    .tag.ok{border-color:rgba(31,199,126,.5);color:#baffde}.tag.warn{border-color:rgba(255,200,87,.55);color:#ffe8a8}.tag.bad{border-color:rgba(255,92,92,.55);color:#ffc2c2}.tag.violet{border-color:rgba(181,140,255,.55);color:#dac8ff}
+    table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:rgba(10,18,32,.72);border-radius:14px;overflow:hidden;margin:12px 0}
+    th,td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left;vertical-align:top;font-size:.92rem}
+    th{background:#14233b;color:#fff;font-weight:700}
+    tr:last-child td{border-bottom:none}
+    code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:#dff1ff}
+    pre{overflow:auto;background:var(--code);border:1px solid var(--line);border-radius:16px;padding:16px;color:#dff1ff;font-size:.9rem;line-height:1.45}
+    .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+    .node{border:1px solid var(--line);border-radius:14px;padding:8px 10px;background:#0d1a2e;color:#eaf2ff;font-size:.9rem}
+    .arrow{color:var(--gold);font-weight:800}
+    .checklist li{margin:.45rem 0;color:#d9e4f5}
+    .small{font-size:.86rem;color:var(--muted)}
+    .section{border:1px solid var(--line);background:rgba(12,21,37,.74);border-radius:22px;padding:18px;margin:16px 0}
+    .status{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .metric{border:1px solid var(--line);background:#0b1628;border-radius:16px;padding:14px}
+    .metric strong{display:block;color:var(--gold);font-size:1.7rem;line-height:1}
+    .footer{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted)}
+    .warnbox{border:1px solid rgba(255,200,87,.55);background:rgba(255,200,87,.08);border-radius:16px;padding:13px;margin:12px 0;color:#ffe8a8}
+    .badbox{border:1px solid rgba(255,92,92,.55);background:rgba(255,92,92,.08);border-radius:16px;padding:13px;margin:12px 0;color:#ffc2c2}
+    @media(max-width:880px){.card,.card.wide{grid-column:1/-1}.status{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.status{grid-template-columns:1fr}.wrap{padding:18px 12px 44px}header{padding:20px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">Universal Hardware Production Stack · Tool 07</div>
+      <h1>Storage Integrity + Transactional Updates</h1>
+      <p class="lead">Make every persistent byte survive power loss, brownout, reset, bus failure, partial write, user interruption, firmware update, SD-card corruption, flash wear, and bad configuration changes without silently lying to the user.</p>
+      <div class="status">
+        <div class="metric"><strong>T07</strong><span>Tool number</span></div>
+        <div class="metric"><strong>14</strong><span>Mapped projects</span></div>
+        <div class="metric"><strong>CRC/SHA</strong><span>Integrity layer</span></div>
+        <div class="metric"><strong>ATOMIC</strong><span>Release gate</span></div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>1. Tool purpose</h2>
+      <p><strong>Storage Integrity + Transactional Updates</strong> is the persistence discipline for universal hardware. It prevents a product from appearing usable while its memory, configuration, logs, firmware, calibration, or manifest has already become corrupt.</p>
+      <p>The tool defines how data is written, verified, committed, rolled back, backed up, and reported to the user. It applies to SPI NOR, SPI NAND, EEPROM, FRAM, SD cards, eMMC, USB mass storage, Linux filesystems, microcontroller flash, local databases, and validation receipts.</p>
+      <div class="flow">
+        <span class="node">Prepare record</span><span class="arrow">→</span><span class="node">Write staging copy</span><span class="arrow">→</span><span class="node">Flush/sync</span><span class="arrow">→</span><span class="node">Read back</span><span class="arrow">→</span><span class="node">Verify CRC/SHA</span><span class="arrow">→</span><span class="node">Commit pointer</span><span class="arrow">→</span><span class="node">Keep rollback</span>
+      </div>
+      <div class="warnbox"><strong>Production rule:</strong> if a write cannot be interrupted safely, it is not a product feature yet. It is only a lab script.</div>
+    </section>
+
+    <section class="section"><h2>2. When to use this tool</h2><div class="grid">
+      <div class="card"><h3>Manifest or rule storage</h3><p>Use when storing cartridge manifests, local rules, policies, object indexes, device identity, or offline receipts.</p><span class="tag ok">8MB cartridge</span><span class="tag">LogicHub evidence</span></div>
+      <div class="card"><h3>Firmware and boot images</h3><p>Use before flashing microcontrollers, Linux images, FPGA/gateware, camera firmware, EVSE firmware, or robot controller overlays.</p><span class="tag bad">rollback required</span></div>
+      <div class="card"><h3>Calibration data</h3><p>Use when storing IMU offsets, camera calibration, LiDAR settings, microscope calibration, RF offsets, printer tuning, encoder correction, or docking tag maps.</p><span class="tag warn">field critical</span></div>
+      <div class="card"><h3>Machine/process logs</h3><p>Use for drone blackbox logs, plastic process runs, EVSE session records, observation receipts, printer commissioning, and robot service history.</p></div>
+      <div class="card"><h3>Configuration updates</h3><p>Use when changing speed limits, motor parameters, heater settings, network profiles, UI profiles, board pin maps, or boot service settings.</p></div>
+      <div class="card"><h3>Power-loss testing</h3><p>Use whenever a user can unplug power, hit E-stop, reset, remove battery, lose USB, brown out, or interrupt a write mid-operation.</p><span class="tag violet">fault injection</span></div>
+    </div></section>
+
+    <section class="section"><h2>3. Storage objects and protection levels</h2><table><thead><tr><th>Object</th><th>Examples</th><th>Minimum protection</th><th>Production behavior</th></tr></thead><tbody>
+      <tr><td>Identity / serial</td><td>device id, cartridge id, board revision, certificate pointer</td><td>dual copy + CRC + write-once policy where possible</td><td>Never regenerate silently; show identity fault if invalid.</td></tr>
+      <tr><td>Manifest / index</td><td>object table, package manifest, release manifest, file map</td><td>copy-on-write + SHA-256 + generation counter</td><td>Boot chooses newest valid generation; older valid generation remains fallback.</td></tr>
+      <tr><td>Configuration</td><td>speed limit, GPIO map, network profile, motor constants, heater limits</td><td>staging file + validation schema + rollback</td><td>Reject invalid config before it can become active.</td></tr>
+      <tr><td>Calibration</td><td>IMU offsets, encoder table, camera matrix, RF correction, bed mesh</td><td>timestamp + hardware id + CRC + operator/test receipt</td><td>Calibration is bound to the exact device/revision tested.</td></tr>
+      <tr><td>Firmware / image</td><td>MCU hex, rootfs, SD image, OpenIPC image, FPGA bitstream</td><td>hash + signed/pinned source + A/B slot or known-good fallback</td><td>Failed boot must fall back or enter clear recovery mode.</td></tr>
+      <tr><td>Logs / receipts</td><td>blackbox, EVSE session, station observation, QA JSON, process run</td><td>append-only records + per-record CRC + rollover policy</td><td>Corrupt tail is truncated; older records remain readable.</td></tr>
+      <tr><td>User content</td><td>images, microscope captures, mission routes, generated G-code, farm plans</td><td>file hash + metadata + backup/export path</td><td>User can export, verify, and recover data locally.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>4. Core transaction pattern</h2>
+      <p>For most small hardware products, do not overwrite active state directly. Write a new candidate, verify it, then atomically move the active pointer.</p>
+      <pre>ACTIVE_A: generation=41, valid=true, hash=...
+ACTIVE_B: generation=42, valid=true, hash=...  ← boot chooses this
+STAGING : generation=43, valid=false
+
+update procedure:
+1. write payload to STAGING
+2. write metadata except valid flag
+3. flush/sync storage
+4. read payload back
+5. verify CRC/SHA/schema/device compatibility
+6. set valid flag / commit marker last
+7. update active pointer or allow boot scanner to select highest valid generation
+8. preserve older valid slot until new slot survives reboot test</pre>
+      <div class="badbox"><strong>Do not do this:</strong> open active config, erase it, write new content, then hope power stays alive. That creates silent bricking and unrecoverable state.</div>
+    </section>
+
+    <section class="section"><h2>5. Project applicability cards</h2><div class="grid">
+      <div class="card"><h3>1. Electronics research bundle</h3><p>Use for lab evidence, source snapshots, and experiment records when theory becomes bench work.</p><p class="small"><strong>Storage target:</strong> lab notes, test receipts, simulation outputs</p><span class="tag">study → reproducible experiment</span></div>
+      <div class="card"><h3>2. Air-gapped 8MB research pack</h3><p>Primary project for this tool. The cartridge needs dual manifest, object integrity, safe commit, rollback, and power-loss proof.</p><p class="small"><strong>Storage target:</strong> W25Q64 SPI NOR manifest/object store</p><span class="tag ok">core target</span></div>
+      <div class="card"><h3>3. Air-gapped 8MB CAD bundle</h3><p>Turn preliminary firmware into a transactional flash protocol before any user-trusted cartridge operation.</p><p class="small"><strong>Storage target:</strong> NOR flash, host validation logs</p><span class="tag ok">EVT gate</span></div>
+      <div class="card"><h3>4. Drone CAD bundle</h3><p>Blackbox logs, calibration, arming state, and firmware config must survive brownout and crash recovery without corrupting flight evidence.</p><p class="small"><strong>Storage target:</strong> SPI NOR/flash logs, IMU calibration</p><span class="tag bad">no silent arming</span></div>
+      <div class="card"><h3>5. Pupper V3</h3><p>Store motor zeroing, gait/controller configuration, battery records, and robot commissioning receipts with rollback.</p><p class="small"><strong>Storage target:</strong> ROS2 config, logs, calibration</p><span class="tag">robot service state</span></div>
+      <div class="card"><h3>6. FarmBot</h3><p>Protect garden plans, tool configuration, axis calibration, firmware parameters, watering logs, and local operation receipts.</p><p class="small"><strong>Storage target:</strong> app database, controller config, job records</p><span class="tag">field data</span></div>
+      <div class="card"><h3>7. OpenFlexure</h3><p>Bind microscope calibration, image captures, stage positions, illumination settings, and validation receipts to hardware revision.</p><p class="small"><strong>Storage target:</strong> Pi storage, microscope server data</p><span class="tag warn">measurement trust</span></div>
+      <div class="card"><h3>8. SatNOGS</h3><p>Observation receipts, station configuration, rotator parameters, RF offset, and client logs need append-safe storage and backup.</p><p class="small"><strong>Storage target:</strong> Linux filesystem, SDR/station logs</p><span class="tag">observation evidence</span></div>
+      <div class="card"><h3>9. Voron</h3><p>Protect printer.cfg, bed mesh, input-shaper data, job history, firmware build outputs, and commissioning receipts.</p><p class="small"><strong>Storage target:</strong> Klipper config, Pi storage, MCU firmware</p><span class="tag bad">heater config safety</span></div>
+      <div class="card"><h3>10. OpenEVSE</h3><p>Charging limits, session logs, safety-event logs, WiFi/API config, and firmware updates need safe rollback and fault records.</p><p class="small"><strong>Storage target:</strong> controller config, ESP32 storage, service logs</p><span class="tag bad">mains safety</span></div>
+      <div class="card"><h3>11. OpenMV + OpenIPC</h3><p>Firmware images, camera configuration, detection thresholds, privacy settings, and local capture indexes need verifiable update paths.</p><p class="small"><strong>Storage target:</strong> camera firmware, SD/eMMC, scripts</p><span class="tag warn">privacy evidence</span></div>
+      <div class="card"><h3>12. BeagleV-Fire / Milk-V Duo</h3><p>Rootfs images, boot configs, SDK outputs, gateware, AI model files, and field service logs need pinned hashes and rollback strategy.</p><p class="small"><strong>Storage target:</strong> SD/eMMC/rootfs, FPGA/gateware artifacts</p><span class="tag">edge runtime</span></div>
+      <div class="card"><h3>13. Precious Plastic</h3><p>Machine recipes, heater profiles, motor fault logs, batch records, material logs, and safety inspection receipts should be append-only.</p><p class="small"><strong>Storage target:</strong> controller memory, process QA database</p><span class="tag bad">machine safety</span></div>
+      <div class="card"><h3>14. NASA JPL Rover / OpenAMRobot</h3><p>Robot configs, docking maps, encoder calibration, Nav2 parameters, firmware overlay versions, and E-stop test receipts need traceable persistence.</p><p class="small"><strong>Storage target:</strong> ROS2 workspace config, Pi logs, MCU firmware</p><span class="tag bad">mobile robot safety</span></div>
+    </div></section>
+
+    <section class="section"><h2>6. Production-stage map</h2><table><thead><tr><th>Stage</th><th>Action</th><th>Output</th><th>Gate</th></tr></thead><tbody>
+      <tr><td>Storage inventory</td><td>List every persistent store: MCU flash, external NOR, SD, eMMC, database, config folder, calibration file, log folder.</td><td><code>storage_inventory.csv</code></td><td>No hidden persistent state remains undocumented.</td></tr>
+      <tr><td>Object classification</td><td>Classify data as identity, manifest, config, calibration, firmware, log, user content, or cache.</td><td><code>storage_object_map.json</code></td><td>Every object has criticality and recovery rule.</td></tr>
+      <tr><td>Integrity format</td><td>Define header, version, length, CRC, SHA, generation, timestamp, hardware id, and valid flag.</td><td><code>record_format.md</code></td><td>Reader can reject malformed or stale records.</td></tr>
+      <tr><td>Transactional write path</td><td>Implement staging, readback, verify, commit marker, and rollback logic.</td><td><code>transaction_write()</code></td><td>Power can fail at any step without silent corruption.</td></tr>
+      <tr><td>Boot recovery</td><td>Scan slots/records, select newest valid generation, quarantine corrupt candidates, display state.</td><td><code>boot_recovery_report.json</code></td><td>Device boots to known-good or explicit recovery mode.</td></tr>
+      <tr><td>Fault injection</td><td>Cut power/reset during erase, write, commit, reboot, update, and log rollover.</td><td><code>fault_injection_receipts/</code></td><td>100+ interruptions pass before DVT; 10k for storage-critical cartridge.</td></tr>
+      <tr><td>Release freeze</td><td>Hash storage layout, schemas, firmware, test logs, and known-good seed images.</td><td><code>storage_release_manifest.json</code></td><td>Same firmware + same input creates same persistent layout.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>7. Clean checklist</h2><ul class="checklist">
+      <li>Identify every write path before writing firmware or scripts.</li>
+      <li>Never overwrite the only valid copy of configuration, identity, or manifest.</li>
+      <li>Write payload first, commit marker last.</li>
+      <li>Read data back after write and verify checksum/hash before activation.</li>
+      <li>Use generation counters to choose newest valid data after reboot.</li>
+      <li>Bind calibration files to device serial, hardware revision, operator, date, and test fixture.</li>
+      <li>Separate caches from safety-critical state. A cache may be deleted; a manifest cannot.</li>
+      <li>For flash, record erase-block/sector geometry and write-size alignment.</li>
+      <li>For SD/eMMC/Linux, call sync/fsync for critical files and test real unplug behavior.</li>
+      <li>For firmware updates, keep known-good rollback until new image proves it can boot and serve health status.</li>
+      <li>For logs, make records append-only and tolerate corrupt tail truncation.</li>
+      <li>Display human-readable fault state when storage integrity fails.</li>
+      <li>Do not hide storage errors behind generic “failed” messages.</li>
+    </ul></section>
+
+    <section class="section"><h2>8. Pass / fail gates</h2><table><thead><tr><th>Gate</th><th>PASS</th><th>FAIL</th><th>Required action</th></tr></thead><tbody>
+      <tr><td>Power-loss safety</td><td>Power interruption at any write step leaves old valid state or new valid state.</td><td>Device boots into corrupt or undefined state.</td><td>Replace overwrite logic with transactional commit.</td></tr>
+      <tr><td>Integrity detection</td><td>Bit flip, truncated record, stale generation, and wrong length are detected.</td><td>Corrupt data is accepted as valid.</td><td>Add header/version/length/CRC/SHA validation.</td></tr>
+      <tr><td>Rollback</td><td>Bad firmware/config/calibration can be rejected and previous known-good restored.</td><td>Bad update bricks device or requires manual reflashing.</td><td>Add A/B slots, rescue mode, or factory reset path.</td></tr>
+      <tr><td>Atomic activation</td><td>Activation happens only after full validation and commit marker write.</td><td>Partial record becomes active.</td><td>Move active pointer/valid flag to final step.</td></tr>
+      <tr><td>Wear discipline</td><td>Frequent writes are rate-limited, rotated, or logged append-only.</td><td>Same sector is rewritten continuously.</td><td>Add wear budget, rotation, buffering, or FRAM/EEPROM alternative.</td></tr>
+      <tr><td>User visibility</td><td>Storage fault has readable code and next action.</td><td>User sees crash, freeze, or meaningless error.</td><td>Map storage errors to Tool 03 state visibility.</td></tr>
+      <tr><td>Evidence trace</td><td>Every validation receipt references storage layout version and manifest hash.</td><td>Test result cannot be tied to persistent-state version.</td><td>Regenerate test receipt with manifest reference.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>9. Risk table</h2><table><thead><tr><th>Risk</th><th>Failure mode</th><th>Affected projects</th><th>Mitigation</th></tr></thead><tbody>
+      <tr><td>Brownout mid-write</td><td>Manifest/config becomes half-written and still appears present.</td><td>8MB cartridge, drones, robots, EVSE, edge boards</td><td>Brownout detect, staging copy, commit marker last, boot scanner.</td></tr>
+      <tr><td>Erase-before-copy</td><td>Only valid copy is erased before replacement succeeds.</td><td>8MB NOR, SD/eMMC images, MCU firmware</td><td>Copy-on-write and dual-slot layout.</td></tr>
+      <tr><td>Silent calibration drift</td><td>Device uses wrong calibration for changed hardware.</td><td>OpenFlexure, Pupper, OpenAMRobot, Drone, SatNOGS, OpenMV</td><td>Bind calibration to hardware serial/revision and expiration rule.</td></tr>
+      <tr><td>Unsafe config activation</td><td>Wrong motor, heater, current, or speed parameter goes live.</td><td>Voron, OpenEVSE, Precious Plastic, robots, FarmBot</td><td>Schema validation plus safety-range checks before commit.</td></tr>
+      <tr><td>Log corruption</td><td>Crash or full disk destroys entire log database.</td><td>Drone blackbox, station observations, EVSE sessions, QA records</td><td>Append-only records with per-record CRC and corrupt-tail truncation.</td></tr>
+      <tr><td>Storage wear</td><td>Flash sectors wear out from frequent status writes.</td><td>8MB module, ESP32, microcontrollers, SD cards</td><td>Rate-limit writes, rotate sectors, separate volatile status from durable events.</td></tr>
+      <tr><td>Boot-loop after bad update</td><td>Device repeatedly boots failed firmware or broken config.</td><td>OpenIPC, RISC-V edge, OpenAMRobot, EVSE, FarmBot</td><td>Boot counter, health confirmation, automatic rollback.</td></tr>
+      <tr><td>Security overclaim</td><td>CRC is treated as authenticity proof.</td><td>All projects with update or evidence claims</td><td>Use CRC for accidental corruption; use signatures/authenticated hashes for trust decisions.</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>10. Example record layout</h2><pre>struct StorageRecordHeader {
+  magic[4]        = "VDSR";        // record identity
+  version         = 1;             // schema version
+  object_type     = MANIFEST;      // manifest/config/log/calibration/firmware pointer
+  generation      = 43;            // monotonic counter
+  payload_length  = 4096;          // bytes after header
+  payload_crc32   = 0x00000000;    // accidental corruption check
+  payload_sha256  = "...";        // stronger identity / manifest link
+  hardware_id     = "BOARD-REV-A"; // compatibility binding
+  flags           = STAGING;       // STAGING until final commit
+}
+
+commit rule:
+- write header with STAGING flag
+- write payload
+- flush/sync
+- read back and verify CRC/SHA
+- rewrite only final flag or pointer as VALID
+- never mark VALID before verification</pre></section>
+
+    <section class="section"><h2>11. Example firmware logic pattern</h2><pre>result_t storage_commit(object_type, payload):
+    old = scan_newest_valid(object_type)
+    slot = choose_inactive_slot(object_type)
+
+    erase(slot)
+    write_header(slot, state="STAGING", generation=old.generation + 1)
+    write_payload(slot, payload)
+    flush_storage(slot)
+
+    check = read_payload(slot)
+    if crc32(check) != expected_crc or sha256(check) != expected_sha:
+        mark_quarantined(slot, reason="VERIFY_FAILED")
+        display_error("Storage verify failed; old state kept")
+        return FAIL_OLD_STATE_ACTIVE
+
+    write_commit_marker(slot, state="VALID")
+    flush_storage(slot)
+
+    boot_test_required = true
+    return PASS_NEW_STATE_STAGED
+
+boot_recover(object_type):
+    candidates = scan_all_slots(object_type)
+    valid = filter(validate_header_crc_sha_schema, candidates)
+    if not valid:
+        display_error("No valid storage record")
+        enter_recovery_mode()
+    else:
+        activate(max_generation(valid))</pre></section>
+
+    <section class="section"><h2>12. Fault-injection matrix</h2><table><thead><tr><th>Test</th><th>Interrupt point</th><th>Expected result</th><th>Projects where mandatory</th></tr></thead><tbody>
+      <tr><td>Erase interruption</td><td>Power cut during sector erase</td><td>Old valid slot still boots; erased candidate ignored.</td><td>8MB cartridge, MCU configs, firmware update</td></tr>
+      <tr><td>Payload write interruption</td><td>Power cut after partial payload</td><td>Partial candidate rejected by length/CRC/SHA.</td><td>All storage-critical devices</td></tr>
+      <tr><td>Commit interruption</td><td>Power cut while writing valid flag/pointer</td><td>Boot scanner selects newest fully valid record only.</td><td>8MB, edge boards, robots, EVSE</td></tr>
+      <tr><td>Bad config injection</td><td>Invalid speed/heater/current/network config</td><td>Schema/range check blocks activation.</td><td>Voron, EVSE, Precious Plastic, robots, FarmBot</td></tr>
+      <tr><td>Corrupt log tail</td><td>Random bytes at end of log</td><td>Reader truncates tail and preserves earlier records.</td><td>Drone, SatNOGS, EVSE, QA fixtures</td></tr>
+      <tr><td>Update boot fail</td><td>New image boots but health check fails</td><td>Boot counter rolls back to previous known-good image.</td><td>OpenIPC, RISC-V edge, AMR, EVSE</td></tr>
+      <tr><td>Full storage</td><td>Disk/flash reaches capacity</td><td>Device refuses unsafe writes and explains cleanup/export action.</td><td>Camera, microscope, station, printer, local UI</td></tr>
+    </tbody></table></section>
+
+    <section class="section"><h2>13. Minimal validation receipt</h2><pre>{
+  "tool_id": "T07",
+  "test_id": "storage-powerloss-commit-001",
+  "project_id": "airgap-8mb-cartridge",
+  "device_serial": "EVT-A-0001",
+  "storage_medium": "W25Q64 SPI NOR",
+  "layout_version": "storage-layout-v1",
+  "firmware_hash": "sha256:...",
+  "manifest_hash": "sha256:...",
+  "interruption_point": "after_payload_before_commit",
+  "expected_behavior": "old_generation_remains_active",
+  "observed_behavior": "old_generation_42_active_candidate_43_rejected",
+  "result": "PASS",
+  "operator": "string",
+  "timestamp": "YYYY-MM-DDTHH:MM:SS+05:30"
+}</pre></section>
+
+    <section class="section"><h2>14. JSON / LogicHub export schema</h2><pre>{
+  "tool_id": "T07",
+  "tool_name": "Storage Integrity + Transactional Updates",
+  "project_id": "string",
+  "release_stage": "research|evt|dvt|pvt|manufacturing|field",
+  "storage_systems": [
+    {
+      "storage_id": "string",
+      "medium": "spi_nor|spi_nand|eeprom|fram|sd|emmc|mcu_flash|linux_fs|database|cloudless_local_store",
+      "capacity_bytes": 0,
+      "erase_block_bytes": 0,
+      "write_granularity_bytes": 0,
+      "persistent_objects": ["identity", "manifest", "config", "calibration", "firmware", "log", "user_content"],
+      "criticality": "low|medium|high|safety_critical",
+      "transaction_model": "dual_slot|copy_on_write|append_only|ab_image|journal|none",
+      "integrity_checks": ["crc32", "sha256", "schema_validation", "signature_optional"],
+      "rollback_available": true,
+      "wear_strategy": "rate_limit|rotation|wear_leveling|replaceable_media|not_required",
+      "user_visible_errors": true
+    }
+  ],
+  "gates": {
+    "power_loss_safe": "pass|fail|not_tested",
+    "corruption_detected": "pass|fail|not_tested",
+    "rollback_verified": "pass|fail|not_tested",
+    "full_storage_behavior_verified": "pass|fail|not_tested",
+    "wear_budget_documented": "pass|fail|not_tested",
+    "approved_for_user_data": false
+  },
+  "receipts": [
+    {
+      "receipt_id": "string",
+      "test_type": "write_verify|power_loss|rollback|corrupt_record|full_storage|wear_cycle",
+      "result": "pass|fail",
+      "evidence_path": "string"
+    }
+  ]
+}</pre></section>
+
+    <section class="section"><h2>15. Production rule</h2><p>A hardware product is not trustworthy because it stores data. It is trustworthy only when it can prove which data is valid, which data is stale, which data is corrupt, what changed, what survived interruption, and what the user should do next.</p><p><strong>Default decision:</strong> if the device cannot survive interrupted writes without silent corruption, block production and keep it in lab-only status.</p></section>
+
+    <div class="footer"><p>Tool 07 of 14. Next file: <code>tool-08-sensor-calibration-health-evidence.html</code></p></div>
+  </div>
+</body>
+</html>

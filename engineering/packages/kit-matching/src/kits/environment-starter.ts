@@ -23,6 +23,7 @@ export const ENVIRONMENT_STARTER_KIT: PhysicalKitDefinition = {
     'irrigation-controller',
     'room-monitor',
   ],
+  applicableToolIds: ['T01', 'T03', 'T10', 'T12', 'T14'],
   requiredTools: ['Small Phillips screwdriver', 'Wire strippers', 'USB cable'],
   assemblySteps: [
     {

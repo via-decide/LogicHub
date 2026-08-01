@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tool 13 — Enclosure / Environmental DFM</title>
+<style>
+  :root{
+    --bg:#0b1118;--panel:#101923;--panel2:#0f1720;--ink:#e8eef7;--muted:#a9b5c4;
+    --line:#223044;--accent:#f59e0b;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--blue:#38bdf8;
+    --code:#071019;
+  }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
+  header{padding:34px 28px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#121b26 0%,#0b1118 100%)}
+  .wrap{max-width:1220px;margin:0 auto;padding:0 18px}
+  h1{margin:0 0 8px;font-size:clamp(30px,4vw,54px);letter-spacing:-.04em;line-height:1.02}
+  h2{font-size:28px;margin:40px 0 14px;letter-spacing:-.02em;border-bottom:1px solid var(--line);padding-bottom:8px}
+  h3{font-size:18px;margin:20px 0 8px;color:#f8fafc}
+  p{margin:8px 0;color:var(--muted)}
+  .tag{display:inline-flex;border:1px solid #5d4622;color:#fbbf24;background:#1d1406;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .sub{font-size:18px;max-width:900px;color:#c7d2df}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}.wrap{padding:0 12px}header{padding-left:14px;padding-right:14px}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset}.card p{font-size:14px}
+  .metric{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#dbeafe;background:#0b1320;border:1px solid #1e3557;border-radius:9px;padding:10px;margin-top:8px;font-size:13px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 22px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:table}
+  th,td{border-bottom:1px solid var(--line);padding:11px 12px;vertical-align:top;text-align:left;font-size:14px}th{color:#f8fafc;background:#142033;font-size:12px;text-transform:uppercase;letter-spacing:.08em}tr:last-child td{border-bottom:0}td:first-child{font-weight:700;color:#f8fafc}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}pre{white-space:pre-wrap;background:var(--code);border:1px solid var(--line);padding:16px;border-radius:12px;overflow:auto;color:#d6e4ff;font-size:13px}.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.blue{color:var(--blue)}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;margin:2px;background:#0b1320;color:#cbd5e1}.stage{border-left:3px solid var(--accent)}
+  .nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.nav a{color:#dbeafe;text-decoration:none;border:1px solid var(--line);background:#101923;padding:7px 10px;border-radius:999px;font-size:13px}.callout{border:1px solid #65430e;background:#1b1306;border-radius:14px;padding:16px;margin:16px 0}.danger{border-color:#5f1f1f;background:#1a0c0c}.success{border-color:#1f5f39;background:#0c1a12}
+  .footer{margin:50px 0 28px;color:#748094;font-size:13px;border-top:1px solid var(--line);padding-top:18px}.small{font-size:12px;color:#7f8da3}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <span class="tag">Tool 13</span>
+  <h1>Enclosure / Environmental DFM</h1>
+  <p class="sub">A production tool for turning exposed prototypes into safe, serviceable, manufacturable hardware that survives heat, dust, vibration, handling, outdoor exposure, lab use, user abuse, and maintenance work.</p>
+  <div class="nav">
+    <a href="#purpose">Purpose</a><a href="#projects">Project Map</a><a href="#stages">Production Stages</a><a href="#checklist">Checklist</a><a href="#gates">Pass/Fail Gates</a><a href="#risks">Risk Table</a><a href="#patterns">Patterns</a><a href="#schema">LogicHub Schema</a>
+  </div>
+</div></header>
+<main class="wrap">
+<section id="purpose">
+  <h2>1. Tool purpose</h2>
+  <div class="grid g3">
+    <div class="card"><h3>Protect the user</h3><p>Keep fingers, tools, wires, liquids, dust, heat, blades, motors, mains terminals, battery terminals, sharp edges, and high-temperature parts away from unsafe contact.</p><div class="metric">Primary output: hazard-separated physical design.</div></div>
+    <div class="card"><h3>Protect the electronics</h3><p>Control airflow, thermal path, vibration, strain relief, ingress, EMI/cable discipline, connector support, service access, and mounting rigidity.</p><div class="metric">Primary output: enclosure design rules + validation receipts.</div></div>
+    <div class="card"><h3>Protect the production process</h3><p>Make the design repeatable through material choice, wall thickness, bosses, fasteners, tolerances, access order, inspection points, and assembly poka-yoke.</p><div class="metric">Primary output: DFM-ready enclosure release package.</div></div>
+  </div>
+  <div class="callout danger"><strong>Rule:</strong> an enclosure is not decoration. It is a safety boundary, thermal system, service workflow, manufacturing object, and user-interface surface.</div>
+</section>
+<section id="projects">
+  <h2>2. Project applicability cards</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Electronics research bundle</h3><p><span class="pill">Lab enclosure discipline</span></p><p>Use as enclosure checklist for future SiC/power/embedded Linux test fixtures: isolation, airflow, touch-safe covers, label zones.</p></div>
+    <div class="card"><h3>Air-gapped 8MB module research pack</h3><p><span class="pill">Cartridge enclosure concept</span></p><p>Define cartridge shell, reader slot, labels, insertion direction, contact protection, dust control, and handling robustness.</p></div>
+    <div class="card"><h3>Air-gapped 8MB CAD implementation bundle</h3><p><span class="pill">EVT cartridge case</span></p><p>Convert OpenSCAD/slot ideas into wall thickness, bosses, rails, clearance, service openings, and print orientation rules.</p></div>
+    <div class="card"><h3>Drone CAD implementation bundle</h3><p><span class="pill">Flight-controller carrier and tether fixture</span></p><p>Design protective FC case, connector strain relief, IMU vibration isolation, airflow, prop-safe bench/tether enclosure boundaries.</p></div>
+    <div class="card"><h3>Pupper V3 research bundle</h3><p><span class="pill">Robot body panels and service covers</span></p><p>Route battery/service access, protect wiring from leg motion, plan impact covers, ventilation, and E-stop visibility.</p></div>
+    <div class="card"><h3>FarmBot research bundle</h3><p><span class="pill">Outdoor electronics/control enclosure</span></p><p>Apply UV, dust, water, irrigation splash, cable gland, drain/vent, toolhead-dock, and service-panel design rules.</p></div>
+    <div class="card"><h3>OpenFlexure Microscope bundle</h3><p><span class="pill">Optics/mechanics housing</span></p><p>Control stray light, sample access, objective collision, dust, vibration, stage clearance, and repeatable printed-part geometry.</p></div>
+    <div class="card"><h3>SatNOGS ground-station bundle</h3><p><span class="pill">Outdoor RF station enclosure</span></p><p>Weatherproof SDR/Pi box, cable strain relief, antenna feedthroughs, grounding path, thermal venting, and service access.</p></div>
+    <div class="card"><h3>Voron 3D printer bundle</h3><p><span class="pill">Printer enclosure/chamber</span></p><p>Validate panel fit, chamber heat, cable chains, electronics bay ventilation, printed-part softening, service access, and fire-risk separation.</p></div>
+    <div class="card"><h3>OpenEVSE bundle</h3><p><span class="pill">EV charger enclosure</span></p><p>Separate mains/low-voltage zones, strain relief, ingress protection, thermal path, touch-safe covers, relay clearance, and certification-ready labeling.</p></div>
+    <div class="card"><h3>OpenMV + OpenIPC vision bundle</h3><p><span class="pill">Camera appliance housing</span></p><p>Protect lens, set FOV, handle heat, cable routing, privacy indicator, mounting bracket, tamper resistance, and weather options.</p></div>
+    <div class="card"><h3>BeagleV-Fire / Milk-V Duo bundle</h3><p><span class="pill">Edge compute carrier enclosure</span></p><p>Design for SBC airflow, IO access, antenna/camera openings, heatsink clearance, service ports, and EMI/cable discipline.</p></div>
+    <div class="card"><h3>Precious Plastic ecosystem bundle</h3><p><span class="pill">Machine guarding and control-box DFM</span></p><p>Create guards, covers, shields, hopper interfaces, heater covers, service panels, fume/airflow boundaries, and warning labels.</p></div>
+    <div class="card"><h3>NASA JPL Rover / OpenAMRobot bundle</h3><p><span class="pill">Mobile robot chassis/enclosure</span></p><p>Protect battery, fuse, E-stop, sensors, LiDAR, camera, motor drivers, wiring harness, bumpers, and docking geometry.</p></div>
+  </div>
+</section>
+<section id="stages">
+  <h2>3. Production-stage map</h2>
+  <div class="grid g2">
+    <div class="card stage"><h3>Stage A — exposed prototype</h3><p>Board or mechanism runs on bench, but cables, heatsinks, batteries, motors, and sensors are exposed.</p><p><strong>Tool 13 action:</strong> define no-touch zones, temporary covers, airflow assumptions, cable strain relief, and safe handling rules.</p></div>
+    <div class="card stage"><h3>Stage B — EVT enclosure</h3><p>First 3D-printed or fabricated enclosure verifies mounting, connector access, heat, clearances, and user handling.</p><p><strong>Tool 13 action:</strong> run assembly/disassembly, drop/handling, thermal soak, vibration, and connector insertion tests.</p></div>
+    <div class="card stage"><h3>Stage C — DVT environmental build</h3><p>Design starts behaving like a real product under heat, dust, splash, field transport, lab contamination, or workshop abuse.</p><p><strong>Tool 13 action:</strong> add gaskets, cable glands, vents, filters, guards, labels, material upgrades, and service inspection gates.</p></div>
+    <div class="card stage"><h3>Stage D — PVT / supplier release</h3><p>Manufacturing-ready enclosure package with drawings, tolerances, fastener spec, inspection points, and QA receipts.</p><p><strong>Tool 13 action:</strong> freeze revision, publish CAD/BOM hash, vendor instructions, assembly order, test fixture, and blocked-use claims.</p></div>
+  </div>
+</section>
+<section id="checklist">
+  <h2>4. Enclosure DFM checklist</h2>
+  <table><thead><tr><th>Domain</th><th>Checklist</th><th>Evidence required</th></tr></thead><tbody>
+    <tr><td>Mechanical fit</td><td>PCB mount holes, board edge clearance, connector access, cable bend radius, battery retention, sensor line-of-sight, tool access.</td><td>Annotated CAD screenshots, assembled photos, interference check, service sequence.</td></tr>
+    <tr><td>Wall/boss design</td><td>Consistent wall thickness, reinforced bosses, ribs instead of thick blocks, no unsupported screw posts, no stress risers near snap fits.</td><td>Section drawings, print orientation notes, fastener torque notes, failed-print log.</td></tr>
+    <tr><td>Thermal path</td><td>Heat source map, vent path, heatsink clearance, fan/filter plan, hot-surface isolation, material softening check.</td><td>Temperature capture at idle/load/fault, ambient condition, derating margin.</td></tr>
+    <tr><td>Electrical safety</td><td>Separated mains/battery/low-voltage zones, strain relief, fuse access, touch-safe terminals, insulation, creepage/clearance boundary.</td><td>Wiring photo, insulation check, fuse rating note, labelled power-zone diagram.</td></tr>
+    <tr><td>Environmental exposure</td><td>Dust, water/splash, UV, field mud, lab chemical exposure, workshop chips, fumes, condensation, insects.</td><td>Ingress assumptions, material selection note, gasket/vent/filter plan.</td></tr>
+    <tr><td>User handling</td><td>No sharp edges, no ambiguous orientation, labels readable, E-stop visible, service panel obvious, no hidden hot/moving surfaces.</td><td>User-test notes, labelled photos, pass/fail handling checklist.</td></tr>
+    <tr><td>Maintenance</td><td>Replaceable fuse, accessible battery, removable storage, service ports, diagnostic LED window, fastener count minimized.</td><td>Service-time measurement, repair checklist, required tools list.</td></tr>
+    <tr><td>Manufacturing</td><td>STL/STEP/source CAD versioned, material/process chosen, tolerances assigned, support strategy clear, supplier notes included.</td><td>CAD hash, drawing set, BOM link, vendor-ready release package.</td></tr>
+  </tbody></table>
+</section>
+<section id="gates">
+  <h2>5. Pass/fail gates</h2>
+  <div class="grid g2">
+    <div class="card"><h3 class="ok">PASS gate</h3><p>The enclosure can be assembled without forcing, protects unsafe zones, exposes required user/service interfaces, survives expected operating temperature, and has documented inspection evidence.</p><pre>PASS when:
+- No cable is pinched or unsupported.
+- No finger/tool can touch dangerous zones during normal use.
+- Heat sources remain below material and component limits.
+- Service access is possible without destructive disassembly.
+- Every CAD/BOM/source file is versioned and hashed.</pre></div>
+    <div class="card"><h3 class="bad">FAIL gate</h3><p>The enclosure hides risk, traps heat, blocks service, exposes terminals, lets the user insert parts incorrectly, or lacks manufacturing evidence.</p><pre>FAIL when:
+- Battery/mains/motor/heater terminals are reachable.
+- Thermal test is missing or fails at realistic load.
+- Sensor, camera, LiDAR, antenna, or optics are blocked.
+- Emergency stop or power disconnect is hidden.
+- CAD revision cannot be traced to BOM and build photos.</pre></div>
+  </div>
+</section>
+<section id="risks">
+  <h2>6. Risk table</h2>
+  <table><thead><tr><th>Risk</th><th>Applies to</th><th>Failure mode</th><th>Mitigation</th></tr></thead><tbody>
+    <tr><td>Trapped heat</td><td>SBCs, chargers, printers, robots, machines</td><td>Thermal throttling, shutdown, plastic softening, fire risk</td><td>Vent path, heatsink clearance, fan/filter, temperature receipt, derating margin.</td></tr>
+    <tr><td>Unsafe touch access</td><td>EVSE, Precious Plastic, Voron, motors, batteries</td><td>Shock, burn, blade contact, pinch injury</td><td>Guards, covers, keyed access, warning labels, interlocks, physical E-stop.</td></tr>
+    <tr><td>Connector strain</td><td>All boards/modules</td><td>Broken solder joints, intermittent faults, cable pullout</td><td>Strain relief, cable clamps, board-mounted support, service bend radius.</td></tr>
+    <tr><td>Wrong insertion</td><td>Cartridges, toolheads, docks, batteries</td><td>Reverse power, bent pins, bus short, bad alignment</td><td>Asymmetric rails, keyed connector, chamfers, labels, insertion test.</td></tr>
+    <tr><td>Ingress contamination</td><td>FarmBot, SatNOGS, cameras, machines</td><td>Corrosion, shorts, optical contamination, RF loss</td><td>Gaskets, cable glands, drain path, filters, conformal coating where justified.</td></tr>
+    <tr><td>Service trap</td><td>All products</td><td>Cannot replace fuse/battery/card/board without damage</td><td>Service panels, captive fasteners, access order, tool list, service-time target.</td></tr>
+    <tr><td>Manufacturing drift</td><td>3D printed/injection/fabricated parts</td><td>Part warps, holes shift, fasteners fail, inconsistent fit</td><td>Tolerance stack, test coupon, supplier inspection, CAD/BOM hash freeze.</td></tr>
+  </tbody></table>
+</section>
+<section id="patterns">
+  <h2>7. Example enclosure logic patterns</h2>
+  <h3>7.1 Mechanical release checklist pattern</h3>
+<pre>{
+  "enclosure_release": {
+    "revision": "ENC-REV-A",
+    "material": "PETG prototype / ABS or PC-ABS DVT candidate",
+    "wall_thickness_mm": 2.4,
+    "boss_core_diameter_mm": 2.8,
+    "airflow": "bottom intake, rear exhaust, no blocked heatsink",
+    "service_access": ["fuse", "battery", "USB-C", "debug header", "storage"],
+    "blocked_until_verified": ["thermal soak", "drop/handling", "cable strain", "touch safety"]
+  }
+}</pre>
+  <h3>7.2 Environmental DFM decision pattern</h3>
+<pre>IF product_context == outdoor:
+    require cable glands + drain/vent path + UV material note + corrosion review
+IF product_context == mains_or_battery_high_current:
+    require touch-safe cover + fuse access + strain relief + labelled power zone
+IF product_context == moving_machine:
+    require guard + interlock or guarded access + E-stop visibility + pinch-point review
+IF product_context == optics_or_camera:
+    require lens/FOV clearance + dust control + calibration target + privacy indicator
+IF product_context == lab_or_measurement:
+    require calibration fixture + contamination control + claim boundary</pre>
+</section>
+<section id="schema">
+  <h2>8. JSON/export-ready schema for LogicHub/GN8R</h2>
+<pre>{
+  "$schema": "https://logichub.app/schemas/enclosure_environmental_dfm_v1.json",
+  "tool_id": "T13",
+  "tool_name": "Enclosure / Environmental DFM",
+  "project": "string",
+  "revision": "string",
+  "enclosure": {
+    "cad_source_uri": "string",
+    "cad_hash_sha256": "string",
+    "material": "string",
+    "process": "3d_print|cnc|sheet_metal|injection_moulding|laser_cut|mixed",
+    "wall_thickness_mm": "number",
+    "fasteners": ["string"],
+    "service_panels": ["string"],
+    "environment": ["indoor", "outdoor", "lab", "industrial", "mobile", "hot_chamber", "wet_area"]
+  },
+  "hazard_boundaries": {
+    "mains_present": "boolean",
+    "battery_high_current": "boolean",
+    "motors_or_heaters": "boolean",
+    "sharp_or_blade_parts": "boolean",
+    "optics_or_measurement_claims": "boolean",
+    "rf_or_antenna": "boolean"
+  },
+  "evidence": {
+    "fit_check": "pass|fail|not_run",
+    "thermal_check": "pass|fail|not_run",
+    "touch_safety_check": "pass|fail|not_run",
+    "strain_relief_check": "pass|fail|not_run",
+    "service_access_check": "pass|fail|not_run",
+    "environmental_check": "pass|fail|not_run",
+    "photos_uri": ["string"],
+    "test_receipt_uri": "string"
+  },
+  "decision": "release|revise|block",
+  "blocked_reasons": ["string"]
+}</pre>
+</section>
+<section>
+  <h2>9. Resume state</h2>
+  <table><tbody>
+    <tr><td>Completed tools</td><td>T01–T13</td></tr>
+    <tr><td>Current tool</td><td>Tool 13 — Enclosure / Environmental DFM</td></tr>
+    <tr><td>Next tool</td><td>tool-14-compliance-safety-risk-ledger.html</td></tr>
+    <tr><td>Rule</td><td>Generate one HTML tool at a time.</td></tr>
+  </tbody></table>
+</section>
+<div class="footer">Generated as part of the hardware research progress toolchain. This HTML is a planning and validation artifact, not a substitute for qualified safety, regulatory, electrical, mechanical, or manufacturing review.</div>
+</main></body></html>

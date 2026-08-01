@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logichub.app/schemas/tool-03-state-visibility-offline-telemetry.schema.json",
+  "title": "Tool03StateVisibilityOfflineTelemetry",
+  "type": "object",
+  "required": [
+    "project",
+    "device",
+    "states",
+    "outputs",
+    "fault_priority",
+    "qa_gates"
+  ],
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "device": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "string"
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "message",
+          "user_action",
+          "severity"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "IDLE",
+              "READY",
+              "BUSY",
+              "WARN",
+              "FAULT"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "user_action": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ]
+          },
+          "latch_until_ack": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "oled": {
+          "type": "boolean"
+        },
+        "tft": {
+          "type": "boolean"
+        },
+        "rgb_led": {
+          "type": "boolean"
+        },
+        "buzzer": {
+          "type": "boolean"
+        },
+        "serial_log": {
+          "type": "boolean"
+        },
+        "local_api": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fault_priority": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "qa_gates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "privacy_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

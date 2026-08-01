@@ -1,0 +1,110 @@
+project_id,project_name,tool,where_used,how
+1,Electronics research bundle,T06 Source Manifest,Research-to-build transition,Convert reports into traceable source ledger before using them for hardware design
+1,Electronics research bundle,T10 Thermal/Power Derating,SiC/power electronics learning,Build derating discipline before high-voltage or high-speed switching work
+1,Electronics research bundle,T12 QA Fixture,Lab exercises,Turn theory into repeatable bench tests
+1,Electronics research bundle,T14 Risk Ledger,Any derived hardware project,Separate learning claims from production-safe claims
+2,Air-gapped 8MB module research pack,T01 Power Protection,Cartridge reader board,USB-C or protected 5V/3.3V power input
+2,Air-gapped 8MB module research pack,T02 Input FSM,Load/verify/commit button,Deterministic button behavior for cartridge operations
+2,Air-gapped 8MB module research pack,T03 Offline Telemetry,OLED/RGB status,"Show cartridge loaded, verify, commit, error, rollback"
+2,Air-gapped 8MB module research pack,T04 Poka-yoke Docking,Cartridge slot,Prevent upside-down or misaligned insertion
+2,Air-gapped 8MB module research pack,T05 Fault Fallbacks,SPI NOR read/write,"Timeouts, watchdog reset, readable error state"
+2,Air-gapped 8MB module research pack,T07 Storage Integrity,Flash object store,"Dual manifest, CRC/SHA, atomic commit"
+2,Air-gapped 8MB module research pack,T12 QA Fixture,Cartridge validation,Test read/write/verify/power-loss recovery
+3,Air-gapped 8MB CAD implementation bundle,T01 Power Protection,PCB input and flash rails,Validate 5V/3.3V conversion and reverse protection
+3,Air-gapped 8MB CAD implementation bundle,T04 Poka-yoke Docking,Enclosure and slot,Create foolproof cartridge insertion geometry
+3,Air-gapped 8MB CAD implementation bundle,T05 Fault Fallbacks,Firmware scaffold,Watchdog + SPI error display
+3,Air-gapped 8MB CAD implementation bundle,T07 Storage Integrity,NOR flash firmware,Atomic object-store layout
+3,Air-gapped 8MB CAD implementation bundle,T12 QA Fixture,PCBA test,"Continuity, flash ID, write/read/verify receipt"
+3,Air-gapped 8MB CAD implementation bundle,T13 Enclosure DFM,Cartridge case,"Snap fit, guide rails, service access"
+4,Drone CAD implementation bundle,T01 Power Protection,FC power input,"Protected 5V/3.3V rails, brownout checks"
+4,Drone CAD implementation bundle,T03 Offline Telemetry,LEDs/buzzer/OLED,"Armed, disarmed, fault, IMU fail, logging states"
+4,Drone CAD implementation bundle,T05 Fault Fallbacks,Sensor and flash handling,"Watchdog, IMU timeout, blackbox flash fault"
+4,Drone CAD implementation bundle,T08 Sensor Calibration,IMU/barometer,Calibration receipt before motor arming
+4,Drone CAD implementation bundle,T09 Motor Safety,ESC outputs,"Arm gate, failsafe, motor inhibit"
+4,Drone CAD implementation bundle,T10 Thermal/Power,LiPo/ESC/motor current,Runtime and thermal safety margins
+4,Drone CAD implementation bundle,T12 QA Fixture,Tether and bench test,"No-prop test, signal test, IMU drift test"
+4,Drone CAD implementation bundle,T14 Compliance Ledger,Drone rule boundary,Separate test fixture from flyable product
+5,Pupper V3 open-source research bundle,T01 Power Protection,Battery and compute rails,"Prevent brownout, unsafe undervoltage, reverse input"
+5,Pupper V3 open-source research bundle,T03 Offline Telemetry,LCD / LED / debug UI,"Show robot state, fault, controller mode"
+5,Pupper V3 open-source research bundle,T05 Fault Fallbacks,ROS2/control loop,Watchdog when controller stalls
+5,Pupper V3 open-source research bundle,T08 Sensor Calibration,IMU/camera/motor zeroing,Baseline capture before walking
+5,Pupper V3 open-source research bundle,T09 Motor Safety,Leg actuators,"E-stop, torque limit, safe pose, motor disable"
+5,Pupper V3 open-source research bundle,T10 Thermal/Power,Motors and battery,"Thermal derating, runtime limits"
+5,Pupper V3 open-source research bundle,T11 Local API,Foxglove/ROS2 bridge,Local debugging and service interface
+5,Pupper V3 open-source research bundle,T12 QA Fixture,Robot commissioning,"Leg direction, IMU, controller, gait test receipts"
+6,FarmBot open-source research bundle,T01 Power Protection,Outdoor controller and motor power,"Protected input, waterproof cable planning"
+6,FarmBot open-source research bundle,T03 Offline Telemetry,Local field status,LED/OLED state for farm-side operation
+6,FarmBot open-source research bundle,T04 Poka-yoke Docking,Toolhead/tool mounting,Foolproof tool and cable connection
+6,FarmBot open-source research bundle,T05 Fault Fallbacks,Axis and tool commands,"Stop on missed command, sensor timeout, motor fault"
+6,FarmBot open-source research bundle,T08 Sensor Calibration,"Axis homing, soil/camera tools",Calibration receipts for repeatable planting
+6,FarmBot open-source research bundle,T09 Motor Safety,Gantry movement,"Endstop, stall, obstruction, emergency stop"
+6,FarmBot open-source research bundle,T11 Local API,FarmBot app / local bridge,Service without cloud dependency
+6,FarmBot open-source research bundle,T13 Environmental DFM,Outdoor enclosure,"Dust, water, UV, cable strain relief"
+7,OpenFlexure Microscope research bundle,T01 Power Protection,Raspberry Pi / motor / illumination,Stable power for imaging and motion
+7,OpenFlexure Microscope research bundle,T03 Offline Telemetry,Local UI/status LEDs,"Capture state, focus state, error state"
+7,OpenFlexure Microscope research bundle,T04 Poka-yoke Geometry,Sample holder/objective mounts,Prevent wrong orientation or lens collision
+7,OpenFlexure Microscope research bundle,T08 Sensor Calibration,Optics/stage/illumination,"Calibration image, resolution target, stage repeatability"
+7,OpenFlexure Microscope research bundle,T11 Local API,Microscope server/API,Local-first lab control
+7,OpenFlexure Microscope research bundle,T12 QA Fixture,Optical validation,"Resolution, focus, repeatability receipts"
+7,OpenFlexure Microscope research bundle,T14 Risk Ledger,Diagnostic boundary,Prevent unsupported medical/diagnostic claims
+8,SatNOGS satellite ground-station research bundle,T01 Power Protection,"Raspberry Pi, SDR, rotator",Stable outdoor station power
+8,SatNOGS satellite ground-station research bundle,T03 Offline Telemetry,Station status,"Signal, observation, network, fault LED/OLED"
+8,SatNOGS satellite ground-station research bundle,T05 Fault Fallbacks,SDR/client scripts,"Restart failed observations, handle missing radio"
+8,SatNOGS satellite ground-station research bundle,T08 Sensor Calibration,RF chain / antenna / rotator,"Frequency offset, signal baseline, pointing check"
+8,SatNOGS satellite ground-station research bundle,T10 Power/Thermal,Outdoor enclosure,Pi/SDR heat and power budget
+8,SatNOGS satellite ground-station research bundle,T11 Local API,Station dashboard,Local station monitoring and logs
+8,SatNOGS satellite ground-station research bundle,T13 Environmental DFM,Outdoor RF enclosure,"Weatherproofing, grounding, cable strain relief"
+8,SatNOGS satellite ground-station research bundle,T14 Compliance Ledger,RF rules,Receive-only vs transmit-capable boundary
+9,Voron 3D printer engineering bundle,T01 Power Protection,24V/mains/control electronics,"Fusing, grounding, protected input"
+9,Voron 3D printer engineering bundle,T02 Input FSM,Panel/menu/encoder,Deterministic front-panel interaction
+9,Voron 3D printer engineering bundle,T03 Offline Telemetry,Display/LED/status,"Heating, printing, fault, maintenance states"
+9,Voron 3D printer engineering bundle,T05 Fault Fallbacks,Klipper/Moonraker/sensors,"Heater fault, endstop fault, MCU disconnect"
+9,Voron 3D printer engineering bundle,T08 Calibration,"Bed mesh, input shaping, extrusion",Commissioning receipts
+9,Voron 3D printer engineering bundle,T09 Heater/Motor Safety,"Hotend, bed, CoreXY gantry","Thermal runaway, motion inhibit"
+9,Voron 3D printer engineering bundle,T10 Thermal/Power,Enclosed chamber,"Wire gauge, PSU margin, airflow"
+9,Voron 3D printer engineering bundle,T12 QA Fixture,Kit validation,"Motion, extrusion, thermal, first-print receipt"
+9,Voron 3D printer engineering bundle,T13 Enclosure DFM,Panels/printed parts,"Chamber heat, serviceability"
+10,OpenEVSE research bundle,T01 Power Protection,Control board and power supply,"Isolation, fusing, protected low-voltage supply"
+10,OpenEVSE research bundle,T03 Offline Telemetry,Charger status UI,"Charging, fault, GFCI, relay, temperature"
+10,OpenEVSE research bundle,T05 Fault Fallbacks,Controller/gateway,"RAPI timeout, watchdog, safe disable"
+10,OpenEVSE research bundle,T09 Relay Safety,Contactor/relay/GFCI,"Stuck relay, diode check, ground monitoring"
+10,OpenEVSE research bundle,T10 Thermal/Current,Charging current,Temperature throttle and load shaping
+10,OpenEVSE research bundle,T11 Local API,ESP32 web/MQTT/OCPP,Local service and integration
+10,OpenEVSE research bundle,T12 QA Fixture,EVSE commissioning,"GFCI, pilot, relay, ground, temperature tests"
+10,OpenEVSE research bundle,T14 Compliance Ledger,EV charging,"Standards, mains safety, India regulatory gates"
+11,OpenMV + OpenIPC local vision bundle,T01 Power Protection,Camera module/edge board,Stable 5V/3.3V camera supply
+11,OpenMV + OpenIPC local vision bundle,T03 Offline Telemetry,Camera status,"Recording, detection, offline, privacy, fault"
+11,OpenMV + OpenIPC local vision bundle,T05 Fault Fallbacks,Camera firmware/network,"Reboot stream, recover failed capture"
+11,OpenMV + OpenIPC local vision bundle,T08 Sensor Calibration,"Lens, exposure, focus, AI threshold",Calibration receipt per deployment
+11,OpenMV + OpenIPC local vision bundle,T11 Local API,RTSP/HTTP/OpenMV VCP,Local-first vision control
+11,OpenMV + OpenIPC local vision bundle,T12 QA Fixture,Camera validation,"Snapshot, latency, detection, privacy checks"
+11,OpenMV + OpenIPC local vision bundle,T14 Risk Ledger,Privacy/security,"No hidden cloud, no unsafe surveillance use"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T01 Power Protection,SBC/edge module carrier,"Power budget, brownout and reverse protection"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T03 Offline Telemetry,Board status,"Boot, service, thermal, network, fault"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T05 Fault Fallbacks,Boot/update/runtime,"Watchdog, service recovery, rollback image"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T07 Storage Integrity,SD/eMMC/rootfs,"Image hash, config backup, update rollback"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T08 Calibration,"GPIO, camera, FPGA IO",Self-test for peripherals
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T10 Thermal/Power,Edge workloads,"Thermal throttle, current budget"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T11 Local API,Edge service interface,"Local dashboard, SSH/API, field service"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T12 QA Fixture,Board validation,"GPIO, boot, network, camera, benchmark receipt"
+12,BeagleV-Fire / Milk-V Duo RISC-V edge bundle,T14 Security Ledger,Firmware provenance,"Trusted image, binary blob, supply-chain review"
+13,Precious Plastic machine ecosystem bundle,T01 Power Protection,Machine control box,"Mains, motor, heater, emergency cutoff"
+13,Precious Plastic machine ecosystem bundle,T02 Input FSM,Control panel,Start/stop/reverse/heater setpoint buttons
+13,Precious Plastic machine ecosystem bundle,T03 Offline Telemetry,Machine status,"Heater ready, motor fault, jam, cycle done"
+13,Precious Plastic machine ecosystem bundle,T04 Poka-yoke Geometry,"Moulds, fixtures, guards",Prevent wrong tooling or unsafe access
+13,Precious Plastic machine ecosystem bundle,T05 Fault Fallbacks,Controller logic,"Jam timeout, heater fault, motor overload"
+13,Precious Plastic machine ecosystem bundle,T09 Motor/Heater Safety,Shredder/extruder/injection/sheetpress,"Interlocks, guarding, E-stop"
+13,Precious Plastic machine ecosystem bundle,T10 Thermal/Current,Heater barrel and motor,"Temperature profile, current draw, derating"
+13,Precious Plastic machine ecosystem bundle,T12 QA Fixture,Machine commissioning,"Torque, heater, guard, cycle receipt"
+13,Precious Plastic machine ecosystem bundle,T13 Enclosure/Guarding,Machine frame,"Covers, shields, fumes, service panels"
+13,Precious Plastic machine ecosystem bundle,T14 Compliance Ledger,Workshop safety,Industrial hazard register
+14,NASA JPL Rover / OpenAMRobot research bundle,T01 Power Protection,Battery and compute supply,"Fuse, disconnect, brownout protection"
+14,NASA JPL Rover / OpenAMRobot research bundle,T03 Offline Telemetry,Robot status panel,"ROS connected, motor fault, battery, E-stop"
+14,NASA JPL Rover / OpenAMRobot research bundle,T04 Poka-yoke Geometry,Battery/dock/sensor modules,Safe insertion and service access
+14,NASA JPL Rover / OpenAMRobot research bundle,T05 Fault Fallbacks,ROS2/micro-ROS,"Watchdog, command timeout, safe stop"
+14,NASA JPL Rover / OpenAMRobot research bundle,T08 Sensor Calibration,"Encoders, IMU, LiDAR, camera, docking tags",Commissioning evidence
+14,NASA JPL Rover / OpenAMRobot research bundle,T09 Motor Safety,Wheels and mobile base,"Physical E-stop, motor inhibit, speed limits"
+14,NASA JPL Rover / OpenAMRobot research bundle,T10 Thermal/Power,"Pi 5, battery, motor drivers",Avoid thermal throttling and brownout
+14,NASA JPL Rover / OpenAMRobot research bundle,T11 Local API/UI,OpenAMRobot dashboard,Local operation and diagnostics
+14,NASA JPL Rover / OpenAMRobot research bundle,T12 QA Fixture,Robot bring-up,"Wheel direction, encoder, nav, docking receipt"
+14,NASA JPL Rover / OpenAMRobot research bundle,T14 Safety Ledger,Mobile robot operation,"E-stop, battery, public-area hazard controls"

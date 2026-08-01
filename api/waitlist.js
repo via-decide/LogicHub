@@ -8,7 +8,12 @@
 // anyone's email into a form, so a raw signup is a claim about a third party,
 // not consent from them. The entry is stored unconfirmed and a signed link is
 // sent; only clicking it flips `confirmed`.
-import { getAdminDb, logRuntimeEvent } from './_sovereignAuth.js';
+// Postgres-backed getAdminDb (not _sovereignAuth.js's SQLite-backed one --
+// this endpoint's write path was broken on Vercel, see api/_pg.js's header).
+// logRuntimeEvent stays on _sovereignAuth.js -- it's a best-effort log write,
+// out of scope for this migration.
+import { logRuntimeEvent } from './_sovereignAuth.js';
+import { getAdminDb } from './_pg.js';
 import { applyCors } from './_payments-config.js';
 import {
   clientBucket,

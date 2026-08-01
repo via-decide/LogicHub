@@ -1,0 +1,22 @@
+[
+  {
+    "path": "README.md",
+    "sha256": "dbcfe6a7de2313ede2094e0cf4e7aa38170d320315860da3049c7a994b24a182",
+    "bytes": 705
+  },
+  {
+    "path": "templates/actuator_motor_heater_safety_receipt.schema.json",
+    "sha256": "b6e51f2d7afadb77febfce3e6672ef5a3494369ef40fdc77bed7d2aab9b048ef",
+    "bytes": 3556
+  },
+  {
+    "path": "tool-09-actuator-motor-heater-safety.html",
+    "sha256": "0298feb762ef3995833af55b160f6d4d23da3c071c0aa768801cdab9f2f37047",
+    "bytes": 26787
+  },
+  {
+    "path": "tool_manifest.json",
+    "sha256": "7985903f9ced7161ff7705eef31de3f91efa40340f471868c2ef56875bf3f0e3",
+    "bytes": 778
+  }
+]

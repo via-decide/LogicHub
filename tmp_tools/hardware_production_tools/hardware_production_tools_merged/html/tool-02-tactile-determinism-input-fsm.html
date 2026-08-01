@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 02 — Tactile Determinism / Input FSM</title>
+  <style>
+    :root {
+      --bg: #0A1220;
+      --panel: #111B2E;
+      --panel-2: #162238;
+      --text: #F4F7FB;
+      --muted: #AEB9C8;
+      --gold: #C9A84C;
+      --saffron: #FF9933;
+      --green: #138808;
+      --danger: #FF5C5C;
+      --line: rgba(255,255,255,0.12);
+      --code: #07101D;
+      --ok: #41D675;
+      --warn: #FFCF5C;
+      --blue: #7EC8FF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(255,153,51,0.12), transparent 34rem), var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header {
+      padding: 42px 24px 30px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(201,168,76,0.16), rgba(10,18,32,0.3));
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px; font-weight: 800; }
+    h1 { margin: 10px 0 10px; font-size: clamp(32px, 5vw, 58px); line-height: 1.02; }
+    h2 { margin-top: 38px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+    h3 { margin-bottom: 8px; color: #fff; }
+    p { color: var(--muted); }
+    strong { color: var(--text); }
+    .hero-grid { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 18px; margin-top: 22px; }
+    .panel, .card { background: rgba(17,27,46,0.92); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.22); }
+    .panel.alt { background: rgba(22,34,56,0.92); }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .tag { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; color: var(--muted); background: rgba(255,255,255,0.04); font-size: 13px; }
+    .tag.hot { color: var(--saffron); border-color: rgba(255,153,51,0.35); }
+    .tag.ok { color: var(--ok); border-color: rgba(65,214,117,0.35); }
+    .tag.warn { color: var(--warn); border-color: rgba(255,207,92,0.35); }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 14px; border: 1px solid var(--line); margin: 14px 0 22px; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--gold); background: rgba(255,255,255,0.04); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
+    tr:last-child td { border-bottom: 0; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    pre { background: var(--code); border: 1px solid var(--line); color: #DDEAFF; padding: 16px; border-radius: 14px; overflow-x: auto; }
+    .callout { border-left: 4px solid var(--saffron); background: rgba(255,153,51,0.08); padding: 14px 16px; border-radius: 12px; margin: 18px 0; }
+    .callout.danger { border-color: var(--danger); background: rgba(255,92,92,0.08); }
+    .callout.ok { border-color: var(--ok); background: rgba(65,214,117,0.08); }
+    .mini { font-size: 13px; color: var(--muted); }
+    .checklist li { margin: 8px 0; color: var(--muted); }
+    .checklist strong { color: var(--text); }
+    .flow { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 10px; }
+    .step { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 12px; padding: 12px; text-align: center; }
+    .step b { display:block; color: var(--gold); margin-bottom: 4px; }
+    .project h3 { color: var(--gold); }
+    .footer { color: var(--muted); margin: 44px 0 24px; font-size: 13px; }
+    .kbd { border:1px solid var(--line); border-bottom-width:3px; border-radius:6px; padding:2px 6px; background:rgba(255,255,255,0.08); color:var(--text); font-size:12px; }
+    .phase { color: var(--blue); font-weight: 700; }
+    @media (max-width: 900px) {
+      .hero-grid, .grid.two, .grid.three, .grid.four { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">Universal Hardware Production Tool · T02</div>
+      <h1>Tactile Determinism / Input FSM</h1>
+      <p>Convert every physical input — button, rotary encoder, E-stop monitor, cartridge detect, limit switch, mode selector, guard switch, or dock sensor — into one clean, intentional, testable event.</p>
+      <div class="tag-row">
+        <span class="tag hot">Buttons</span>
+        <span class="tag hot">Rotary encoders</span>
+        <span class="tag">Switches</span>
+        <span class="tag">Cartridge detect</span>
+        <span class="tag">Endstops</span>
+        <span class="tag warn">E-stop monitor</span>
+        <span class="tag ok">Deterministic FSM</span>
+      </div>
+      <div class="hero-grid">
+        <section class="panel">
+          <h2 style="margin-top:0">Purpose</h2>
+          <p>A usable hardware product must not double-click, miss presses, react late, arm accidentally, or treat electrical noise as user intent. This tool defines the input architecture that turns physical contact into stable semantic events.</p>
+          <div class="callout ok"><strong>Output:</strong> input map, debounce policy, event queue, state machine, pass/fail test receipt, and risk ledger for every physical input.</div>
+        </section>
+        <aside class="panel alt">
+          <h2 style="margin-top:0">Use when</h2>
+          <p>Any product has a user-facing control, service button, cartridge switch, guard sensor, endstop, docking input, rotary encoder, or motor-enable control.</p>
+          <p><strong>Do not use software debounce as the only safety mechanism.</strong> E-stop, motor power, heater cutoff, mains isolation, and high-force machines need independent hardware safety paths.</p>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>1. Production rule</h2>
+      <div class="panel">
+        <p><strong>Physical contact is not an event.</strong> A physical contact is noisy evidence. An event is emitted only after the input is electrically valid, time-stable, state-legal, and safe for the current operating mode.</p>
+        <pre>contact transition → electrical filter → timestamp → debounce window → FSM transition → semantic event → action gate</pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Canonical input classes</h2>
+      <table>
+        <thead><tr><th>Input class</th><th>Examples</th><th>Deterministic handling</th><th>Never allow</th></tr></thead>
+        <tbody>
+          <tr><td>User command</td><td>Load, verify, commit, start, menu, capture</td><td>Debounce, event queue, mode gate</td><td>Repeated actions from one press</td></tr>
+          <tr><td>Mode selector</td><td>Service/run, auto/manual, arm/disarm</td><td>Stable position check + transition confirmation</td><td>Instant arming on bouncing transition</td></tr>
+          <tr><td>Rotary encoder</td><td>Printer panel, dial, jog wheel</td><td>Quadrature state table, illegal transition reject</td><td>Counting every noisy edge as motion</td></tr>
+          <tr><td>Presence/detect</td><td>Cartridge loaded, tool mounted, guard closed</td><td>Stable detect + continuity / ID validation where possible</td><td>Starting operation from mechanical presence alone</td></tr>
+          <tr><td>Limit/home</td><td>Endstop, rotator home, microscope travel limit</td><td>Debounce + stuck-switch detection + travel context</td><td>Ignoring limit switch state during motion</td></tr>
+          <tr><td>Safety monitor</td><td>E-stop monitor, door guard, interlock feedback</td><td>Read as evidence only; hardware path must do cutoff</td><td>Software-only emergency stop for hazardous motion</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Canonical FSM</h2>
+      <div class="flow">
+        <div class="step"><b>IDLE</b><span>Stable inactive</span></div>
+        <div class="step"><b>PRESS_CANDIDATE</b><span>First edge seen</span></div>
+        <div class="step"><b>PRESSED</b><span>Debounce passed</span></div>
+        <div class="step"><b>LONG_HELD</b><span>Hold threshold</span></div>
+        <div class="step"><b>RELEASE_CANDIDATE</b><span>Release edge seen</span></div>
+        <div class="step"><b>EVENT_EMITTED</b><span>One action only</span></div>
+      </div>
+      <div class="callout"><strong>Rule:</strong> interrupt handlers should capture time and raw state only. Heavy work, flash writes, motor commands, network calls, display updates, and file writes belong outside the ISR.</div>
+    </section>
+
+    <section>
+      <h2>4. Electrical pattern</h2>
+      <div class="grid two">
+        <div class="card">
+          <h3>Active-low button input</h3>
+          <pre>VCC ── 10k pull-up ── MCU GPIO
+                   │
+                switch
+                   │
+                  GND
+
+Optional: 100nF to GND near MCU input
+Better: Schmitt input / RC + Schmitt for noisy cables</pre>
+          <p>Use internal pull-ups only for short, local buttons. Use external pull-up, RC filtering, ESD/TVS, and shielded routing for external panels or cables.</p>
+        </div>
+        <div class="card">
+          <h3>Rotary encoder input</h3>
+          <pre>A ── pull-up/filter ── GPIO interrupt-capable
+B ── pull-up/filter ── GPIO interrupt-capable
+SW ─ pull-up/filter ── GPIO
+GND common, cable short or shielded</pre>
+          <p>Decode with a legal quadrature transition table. Reject illegal state jumps instead of adding false steps.</p>
+        </div>
+      </div>
+      <div class="callout danger"><strong>E-stop boundary:</strong> the emergency stop path must physically interrupt hazardous energy or command an independent safety-rated cutoff. Software may display or log E-stop state, but must not be the only stop mechanism.</div>
+    </section>
+
+    <section>
+      <h2>5. Firmware architecture pattern</h2>
+      <pre>ISR / GPIO callback:
+  raw = read_gpio(pin)
+  now = monotonic_us()
+  input_queue.push({pin, raw, now})
+
+Input service loop:
+  event = debounce_fsm.consume(raw_sample)
+  if event:
+      semantic_event = map_to_command(event)
+      if mode_gate.allows(semantic_event):
+          action_queue.push(semantic_event)
+      else:
+          fault_log.record_rejected_event(semantic_event)</pre>
+      <div class="grid three">
+        <div class="card"><h3>Debounce window</h3><p>Start with 10–30 ms for tactile switches. Measure real hardware and store the chosen value in the input manifest.</p></div>
+        <div class="card"><h3>Hold threshold</h3><p>Use separate thresholds for short press, long press, and service hold. Do not overload one button with hidden destructive actions.</p></div>
+        <div class="card"><h3>Event IDs</h3><p>Emit semantic events such as <code>CARTRIDGE_VERIFY_REQUESTED</code>, not raw pin changes.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>6. Production-stage map</h2>
+      <table>
+        <thead><tr><th>Stage</th><th>Input work</th><th>Evidence required</th></tr></thead>
+        <tbody>
+          <tr><td><span class="phase">Concept</span></td><td>List every physical input and classify it as command, detect, limit, mode, or safety monitor.</td><td>Input intent table.</td></tr>
+          <tr><td><span class="phase">EVT</span></td><td>Build breadboard/PCB debounce test and prove no double events from normal use.</td><td>Raw transition log + event log.</td></tr>
+          <tr><td><span class="phase">DVT</span></td><td>Test cable length, ESD/noise, fast taps, long holds, power-cycle state, and illegal mode changes.</td><td>Pass/fail debounce report.</td></tr>
+          <tr><td><span class="phase">PVT</span></td><td>Fixture-test every input on production units and store input response receipts.</td><td>Serial-numbered QA receipt.</td></tr>
+          <tr><td><span class="phase">Field service</span></td><td>Expose input diagnostics without requiring cloud: last event, stuck input, bounce counter, state.</td><td>Local diagnostic screen/log.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>7. Applicability across the 14 projects</h2>
+      <div class="grid two">
+        
+      <article class="card project">
+        <h3>Electronics research bundle</h3>
+        <p><strong>Input surface:</strong> Lab buttons, test-jig switches, learning boards</p>
+        <p><strong>Production use:</strong> Use debounced inputs to make bench exercises repeatable and to avoid mistaking switch bounce for circuit faults.</p>
+      </article>
+
+      <article class="card project">
+        <h3>Air-gapped 8MB module research pack</h3>
+        <p><strong>Input surface:</strong> Load / verify / commit / abort buttons, cartridge-detect switch</p>
+        <p><strong>Production use:</strong> Convert physical actions into deterministic storage events so commit logic never runs twice from one press.</p>
+      </article>
+
+      <article class="card project">
+        <h3>Air-gapped 8MB CAD implementation bundle</h3>
+        <p><strong>Input surface:</strong> Reader board UI, cartridge detect, service/reset input</p>
+        <p><strong>Production use:</strong> Treat every button and detect pin as a validated event source before flash writes, rollback, or serial service mode.</p>
+      </article>
+
+      <article class="card project">
+        <h3>Drone CAD implementation bundle</h3>
+        <p><strong>Input surface:</strong> Arm switch, boot button, calibration trigger, mode selector</p>
+        <p><strong>Production use:</strong> Use input FSM gates so motors cannot arm from noisy switch transitions or accidental double events.</p>
+      </article>
+
+      <article class="card project">
+        <h3>Pupper V3 open-source research bundle</h3>
+        <p><strong>Input surface:</strong> Power button, controller mode button, physical E-stop monitor, gait/calibration input</p>
+        <p><strong>Production use:</strong> Separate software mode requests from physical motor-disable paths; input events should request safe state changes, not directly override safety.</p>
+      </article>
+
+      <article class="card project">
+        <h3>FarmBot open-source research bundle</h3>
+        <p><strong>Input surface:</strong> Tool mount detect, endstop, local stop/start, maintenance panel</p>
+        <p><strong>Production use:</strong> Debounce and validate gantry/tool/endstop signals before axis motion or farm operation.</p>
+      </article>
+
+      <article class="card project">
+        <h3>OpenFlexure Microscope research bundle</h3>
+        <p><strong>Input surface:</strong> Focus buttons, sample-stage controls, capture button, limit/detect switches</p>
+        <p><strong>Production use:</strong> Avoid repeated focus/capture commands from bounce; ensure manual control does not corrupt scan evidence.</p>
+      </article>
+
+      <article class="card project">
+        <h3>SatNOGS satellite ground-station research bundle</h3>
+        <p><strong>Input surface:</strong> Station service button, rotator home/limit switches, maintenance panel</p>
+        <p><strong>Production use:</strong> Limit and home inputs must be filtered and faulted cleanly before any rotator movement.</p>
+      </article>
+
+      <article class="card project">
+        <h3>Voron 3D printer engineering bundle</h3>
+        <p><strong>Input surface:</strong> Panel encoder, reset/menu button, filament sensor, endstops</p>
+        <p><strong>Production use:</strong> Turn panel/endstop/filament transitions into deterministic printer events before motion or heater decisions.</p>
+      </article>
+
+      <article class="card project">
+        <h3>OpenEVSE research bundle</h3>
+        <p><strong>Input surface:</strong> User button, RFID-present event, service input, contactor/door/state detect</p>
+        <p><strong>Production use:</strong> A user input can request charging, but safety checks must outrank it; debounce prevents repeated enable/disable transitions.</p>
+      </article>
+
+      <article class="card project">
+        <h3>OpenMV + OpenIPC local vision bundle</h3>
+        <p><strong>Input surface:</strong> Privacy shutter detect, capture button, mode switch, reset input</p>
+        <p><strong>Production use:</strong> Make local vision modes explicit: recording, detection, privacy lockout, and service actions must not toggle from noise.</p>
+      </article>
+
+      <article class="card project">
+        <h3>BeagleV-Fire / Milk-V Duo RISC-V edge bundle</h3>
+        <p><strong>Input surface:</strong> Carrier-board buttons, boot-mode switch, GPIO header inputs, service switch</p>
+        <p><strong>Production use:</strong> Use a board input map and self-test so Linux/FPGA services receive stable hardware events.</p>
+      </article>
+
+      <article class="card project">
+        <h3>Precious Plastic machine ecosystem bundle</h3>
+        <p><strong>Input surface:</strong> Start/stop/reverse buttons, heater enable, guard-door switch, E-stop monitor</p>
+        <p><strong>Production use:</strong> Industrial inputs require debouncing plus hardwired safety interlocks; software must never be the only stop path.</p>
+      </article>
+
+      <article class="card project">
+        <h3>NASA JPL Rover / OpenAMRobot research bundle</h3>
+        <p><strong>Input surface:</strong> Drive enable, docking button, bumper/limit inputs, E-stop monitor</p>
+        <p><strong>Production use:</strong> Map physical events to ROS2/micro-ROS safe-state requests with command timeout and independent motor power cutoff.</p>
+      </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>8. Checklist</h2>
+      <div class="grid two">
+        <div class="card">
+          <h3>Hardware checklist</h3>
+          <ul class="checklist">
+            <li><strong>Pull state defined:</strong> every input has a known default through pull-up/pull-down.</li>
+            <li><strong>Voltage safe:</strong> input voltage never exceeds MCU absolute maximum.</li>
+            <li><strong>Connector safe:</strong> external buttons/switches have ESD and cable-noise consideration.</li>
+            <li><strong>Safety separation:</strong> hazardous stop paths are not software-only.</li>
+            <li><strong>Labelled interface:</strong> panel, connector, or harness clearly maps to input function.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Firmware checklist</h3>
+          <ul class="checklist">
+            <li><strong>ISR minimal:</strong> no display, flash, motor, or network work inside interrupt.</li>
+            <li><strong>Event queue:</strong> raw samples and semantic actions are separated.</li>
+            <li><strong>Debounce measured:</strong> policy is documented per input class.</li>
+            <li><strong>Mode-gated:</strong> events are legal only in defined system states.</li>
+            <li><strong>Fault visible:</strong> stuck input, impossible sequence, and timeout produce readable faults.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>9. Pass / fail gates</h2>
+      <table>
+        <thead><tr><th>Gate</th><th>Pass condition</th><th>Fail condition</th></tr></thead>
+        <tbody>
+          <tr><td>Single press</td><td>Exactly one semantic event for 100 normal presses.</td><td>Any duplicate press, missed press, or delayed event outside target latency.</td></tr>
+          <tr><td>Fast taps</td><td>Device accepts legal fast taps and rejects bounce.</td><td>Fast use causes hidden double actions.</td></tr>
+          <tr><td>Long hold</td><td>Long hold emits one long-hold event after threshold.</td><td>Long hold emits repeated short presses unless explicitly intended.</td></tr>
+          <tr><td>Power-cycle</td><td>Input state after reboot is safe and explicit.</td><td>Booting with held input causes unsafe action.</td></tr>
+          <tr><td>Noise/stuck</td><td>Stuck or noisy input is detected and reported.</td><td>System silently treats noise as valid commands.</td></tr>
+          <tr><td>Safety path</td><td>Hazardous energy can be physically interrupted independent of app/browser/firmware.</td><td>Software-only E-stop for motor/heater/mains/blade system.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>10. Risk table</h2>
+      <table>
+        <thead><tr><th>Risk</th><th>Common cause</th><th>Project impact</th><th>Control</th></tr></thead>
+        <tbody>
+          <tr><td>Double event</td><td>Switch bounce counted as multiple presses</td><td>Duplicate flash commit, repeated motor command, accidental enable</td><td>Debounce FSM + one event per press cycle</td></tr>
+          <tr><td>Missed event</td><td>Polling too slow or blocking firmware loop</td><td>User distrust, missed abort, failed calibration trigger</td><td>Interrupt/timestamp + non-blocking input service</td></tr>
+          <tr><td>Unsafe boot state</td><td>Held button or floating input during reset</td><td>Unexpected motor/charger/heater action</td><td>Defined pull state + boot-safe mode gate</td></tr>
+          <tr><td>False limit</td><td>Noisy endstop/guard switch</td><td>Stopped jobs, wrong homing, hidden crash risk</td><td>Shielding, debounce, plausibility check</td></tr>
+          <tr><td>Software-only safety</td><td>E-stop implemented only in UI/code</td><td>Robot/machine keeps hazardous energy path live</td><td>Hardwired cutoff + software monitor</td></tr>
+          <tr><td>Mode confusion</td><td>One button controls many hidden modes</td><td>Wrong service action or destructive command</td><td>Visible state, confirmation, explicit labels</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>11. LogicHub / GN8R export schema</h2>
+      <pre>{
+  "tool_id": "T02",
+  "tool_name": "Tactile Determinism / Input FSM",
+  "project": "<project-name>",
+  "hardware_revision": "<rev>",
+  "inputs": [
+    {
+      "input_id": "BTN_VERIFY",
+      "class": "user_command",
+      "electrical_default": "pullup_active_low",
+      "gpio": "PA3",
+      "debounce_ms": 20,
+      "short_press_ms_min": 40,
+      "long_press_ms": 1200,
+      "allowed_states": ["IDLE", "CARTRIDGE_LOADED"],
+      "semantic_events": ["VERIFY_REQUESTED", "SERVICE_MENU_REQUESTED"],
+      "safety_relevance": "non_hazardous",
+      "test_required": true
+    }
+  ],
+  "safety_notes": [
+    "Emergency stop is hardwired separately; this input only monitors state."
+  ],
+  "evidence_required": [
+    "100_press_no_duplicate_log",
+    "fast_tap_test",
+    "long_hold_test",
+    "power_cycle_safe_state_test",
+    "stuck_input_fault_test"
+  ]
+}</pre>
+    </section>
+
+    <section>
+      <h2>12. Minimal firmware pseudocode</h2>
+      <pre>enum InputState { IDLE, PRESS_CANDIDATE, PRESSED, LONG_HELD, RELEASE_CANDIDATE };
+
+void input_tick(Input *in, bool raw, uint32_t now_ms) {
+  switch (in->state) {
+    case IDLE:
+      if (raw == ACTIVE) { in->state = PRESS_CANDIDATE; in->t0 = now_ms; }
+      break;
+    case PRESS_CANDIDATE:
+      if (raw != ACTIVE) in->state = IDLE;
+      else if (now_ms - in->t0 >= in->debounce_ms) {
+        in->state = PRESSED;
+        in->pressed_at = now_ms;
+      }
+      break;
+    case PRESSED:
+      if (raw != ACTIVE) { in->state = RELEASE_CANDIDATE; in->t0 = now_ms; }
+      else if (now_ms - in->pressed_at >= in->long_ms) {
+        emit_event(in->long_event);
+        in->state = LONG_HELD;
+      }
+      break;
+    case RELEASE_CANDIDATE:
+      if (raw == ACTIVE) in->state = PRESSED;
+      else if (now_ms - in->t0 >= in->debounce_ms) {
+        if (now_ms - in->pressed_at < in->long_ms) emit_event(in->short_event);
+        in->state = IDLE;
+      }
+      break;
+    case LONG_HELD:
+      if (raw != ACTIVE) { in->state = RELEASE_CANDIDATE; in->t0 = now_ms; }
+      break;
+  }
+}</pre>
+    </section>
+
+    <section>
+      <h2>13. Tool position in the HTML generation sequence</h2>
+      <table>
+        <thead><tr><th>Current</th><th>Generated file</th><th>Next</th></tr></thead>
+        <tbody>
+          <tr><td>T02</td><td><code>tool-02-tactile-determinism-input-fsm.html</code></td><td><code>tool-03-state-visibility-offline-telemetry.html</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p class="footer">Generated for the hardware research progress archive. This tool is a production planning aid, not a substitute for certified safety engineering where hazardous energy, vehicles, EV charging, high torque, heaters, drones, or public operation are involved.</p>
+  </main>
+</body>
+</html>

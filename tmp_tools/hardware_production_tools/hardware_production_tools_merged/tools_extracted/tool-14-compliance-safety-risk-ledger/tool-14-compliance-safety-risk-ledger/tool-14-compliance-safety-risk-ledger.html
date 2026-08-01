@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tool 14 — Compliance / Safety Risk Ledger</title>
+<style>
+:root {
+  --bg:#0a0f1a; --panel:#111827; --panel2:#0f172a; --text:#e5e7eb; --muted:#94a3b8;
+  --line:#263244; --accent:#f59e0b; --good:#22c55e; --bad:#ef4444; --warn:#f59e0b; --blue:#38bdf8;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,#070b12,#111827); color:var(--text); }
+header { padding:42px 28px 24px; border-bottom:1px solid var(--line); background:radial-gradient(circle at top right,rgba(245,158,11,.14),transparent 36%),#0a0f1a; }
+.container { max-width:1180px; margin:0 auto; padding:24px; }
+h1 { margin:0 0 8px; font-size:clamp(30px,5vw,56px); letter-spacing:-.04em; }
+h2 { margin:36px 0 14px; font-size:24px; letter-spacing:-.02em; }
+h3 { margin:.3rem 0 .55rem; font-size:18px; }
+p { color:var(--muted); line-height:1.55; }
+a { color:var(--blue); }
+.kicker { color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
+.sub { max-width:900px; font-size:17px; color:#cbd5e1; }
+.grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+.card { grid-column:span 4; background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015)); border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:0 12px 35px rgba(0,0,0,.22); }
+.card.wide { grid-column:span 6; }
+.card.full { grid-column:1/-1; }
+.project { min-height:260px; }
+.eyebrow { color:var(--accent); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; font-weight:700; }
+.gate { border-left:3px solid var(--warn); padding-left:10px; color:#fde68a; }
+table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid var(--line); }
+th,td { padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; }
+th { background:#111827; color:#f8fafc; font-size:13px; }
+td { color:#cbd5e1; font-size:14px; }
+.badge { display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#0f172a; color:#cbd5e1; margin:4px 6px 4px 0; font-size:13px; }
+.badge.blocked { color:#fecaca; border-color:rgba(239,68,68,.45); }
+.badge.hold { color:#fde68a; border-color:rgba(245,158,11,.45); }
+.badge.pass { color:#bbf7d0; border-color:rgba(34,197,94,.45); }
+pre { overflow:auto; background:#020617; border:1px solid var(--line); border-radius:14px; padding:16px; color:#d1d5db; font-size:13px; line-height:1.45; }
+ul.check { margin:0; padding-left:18px; color:#cbd5e1; line-height:1.7; }
+.stage { display:flex; flex-wrap:wrap; gap:8px; }
+.stage span { padding:9px 11px; border:1px solid var(--line); border-radius:10px; background:#0f172a; color:#cbd5e1; }
+.footer { color:#64748b; padding:30px 0; border-top:1px solid var(--line); margin-top:38px; }
+@media (max-width:900px) { .card,.card.wide { grid-column:1/-1; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="kicker">Universal Hardware Production Stack · Tool 14 / 14</div>
+    <h1>Compliance / Safety Risk Ledger</h1>
+    <p class="sub">A release-control tool for hardware projects that may touch mains power, batteries, RF, cameras, medical/lab claims, robotics, EV charging, drones, heaters, motors, or industrial machinery. The goal is not to make a prototype look safe; the goal is to stop unsupported product claims until evidence exists.</p>
+    <div>
+      <span class="badge blocked">blocked claim register</span>
+      <span class="badge hold">release-hold gates</span>
+      <span class="badge pass">evidence-driven approval</span>
+      <span class="badge">India productization ready</span>
+    </div>
+  </div>
+</header>
+<main class="container">
+  <section class="grid">
+    <article class="card wide">
+      <h2>Tool purpose</h2>
+      <p>Use this tool to convert open-source hardware research into a production-grade safety ledger. Every hazard gets an owner, mitigation, required evidence, review status, and release gate.</p>
+      <p>This is the final gate after source intake, power design, UI state, docking geometry, fault handling, storage integrity, calibration, interlocks, thermal derating, local APIs, QA fixtures, and enclosure DFM.</p>
+    </article>
+    <article class="card wide">
+      <h2>Use when</h2>
+      <ul class="check">
+        <li>A prototype may become a kit, supplier package, public demo, paid service, or deployed product.</li>
+        <li>The design contains batteries, mains, motors, heaters, cameras, RF, drones, EV charging, robots, lab measurements, or industrial machines.</li>
+        <li>A marketing or documentation claim could imply certification, safety, medical/diagnostic ability, RF permission, autonomous operation, or field readiness.</li>
+      </ul>
+    </article>
+  </section>
+
+  <h2>Production-stage map</h2>
+  <div class="stage">
+    <span>Source intake</span><span>Hazard discovery</span><span>Risk scoring</span><span>Mitigation design</span><span>Evidence planning</span><span>Bench validation</span><span>Qualified review</span><span>Waiver / block / approve</span><span>Release receipt</span>
+  </div>
+
+  <h2>Pass / hold / block gates</h2>
+  <section class="grid">
+    <article class="card"><h3>Pass</h3><p>Evidence exists, mitigation is implemented, review owner signs off, and the claim is limited to what was actually tested.</p></article>
+    <article class="card"><h3>Hold</h3><p>Prototype can remain internal, but cannot be sold, published as production-ready, or operated around users until missing tests are resolved.</p></article>
+    <article class="card"><h3>Block</h3><p>The design or claim is unsafe, unsupported, uncertified, legally sensitive, or outside project scope. Do not ship or demonstrate as usable hardware.</p></article>
+  </section>
+
+  <h2>Reusable risk taxonomy</h2>
+  <table>
+    <thead><tr><th>Risk class</th><th>Trigger</th><th>Minimum mitigation</th><th>Applies to</th></tr></thead>
+    <tbody><tr><td>Power hazard</td><td>Mains, battery, high current, reverse polarity, brownout</td><td>Fuse/breaker, disconnect, TVS, ideal diode, current budget, brownout test</td><td>P01,P03,P04,P09,P10,P13,P14</td></tr>
+<tr><td>Motion hazard</td><td>Motors, wheels, gantries, legs, blades, propellers</td><td>Physical E-stop, guarded motion, arming state, speed limits, interlocks</td><td>P04,P05,P06,P09,P13,P14</td></tr>
+<tr><td>Thermal hazard</td><td>Heaters, chambers, regulators, hotends, power silicon</td><td>Thermal cutoff, derating, sensor plausibility, airflow, enclosure margin</td><td>P01,P09,P10,P12,P13</td></tr>
+<tr><td>Data integrity hazard</td><td>Flash corruption, unverified images, stale manifests</td><td>Hashing, dual manifest, rollback, write-verification, provenance ledger</td><td>P02,P03,P11,P12</td></tr>
+<tr><td>Measurement hazard</td><td>False sensor/optics/RF/calibration confidence</td><td>Calibration receipt, baseline reference, repeatability test, uncertainty note</td><td>P07,P08,P11,P14</td></tr>
+<tr><td>Privacy/security hazard</td><td>Camera, local API, exposed services, credentials</td><td>Local-only mode, auth, network scan, firmware provenance, log redaction</td><td>P11,P12,P14</td></tr>
+<tr><td>Regulatory hazard</td><td>RF, EVSE, drone, medical/diagnostic, public robot operation</td><td>Blocked-claims ledger, standards map, qualified review, release hold</td><td>P04,P07,P08,P10,P14</td></tr></tbody>
+  </table>
+
+  <h2>Project applicability cards</h2>
+  <section class="grid">
+    
+<article class="card project">
+  <div class="eyebrow">P01</div>
+  <h3>Electronics research bundle</h3>
+  <p><strong>Role:</strong> Foundation study bundle for SiC MOSFETs and embedded Linux</p>
+  <p><strong>Use:</strong> Separate learning claims from production-safe claims before translating theory into hardware.</p>
+  <p><strong>Hazards:</strong> High voltage, fast switching, thermal stress, layout parasitics, shock/fire risk</p>
+  <p class="gate"><strong>Release gate:</strong> No powered prototype claim without schematic, BOM, derating calculation, test plan, and qualified review.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P02</div>
+  <h3>Air-gapped 8MB module research pack</h3>
+  <p><strong>Role:</strong> Offline storage cartridge architecture</p>
+  <p><strong>Use:</strong> Track corruption, brownout, level-shift, flash-write and data-integrity hazards.</p>
+  <p><strong>Hazards:</strong> Silent corruption, partial writes, floating flash pins, brownout, wrong voltage rails</p>
+  <p class="gate"><strong>Release gate:</strong> No trusted storage claim until power-loss and dual-manifest recovery tests pass.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P03</div>
+  <h3>Air-gapped 8MB CAD implementation bundle</h3>
+  <p><strong>Role:</strong> EVT-style cartridge PCB/enclosure implementation</p>
+  <p><strong>Use:</strong> Block fabrication release until ERC/DRC, flash bus, USB power, and enclosure safety are reviewed.</p>
+  <p><strong>Hazards:</strong> Prototype Gerbers, unverified footprints, USB serial misuse, 5V/3.3V damage</p>
+  <p class="gate"><strong>Release gate:</strong> No PCB order using preliminary outputs; regenerate after netlist/footprint/electrical review.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P04</div>
+  <h3>Drone CAD implementation bundle</h3>
+  <p><strong>Role:</strong> Bounded flight-controller EVT platform</p>
+  <p><strong>Use:</strong> Separate bench/tethered test evidence from real-flight readiness.</p>
+  <p><strong>Hazards:</strong> Propellers, LiPo, motor arming, RF link loss, IMU calibration errors, uncontrolled flight</p>
+  <p class="gate"><strong>Release gate:</strong> No untethered flight until arming, failsafe, geofence, RF, battery, and no-prop tests pass.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P05</div>
+  <h3>Pupper V3 open-source research bundle</h3>
+  <p><strong>Role:</strong> Quadruped robotics research/productization study</p>
+  <p><strong>Use:</strong> Control leg torque, battery risk, E-stop, gait safety, and low-voltage conditions.</p>
+  <p><strong>Hazards:</strong> Pinch/contact hazards, motor torque, falls, hot actuators, battery undervoltage</p>
+  <p class="gate"><strong>Release gate:</strong> No walking test unless robot is on blocks first and E-stop/torque limits are verified.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P06</div>
+  <h3>FarmBot open-source research bundle</h3>
+  <p><strong>Role:</strong> Agriculture automation gantry ecosystem</p>
+  <p><strong>Use:</strong> Control outdoor power, moving axes, toolheads, irrigation and field operation risks.</p>
+  <p><strong>Hazards:</strong> Moving gantry, belts, water near electronics, outdoor weather, toolhead collision</p>
+  <p class="gate"><strong>Release gate:</strong> No field deployment without weatherproofing, cable routing, endstops, E-stop and safe tool rules.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P07</div>
+  <h3>OpenFlexure Microscope research bundle</h3>
+  <p><strong>Role:</strong> Open-source lab microscope and precision positioning platform</p>
+  <p><strong>Use:</strong> Prevent false measurement confidence and unsupported medical/diagnostic claims.</p>
+  <p><strong>Hazards:</strong> Optical miscalibration, contamination, sample mishandling, incorrect diagnostic interpretation</p>
+  <p class="gate"><strong>Release gate:</strong> No diagnostic claim without calibrated optics, reference sample, repeatability evidence and regulatory review.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P08</div>
+  <h3>SatNOGS satellite ground-station research bundle</h3>
+  <p><strong>Role:</strong> Receive-only satellite ground-station learning platform</p>
+  <p><strong>Use:</strong> Define RF, mast, grounding, weather and receive-vs-transmit compliance boundaries.</p>
+  <p><strong>Hazards:</strong> Mast fall, lightning, outdoor cable ingress, rotator pinch, spectrum-law violation</p>
+  <p class="gate"><strong>Release gate:</strong> No transmit or high mast deployment without local RF permission, grounding and mechanical review.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P09</div>
+  <h3>Voron 3D printer engineering bundle</h3>
+  <p><strong>Role:</strong> High-performance open-source printer engineering study</p>
+  <p><strong>Use:</strong> Control heaters, mains/24V wiring, chamber heat, motion and print-farm safety.</p>
+  <p><strong>Hazards:</strong> Hotend/bed burns, thermal runaway, chamber heat, moving gantry, mains wiring</p>
+  <p class="gate"><strong>Release gate:</strong> No unattended printing until thermal runaway, wiring, grounding, fusing and chamber temperature tests pass.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P10</div>
+  <h3>OpenEVSE research bundle</h3>
+  <p><strong>Role:</strong> Open EV charging hardware/software platform</p>
+  <p><strong>Use:</strong> Treat all EVSE work as mains/safety-critical; block uncertified charger claims.</p>
+  <p><strong>Hazards:</strong> Mains voltage, ground faults, stuck relay, GFCI failure, enclosure heat, EV standards noncompliance</p>
+  <p class="gate"><strong>Release gate:</strong> No live EV charging product without certified design review, GFCI/ground/relay tests and applicable approvals.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P11</div>
+  <h3>OpenMV + OpenIPC local vision bundle</h3>
+  <p><strong>Role:</strong> Local-first camera/vision appliance stack</p>
+  <p><strong>Use:</strong> Control privacy, firmware provenance, camera flashing, credential and network exposure risks.</p>
+  <p><strong>Hazards:</strong> Video leakage, exposed credentials, bricked camera, unsafe surveillance use</p>
+  <p class="gate"><strong>Release gate:</strong> No deployment until local-only data path, password rotation, firmware hash and privacy notice are verified.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P12</div>
+  <h3>BeagleV-Fire / Milk-V Duo RISC-V edge bundle</h3>
+  <p><strong>Role:</strong> RISC-V edge compute, FPGA and embedded Linux platform</p>
+  <p><strong>Use:</strong> Track firmware-image provenance, thermal/power limits, network services and peripheral-voltage risks.</p>
+  <p><strong>Hazards:</strong> Brownout, thermal throttling, untrusted images, FPGA/toolchain assumptions, exposed services</p>
+  <p class="gate"><strong>Release gate:</strong> No field image until boot source, hashes, services, GPIO voltage and thermal evidence are recorded.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P13</div>
+  <h3>Precious Plastic machine ecosystem bundle</h3>
+  <p><strong>Role:</strong> Plastic recycling and small manufacturing machine ecosystem</p>
+  <p><strong>Use:</strong> Control blades, heaters, torque, fumes, mains/VFDs, guarding, and workshop safety.</p>
+  <p><strong>Hazards:</strong> Shredder blades, high torque, pinch points, hot barrels, fumes, VFD/mains wiring</p>
+  <p class="gate"><strong>Release gate:</strong> No public workshop use without guards, E-stop, ventilation, electrical review and operator checklist.</p>
+</article>
+
+
+<article class="card project">
+  <div class="eyebrow">P14</div>
+  <h3>NASA JPL Rover / OpenAMRobot research bundle</h3>
+  <p><strong>Role:</strong> Rover mechanics plus modern ROS2 AMR robot stack</p>
+  <p><strong>Use:</strong> Control battery, mobile robot, motor, E-stop, brownout and public-area safety hazards.</p>
+  <p><strong>Hazards:</strong> No battery fuse/disconnect in OpenAMRobot status, moving wheels, Pi brownout, software-only E-stop</p>
+  <p class="gate"><strong>Release gate:</strong> No mobile operation around people until physical E-stop, fuse/disconnect, speed limits and stop tests pass.</p>
+</article>
+
+  </section>
+
+  <h2>Compliance checklist</h2>
+  <section class="grid">
+    <article class="card wide">
+      <h3>Before supplier review</h3>
+      <ul class="check">
+        <li>All source files, CAD, BOM, firmware, manuals, and datasheets are pinned and hashed.</li>
+        <li>All user-facing claims have an evidence source or are marked as blocked.</li>
+        <li>Every power, thermal, motion, RF, battery, privacy, and enclosure hazard has a mitigation.</li>
+        <li>Every missing mitigation has a release-hold entry.</li>
+      </ul>
+    </article>
+    <article class="card wide">
+      <h3>Before powered demo</h3>
+      <ul class="check">
+        <li>Physical emergency stop is tested where motion/heaters/relays are present.</li>
+        <li>Fuse, disconnect, current limit, and brownout behavior are verified where applicable.</li>
+        <li>Firmware watchdog and safe-state behavior are demonstrated.</li>
+        <li>Operator checklist is printed or visible locally.</li>
+      </ul>
+    </article>
+    <article class="card wide">
+      <h3>Before customer or public use</h3>
+      <ul class="check">
+        <li>Applicable standards and local regulatory obligations are identified.</li>
+        <li>Dangerous unsupported claims are removed from UI, docs, pitch, and labels.</li>
+        <li>QA test receipts exist for the exact hardware revision being used.</li>
+        <li>Maintenance and failure instructions are clear enough for non-engineers.</li>
+      </ul>
+    </article>
+    <article class="card wide">
+      <h3>Blocked claim examples</h3>
+      <ul class="check">
+        <li>“Flight ready” for the drone bundle without flight safety evidence.</li>
+        <li>“Medical diagnostic microscope” for OpenFlexure without regulatory validation.</li>
+        <li>“Certified EV charger” for OpenEVSE without certified electrical review.</li>
+        <li>“Safe AMR around people” for OpenAMRobot without physical E-stop and mobile robot risk assessment.</li>
+      </ul>
+    </article>
+  </section>
+
+  <h2>Example ledger entry</h2>
+  <pre>{
+  "project_id": "P14",
+  "hazard_id": "AMR-POWER-001",
+  "hazard": "24 V battery can short before controller shutdown",
+  "severity": "critical",
+  "likelihood": "possible",
+  "mitigation": "Add 15-20 A fuse or breaker on battery positive and battery-side disconnect / physical E-stop.",
+  "evidence_required": [
+    "wiring photo",
+    "fuse rating calculation",
+    "disconnect test receipt",
+    "emergency stop test video or log"
+  ],
+  "release_gate": "blocked",
+  "owner": "hardware-safety-reviewer",
+  "review_status": "needs_review",
+  "last_reviewed": "2026-07-31"
+}</pre>
+
+  <h2>Export-ready JSON schema</h2>
+  <pre>{
+  &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,
+  &quot;title&quot;: &quot;ComplianceSafetyRiskLedgerEntry&quot;,
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;project_id&quot;,
+    &quot;hazard_id&quot;,
+    &quot;hazard&quot;,
+    &quot;severity&quot;,
+    &quot;likelihood&quot;,
+    &quot;mitigation&quot;,
+    &quot;evidence_required&quot;,
+    &quot;release_gate&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;project_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;hazard_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;hazard&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;severity&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;low&quot;,
+        &quot;medium&quot;,
+        &quot;high&quot;,
+        &quot;critical&quot;
+      ]
+    },
+    &quot;likelihood&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;rare&quot;,
+        &quot;possible&quot;,
+        &quot;likely&quot;,
+        &quot;frequent&quot;
+      ]
+    },
+    &quot;mitigation&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;evidence_required&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;release_gate&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;allowed&quot;,
+        &quot;hold&quot;,
+        &quot;blocked&quot;
+      ]
+    },
+    &quot;owner&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;review_status&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;draft&quot;,
+        &quot;needs_review&quot;,
+        &quot;approved&quot;,
+        &quot;rejected&quot;
+      ]
+    },
+    &quot;last_reviewed&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date&quot;
+    }
+  }
+}</pre>
+
+  <section class="footer">
+    <p>Tool 14 completes the 14-tool hardware production stack. Recommended next step: generate a master index ZIP/dashboard linking Tools 01–14, the 14 research ZIP bundles, and the remaining-scope tracker.</p>
+  </section>
+</main>
+</body>
+</html>

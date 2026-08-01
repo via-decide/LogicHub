@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool 08 — Sensor Calibration + Health Evidence</title>
+  <style>
+    :root{--bg:#0A1220;--panel:#101b2f;--panel2:#0f1728;--text:#eef4ff;--muted:#aebbd0;--line:#263956;--gold:#D4AF37;--saffron:#FF9933;--green:#138808;--red:#ff6b6b;--blue:#74b9ff;--code:#07101d;--ok:#1fc77e;--warn:#ffc857;--bad:#ff5c5c;--violet:#b58cff;}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#07101d 0%,var(--bg) 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+    a{color:var(--blue)}
+    .wrap{max-width:1180px;margin:auto;padding:28px 18px 64px}
+    header{border:1px solid var(--line);background:radial-gradient(circle at top right,rgba(116,185,255,.16),transparent 28%),linear-gradient(135deg,rgba(212,175,55,.13),rgba(16,27,47,.88));border-radius:24px;padding:28px;margin-bottom:20px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+    .kicker{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:.78rem}
+    h1{font-size:clamp(2rem,4vw,4rem);line-height:1.05;margin:.35rem 0 .65rem}
+    h2{font-size:1.55rem;margin:30px 0 12px;border-left:5px solid var(--gold);padding-left:12px}
+    h3{font-size:1.1rem;margin:18px 0 8px;color:#fff}
+    p{margin:.5rem 0;color:var(--muted)}
+    .lead{font-size:1.07rem;max-width:960px;color:#dfe8f8}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{grid-column:span 4;border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,27,47,.94),rgba(12,21,37,.96));border-radius:18px;padding:16px;min-height:132px}
+    .card.wide{grid-column:span 6}.card.full{grid-column:1/-1}.card.third{grid-column:span 4}.card.small{min-height:auto}
+    .tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.78rem;color:#d8e6ff;background:#0b1628;margin:2px 4px 2px 0;white-space:nowrap}
+    .tag.ok{border-color:rgba(31,199,126,.5);color:#baffde}.tag.warn{border-color:rgba(255,200,87,.55);color:#ffe8a8}.tag.bad{border-color:rgba(255,92,92,.55);color:#ffc2c2}.tag.violet{border-color:rgba(181,140,255,.55);color:#dac8ff}.tag.blue{border-color:rgba(116,185,255,.55);color:#cfe8ff}
+    table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:rgba(10,18,32,.72);border-radius:14px;overflow:hidden;margin:12px 0}
+    th,td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left;vertical-align:top;font-size:.92rem}
+    th{background:#14233b;color:#fff;font-weight:700}
+    tr:last-child td{border-bottom:none}
+    code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:#dff1ff}
+    pre{overflow:auto;background:var(--code);border:1px solid var(--line);border-radius:16px;padding:16px;color:#dff1ff;font-size:.88rem;line-height:1.45}
+    .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+    .node{border:1px solid var(--line);border-radius:14px;padding:8px 10px;background:#0d1a2e;color:#eaf2ff;font-size:.9rem}
+    .arrow{color:var(--gold);font-weight:800}
+    .checklist li{margin:.45rem 0;color:#d9e4f5}
+    .small{font-size:.86rem;color:var(--muted)}
+    .section{border:1px solid var(--line);background:rgba(12,21,37,.74);border-radius:22px;padding:18px;margin:16px 0}
+    .status{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .metric{border:1px solid var(--line);background:#0b1628;border-radius:16px;padding:14px}
+    .metric strong{display:block;color:var(--gold);font-size:1.7rem;line-height:1}
+    .footer{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted)}
+    .warnbox{border:1px solid rgba(255,200,87,.55);background:rgba(255,200,87,.08);border-radius:16px;padding:13px;margin:12px 0;color:#ffe8a8}
+    .badbox{border:1px solid rgba(255,92,92,.55);background:rgba(255,92,92,.08);border-radius:16px;padding:13px;margin:12px 0;color:#ffc2c2}
+    .okbox{border:1px solid rgba(31,199,126,.45);background:rgba(31,199,126,.08);border-radius:16px;padding:13px;margin:12px 0;color:#caffdf}
+    @media(max-width:880px){.card,.card.wide,.card.third{grid-column:1/-1}.status{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.status{grid-template-columns:1fr}.wrap{padding:18px 12px 44px}header{padding:20px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">Universal Hardware Production Stack · Tool 08</div>
+      <h1>Sensor Calibration + Health Evidence</h1>
+      <p class="lead">Convert sensors from “connected parts” into trusted production instruments. Every IMU, encoder, camera, LiDAR, microscope stage, RF chain, temperature probe, current sensor, voltage divider, docking marker, and process sensor must prove that it is present, oriented, calibrated, fresh, and believable before the product can act on it.</p>
+      <div class="status">
+        <div class="metric"><strong>T08</strong><span>Tool number</span></div>
+        <div class="metric"><strong>14</strong><span>Mapped projects</span></div>
+        <div class="metric"><strong>CAL</strong><span>Calibration gate</span></div>
+        <div class="metric"><strong>JSON</strong><span>Evidence receipt</span></div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>1. Tool purpose</h2>
+      <p><strong>Sensor Calibration + Health Evidence</strong> is the production discipline for making hardware perception trustworthy. A sensor is not accepted just because it returns numbers. It must pass identity, wiring, range, noise, orientation, timing, calibration, drift, and field-health checks.</p>
+      <p>This tool turns bring-up into evidence: each product stores a repeatable <code>calibration_receipt.json</code> showing what sensor was tested, under what fixture, with which firmware/software revision, what raw values were observed, what offsets were computed, and whether the result is safe to use.</p>
+      <div class="flow">
+        <span class="node">Detect sensor</span><span class="arrow">→</span><span class="node">Verify identity</span><span class="arrow">→</span><span class="node">Capture raw baseline</span><span class="arrow">→</span><span class="node">Check noise/range</span><span class="arrow">→</span><span class="node">Compute calibration</span><span class="arrow">→</span><span class="node">Write receipt</span><span class="arrow">→</span><span class="node">Runtime health monitor</span>
+      </div>
+      <div class="warnbox"><strong>Production rule:</strong> a sensor that has no calibration evidence must not be used for safety, navigation, measurement claims, payment, medical/lab decisions, motor arming, or automated process control.</div>
+    </section>
+
+    <section class="section">
+      <h2>2. When to use this tool</h2>
+      <div class="grid">
+        <div class="card"><h3>Motion sensing</h3><p>Use for IMUs, wheel encoders, limit switches, motor feedback, odometry, gantry position, quadruped pose, and drone attitude.</p><span class="tag ok">robots</span><span class="tag">drones</span><span class="tag">printers</span></div>
+        <div class="card"><h3>Vision and optics</h3><p>Use for OpenMV, OpenIPC, Raspberry Pi cameras, microscope optics, AprilTags, docking cameras, focus systems, and local AI thresholds.</p><span class="tag blue">camera</span><span class="tag">microscope</span></div>
+        <div class="card"><h3>RF and signal chain</h3><p>Use for SDR frequency offset, antenna orientation, rotator position, observation baselines, cable loss, noise floor, and signal quality.</p><span class="tag violet">SatNOGS</span></div>
+        <div class="card"><h3>Power and thermal sensing</h3><p>Use for battery voltage, pack current, charger pilot states, thermistors, regulator temperature, chamber temperature, and heater sensors.</p><span class="tag warn">thermal</span><span class="tag bad">safety</span></div>
+        <div class="card"><h3>Docking and interface sensing</h3><p>Use for cartridge presence, keyed connector confirmation, AMR docking tags, toolhead identity, cable presence, and machine guarding sensors.</p><span class="tag">poka-yoke</span></div>
+        <div class="card"><h3>Manufacturing QA</h3><p>Use when a prototype must become repeatable: every sensor gets a factory baseline and every field return can be compared against it.</p><span class="tag ok">receipt-driven</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. Calibration object model</h2>
+      <table>
+        <thead><tr><th>Layer</th><th>Question answered</th><th>Evidence to capture</th><th>Fail behavior</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Identity</strong></td><td>Is this the expected sensor or module?</td><td>Device ID, bus address, chip ID, serial number, firmware version, driver version.</td><td>Block production release; show wrong-sensor error.</td></tr>
+          <tr><td><strong>Electrical presence</strong></td><td>Is it wired and powered correctly?</td><td>Voltage rail, bus scan, pull-up state, error count, continuity result.</td><td>Disable dependent feature and require wiring inspection.</td></tr>
+          <tr><td><strong>Physical orientation</strong></td><td>Is the sensor mounted in the expected direction?</td><td>Axis sign test, gravity vector, wheel direction, camera orientation, tag pose.</td><td>Block motion/navigation until orientation is corrected.</td></tr>
+          <tr><td><strong>Noise and range</strong></td><td>Are readings stable and within expected physical limits?</td><td>Mean, min, max, standard deviation, outlier rate, timestamp jitter.</td><td>Mark sensor degraded; prevent safety-critical action.</td></tr>
+          <tr><td><strong>Calibration transform</strong></td><td>How do raw readings become useful engineering units?</td><td>Offsets, scale factors, matrices, lookup tables, lens model, encoder ratio.</td><td>Fall back to conservative defaults only if allowed by risk ledger.</td></tr>
+          <tr><td><strong>Runtime freshness</strong></td><td>Is the live data current and believable?</td><td>Last sample age, heartbeat, stale count, health topic, watchdog status.</td><td>Stop motors/heaters/process or degrade to manual mode.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>4. Production-stage map</h2>
+      <div class="flow">
+        <span class="node">Source intake</span><span class="arrow">→</span><span class="node">Bench ID check</span><span class="arrow">→</span><span class="node">Fixture calibration</span><span class="arrow">→</span><span class="node">Assembly validation</span><span class="arrow">→</span><span class="node">Commissioning receipt</span><span class="arrow">→</span><span class="node">Runtime health</span><span class="arrow">→</span><span class="node">Field service compare</span>
+      </div>
+      <table>
+        <thead><tr><th>Stage</th><th>Work product</th><th>Gate</th></tr></thead>
+        <tbody>
+          <tr><td>Design</td><td>Sensor choice, datasheet, mounting direction, bus address, expected limits, calibration method.</td><td>No uncalibratable sensor in safety or measurement path.</td></tr>
+          <tr><td>Prototype</td><td>Raw logs, wiring notes, first fixture, noise baseline, drift notes.</td><td>Raw values must match physical reality.</td></tr>
+          <tr><td>EVT</td><td>Automated calibration script, JSON receipt, pass/fail thresholds.</td><td>Every sensor must have a repeatable test.</td></tr>
+          <tr><td>DVT</td><td>Environmental drift test, vibration/temperature/power-cycle validation.</td><td>Calibration survives expected use conditions.</td></tr>
+          <tr><td>PVT</td><td>Production fixture, operator instructions, serialized receipts.</td><td>Unit cannot ship without its receipt.</td></tr>
+          <tr><td>Field</td><td>Health dashboard, service retest, recalibration workflow.</td><td>Faults are visible and recoverable.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>5. Project applicability cards</h2>
+      <div class="grid">
+        <div class="card"><h3>1. Electronics research</h3><p>Use T08 to turn SiC/power/embedded Linux study into lab fixtures: temperature probes, current sensors, voltage dividers, oscilloscope captures, and boot-health logs.</p><span class="tag">lab standard</span></div>
+        <div class="card"><h3>2. Air-gapped 8MB research</h3><p>Calibrate cartridge presence detection, SPI bus health, flash ID read stability, supply voltage sense, button behavior, and OLED/LED status confirmation.</p><span class="tag ok">cartridge</span></div>
+        <div class="card"><h3>3. Air-gapped 8MB CAD</h3><p>Add production receipts for PCBA rail voltage, flash JEDEC ID, read/write timing, connector insertion repeatability, and brownout threshold.</p><span class="tag">PCBA</span></div>
+        <div class="card"><h3>4. Drone FC</h3><p>Gate motor arming on IMU orientation, gyro bias, accelerometer scale, barometer sanity, blackbox timestamping, battery voltage, and RC/ESC signal health.</p><span class="tag bad">arming gate</span></div>
+        <div class="card"><h3>5. Pupper V3</h3><p>Capture IMU bias, motor zero offsets, leg direction, camera alignment, battery health, controller timing, and gait-state confidence before walking.</p><span class="tag">quadruped</span></div>
+        <div class="card"><h3>6. FarmBot</h3><p>Calibrate axis homing, belt travel, camera/soil sensors, water-flow status, toolhead identity, endstops, and outdoor environmental sensors.</p><span class="tag ok">field robot</span></div>
+        <div class="card"><h3>7. OpenFlexure</h3><p>Use resolution targets, stage repeatability, illumination uniformity, focus repeatability, camera exposure, and optical distortion receipts.</p><span class="tag violet">measurement</span></div>
+        <div class="card"><h3>8. SatNOGS</h3><p>Baseline SDR noise floor, frequency offset, antenna orientation, cable loss, rotator azimuth/elevation, GPS/time sync, and observation quality.</p><span class="tag blue">RF</span></div>
+        <div class="card"><h3>9. Voron</h3><p>Capture bed mesh, endstop repeatability, extruder rotation distance, input shaping, thermistor sanity, chamber temperature, and first-print evidence.</p><span class="tag warn">heater/motion</span></div>
+        <div class="card"><h3>10. OpenEVSE</h3><p>Validate pilot signal, GFCI self-test, diode check, ground monitor, relay feedback, temperature sensors, line voltage, and current measurement.</p><span class="tag bad">mains safety</span></div>
+        <div class="card"><h3>11. OpenMV + OpenIPC</h3><p>Calibrate lens focus, exposure, image orientation, detection thresholds, frame timing, RTSP health, privacy indicators, and offline capture quality.</p><span class="tag">vision</span></div>
+        <div class="card"><h3>12. RISC-V edge</h3><p>Validate GPIO, camera, NPU/TPU benchmark receipt, FPGA IO loopback, board temperature, network timing, SD/eMMC health, and boot service state.</p><span class="tag">edge compute</span></div>
+        <div class="card"><h3>13. Precious Plastic</h3><p>Calibrate heater thermocouples, motor current, barrel zones, jam detection, guard sensors, cycle timing, material batch trace, and product dimensions.</p><span class="tag bad">industrial</span></div>
+        <div class="card"><h3>14. NASA JPL Rover / OpenAMRobot</h3><p>Calibrate encoders, IMU, LiDAR, camera, AprilTag docking, wheel radius, track width, battery voltage, micro-ROS topic freshness, and E-stop input.</p><span class="tag ok">AMR</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>6. Universal calibration checklist</h2>
+      <div class="grid">
+        <div class="card wide"><h3>Before calibration</h3><ul class="checklist">
+          <li>Record product ID, revision, firmware hash, software hash, fixture ID, operator, timestamp, and ambient conditions.</li>
+          <li>Confirm power rails are stable and within tolerance before trusting any sensor reading.</li>
+          <li>Confirm the sensor is the correct part number and not an electrical substitute with different scale/orientation.</li>
+          <li>Confirm the mechanical mounting direction, connector keying, cable route, strain relief, and service access.</li>
+        </ul></div>
+        <div class="card wide"><h3>During calibration</h3><ul class="checklist">
+          <li>Capture raw values before filtering so future debugging can separate hardware faults from software filters.</li>
+          <li>Measure noise and outliers over a fixed sample window.</li>
+          <li>Run a known physical stimulus: gravity, rotation, distance target, optical target, RF test signal, heater setpoint, current load, or motion command.</li>
+          <li>Write calibration constants only after read-back verification and receipt creation.</li>
+        </ul></div>
+        <div class="card wide"><h3>After calibration</h3><ul class="checklist">
+          <li>Reboot or power-cycle and verify the calibration loads correctly.</li>
+          <li>Run a short runtime health test with stale-data detection enabled.</li>
+          <li>Store a human-readable summary and machine-readable JSON receipt.</li>
+          <li>Mark the unit blocked if the receipt is missing, partial, manually edited, or outside tolerance.</li>
+        </ul></div>
+        <div class="card wide"><h3>Field service</h3><ul class="checklist">
+          <li>Compare live drift against factory baseline.</li>
+          <li>Recalibrate only through the same evidence path, not by changing constants silently.</li>
+          <li>Expose degraded states on local UI and logs.</li>
+          <li>Prevent automatic operation when critical sensors are stale or implausible.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>7. Pass/fail gates</h2>
+      <table>
+        <thead><tr><th>Gate</th><th>Pass condition</th><th>Fail condition</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Sensor identity</td><td>Expected chip/module ID and version captured.</td><td>Wrong ID, unknown sensor, bus collision, missing serial.</td><td>Block release; inspect BOM/substitution.</td></tr>
+          <tr><td>Signal range</td><td>All raw values remain inside physical limits.</td><td>Saturated, stuck-at, inverted, impossible, or clipping readings.</td><td>Block dependent feature; inspect wiring/mount.</td></tr>
+          <tr><td>Noise baseline</td><td>Standard deviation and outlier rate within threshold.</td><td>Excessive noise, intermittent bus failures, jitter, thermal drift.</td><td>Fail QA; check grounding, shielding, filtering, power.</td></tr>
+          <tr><td>Orientation</td><td>Axis, direction, image, or pose agrees with mechanical drawing.</td><td>Inverted encoder, upside-down IMU, mirrored camera, swapped wheel.</td><td>Block motion and update assembly fixture.</td></tr>
+          <tr><td>Calibration persistence</td><td>Constants survive reboot and match receipt hash.</td><td>Missing receipt, mismatch, partial write, stale constants.</td><td>Re-run T07 transactional storage and recalibrate.</td></tr>
+          <tr><td>Runtime freshness</td><td>Samples update inside timeout with monotonic timestamps.</td><td>Stale topic, frozen frame, dead bus, missed heartbeat.</td><td>Safe stop, degraded mode, or maintenance lockout.</td></tr>
+        </tbody>
+      </table>
+      <div class="badbox"><strong>Hard stop:</strong> drones, mobile robots, EV chargers, heaters, machines with blades, and moving gantries must not operate automatically from uncalibrated or stale critical sensors.</div>
+    </section>
+
+    <section class="section">
+      <h2>8. Risk table</h2>
+      <table>
+        <thead><tr><th>Risk</th><th>Typical cause</th><th>Visible symptom</th><th>Control</th></tr></thead>
+        <tbody>
+          <tr><td>False confidence</td><td>Sensor returns plausible but wrong data.</td><td>Robot drifts, microscope mismeasures, charger over/under-reports current.</td><td>Known stimulus test + baseline receipt.</td></tr>
+          <tr><td>Axis inversion</td><td>IMU rotated, motor polarity swapped, encoder sign wrong.</td><td>Control loop fights itself or robot moves opposite command.</td><td>Direction/orientation gate before enabling actuators.</td></tr>
+          <tr><td>Thermal drift</td><td>Sensor or board heats during operation.</td><td>Offsets change after warm-up.</td><td>Warm-up profile, temperature-tagged calibration, derating.</td></tr>
+          <tr><td>Bus intermittency</td><td>Loose cable, weak pull-ups, EMI, long harness.</td><td>Random I2C/SPI/USB/CSI drops.</td><td>Error counters, shield/ground review, connector locking.</td></tr>
+          <tr><td>Stale data accepted</td><td>Software reads old value without freshness check.</td><td>Motion continues after sensor is disconnected.</td><td>Heartbeat timeout and safe-state transition.</td></tr>
+          <tr><td>Bad calibration stored</td><td>Manual editing, partial write, wrong fixture.</td><td>Unit passes once but fails in field.</td><td>Signed/hash receipt, fixture ID, T07 atomic commit.</td></tr>
+          <tr><td>Overclaiming measurement</td><td>Marketing exceeds calibration evidence.</td><td>Unsafe medical, lab, safety, payment, or compliance claim.</td><td>T14 compliance ledger and blocked-claim list.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>9. Example calibration routines</h2>
+      <h3>Generic embedded sensor health loop</h3>
+      <pre><code>sensor_state = INIT
+while true:
+    sample = read_sensor_with_timeout()
+
+    if sample.timeout:
+        fault("SENSOR_STALE")
+        enter_safe_state()
+        continue
+
+    if not sample.within_physical_limits():
+        fault("SENSOR_IMPLAUSIBLE")
+        enter_safe_state()
+        continue
+
+    update_noise_window(sample)
+    if noise_window.outlier_rate &gt; MAX_OUTLIER_RATE:
+        fault("SENSOR_NOISY")
+        enter_degraded_mode()
+        continue
+
+    publish_fresh_sample(sample, timestamp=monotonic_ms())</code></pre>
+
+      <h3>Manufacturing receipt pattern</h3>
+      <pre><code>{
+  "tool_id": "T08",
+  "product": "openamrobot-base",
+  "unit_serial": "AMR-0007",
+  "fixture_id": "ENC-IMU-LIDAR-CAL-01",
+  "sensor": {
+    "name": "imu",
+    "expected_part": "MPU6500",
+    "bus": "I2C",
+    "identity_result": "pass"
+  },
+  "raw_baseline": {
+    "sample_count": 2000,
+    "gyro_dps_mean": [0.01, -0.02, 0.00],
+    "accel_g_mean": [0.00, 0.01, 1.00],
+    "max_sample_age_ms": 12
+  },
+  "calibration": {
+    "offsets": {"gyro": [0.01, -0.02, 0.00]},
+    "orientation": "x_forward_z_up",
+    "hash": "sha256:..."
+  },
+  "result": "pass"
+}</code></pre>
+
+      <h3>OpenFlexure / camera target receipt fields</h3>
+      <pre><code>focus_position_steps
+illumination_pwm
+camera_exposure_us
+resolution_target_id
+pixels_per_mm
+field_flatness_percent
+repeatability_um
+calibration_image_hash</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>10. Sensor-specific notes</h2>
+      <table>
+        <thead><tr><th>Sensor type</th><th>Calibration stimulus</th><th>Minimum evidence</th><th>Common project</th></tr></thead>
+        <tbody>
+          <tr><td>IMU</td><td>Still surface, known gravity direction, controlled rotation.</td><td>Bias, axis signs, sample rate, noise, temperature.</td><td>Drone, Pupper, OpenAMRobot, rover.</td></tr>
+          <tr><td>Encoder</td><td>Known wheel turn or linear travel.</td><td>Counts/rev, direction, missed count, wheel radius, gear ratio.</td><td>OpenAMRobot, FarmBot, Voron, rover.</td></tr>
+          <tr><td>Camera</td><td>Checkerboard, AprilTag, focus target, lighting target.</td><td>Orientation, exposure, focus, distortion, frame timing.</td><td>OpenMV, OpenIPC, OpenFlexure, AMR docking.</td></tr>
+          <tr><td>LiDAR</td><td>Known distance wall/target.</td><td>Range error, scan rate, dead zones, timestamp freshness.</td><td>OpenAMRobot, robotics.</td></tr>
+          <tr><td>RF SDR</td><td>Known signal, satellite pass, frequency reference.</td><td>Noise floor, frequency offset, gain, timestamp, observation SNR.</td><td>SatNOGS.</td></tr>
+          <tr><td>Thermistor/thermocouple</td><td>Known temperature point or calibrated meter comparison.</td><td>ADC value, lookup table, fault open/short behavior.</td><td>Voron, Precious Plastic, OpenEVSE.</td></tr>
+          <tr><td>Voltage/current</td><td>Known load and reference meter.</td><td>Divider ratio, shunt value, ADC offset, trip threshold.</td><td>EVSE, battery systems, drone, robots.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>11. JSON/export-ready schema</h2>
+      <p>Use this schema shape for LogicHub/GN8R receipts. The complete schema is included in the ZIP as <code>tool-08-calibration-receipt.schema.json</code>.</p>
+      <pre><code>{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "T08 Sensor Calibration Receipt",
+  "type": "object",
+  "required": ["tool_id", "project", "unit_serial", "sensor", "calibration", "result"],
+  "properties": {
+    "tool_id": {"const": "T08"},
+    "project": {"type": "string"},
+    "unit_serial": {"type": "string"},
+    "fixture_id": {"type": "string"},
+    "source_hashes": {"type": "array", "items": {"type": "string"}},
+    "sensor": {
+      "type": "object",
+      "required": ["name", "expected_part", "interface", "identity_result"],
+      "properties": {
+        "name": {"type": "string"},
+        "expected_part": {"type": "string"},
+        "interface": {"enum": ["I2C", "SPI", "UART", "USB", "CSI", "GPIO", "ADC", "ROS2", "RTSP", "OTHER"]},
+        "identity_result": {"enum": ["pass", "fail", "not_applicable"]}
+      }
+    },
+    "calibration": {"type": "object"},
+    "health_limits": {"type": "object"},
+    "result": {"enum": ["pass", "fail", "blocked", "degraded"]}
+  }
+}</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>12. LogicHub/GN8R task seed</h2>
+      <pre><code>/task
+repo: via-decide/LogicHub
+mode: logichub-v0.1
+tier: T5
+estimated_time: 360
+version: 1
+depends_on: tool_07_storage_integrity_transactional_updates
+task: Implement Tool 08 Sensor Calibration + Health Evidence model. Add calibration receipt schema, per-project sensor map, fixture identity, raw baseline capture, drift limits, pass/fail gates, and evidence export for the 14 hardware research bundles.
+
+CAUSATION:
+Universal hardware cannot trust sensors because they return numbers. It can only trust sensors that identify correctly, react to known stimulus, stay within limits, and produce durable evidence.
+
+CONVERGENCE PROOF:
+Variables:
+S = sensor connected but untrusted
+C = calibrated sensor with receipt
+H = runtime health monitor
+Constraint = no safety, motion, measurement, or automation path may consume uncalibrated or stale sensor data.
+
+EXECUTION_CONTRACT:
+- create schemas/t08_calibration_receipt.schema.json
+- create data/project_sensor_map.json
+- create examples/openamrobot_imu_receipt.json
+- create examples/openflexure_optics_receipt.json
+- create examples/satnogs_rf_receipt.json
+- add negative tests for missing identity, stale sample, inverted axis, excessive noise, missing fixture_id, and missing receipt hash</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>13. Output checklist for generated products</h2>
+      <ul class="checklist">
+        <li><strong>Design output:</strong> sensor placement drawing, orientation note, bus address, expected range, fault code list.</li>
+        <li><strong>Firmware output:</strong> timeout, freshness counter, raw diagnostic path, safe-state transition.</li>
+        <li><strong>Software output:</strong> calibration script, fixture runner, validation report renderer, local dashboard health state.</li>
+        <li><strong>Manufacturing output:</strong> serialized calibration receipt and operator test procedure.</li>
+        <li><strong>Field output:</strong> recalibration workflow, degraded-state visibility, service comparison against factory baseline.</li>
+      </ul>
+      <div class="okbox"><strong>Done state:</strong> the unit has no hidden sensor assumptions. Every sensor that affects control, safety, quality, measurement, or product claims has evidence.</div>
+    </section>
+
+    <div class="footer">
+      <p><strong>Next tool:</strong> Tool 09 — Actuator / Motor / Heater Safety Interlock.</p>
+      <p class="small">Generated for the 14-project hardware research stack. Standalone HTML, no external dependencies.</p>
+    </div>
+  </div>
+</body>
+</html>
