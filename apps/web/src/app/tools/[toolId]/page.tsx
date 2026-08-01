@@ -9,19 +9,21 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }: { params: { toolId: string } }): Metadata {
-  const tool = allTools.find((t) => t.id === params.toolId);
+export async function generateMetadata({ params }: { params: Promise<{ toolId: string }> }): Promise<Metadata> {
+  const { toolId } = await params;
+  const tool = allTools.find((t) => t.id === toolId);
   if (!tool) return {};
-  
+
   return {
     title: `${tool.eyebrow.split('·')[1]?.trim() || 'Tool'} — ${tool.title}`,
     description: tool.lead,
   };
 }
 
-export default function ToolPage({ params }: { params: { toolId: string } }) {
-  const tool = allTools.find((t) => t.id === params.toolId);
-  
+export default async function ToolPage({ params }: { params: Promise<{ toolId: string }> }) {
+  const { toolId } = await params;
+  const tool = allTools.find((t) => t.id === toolId);
+
   if (!tool) {
     notFound();
   }
