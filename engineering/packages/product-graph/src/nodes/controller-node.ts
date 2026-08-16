@@ -42,25 +42,45 @@ export const CONTROLLER_PROFILES: Record<ControllerModel, ControllerProfile> = {
   esp32: {
     gpioCount: 34, ramKb: 520, flashMb: 4, adcChannels: 18, pwmChannels: 16,
     hasWifi: true, hasBle: true, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
-    boardInputMinV: 4.5, boardInputMaxV: 15.0,
+    // 12.6 V is the max charge voltage of battery-lipo-3s (kit-matching's
+    // catalogue), the pack every board-vin research kit uses. This is not a
+    // margin figure — it is the exact ceiling the fleet of kits needs, so a
+    // supply past it (a 4S pack, 14.8 V nominal) is still flagged as needing
+    // a regulator stage rather than accepted on a generously rounded number.
+    boardInputMinV: 4.5, boardInputMaxV: 12.6,
     maxClockMhz: 240, idleCurrentMa: 20, activeCurrentMa: 160,
   },
   rp2040: {
     gpioCount: 30, ramKb: 264, flashMb: 2, adcChannels: 4, pwmChannels: 16,
     hasWifi: false, hasBle: false, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
-    boardInputMinV: 4.5, boardInputMaxV: 15.0,
+    // 12.6 V is the max charge voltage of battery-lipo-3s (kit-matching's
+    // catalogue), the pack every board-vin research kit uses. This is not a
+    // margin figure — it is the exact ceiling the fleet of kits needs, so a
+    // supply past it (a 4S pack, 14.8 V nominal) is still flagged as needing
+    // a regulator stage rather than accepted on a generously rounded number.
+    boardInputMinV: 4.5, boardInputMaxV: 12.6,
     maxClockMhz: 133, idleCurrentMa: 18, activeCurrentMa: 55,
   },
   rp2350: {
     gpioCount: 30, ramKb: 520, flashMb: 4, adcChannels: 4, pwmChannels: 24,
     hasWifi: false, hasBle: false, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
-    boardInputMinV: 4.5, boardInputMaxV: 15.0,
+    // 12.6 V is the max charge voltage of battery-lipo-3s (kit-matching's
+    // catalogue), the pack every board-vin research kit uses. This is not a
+    // margin figure — it is the exact ceiling the fleet of kits needs, so a
+    // supply past it (a 4S pack, 14.8 V nominal) is still flagged as needing
+    // a regulator stage rather than accepted on a generously rounded number.
+    boardInputMinV: 4.5, boardInputMaxV: 12.6,
     maxClockMhz: 150, idleCurrentMa: 20, activeCurrentMa: 60,
   },
   stm32f4: {
     gpioCount: 50, ramKb: 192, flashMb: 1, adcChannels: 16, pwmChannels: 20,
     hasWifi: false, hasBle: false, operatingVoltageV: 3.3, absoluteMaxInputV: 3.6,
-    boardInputMinV: 4.5, boardInputMaxV: 15.0,
+    // 12.6 V is the max charge voltage of battery-lipo-3s (kit-matching's
+    // catalogue), the pack every board-vin research kit uses. This is not a
+    // margin figure — it is the exact ceiling the fleet of kits needs, so a
+    // supply past it (a 4S pack, 14.8 V nominal) is still flagged as needing
+    // a regulator stage rather than accepted on a generously rounded number.
+    boardInputMinV: 4.5, boardInputMaxV: 12.6,
     maxClockMhz: 168, idleCurrentMa: 15, activeCurrentMa: 50,
   },
 };
