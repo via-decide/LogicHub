@@ -87,6 +87,17 @@ describe('Gate 2 — controller node world', () => {
       .toContain('controller.regulator-required');
   });
 
+  it('pins boardInputMaxV to the pack it is actually derived from', () => {
+    // A commit once widened this from 9.0 to 15.0 with no explanation, which
+    // silently let a 4S LiPo (14.8 V) through a check meant to catch it. The
+    // correct ceiling is 12.6 V — the max charge voltage of battery-lipo-3s,
+    // the pack every board-vin research kit in the catalogue actually uses.
+    // Pinned per profile so a future change has to touch this line and say why.
+    for (const profile of Object.values(CONTROLLER_PROFILES)) {
+      expect(profile.boardInputMaxV).toBe(12.6);
+    }
+  });
+
   it('defaults to the logic rail, so an unstated supply entry stays strict', () => {
     const params = ControllerNode.parseParameters({ controller: 'esp32' });
     expect(params.supplyEntry).toBe('direct-3v3');
