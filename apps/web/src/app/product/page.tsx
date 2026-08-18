@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ConnectionType, UserMode } from '@logichub-engineering/product-graph';
 import { useProductGraph } from './useProductGraph';
 import { ProductCanvas } from './ProductCanvas';
+import { StackPanel } from './StackPanel';
 
 const CONNECTION_TYPES: ConnectionType[] = ['power', 'control', 'data', 'mechanical'];
 const MODES: UserMode[] = ['explore', 'builder', 'engineer'];
@@ -172,7 +173,7 @@ export default function ProductPage() {
         </aside>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-3 gap-4">
         <Panel title="What this could become">
           <ul className="space-y-1.5">
             {products.slice(0, 6).map(match => (
@@ -202,6 +203,8 @@ export default function ProductPage() {
             ))}
           </ul>
         </Panel>
+
+        <StackPanel graph={graph} />
       </div>
 
       <footer className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
