@@ -3,7 +3,7 @@
 //
 // This takes no money and promises no date. It records that someone wants to be
 // told when the cartridge is available, and tells them we have it.
-import { getAdminDb, logRuntimeEvent } from './_sovereignAuth.js';
+import { getAdminDb, logRuntimeEvent } from './_firebaseAdmin.js';
 import { applyCors } from './_payments-config.js';
 
 const COLLECTION = 'cartridge_waitlist';
