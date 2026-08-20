@@ -7,7 +7,7 @@ import type {
   SurfaceReadout,
   SurfaceSection,
 } from '../schemas/surface.schema.js';
-import type { FaultCode, MaintenanceEntry, SelfTest } from '../schemas/diagnostics.schema.js';
+import type { MaintenanceEntry } from '../schemas/diagnostics.schema.js';
 import { FAULT_CODES, SELF_TESTS } from '../diagnostics/self-tests.js';
 import { sortedNodes } from './shared.js';
 
@@ -29,33 +29,28 @@ export function generateServiceSurface(
   options: ServiceSurfaceOptions = {},
 ): GeneratedSurface {
   const nodes = sortedNodes(graph);
-  const presentTypes = new Set(nodes.map(n => n.type));
   const history = options.maintenanceHistory ?? [];
 
-  const applicableFaults: FaultCode[] = FAULT_CODES
-    .filter(f => presentTypes.has(f.appliesToNodeType))
-    .map(f => ({ ...f }));
+  const faultReadouts: SurfaceReadout[] = nodes.flatMap(node => FAULT_CODES
+    .filter(fault => fault.appliesToNodeType === node.type)
+    .map(fault => ({
+      id: `fault.${node.id}.${fault.code}`,
+      sourceNodeId: node.id,
+      label: `${fault.code} — ${fault.title}`,
+      unit: '',
+      epistemicState: 'UNKNOWN' as const,
+    })));
 
-  const applicableTests: SelfTest[] = SELF_TESTS
-    .filter(t => presentTypes.has(t.appliesToNodeType))
-    .map(t => ({ ...t }));
-
-  const faultReadouts: SurfaceReadout[] = applicableFaults.map(fault => ({
-    id: `fault.${fault.code}`,
-    sourceNodeId: firstNodeOfType(nodes, fault.appliesToNodeType) ?? fault.appliesToNodeType,
-    label: `${fault.code} — ${fault.title}`,
-    unit: '',
-    epistemicState: 'UNKNOWN',
-  }));
-
-  const selfTestControls: SurfaceControl[] = applicableTests.map(test => ({
-    id: `selftest.${test.id}`,
-    sourceNodeId: firstNodeOfType(nodes, test.appliesToNodeType) ?? test.appliesToNodeType,
-    kind: 'button',
-    label: `Run ${test.name}`,
-    requiresPermission: 'diagnostics.run',
-    firmwareInterlockRequired: true,
-  }));
+  const selfTestControls: SurfaceControl[] = nodes.flatMap(node => SELF_TESTS
+    .filter(test => test.appliesToNodeType === node.type)
+    .map(test => ({
+      id: `selftest.${node.id}.${test.id}`,
+      sourceNodeId: node.id,
+      kind: 'button' as const,
+      label: `Run ${test.name}`,
+      requiresPermission: 'diagnostics.run' as const,
+      firmwareInterlockRequired: true as const,
+    })));
 
   const replacementControls: SurfaceControl[] = nodes
     .filter(n => n.type !== 'operator-app')
@@ -203,11 +198,4 @@ export function generateServiceSurface(
         + 'a link; results recorded offline sync when a link returns.',
     },
   };
-}
-
-function firstNodeOfType(
-  nodes: readonly { id: string; type: string }[],
-  nodeType: string,
-): string | undefined {
-  return nodes.find(n => n.type === nodeType)?.id;
 }
