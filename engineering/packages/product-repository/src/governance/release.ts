@@ -25,28 +25,35 @@ export interface ReleaseRequest {
 export function decideRelease(request: ReleaseRequest): ReleaseDecision {
   const blockers: ReleaseBlocker[] = [];
 
-  const failed = request.diff.validationChecks.filter(c => c.verdict === 'FAIL');
-  for (const check of failed) {
+  if (request.diff.toRevisionId !== request.revisionId) {
     blockers.push({
-      code: 'release.validation-failed',
-      message: `${check.label} failed: ${check.detail}`,
+      code: 'release.diff-revision-mismatch',
+      message: `Diff targets ${request.diff.toRevisionId}, not revision ${request.revisionId}.`,
     });
-  }
+  } else {
+    const failed = request.diff.validationChecks.filter(c => c.verdict === 'FAIL');
+    for (const check of failed) {
+      blockers.push({
+        code: 'release.validation-failed',
+        message: `${check.label} failed: ${check.detail}`,
+      });
+    }
 
-  const unknown = request.diff.validationChecks.filter(c => c.verdict === 'UNKNOWN');
-  for (const check of unknown) {
-    // An unrun check is not a passed check, so it cannot be released past.
-    blockers.push({
-      code: 'release.validation-unknown',
-      message: `${check.label} could not be evaluated: ${check.detail}`,
-    });
-  }
+    const unknown = request.diff.validationChecks.filter(c => c.verdict === 'UNKNOWN');
+    for (const check of unknown) {
+      // An unrun check is not a passed check, so it cannot be released past.
+      blockers.push({
+        code: 'release.validation-unknown',
+        message: `${check.label} could not be evaluated: ${check.detail}`,
+      });
+    }
 
-  for (const area of request.diff.affectedAreas.filter(a => !a.evaluated)) {
-    blockers.push({
-      code: 'release.area-unevaluated',
-      message: `${area.area} is affected by this change but was not evaluated.`,
-    });
+    for (const area of request.diff.affectedAreas.filter(a => !a.evaluated)) {
+      blockers.push({
+        code: 'release.area-unevaluated',
+        message: `${area.area} is affected by this change but was not evaluated.`,
+      });
+    }
   }
 
   for (const stale of request.staleRecords) {
@@ -60,6 +67,11 @@ export function decideRelease(request: ReleaseRequest): ReleaseDecision {
     blockers.push({
       code: 'release.no-review',
       message: 'This revision has not been reviewed.',
+    });
+  } else if (request.review.revisionId !== request.revisionId) {
+    blockers.push({
+      code: 'release.review-revision-mismatch',
+      message: `Review targets ${request.review.revisionId}, not revision ${request.revisionId}.`,
     });
   } else if (request.review.verdict !== 'APPROVED') {
     blockers.push({

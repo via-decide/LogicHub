@@ -20,6 +20,17 @@ export interface CommitInput {
   createdAt: string;
 }
 
+function immutableSnapshot<T>(value: T): T {
+  const snapshot = structuredClone(value);
+  const freeze = (entry: unknown): void => {
+    if (entry === null || typeof entry !== 'object' || Object.isFrozen(entry)) return;
+    Object.freeze(entry);
+    for (const child of Object.values(entry)) freeze(child);
+  };
+  freeze(snapshot);
+  return snapshot;
+}
+
 /**
  * An append-only history of product revisions, with the decisions and
  * evidence recorded against each.
@@ -46,7 +57,7 @@ export class ProductRepository {
       createdAt: input.createdAt,
     }).slice(0, 16)}`;
 
-    const revision: ProductRevision = {
+    const revision = immutableSnapshot<ProductRevision>({
       revisionId,
       parentRevisionId: this.head,
       intent: input.intent,
@@ -56,7 +67,7 @@ export class ProductRepository {
       author: input.author,
       message: input.message,
       createdAt: input.createdAt,
-    };
+    });
 
     this.revisions.set(revisionId, revision);
     this.head = revisionId;
