@@ -1,5 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Product boundaries
+
+This app is part of the root LogicHub product. It must not import packages from
+the independent `engineering/` workspace. Browser experiences backed by the
+engineering product graph belong behind an approved integration boundary or in
+the engineering platform itself; they are not exposed as a local route here.
+
 ## Getting Started
 
 First, run the development server:
