@@ -25,15 +25,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@logichub-engineering/product-graph": [
-        "../../engineering/packages/product-graph/dist/index.d.ts"
-      ],
-      "@logichub-engineering/kit-matching": [
-        "../../engineering/packages/kit-matching/dist/index.d.ts"
-      ],
-      "@logichub-engineering/shared": [
-        "../../engineering/packages/shared/dist/index.d.ts"
       ]
     }
   },
