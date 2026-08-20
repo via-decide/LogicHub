@@ -118,8 +118,14 @@ into the form. Collected only when you submit it.</dd>
 of what was asked.</dd>
 <dt>Server logs</dt><dd>Standard request logs kept by our hosting provider,
 including IP address and user agent, used for security and diagnosing faults.</dd>
+<dt>Product analytics</dt><dd>When you sign in or use the app builder, we record
+events such as first access, returning use, project creation, uploads, imports,
+and publishing. An event can contain your user identifier, project identifier,
+session identifier, plan or access source, and event-specific technical metadata.
+We do not use this information for advertising or cross-site tracking.</dd>
 </dl>
-<p>We do not use analytics or tracking cookies. See the
+<p>These product events are service-side operational analytics; they do not use
+analytics or tracking cookies. See the
 <a href="/cookies">cookie policy</a>.</p>
 
 <h2>Why we collect it</h2>
@@ -127,6 +133,8 @@ including IP address and user agent, used for security and diagnosing faults.</d
 <li>To tell you when something you asked to be told about is ready</li>
 <li>To answer your questions</li>
 <li>To keep the service working and secure</li>
+<li>To understand adoption and the app-building workflow, measure publishing and
+returning use, and improve the service</li>
 </ul>
 <p>We rely on your consent, given when you submit a form. You may withdraw it at
 any time, and withdrawing is as easy as giving it: email
@@ -140,6 +148,9 @@ remove you, whichever comes first.</dd>
 as required for our records.</dd>
 <dt>Server logs</dt><dd>As retained by our hosting provider under their standard
 retention.</dd>
+<dt>Product analytics</dt><dd>While needed to operate and improve the service,
+or until you ask us to erase analytics linked to your account, unless we must
+retain a record for security or legal reasons.</dd>
 </dl>
 
 <h2>Who we share it with</h2>
@@ -332,11 +343,12 @@ pages['cookies.html'] = layout('Cookie Policy', `
 <p class="updated">Last updated: ${UPDATED}</p>
 
 <div class="notice">
-<strong>We do not track you.</strong>
+<strong>We do not use browser tracking technologies.</strong>
 <p style="margin:8px 0 0">This site sets no analytics cookies, no advertising
 cookies, and no third-party trackers. There is no consent banner because there is
-nothing to consent to. A test in our build asserts no analytics script is present,
-so this statement cannot quietly stop being true.</p>
+nothing stored in your browser for analytics consent. The app builder does record
+service-side operational events as described in our privacy policy; those events
+do not use cookies or third-party browser scripts.</p>
 </div>
 
 <h2>What is stored</h2>
@@ -351,16 +363,17 @@ the Reset control in the tool.</dd>
 
 <h2>What is not stored</h2>
 <ul>
-<li>No analytics or usage tracking</li>
+<li>No analytics or usage identifiers in cookies or browser tracking scripts</li>
 <li>No advertising or cross-site identifiers</li>
 <li>No profiling and no behavioural targeting</li>
 <li>No fingerprinting</li>
 </ul>
 
 <h2>If this changes</h2>
-<p>If we ever adopt analytics, this page changes first, a consent mechanism appears
-before anything is collected, and the change is notified. We will not switch on
-tracking behind an unchanged policy.</p>
+<p>If we ever adopt browser-based analytics or advertising trackers, this page
+changes first, a consent mechanism appears before anything is stored, and the
+change is notified. We will not switch on browser tracking behind an unchanged
+policy.</p>
 
 <h2>Questions</h2>
 <p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>

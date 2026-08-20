@@ -6,7 +6,7 @@
     "build": "node ./scripts/build-static.mjs",
     "dev": "node ./scripts/serve-static.mjs",
     "preview": "node ./scripts/serve-static.mjs --dist",
-    "site:build": "node ./scripts/build-icons.mjs && node ./scripts/build-policy-pages.mjs && node ./scripts/build-public-site.mjs",
+    "site:build": "node ./scripts/build-icons.mjs && node ./scripts/build-policy-pages.mjs && pnpm site:check && node ./scripts/build-public-site.mjs",
     "site:verify": "node ./scripts/verify-root-source.mjs",
     "site:verify-live": "node ./scripts/verify-live-root.mjs",
     "test:e2e": "npx playwright test",

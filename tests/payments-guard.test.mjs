@@ -135,3 +135,11 @@ test('the disabled response says plainly that nothing was charged', () => {
   assert.match(res.body.message, /no order has been created/);
   assert.equal(res.body.waitlist, '/waitlist');
 });
+
+test('the waitlist uses the declared durable Firebase backend', async () => {
+  const { readFileSync } = await import('node:fs');
+  const source = readFileSync('api/waitlist.js', 'utf8');
+
+  assert.match(source, /from ['"]\.\/_firebaseAdmin\.js['"]/);
+  assert.doesNotMatch(source, /_sovereignAuth|_sovereignDb|better-sqlite3/);
+});
