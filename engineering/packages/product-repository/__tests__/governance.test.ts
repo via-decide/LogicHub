@@ -79,6 +79,43 @@ describe('Gate 8 — repository history', () => {
     expect(JSON.stringify(repo.require(first.revisionId))).toBe(before);
   });
 
+  it('does not expose mutable committed revision snapshots', () => {
+    const { repo, first } = seed();
+    const originalHash = first.graphHash;
+
+    first.intent.statement = 'Mutated commit result';
+    repo.require(first.revisionId).graph.name = 'Mutated require result';
+    repo.get(first.revisionId)!.stamp.hardware = 'mutated-get';
+    repo.headRevision()!.graph.nodes[0].parameters.cellCount = 99;
+    repo.history(first.revisionId)[0].message = 'Mutated history result';
+
+    const stored = repo.require(first.revisionId);
+    expect(stored.graphHash).toBe(originalHash);
+    expect(stored.intent).toEqual(INTENT);
+    expect(stored.stamp).toEqual(STAMP);
+    expect(stored.graph.name).not.toBe('Mutated require result');
+    expect(stored.graph.nodes[0].parameters.cellCount).not.toBe(99);
+    expect(stored.message).toBe('Initial rover');
+  });
+
+  it('snapshots mutable commit inputs before storing them', () => {
+    const graph = roverGraph(3);
+    const intent = structuredClone(INTENT);
+    const stamp = structuredClone(STAMP);
+    const repo = new ProductRepository();
+    const committed = repo.commit({
+      intent, stamp, graph, author: 'tester', message: 'Snapshot inputs', createdAt: FIXED_TIME,
+    });
+
+    intent.statement = 'Changed later';
+    stamp.hardware = 'changed-later';
+    graph.name = 'Changed later';
+
+    expect(repo.require(committed.revisionId).intent).toEqual(INTENT);
+    expect(repo.require(committed.revisionId).stamp).toEqual(STAMP);
+    expect(repo.require(committed.revisionId).graph.name).not.toBe('Changed later');
+  });
+
   it('records the four revision streams separately', () => {
     const { first } = seed();
     expect(first.stamp).toEqual({

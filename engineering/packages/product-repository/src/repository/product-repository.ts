@@ -36,7 +36,7 @@ export class ProductRepository {
 
   /** Commit a new revision on top of the current head. */
   commit(input: CommitInput): ProductRevision {
-    const resolved = propagate(input.graph).graph;
+    const resolved = propagate(structuredClone(input.graph)).graph;
     const graphHash = hashValue(resolved);
 
     const revisionId = `rev_${hashValue({
@@ -49,8 +49,8 @@ export class ProductRepository {
     const revision: ProductRevision = {
       revisionId,
       parentRevisionId: this.head,
-      intent: input.intent,
-      stamp: input.stamp,
+      intent: structuredClone(input.intent),
+      stamp: structuredClone(input.stamp),
       graph: resolved,
       graphHash,
       author: input.author,
@@ -58,19 +58,20 @@ export class ProductRepository {
       createdAt: input.createdAt,
     };
 
-    this.revisions.set(revisionId, revision);
+    this.revisions.set(revisionId, structuredClone(revision));
     this.head = revisionId;
-    return revision;
+    return structuredClone(revision);
   }
 
   get(revisionId: string): ProductRevision | undefined {
-    return this.revisions.get(revisionId);
+    const revision = this.revisions.get(revisionId);
+    return revision === undefined ? undefined : structuredClone(revision);
   }
 
   require(revisionId: string): ProductRevision {
     const found = this.revisions.get(revisionId);
     if (!found) throw new Error(`Unknown revision: ${revisionId}`);
-    return found;
+    return structuredClone(found);
   }
 
   headRevision(): ProductRevision | null {

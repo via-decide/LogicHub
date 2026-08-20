@@ -138,14 +138,20 @@ export function kitToGraph(
 }
 
 /**
- * Wire the standard kit topology: the pack feeds every consumer, the
- * controller drives the motors and reads the sensors, and the link carries
- * the operator app.
+ * Wire the standard kit topology: the pack and controller feed the driver,
+ * the driver feeds the motors, the controller reads the sensors, and the link
+ * carries the operator app. Kits without a driver retain direct motor wiring.
  */
 function wireKitGraph(kitId: string, nodes: readonly LogicNode[]): Connection[] {
   const byType = (type: string) => nodes.filter(n => n.type === type);
   const battery = byType('battery')[0];
   const controller = byType('controller')[0];
+  const driver = byType('driver')[0];
+  const motors = byType('motor');
+  // Servos contain their own switching stage. Only motors that require the
+  // kit's external bridge belong downstream of that bridge.
+  const drivenMotors = motors.filter(motor => motor.parameters.motorType !== 'servo');
+  const directMotors = motors.filter(motor => motor.parameters.motorType === 'servo');
   const connections: Connection[] = [];
 
   const add = (from: string, to: string, type: Connection['type']) => {
@@ -157,14 +163,27 @@ function wireKitGraph(kitId: string, nodes: readonly LogicNode[]): Connection[] 
       if (node.id === battery.id) continue;
       // The operator app is software and draws nothing.
       if (node.type === 'operator-app') continue;
+      // An instantiated driver is the motors' power stage. Connecting the
+      // pack to the motors as well would bypass it and double-count the load.
+      if (driver && drivenMotors.some(motor => motor.id === node.id)) continue;
       add(battery.id, node.id, 'power');
     }
   }
 
   if (controller) {
-    for (const motor of byType('motor')) add(controller.id, motor.id, 'control');
+    if (driver) {
+      add(controller.id, driver.id, 'control');
+      for (const motor of drivenMotors) add(driver.id, motor.id, 'control');
+      for (const motor of directMotors) add(controller.id, motor.id, 'control');
+    } else {
+      for (const motor of motors) add(controller.id, motor.id, 'control');
+    }
     for (const sensor of byType('sensor')) add(controller.id, sensor.id, 'data');
     for (const link of byType('connectivity')) add(controller.id, link.id, 'data');
+  }
+
+  if (driver) {
+    for (const motor of drivenMotors) add(driver.id, motor.id, 'power');
   }
 
   const app = byType('operator-app')[0];
