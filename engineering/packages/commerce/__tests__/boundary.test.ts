@@ -144,6 +144,20 @@ describe('Gate 9 — the two one-way digests', () => {
     expect(challengeSignature(monitorGraph())).not.toBe(challengeSignature(roverGraph()));
   });
 
+  it('includes numeric goal-predicate outcomes rather than capability-key presence', () => {
+    const passing = roverGraph();
+    const failing = structuredClone(passing);
+    for (const motor of passing.nodes.filter(node => node.type === 'motor')) {
+      motor.capabilities['motor.speedMps'] = 0.4;
+    }
+    for (const motor of failing.nodes.filter(node => node.type === 'motor')) {
+      motor.capabilities['motor.speedMps'] = 0.75;
+    }
+
+    expect(challengeSignature(passing, 'camera-slider'))
+      .not.toBe(challengeSignature(failing, 'camera-slider'));
+  });
+
   it('gives those two designs different fingerprints even though they solve alike', () => {
     // They are the same solution but not the same design, and the fingerprint
     // tracks identity rather than capability.

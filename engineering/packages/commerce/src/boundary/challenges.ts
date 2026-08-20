@@ -1,22 +1,19 @@
 import type { ProductGraph } from '@logichub-engineering/product-graph';
+import { matchProducts } from '@logichub-engineering/product-graph';
 import { REFERENCE_KITS } from '@logichub-engineering/kit-matching';
-import { kitToGraph } from '@logichub-engineering/kit-matching';
 import type { ChallengeCard } from '../schemas/boundary.schema.js';
-import { challengeSignature } from './sovereignty.js';
-
-/** Fixed timestamp so a reference challenge is the same on every machine. */
-const REFERENCE_TIME = '2026-01-01T00:00:00.000Z';
 
 /**
  * Verify that a candidate design solves a challenge.
  *
- * The signature is recomputed from the candidate on the user's own machine and
- * compared locally. Neither the challenge author's design nor the solver's
- * design is transmitted, and the platform learns only that two signatures
- * matched — which it could already see, since the signature is what was shared.
+ * The public goal is evaluated against the candidate on the user's own machine.
+ * Neither the challenge author's design nor the solver's design is transmitted.
+ * The opaque id is only the challenge's identity and contains no solving data.
  */
-export function verifyCompletion(challengeId: string, candidate: ProductGraph): boolean {
-  return challengeSignature(candidate) === challengeId;
+export function verifyCompletion(challenge: ChallengeCard, candidate: ProductGraph): boolean {
+  const match = matchProducts(candidate)
+    .find(result => result.templateName === challenge.goalProductName);
+  return match?.verdict === 'CAN_MAKE';
 }
 
 /**
@@ -30,11 +27,10 @@ export function buildReferenceChallenges(): ChallengeCard[] {
   return REFERENCE_KITS
     .filter(kit => kit.supportedProductTemplateIds.length > 0)
     .map(kit => {
-      const graph = kitToGraph(kit, { now: REFERENCE_TIME });
       const goal = goalNameFor(kit.supportedProductTemplateIds[0]!);
 
       return {
-        challengeId: challengeSignature(graph),
+        challengeId: createOpaqueChallengeId(),
         goalProductName: goal,
         difficulty: kit.assemblyDifficulty,
         origin: 'reference' as const,
@@ -42,6 +38,13 @@ export function buildReferenceChallenges(): ChallengeCard[] {
       };
     })
     .sort((a, b) => (a.challengeId < b.challengeId ? -1 : 1));
+}
+
+/** A random public identity that cannot be enumerated from the kit catalogue. */
+function createOpaqueChallengeId(): string {
+  const bytes = new Uint8Array(32);
+  globalThis.crypto.getRandomValues(bytes);
+  return [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 /**

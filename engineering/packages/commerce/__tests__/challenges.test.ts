@@ -4,7 +4,7 @@ import {
   buildReferenceChallenges,
   verifyCompletion,
 } from '../src/boundary/challenges.js';
-import { challengeSignature, findLeaks, redactForWeb, toChallengeCard } from '../src/boundary/sovereignty.js';
+import { findLeaks, redactForWeb, toChallengeCard } from '../src/boundary/sovereignty.js';
 import { buildConversionJourney } from '../src/conversion/journey.js';
 import { ChallengeCardSchema } from '../src/schemas/boundary.schema.js';
 import { equivalentRoverGraph, monitorGraph, roverGraph } from './helpers.js';
@@ -13,25 +13,31 @@ describe('Gate 9 — challenge completion', () => {
   it('accepts an independently built design that reaches the same capabilities', () => {
     // The whole loop: someone shares a code, someone else solves it their own
     // way, and neither design goes anywhere.
-    const challengeId = challengeSignature(roverGraph());
-    expect(verifyCompletion(challengeId, equivalentRoverGraph())).toBe(true);
+    const card = toChallengeCard(redactForWeb(
+      buildConversionJourney(roverGraph(), 'creator'), roverGraph(),
+    ));
+    expect(verifyCompletion(card, equivalentRoverGraph())).toBe(true);
   });
 
   it('rejects a design that reaches somewhere else', () => {
-    const challengeId = challengeSignature(roverGraph());
-    expect(verifyCompletion(challengeId, monitorGraph())).toBe(false);
+    const card = toChallengeCard(redactForWeb(
+      buildConversionJourney(roverGraph(), 'creator'), roverGraph(),
+    ));
+    expect(verifyCompletion(card, monitorGraph())).toBe(false);
   });
 
   it('accepts the design the challenge came from', () => {
     const graph = roverGraph();
-    expect(verifyCompletion(challengeSignature(graph), graph)).toBe(true);
+    const card = toChallengeCard(redactForWeb(buildConversionJourney(graph, 'creator'), graph));
+    expect(verifyCompletion(card, graph)).toBe(true);
   });
 
   it('verifies without either design crossing the boundary', () => {
     // Everything verification needs is the shared code plus the candidate,
     // both of which are already on the solver's machine.
-    const challengeId = challengeSignature(roverGraph());
-    expect(findLeaks({ challengeId })).toEqual([]);
+    const graph = roverGraph();
+    const card = toChallengeCard(redactForWeb(buildConversionJourney(graph, 'creator'), graph));
+    expect(findLeaks(card)).toEqual([]);
   });
 });
 
@@ -63,14 +69,15 @@ describe('Gate 9 — reference challenges', () => {
     expect(findLeaks(challenges)).toEqual([]);
   });
 
-  it('is deterministic across runs', () => {
-    expect(JSON.stringify(buildReferenceChallenges())).toBe(JSON.stringify(challenges));
+  it('uses non-enumerable identities rather than deterministic kit signatures', () => {
+    const nextIds = buildReferenceChallenges().map(card => card.challengeId);
+    expect(nextIds).not.toEqual(challenges.map(card => card.challengeId));
   });
 
   it('is solvable: the kit it came from completes it', () => {
     const journey = buildConversionJourney(roverGraph(), 'creator');
     const card = toChallengeCard(redactForWeb(journey, roverGraph()));
-    expect(verifyCompletion(card.challengeId, roverGraph())).toBe(true);
+    expect(verifyCompletion(card, roverGraph())).toBe(true);
   });
 });
 
