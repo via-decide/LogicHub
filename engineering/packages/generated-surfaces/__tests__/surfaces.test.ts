@@ -153,6 +153,12 @@ describe('Gate 5 — engineering surface', () => {
     // The pack's own arithmetic keeps its stronger standing.
     expect(readouts.find(r => r.id === 'n1_battery.storedEnergyWh')!.epistemicState)
       .toBe('CALCULATED');
+
+    const derived = sectionOf(generateEngineeringSurface(roverGraph()), 'calculations').readouts;
+    expect(derived.find(r => r.id === 'n1_battery.metric.estimatedRuntimeH')!.epistemicState)
+      .toBe('ESTIMATED');
+    expect(derived.find(r => r.id === 'n1_battery.metric.totalLoadW')!.epistemicState)
+      .toBe('ESTIMATED');
   });
 
   it('does not invent thermal limits it has not computed', () => {
@@ -206,6 +212,21 @@ describe('Gate 5 — engineering surface', () => {
     expect(added.after).toBe('motor');
   });
 
+  it('reports configuration changes even when derived metrics stay the same', () => {
+    const before = roverGraph();
+    const controller = before.nodes.find(n => n.type === 'controller')!;
+    const after = propagate(updateNodeParameters(before, controller.id, {
+      assignedPins: { motorLeft: 'GPIO14', motorRight: 'GPIO13' },
+    })).graph;
+
+    expect(compareRevisions(before, after)).toContainEqual({
+      nodeId: controller.id,
+      field: 'parameters.assignedPins',
+      before: '{"motorLeft":"GPIO12","motorRight":"GPIO13"}',
+      after: '{"motorLeft":"GPIO14","motorRight":"GPIO13"}',
+    });
+  });
+
   it('finds no differences between a graph and itself', () => {
     const graph = roverGraph();
     expect(compareRevisions(graph, graph)).toEqual([]);
@@ -217,18 +238,19 @@ describe('Gate 5 — service surface', () => {
     const readouts = sectionOf(generateServiceSurface(roverGraph()), 'faults').readouts;
     const codes = readouts.map(r => r.id);
 
-    expect(codes).toContain('fault.F-MOT-001');
-    expect(codes).toContain('fault.F-BAT-001');
-    expect(codes).toContain('fault.F-LNK-001');
+    expect(codes).toContain('fault.n3_motor_left.F-MOT-001');
+    expect(codes).toContain('fault.n1_battery.F-BAT-001');
+    expect(codes).toContain('fault.n6_link.F-LNK-001');
+    expect(codes).toContain('fault.n4_motor_right.F-MOT-001');
   });
 
   it('withholds fault codes for parts the product does not have', () => {
     const readouts = sectionOf(generateServiceSurface(unlinkedGraph()), 'faults').readouts;
     const codes = readouts.map(r => r.id);
 
-    expect(codes).toContain('fault.F-CTL-001');
-    expect(codes).not.toContain('fault.F-MOT-001');
-    expect(codes).not.toContain('fault.F-LNK-001');
+    expect(codes).toContain('fault.n2_controller.F-CTL-001');
+    expect(codes.some(code => code.includes('F-MOT-001'))).toBe(false);
+    expect(codes.some(code => code.includes('F-LNK-001'))).toBe(false);
   });
 
   it('offers self-tests, replacement, calibration and flashing', () => {
@@ -237,6 +259,23 @@ describe('Gate 5 — service surface', () => {
     expect(sectionOf(surface, 'replacement').controls.length).toBeGreaterThan(0);
     expect(sectionOf(surface, 'calibration').controls.length).toBeGreaterThan(0);
     expect(sectionOf(surface, 'firmware').controls.map(c => c.id)).toContain('flash.n2_controller');
+  });
+
+  it('generates fault and self-test diagnostics for every matching component', () => {
+    const surface = generateServiceSurface(roverGraph());
+    const motorFaults = sectionOf(surface, 'faults').readouts
+      .filter(readout => readout.id.endsWith('.F-MOT-001'));
+    const motorTests = sectionOf(surface, 'self-tests').controls
+      .filter(control => control.id.endsWith('.selftest.motor'));
+
+    expect(motorFaults.map(readout => readout.id)).toEqual([
+      'fault.n3_motor_left.F-MOT-001',
+      'fault.n4_motor_right.F-MOT-001',
+    ]);
+    expect(motorTests.map(control => control.id)).toEqual([
+      'selftest.n3_motor_left.selftest.motor',
+      'selftest.n4_motor_right.selftest.motor',
+    ]);
   });
 
   it('starts with an empty maintenance history and says so', () => {

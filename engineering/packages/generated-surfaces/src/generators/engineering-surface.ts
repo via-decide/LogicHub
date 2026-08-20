@@ -90,7 +90,7 @@ export function generateEngineeringSurface(graph: ProductGraph): GeneratedSurfac
         label: `${node.type} · ${key}`,
         unit: '',
         value: raw,
-        epistemicState: epistemicOf(node),
+        epistemicState: powerEpistemicState(node, key),
       });
     }
 
@@ -244,12 +244,29 @@ export function compareRevisions(before: ProductGraph, after: ProductGraph): Rev
       continue;
     }
 
-    const keys = [...new Set([
+    const parameterKeys = [...new Set([
+      ...Object.keys(a.parameters),
+      ...Object.keys(b.parameters),
+    ])].sort();
+
+    for (const key of parameterKeys) {
+      const av = a.parameters[key];
+      const bv = b.parameters[key];
+      if (stableValue(av) === stableValue(bv)) continue;
+      differences.push({
+        nodeId: id,
+        field: `parameters.${key}`,
+        before: displayValue(av),
+        after: displayValue(bv),
+      });
+    }
+
+    const metricKeys = [...new Set([
       ...Object.keys(a.derivedMetrics),
       ...Object.keys(b.derivedMetrics),
     ])].sort();
 
-    for (const key of keys) {
+    for (const key of metricKeys) {
       const av = a.derivedMetrics[key];
       const bv = b.derivedMetrics[key];
       if (av === bv) continue;
@@ -263,4 +280,18 @@ export function compareRevisions(before: ProductGraph, after: ProductGraph): Rev
   }
 
   return differences;
+}
+
+function stableValue(value: unknown): string {
+  if (value === undefined) return 'undefined';
+  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? String(value);
+  if (Array.isArray(value)) return `[${value.map(stableValue).join(',')}]`;
+  return `{${Object.entries(value as Record<string, unknown>)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, entry]) => `${JSON.stringify(key)}:${stableValue(entry)}`)
+    .join(',')}}`;
+}
+
+function displayValue(value: unknown): string {
+  return value === undefined ? 'unknown' : stableValue(value);
 }
