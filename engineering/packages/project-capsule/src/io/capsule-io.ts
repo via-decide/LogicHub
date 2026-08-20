@@ -1,4 +1,5 @@
 import { ProductGraphSchema, type ProductGraph } from '@logichub-engineering/product-graph';
+import { hashValue } from '../canonical/hashing.js';
 import {
   CapsuleManifestSchema,
   CHECKSUMS_PATH,
@@ -84,6 +85,14 @@ export function importProductGraph(capsule: Capsule): ProductGraph {
     throw new Error(
       `${PRODUCT_GRAPH_PATH} failed validation: `
       + result.error.issues.map(i => i.message).join(', '),
+    );
+  }
+
+  const actualHash = hashValue(result.data);
+  if (actualHash !== capsule.manifest.productGraphHash) {
+    throw new Error(
+      `${PRODUCT_GRAPH_PATH} hash does not match the manifest: `
+      + `expected ${capsule.manifest.productGraphHash}, computed ${actualHash}.`,
     );
   }
 

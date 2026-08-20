@@ -136,7 +136,9 @@ describe('Gate 6 — capsule export', () => {
     };
     const capsule = buildCapsule(roverGraph(), { externalReferences: [reference] });
     expect(capsule.manifest.externalReferences).toEqual([reference]);
-    expect(verifyCapsule(capsule).externalReferencesUnchecked).toBe(1);
+    const verification = verifyCapsule(capsule);
+    expect(verification.externalReferencesUnchecked).toBe(1);
+    expect(verification.verified).toBe(false);
   });
 
   it('stays well inside the 8 MB entry target for this product', () => {
@@ -316,6 +318,7 @@ describe('Gate 6 — verification', () => {
     }));
     expect(result.externalReferencesUnchecked).toBe(1);
     expect(result.filesChecked).toBe(EXPECTED_PATHS.length - 2);
+    expect(result.verified).toBe(false);
   });
 });
 
@@ -382,5 +385,20 @@ describe('Gate 6 — import and reproduce', () => {
         f.path === 'product-graph.json' ? { ...f, content: '{"id":"g"}' } : f),
     };
     expect(() => importProductGraph(broken)).toThrow(/failed validation/);
+  });
+
+  it('rejects a schema-valid imported graph that does not match the manifest hash', () => {
+    const original = buildCapsule(roverGraph());
+    const graph = roverGraph();
+    const battery = graph.nodes.find(n => n.type === 'battery')!;
+    const changed = propagate(updateNodeParameters(graph, battery.id, { capacityMah: 4000 })).graph;
+    const changedGraphFile = fileIn(buildCapsule(changed), 'product-graph.json');
+    const tampered = {
+      ...original,
+      files: original.files.map(file =>
+        file.path === 'product-graph.json' ? { ...file, content: changedGraphFile } : file),
+    };
+
+    expect(() => importProductGraph(tampered)).toThrow(/hash does not match the manifest/);
   });
 });
