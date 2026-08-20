@@ -8,7 +8,7 @@
 // anyone's email into a form, so a raw signup is a claim about a third party,
 // not consent from them. The entry is stored unconfirmed and a signed link is
 // sent; only clicking it flips `confirmed`.
-import { getAdminDb, logRuntimeEvent } from './_sovereignAuth.js';
+import { getWaitlistDb, logWaitlistEvent } from './_waitlistPersistence.js';
 import { applyCors } from './_payments-config.js';
 import {
   clientBucket,
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'invalid_email', message: 'Enter a valid email address.' });
   }
 
-  const db = getAdminDb();
+  const db = getWaitlistDb();
 
   // Counted before anything is stored. A failure here refuses the signup: an
   // uncounted request through an unbounded write endpoint is the worse outcome.
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
   // must not tell the person their signup did not work.
   await notify(entry, confirmationSent).catch(() => false);
 
-  await logRuntimeEvent('waitlist_signup', {
+  await logWaitlistEvent('waitlist_signup', {
     product: entry.product,
     country,
     confirmationSent,

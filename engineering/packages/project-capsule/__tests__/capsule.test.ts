@@ -14,6 +14,9 @@ import {
   type ExternalReference,
 } from '../src/schemas/capsule.schema.js';
 import { roverGraph } from './helpers.js';
+import { byteLength, hashValue, sha256Hex } from '../src/canonical/hashing.js';
+import { canonicalize } from '../src/canonical/canonical-json.js';
+import { renderChecksums } from '../src/build/capsule-builder.js';
 
 const EXPECTED_PATHS = [
   'README.md',
@@ -44,6 +47,35 @@ function fileIn(capsule: { files: { path: string; content: string }[] }, path: s
   const found = capsule.files.find(f => f.path === path);
   if (found === undefined) throw new Error(`No file ${path}`);
   return found.content;
+}
+
+function capsuleWithAlteredGraphAndStaleIdentity() {
+  const capsule = buildCapsule(roverGraph());
+  const graph = JSON.parse(fileIn(capsule, 'product-graph.json'));
+  graph.name = 'Altered product';
+  const graphContent = canonicalize(graph);
+  const files = capsule.files.map(file =>
+    file.path === 'product-graph.json' ? { ...file, content: graphContent } : file);
+  const fileEntries = capsule.manifest.files.map(entry =>
+    entry.path === 'product-graph.json'
+      ? { ...entry, sha256: sha256Hex(graphContent), bytes: byteLength(graphContent) }
+      : entry);
+  const manifest = {
+    ...capsule.manifest,
+    files: fileEntries,
+    contentHash: hashValue({
+      files: fileEntries,
+      externalReferences: capsule.manifest.externalReferences,
+    }),
+  };
+  const withManifest = files.map(file =>
+    file.path === MANIFEST_PATH ? { ...file, content: canonicalize(manifest) } : file);
+  const checksums = renderChecksums(withManifest.filter(file => file.path !== CHECKSUMS_PATH));
+  return {
+    manifest,
+    files: withManifest.map(file =>
+      file.path === CHECKSUMS_PATH ? { ...file, content: checksums } : file),
+  };
 }
 
 describe('Gate 6 — capsule export', () => {
@@ -234,6 +266,13 @@ describe('Gate 6 — verification', () => {
     expect(result.findings.map(f => f.code)).toContain('capsule.checksum-mismatch');
   });
 
+  it('catches an altered graph even when the file tables and checksums are regenerated', () => {
+    const result = verifyCapsule(capsuleWithAlteredGraphAndStaleIdentity());
+    expect(result.verified).toBe(false);
+    expect(result.findings.map(f => f.code))
+      .toContain('capsule.product-graph-hash-mismatch');
+  });
+
   it('catches a removed file', () => {
     const capsule = buildCapsule(roverGraph());
     const tampered = {
@@ -382,5 +421,10 @@ describe('Gate 6 — import and reproduce', () => {
         f.path === 'product-graph.json' ? { ...f, content: '{"id":"g"}' } : f),
     };
     expect(() => importProductGraph(broken)).toThrow(/failed validation/);
+  });
+
+  it('rejects an imported graph that does not match the manifest identity', () => {
+    expect(() => importProductGraph(capsuleWithAlteredGraphAndStaleIdentity()))
+      .toThrow(/does not match the manifest productGraphHash/);
   });
 });

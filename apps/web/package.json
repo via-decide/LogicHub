@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
+    "prebuild": "pnpm run build:engines",
+    "build:engines": "pnpm --dir ../../engineering install --frozen-lockfile && pnpm --dir ../../engineering exec tsc --build packages/shared packages/contracts packages/product-graph packages/kit-matching",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"

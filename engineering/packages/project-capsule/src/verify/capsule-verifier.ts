@@ -12,6 +12,8 @@ import type {
 } from '../schemas/verification.schema.js';
 import { renderChecksums } from '../build/capsule-builder.js';
 
+const PRODUCT_GRAPH_PATH = 'product-graph.json';
+
 /**
  * Verify a capsule end to end.
  *
@@ -106,6 +108,28 @@ export function verifyCapsule(capsule: Capsule): VerificationResult {
       path: MANIFEST_PATH,
       message: 'The manifest content hash does not match its own file table.',
     });
+  }
+
+  const graphFile = byPath.get(PRODUCT_GRAPH_PATH);
+  if (graphFile !== undefined) {
+    try {
+      const actualGraphHash = hashValue(JSON.parse(graphFile.content));
+      if (actualGraphHash !== capsule.manifest.productGraphHash) {
+        findings.push({
+          code: 'capsule.product-graph-hash-mismatch',
+          severity: 'error',
+          path: PRODUCT_GRAPH_PATH,
+          message: `Expected ${capsule.manifest.productGraphHash}, computed ${actualGraphHash}.`,
+        });
+      }
+    } catch {
+      findings.push({
+        code: 'capsule.product-graph-invalid',
+        severity: 'error',
+        path: PRODUCT_GRAPH_PATH,
+        message: 'The product graph is not valid JSON.',
+      });
+    }
   }
 
   findings.push(...verifyChecksumFile(capsule, byPath));

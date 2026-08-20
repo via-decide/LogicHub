@@ -72,6 +72,14 @@ const request = (ip) => ({ headers: ip ? { 'x-forwarded-for': ip } : {} });
 
 // --- consent -----------------------------------------------------------------
 
+test('the deployed waitlist handlers load using declared runtime dependencies', async () => {
+  const signup = await import('../api/waitlist.js');
+  const confirmation = await import('../api/waitlist-confirm.js');
+
+  assert.equal(typeof signup.default, 'function');
+  assert.equal(typeof confirmation.default, 'function');
+});
+
 test('there is no default signing secret', () => {
   withEnv({ WAITLIST_TOKEN_SECRET: undefined, SECRET_KEY: undefined }, () => {
     assert.equal(tokenSecret(), null);
