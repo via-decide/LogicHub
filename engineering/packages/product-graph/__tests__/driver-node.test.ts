@@ -83,6 +83,15 @@ describe('driver node — the stage that turns motor current into heat', () => {
     expect('driver.dissipationW' in capabilities).toBe(false);
   });
 
+  it('publishes only its incremental current draw to the power budget', () => {
+    const params = DriverNode.parseParameters({ quiescentCurrentMa: 2 });
+    const metrics = DriverNode.deriveMetrics(params, bareContext({
+      downstreamNodes: [resolvedMotor('n_m1', 3)],
+    }));
+
+    expect(DriverNode.exposeRequirements(params, metrics)['power.currentA']).toBe(0.002);
+  });
+
   it('publishes a thermal resistance only when one was declared', () => {
     const without = DriverNode.parseParameters({});
     const withTheta = DriverNode.parseParameters({

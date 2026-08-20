@@ -137,15 +137,14 @@ export const DriverNode: NodePlugin<DriverParams> = {
   exposeRequirements(params, metrics) {
     const requirements: Record<string, unknown> = {
       'power.voltageV': params.supplyVoltageMinV,
+      // The motors publish their own demand. The driver's requirement is only
+      // its incremental logic draw; repeating pass-through motor current here
+      // would make the graph-level budget count that demand twice.
+      'power.currentA': round(params.quiescentCurrentMa / 1000),
       'driver.type': params.driverFamily,
     };
 
-    // The stage draws what it passes through, plus its own quiescent draw.
-    if (typeof metrics.drivenCurrentA === 'number') {
-      requirements['power.currentA'] = round(
-        metrics.drivenCurrentA * Number(metrics.channelsInUse) + params.quiescentCurrentMa / 1000,
-      );
-    }
+    void metrics;
 
     return requirements;
   },

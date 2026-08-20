@@ -60,14 +60,23 @@ describe('Gate 4 — a kit loads as an editable graph', () => {
     const battery = graph.nodes.find(n => n.type === 'battery')!;
     const controller = graph.nodes.find(n => n.type === 'controller')!;
 
-    // Controller, driver, two motors, sensor and the link — everything but the app.
+    const driver = graph.nodes.find(n => n.type === 'driver')!;
+    const motors = graph.nodes.filter(n => n.type === 'motor');
+
+    // The pack feeds the controller, driver, sensor and link, but not motors
+    // that have an instantiated power stage.
     const powered = graph.connections.filter(c => c.from === battery.id && c.type === 'power');
-    expect(powered).toHaveLength(6);
+    expect(powered).toHaveLength(4);
+    expect(powered.map(c => c.to)).not.toEqual(expect.arrayContaining(motors.map(m => m.id)));
 
     const controlled = graph.connections.filter(
       c => c.from === controller.id && c.type === 'control',
     );
-    expect(controlled).toHaveLength(2);
+    expect(controlled.map(c => c.to)).toEqual([driver.id]);
+    expect(graph.connections.filter(c => c.from === driver.id && c.type === 'power'))
+      .toHaveLength(2);
+    expect(graph.connections.filter(c => c.from === driver.id && c.type === 'control'))
+      .toHaveLength(2);
   });
 
   it('does not run power to the operator app', () => {
@@ -83,9 +92,11 @@ describe('Gate 4 — a kit loads as an editable graph', () => {
   });
 
   it('resolves the loaded Motion Starter with no supply errors', () => {
-    const { violations } = propagate(loadMotionStarter());
+    const { graph, violations } = propagate(loadMotionStarter());
     const errors = violations.filter(v => v.severity === 'error');
     expect(errors).toEqual([]);
+    expect(graph.nodes.find(n => n.type === 'driver')?.derivedMetrics.currentBasis)
+      .toBe('downstream');
   });
 
   it('feeds the controller through its board input rather than the logic rail', () => {
