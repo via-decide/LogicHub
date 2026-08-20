@@ -65,6 +65,32 @@ describe('Gate 7 — estimate versus measurement', () => {
     expect(entry.percentDifference).toBe(-10);
   });
 
+  it('rejects a reading recorded in a non-canonical unit', () => {
+    expect(() => compareToEstimates(roverGraph(), [
+      measurement('battery.voltage', 4800, { unit: 'mV' }),
+    ])).toThrow(/requires V/);
+  });
+
+  it('uses the referenced motor node for its estimate', () => {
+    const graph = roverGraph();
+    const motors = graph.nodes.filter(node => node.type === 'motor');
+    expect(motors).toHaveLength(2);
+    const secondMotor = motors[1]!;
+    const adjusted = {
+      ...graph,
+      nodes: graph.nodes.map(node => node.id === secondMotor.id
+        ? { ...node, derivedMetrics: { ...node.derivedMetrics, typicalCurrentA: 0.75 } }
+        : node),
+    };
+
+    const entry = entryFor(compareToEstimates(adjusted, [
+      measurement('motor.current', 0.8, { nodeId: secondMotor.id }),
+    ]), 'motor.current');
+
+    expect(entry.estimated).toBe(0.75);
+    expect(entry.difference).toBe(0.05);
+  });
+
   it('offers no estimate for quantities the model does not derive', () => {
     // Motor response time and sensor detection range are properties of real
     // parts; nothing in the graph predicts them, so no stand-in is invented.
