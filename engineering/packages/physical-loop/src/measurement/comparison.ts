@@ -45,6 +45,13 @@ export function compareToEstimates(
   // Later readings of the same quantity supersede earlier ones, chosen by
   // timestamp so the result does not depend on array order.
   for (const measurement of [...measurements].sort(compareByRecordedAt)) {
+    const expectedUnit = QUANTITY_UNITS[measurement.quantity];
+    if (measurement.unit !== expectedUnit) {
+      throw new Error(
+        `Measurement ${measurement.id} uses ${measurement.unit}; `
+        + `${measurement.quantity} requires ${expectedUnit}.`,
+      );
+    }
     byQuantity.set(measurement.quantity, measurement);
   }
 
@@ -70,7 +77,7 @@ function compareQuantity(
   graph: ProductGraph,
   measurement: Measurement | undefined,
 ): QuantityComparison {
-  const estimated = estimateFor(quantity, graph);
+  const estimated = estimateFor(quantity, graph, measurement?.nodeId);
   const measured = measurement?.value;
 
   let state: ComparisonState;
@@ -124,9 +131,21 @@ function noteFor(state: ComparisonState, quantity: MeasuredQuantity): string {
  * motor response time and sensor detection range are properties of real parts
  * that nothing here derives. Those return undefined rather than a stand-in.
  */
-function estimateFor(quantity: MeasuredQuantity, graph: ProductGraph): number | undefined {
+function estimateFor(
+  quantity: MeasuredQuantity,
+  graph: ProductGraph,
+  measuredNodeId: string | null | undefined,
+): number | undefined {
   const nodes = [...graph.nodes].sort((a, b) => (a.id < b.id ? -1 : 1));
   const first = (type: string) => nodes.find(n => n.type === type);
+  const measuredNode = measuredNodeId === null || measuredNodeId === undefined
+    ? undefined
+    : nodes.find(node => node.id === measuredNodeId);
+  const motor = measuredNodeId === null || measuredNodeId === undefined
+    ? first('motor')
+    : measuredNode?.type === 'motor'
+      ? measuredNode
+      : undefined;
 
   switch (quantity) {
     case 'battery.voltage':
@@ -138,10 +157,10 @@ function estimateFor(quantity: MeasuredQuantity, graph: ProductGraph): number | 
     }
 
     case 'motor.current':
-      return metric(first('motor'), 'typicalCurrentA');
+      return metric(motor, 'typicalCurrentA');
 
     case 'motor.peakCurrent':
-      return metric(first('motor'), 'stallCurrentA');
+      return metric(motor, 'stallCurrentA');
 
     case 'runtime':
       return metric(first('battery'), 'estimatedRuntimeH');

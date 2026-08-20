@@ -38,6 +38,19 @@ export interface CreatePrototypeRevisionInput {
 export function createPrototypeRevision(
   input: CreatePrototypeRevisionInput,
 ): PrototypeRevision {
+  for (const measurement of input.measurements) {
+    if (
+      measurement.unitSerial !== input.identity.unitSerial
+      || measurement.hardwareRevision !== input.identity.hardwareRevision
+    ) {
+      throw new Error(
+        `Measurement ${measurement.id} belongs to unit ${measurement.unitSerial} `
+        + `(${measurement.hardwareRevision}), not ${input.identity.unitSerial} `
+        + `(${input.identity.hardwareRevision}).`,
+      );
+    }
+  }
+
   const resolved = propagate(input.graph).graph;
   const comparison = compareToEstimates(resolved, input.measurements);
 

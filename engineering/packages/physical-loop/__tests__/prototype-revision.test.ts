@@ -56,6 +56,18 @@ describe('Gate 7 — prototype revision', () => {
     expect(revision.identity.hardwareRevision).toBe('hw-a');
   });
 
+  it('rejects measurements from another physical unit', () => {
+    expect(() => revisionWith([
+      measurement('battery.voltage', 4.7, { unitSerial: 'MS-999999' }),
+    ])).toThrow(/not MS-000123/);
+  });
+
+  it('rejects measurements from another hardware revision', () => {
+    expect(() => revisionWith([
+      measurement('battery.voltage', 4.7, { hardwareRevision: 'hw-b' }),
+    ])).toThrow(/hw-b.*not MS-000123.*hw-a/);
+  });
+
   it('binds the revision to the graph it was taken against', () => {
     const revision = revisionWith([measurement('battery.voltage', 4.7)]);
     expect(revision.productGraphHash).toMatch(/^[a-f0-9]{64}$/);

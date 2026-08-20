@@ -30,6 +30,7 @@ export function measurement(
     instrument: 'bench multimeter',
     environment: { ambientTemperatureC: 21, surface: 'bench', notes: '' },
     evidenceRef: `ev_${quantity}`,
+    unitSerial: IDENTITY.unitSerial,
     hardwareRevision: 'hw-a',
     firmwareRevision: 'fw-1.0.0',
     ...overrides,

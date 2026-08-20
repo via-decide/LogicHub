@@ -44,6 +44,8 @@ export const MeasurementSchema = z.object({
   instrument: z.string().min(1),
   environment: EnvironmentalConditionsSchema,
   evidenceRef: z.string().min(1),
+  /** Serial of the individual physical unit this reading came from. */
+  unitSerial: z.string().min(1),
   hardwareRevision: z.string().min(1),
   firmwareRevision: z.string().min(1),
 });
