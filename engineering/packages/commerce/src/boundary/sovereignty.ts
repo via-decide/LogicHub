@@ -1,5 +1,5 @@
 import type { ProductGraph } from '@logichub-engineering/product-graph';
-import { aggregateCapabilities } from '@logichub-engineering/product-graph';
+import { matchProducts } from '@logichub-engineering/product-graph';
 import { hashValue, sha256Hex } from '@logichub-engineering/project-capsule';
 import type { ConversionJourney } from '../schemas/conversion.schema.js';
 import type {
@@ -31,22 +31,29 @@ export function designFingerprint(graph: ProductGraph): string {
 /**
  * Identifies what a design can *do*, rather than how it is built.
  *
- * Taken over the node-type multiset and the aggregated capability keys, so
- * positions, node ids, names and timestamps are excluded. Two people who reach
- * the same capabilities by different routes produce the same signature, which
- * is what makes a challenge solvable rather than a guessing game about ids.
+ * Taken over the normalized outcomes of a product goal's predicates. Raw
+ * values, positions, node ids, names and timestamps are excluded. Values on
+ * opposite sides of a threshold do not match, while two implementations that
+ * satisfy the same predicates do.
  */
-export function challengeSignature(graph: ProductGraph): string {
-  const nodeTypes = graph.nodes.map(n => n.type).sort();
-  const capabilities = aggregateCapabilities(graph);
+export function challengeSignature(graph: ProductGraph, goalTemplateId?: string): string {
+  const matches = matchProducts(graph);
+  const goal = goalTemplateId === undefined
+    ? matches[0]
+    : matches.find(match => match.templateId === goalTemplateId);
 
-  // Capability keys, not values: "has bluetooth" is the shared goal, while the
-  // exact estimated range is a property of the specific parts chosen.
-  const capabilityKeys = Object.keys(capabilities)
-    .filter(key => capabilities[key] !== false)
-    .sort();
+  if (goal === undefined) {
+    throw new Error(`Unknown product goal: ${String(goalTemplateId)}`);
+  }
 
-  return sha256Hex(`${CHALLENGE_SALT}:${hashValue({ nodeTypes, capabilityKeys })}`);
+  const outcomes = {
+    templateId: goal.templateId,
+    verdict: goal.verdict,
+    matched: [...goal.matchedCapabilities].sort(),
+    missing: [...goal.missingCapabilities].sort(),
+  };
+
+  return sha256Hex(`${CHALLENGE_SALT}:${hashValue(outcomes)}`);
 }
 
 /**
@@ -63,7 +70,9 @@ export function redactForWeb(journey: ConversionJourney, graph: ProductGraph): P
 
   return {
     designFingerprint: designFingerprint(graph),
-    challengeSignature: challengeSignature(graph),
+    challengeSignature: topProduct === undefined
+      ? challengeSignature(graph)
+      : challengeSignature(graph, topProduct.templateId),
     targetProductTemplateId: topProduct?.templateId ?? null,
     targetProductTemplateName: topProduct?.templateName ?? null,
     verdictLabel: topProduct?.verdict ?? null,
@@ -98,12 +107,19 @@ export function toChallengeCard(
   }
 
   return {
-    challengeId: payload.challengeSignature,
+    challengeId: createOpaqueChallengeId(),
     goalProductName: goal,
     difficulty: DIFFICULTY_BY_VERDICT[payload.verdictLabel ?? 'NOT_RECOMMENDED'],
     origin,
     prompt: `Build a configuration that can become a ${goal}.`,
   };
+}
+
+/** Public challenge ids are random identities, not enumerable solution digests. */
+function createOpaqueChallengeId(): string {
+  const bytes = new Uint8Array(32);
+  globalThis.crypto.getRandomValues(bytes);
+  return [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 /** Keys that only ever appear on working data. */
@@ -228,10 +244,10 @@ export const SOVEREIGNTY_POSTURE: SovereigntyPosture = {
   ],
   notes: [
     'Both digests are SHA-256 over canonical input and are not reversible.',
-    'The capability signature excludes node ids, positions, names and timestamps, '
-    + 'so two designs reaching the same capabilities match without either being disclosed.',
-    'Challenge completion is verified locally by recomputing the signature; no design '
-    + 'is transmitted in either direction.',
+    'The capability signature records normalized goal-predicate outcomes and excludes raw '
+    + 'values, node ids, positions, names and timestamps.',
+    'Challenge completion is verified locally by evaluating the public goal; no design '
+    + 'is transmitted in either direction, and the opaque challenge id contains no solution.',
     'The platform cannot show a design it was never sent.',
     'This describes what this software does. It does not describe what happens to '
     + 'files the user shares through other tools.',
