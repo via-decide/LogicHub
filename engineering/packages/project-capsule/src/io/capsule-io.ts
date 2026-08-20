@@ -7,6 +7,7 @@ import {
   type Capsule,
   type CapsuleFile,
 } from '../schemas/capsule.schema.js';
+import { hashValue } from '../canonical/hashing.js';
 
 const PRODUCT_GRAPH_PATH = 'product-graph.json';
 
@@ -84,6 +85,14 @@ export function importProductGraph(capsule: Capsule): ProductGraph {
     throw new Error(
       `${PRODUCT_GRAPH_PATH} failed validation: `
       + result.error.issues.map(i => i.message).join(', '),
+    );
+  }
+
+  const actualHash = hashValue(result.data);
+  if (actualHash !== capsule.manifest.productGraphHash) {
+    throw new Error(
+      `${PRODUCT_GRAPH_PATH} does not match the manifest productGraphHash: `
+      + `expected ${capsule.manifest.productGraphHash}, computed ${actualHash}.`,
     );
   }
 

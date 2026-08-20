@@ -8,7 +8,7 @@
 // It never creates an entry. A confirmation for an address that never signed up
 // is refused — otherwise the link would be a way to add people, which is the
 // thing it exists to prevent.
-import { getAdminDb, logRuntimeEvent } from './_sovereignAuth.js';
+import { getWaitlistDb, logWaitlistEvent } from './_waitlistPersistence.js';
 import { normaliseEmail, tokenMatches, tokenSecret } from './_waitlist.js';
 
 const COLLECTION = 'cartridge_waitlist';
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
 
   let alreadyConfirmed = false;
   try {
-    const ref = getAdminDb().collection(COLLECTION).doc(email);
+    const ref = getWaitlistDb().collection(COLLECTION).doc(email);
     const snapshot = await ref.get();
 
     if (!snapshot.exists) {
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       `Something went wrong on our side. Try the link again, or email ${CONTACT}.`);
   }
 
-  await logRuntimeEvent('waitlist_confirmed', { alreadyConfirmed }).catch(() => {});
+  await logWaitlistEvent('waitlist_confirmed', { alreadyConfirmed }).catch(() => {});
 
   return page(res, 200, 'You are on the list',
     alreadyConfirmed
