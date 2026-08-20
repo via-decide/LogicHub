@@ -79,6 +79,27 @@ describe('Gate 8 — repository history', () => {
     expect(JSON.stringify(repo.require(first.revisionId))).toBe(before);
   });
 
+  it('snapshots revisions without retaining or exposing mutable references', () => {
+    const intent = structuredClone(INTENT);
+    const stamp = structuredClone(STAMP);
+    const graph = roverGraph(3);
+    const repo = new ProductRepository();
+    const committed = repo.commit({
+      intent, stamp, graph, author: 'tester', message: 'Initial rover', createdAt: FIXED_TIME,
+    });
+
+    intent.statement = 'Mutated intent';
+    stamp.hardware = 'hw-mutated';
+    graph.nodes[0]!.parameters.cellCount = 99;
+
+    expect(committed.intent.statement).toBe(INTENT.statement);
+    expect(committed.stamp.hardware).toBe(STAMP.hardware);
+    expect(committed.graph.nodes[0]!.parameters.cellCount).toBe(3);
+    expect(Object.isFrozen(committed.graph.nodes[0]!.parameters)).toBe(true);
+    expect(() => { committed.intent.notes = 'mutated return value'; }).toThrow(TypeError);
+    expect(repo.require(committed.revisionId).intent.notes).toBe('');
+  });
+
   it('records the four revision streams separately', () => {
     const { first } = seed();
     expect(first.stamp).toEqual({
@@ -218,7 +239,7 @@ describe('Gate 8 — release', () => {
     return decideRelease({
       revisionId: second.revisionId,
       diff: semanticDiff(first, second),
-      review: APPROVED,
+      review: { ...APPROVED, revisionId: second.revisionId },
       staleRecords: [],
       ...overrides,
     });
@@ -255,9 +276,20 @@ describe('Gate 8 — release', () => {
 
   it('blocks a release when the reviewer requested changes', () => {
     const result = releaseFor({
+      revisionId: APPROVED.revisionId,
       review: { ...APPROVED, verdict: 'CHANGES_REQUESTED' },
     });
     expect(result.blockers.map(b => b.code)).toContain('release.changes-requested');
+  });
+
+  it('blocks a release when the diff targets another revision', () => {
+    const result = releaseFor({ revisionId: 'rev_other' });
+    expect(result.blockers.map(b => b.code)).toContain('release.diff-revision-mismatch');
+  });
+
+  it('blocks a release when the approval targets another revision', () => {
+    const result = releaseFor({ review: APPROVED });
+    expect(result.blockers.map(b => b.code)).toContain('release.review-revision-mismatch');
   });
 
   it('releases only when nothing at all is outstanding', () => {
@@ -275,7 +307,7 @@ describe('Gate 8 — release', () => {
         hasUnevaluatedAreas: false,
         summary: 'Clean.',
       },
-      review: APPROVED,
+      review: { ...APPROVED, revisionId: 'rev_clean' },
       staleRecords: [],
     });
 
