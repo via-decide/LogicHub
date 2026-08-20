@@ -121,11 +121,13 @@ export function verifyCapsule(capsule: Capsule): VerificationResult {
     }
   }
 
+  const externalReferencesUnchecked = capsule.manifest.externalReferences.length;
+
   return {
-    verified: findings.every(f => f.severity !== 'error'),
+    verified: findings.every(f => f.severity !== 'error') && externalReferencesUnchecked === 0,
     findings: findings.sort(compareFindings),
     filesChecked,
-    externalReferencesUnchecked: capsule.manifest.externalReferences.length,
+    externalReferencesUnchecked,
   };
 }
 
