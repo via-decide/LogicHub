@@ -69,6 +69,10 @@
     .stat-num{font-size:clamp(22px,4vw,36px);font-weight:800;color:var(--accent);display:block;line-height:1}
     .stat-label{font-size:13px;color:var(--muted);margin-top:5px;display:block}
 
+    /* ── SECTION EYEBROW ─────────────────────────────── */
+    .section-eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .section-eyebrow::before{content:'';display:block;width:28px;height:2px;background:var(--accent);border-radius:1px}
+
     /* ── SECTION HEADINGS ────────────────────────────── */
     .section-head{margin:clamp(48px,6vw,72px) 0 24px}
     .section-head h2{font-size:clamp(22px,4vw,38px);margin:0 0 8px;letter-spacing:-.01em}
@@ -209,6 +213,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ GATE SWEEP TABLE ════════════════════════════ -->
     <div class="section-head">
+      <div class="section-eyebrow">Gate Pipeline</div>
       <h2>Every gate. Every hardware PR.</h2>
       <p>Nine deterministic checks run locally without network egress — zero AI hallucination, strict physical tolerance bounds.</p>
     </div>
@@ -276,6 +281,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ TRUST / SANDBOX PROMISE ═════════════════════ -->
     <div class="section-head">
+      <div class="section-eyebrow">Trust &amp; Security</div>
       <h2>Your hardware telemetry never leaves the boundary.</h2>
       <p>LogicHub evaluates every gate locally. Only the signed verdict comes back out.</p>
     </div>
@@ -299,6 +305,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ 14 TOOLS PREVIEW ════════════════════════════ -->
     <div class="section-head">
+      <div class="section-eyebrow">Production Tools</div>
       <h2>14 universal hardware production tools</h2>
       <p>Power, telemetry, geometry, fault tolerance, compliance — one production checklist per discipline, applied on every gate run.</p>
     </div>
@@ -325,6 +332,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ FAQ ════════════════════════════════════════= -->
     <div class="section-head">
+      <div class="section-eyebrow">FAQ</div>
       <h2>Fair questions, straight answers.</h2>
       <p>The things hardware engineering leads ask before they hand LogicHub a repository. Something else? <a href="mailto:dharam@viadecide.com" style="color:var(--accent)">dharam@viadecide.com</a></p>
     </div>
