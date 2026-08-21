@@ -78,7 +78,7 @@ export default defineConfig({
     {
       name: 'marketplace',
       use: { ...chromium, baseURL: MARKETPLACE_URL },
-      testMatch: ['**/workspace.spec.ts'],
+      testMatch: ['**/workspace.spec.ts', '**/marketplace-verification.spec.ts'],
     },
   ],
 
