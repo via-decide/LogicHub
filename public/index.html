@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07110f">
   <meta name="logichub-product" content="sovereign-execution-boundary">
-  <meta name="logichub-build-id" content="d9833946eb1871ee8d1e2bbdeb35a55e36ffb586">
+  <meta name="logichub-build-id" content="a1265bc06b1aacc614900ada20c28f3c16e4cd2f">
   <title>LogicHub.app — Bounded Hardware Verification &amp; Execution</title>
   <meta name="description" content="Anyone can generate a hardware design. LogicHub is where it gets verified — deterministic gates, physical telemetry, evidence you can audit, and signed manufacturing releases.">
   <link rel="canonical" href="https://logichub.app/">
@@ -68,6 +68,10 @@
     .stat-block:last-child{border-right:none}
     .stat-num{font-size:clamp(22px,4vw,36px);font-weight:800;color:var(--accent);display:block;line-height:1}
     .stat-label{font-size:13px;color:var(--muted);margin-top:5px;display:block}
+
+    /* ── SECTION EYEBROW ─────────────────────────────── */
+    .section-eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .section-eyebrow::before{content:'';display:block;width:28px;height:2px;background:var(--accent);border-radius:1px}
 
     /* ── SECTION HEADINGS ────────────────────────────── */
     .section-head{margin:clamp(48px,6vw,72px) 0 24px}
@@ -148,6 +152,10 @@
         <a href="/how-it-works">How It Works</a>
         <a href="/tools/">14 Gates</a>
         <a href="/workspace">Workspace</a>
+        <a href="https://aporaksha.com/store">Store</a>
+        <a href="https://aporaksha.com/sell">Sell</a>
+        <a href="https://aporaksha.com/membership">Membership</a>
+        <a href="https://aporaksha.com/passport">Passport</a>
         <a class="nav-demo" href="/workspace">Run LogicHub →</a>
       </div>
     </nav>
@@ -177,7 +185,7 @@ receipt.liveVerified: false
 bundle_sha256:
   43911e7a735daa50c9a3eb508d3fe010d8d75550ac6504fdb6298095bc914653
 
-build: d9833946eb1871ee8d1e2bbdeb35a55e36ffb586
+build: a1265bc06b1aacc614900ada20c28f3c16e4cd2f
 runtime: zayvora · local deterministic route
 verdict: PASS — no gate failed</pre>
       </aside>
@@ -205,6 +213,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ GATE SWEEP TABLE ════════════════════════════ -->
     <div class="section-head">
+      <div class="section-eyebrow">Gate Pipeline</div>
       <h2>Every gate. Every hardware PR.</h2>
       <p>Nine deterministic checks run locally without network egress — zero AI hallucination, strict physical tolerance bounds.</p>
     </div>
@@ -272,6 +281,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ TRUST / SANDBOX PROMISE ═════════════════════ -->
     <div class="section-head">
+      <div class="section-eyebrow">Trust &amp; Security</div>
       <h2>Your hardware telemetry never leaves the boundary.</h2>
       <p>LogicHub evaluates every gate locally. Only the signed verdict comes back out.</p>
     </div>
@@ -295,6 +305,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ 14 TOOLS PREVIEW ════════════════════════════ -->
     <div class="section-head">
+      <div class="section-eyebrow">Production Tools</div>
       <h2>14 universal hardware production tools</h2>
       <p>Power, telemetry, geometry, fault tolerance, compliance — one production checklist per discipline, applied on every gate run.</p>
     </div>
@@ -321,6 +332,7 @@ verdict: PASS — no gate failed</pre>
 
     <!-- ══ FAQ ════════════════════════════════════════= -->
     <div class="section-head">
+      <div class="section-eyebrow">FAQ</div>
       <h2>Fair questions, straight answers.</h2>
       <p>The things hardware engineering leads ask before they hand LogicHub a repository. Something else? <a href="mailto:dharam@viadecide.com" style="color:var(--accent)">dharam@viadecide.com</a></p>
     </div>
@@ -408,9 +420,23 @@ verdict: PASS — no gate failed</pre>
           <a href="/contact.html">Contact</a>
         </div>
       </div>
+      <div style="border-top:1px solid var(--line);margin-top:24px;padding-top:24px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem">
+        <div style="font-weight:800;font-size:1rem;letter-spacing:0.08em;color:var(--text)">DAXINI ECOSYSTEM</div>
+        <div style="display:flex;flex-wrap:wrap;gap:1.25rem;font-size:0.85rem">
+          <a href="https://daxini.xyz" style="color:var(--muted);text-decoration:none">daxini.xyz</a>
+          <a href="https://daxini.space" style="color:var(--muted);text-decoration:none">daxini.space</a>
+          <a href="https://aporaksha.com" style="color:var(--muted);text-decoration:none">aporaksha</a>
+          <a href="https://hanuman.solutions" style="color:var(--muted);text-decoration:none">hanuman</a>
+          <a href="https://viadecide.com" style="color:var(--muted);text-decoration:none">viadecide</a>
+          <a href="https://aporaksha.com/store" style="color:var(--muted);text-decoration:none">store</a>
+          <a href="https://aporaksha.com/sell" style="color:var(--muted);text-decoration:none">sell</a>
+          <a href="https://aporaksha.com/membership" style="color:var(--muted);text-decoration:none">membership</a>
+          <a href="https://aporaksha.com/passport" style="color:var(--muted);text-decoration:none">passport</a>
+        </div>
+      </div>
       <div class="footer-bottom">
         <span><span class="status-dot" aria-hidden="true"></span>All systems operational</span>
-        <span>© 2026 LogicHub · <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span>
+        <span>© 2026 Dharam Daxini · <a href="mailto:dharam@viadecide.com">dharam@viadecide.com</a></span>
       </div>
     </footer>
 
@@ -431,5 +457,6 @@ verdict: PASS — no gate failed</pre>
     }).catch(function(){sessionStorage.setItem(key,'1');});
   }());
   </script>
+  <script src="/js/mobile-nav.js" defer></script>
 </body>
 </html>
