@@ -48,17 +48,17 @@ jobs:
       - name: Campaign evidence browser test
         id: evidence
         continue-on-error: true
-        run: npx playwright test --project=product tests/e2e/campaign-evidence.spec.ts --reporter=line
+        run: npx playwright test --config=playwright.campaign.config.ts tests/e2e/campaign-evidence.spec.ts --reporter=line
 
       - name: Campaign components browser test
         id: components
         continue-on-error: true
-        run: npx playwright test --project=product tests/e2e/campaign-components.spec.ts --reporter=line
+        run: npx playwright test --config=playwright.campaign.config.ts tests/e2e/campaign-components.spec.ts --reporter=line
 
       - name: Campaign accessibility Axe test
         id: accessibility
         continue-on-error: true
-        run: npx playwright test --project=product tests/e2e/campaign-accessibility.spec.ts --reporter=line
+        run: npx playwright test --config=playwright.campaign.config.ts tests/e2e/campaign-accessibility.spec.ts --reporter=line
 
       - name: Enforce browser gate
         if: always()
