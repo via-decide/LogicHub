@@ -73,6 +73,9 @@ export default defineConfig({
       testMatch: [
         '**/product-builder.spec.ts',
         '**/product-accessibility.spec.ts',
+        '**/campaign-evidence.spec.ts',
+        '**/campaign-components.spec.ts',
+        '**/campaign-accessibility.spec.ts',
       ],
     },
     {
