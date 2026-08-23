@@ -1,4 +1,4 @@
-import type { CampaignFixture } from './contracts';
+import type { CampaignFixture, EngineeringChange } from './contracts';
 
 export interface CampaignEvaluation {
   decision: 'SUPPORTED' | 'CONDITIONALLY_SUPPORTED' | 'FAILED' | 'INCONCLUSIVE';
@@ -11,6 +11,6 @@ export interface CampaignEvaluation {
 }
 
 export function validateCampaignData(input: Partial<CampaignFixture>): { valid: boolean; errors: string[] };
-export function applyRevisionChange<T extends Partial<CampaignFixture>>(input: T, change: Record<string, unknown>): T & { revisionImpact: { changeId?: string; affectedEvidenceIds: string[]; affectedTestIds: string[] } };
+export function applyRevisionChange<T extends Partial<CampaignFixture>>(input: T, change: Partial<EngineeringChange>): T & { revisionImpact: { changeId?: string; affectedEvidenceIds: string[]; affectedTestIds: string[] } };
 export function aggregateDependencies(input: Partial<CampaignFixture>): Array<Record<string, unknown>>;
 export function evaluateCampaign(input: Partial<CampaignFixture>): CampaignEvaluation;
