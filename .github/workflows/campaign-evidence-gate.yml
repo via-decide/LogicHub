@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Install engineering dependencies
-        run: pnpm --dir engineering install --frozen-lockfile
+        run: pnpm --dir engineering install --no-frozen-lockfile
 
       - name: Build engineering workspace
         run: pnpm --dir engineering build
