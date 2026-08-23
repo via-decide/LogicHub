@@ -45,5 +45,27 @@ jobs:
       - name: Deterministic campaign unit tests
         run: node --test tests/campaign-evidence.test.mjs
 
-      - name: Campaign Playwright and Axe gate
-        run: npx playwright test --project=product tests/e2e/campaign-*.spec.ts
+      - name: Campaign evidence browser test
+        id: evidence
+        continue-on-error: true
+        run: npx playwright test --project=product tests/e2e/campaign-evidence.spec.ts --reporter=line
+
+      - name: Campaign components browser test
+        id: components
+        continue-on-error: true
+        run: npx playwright test --project=product tests/e2e/campaign-components.spec.ts --reporter=line
+
+      - name: Campaign accessibility Axe test
+        id: accessibility
+        continue-on-error: true
+        run: npx playwright test --project=product tests/e2e/campaign-accessibility.spec.ts --reporter=line
+
+      - name: Enforce browser gate
+        if: always()
+        run: |
+          echo "evidence=${{ steps.evidence.outcome }}"
+          echo "components=${{ steps.components.outcome }}"
+          echo "accessibility=${{ steps.accessibility.outcome }}"
+          test "${{ steps.evidence.outcome }}" = success
+          test "${{ steps.components.outcome }}" = success
+          test "${{ steps.accessibility.outcome }}" = success
