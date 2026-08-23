@@ -84,9 +84,15 @@ export interface TestRecord {
   operator?: string;
   reviewer?: string;
   configurationRevisionId: string;
-  tractorRevisionId: string;
-  batteryRevisionId: string;
-  firmwareRevisionId: string;
+  systemRevisionId?: string;
+  componentRevisionIds?: string[];
+  softwareRevisionIds?: string[];
+  /** @deprecated legacy tractor-campaign aliases retained for fixture compatibility */
+  tractorRevisionId?: string;
+  /** @deprecated legacy tractor-campaign aliases retained for fixture compatibility */
+  batteryRevisionId?: string;
+  /** @deprecated legacy tractor-campaign aliases retained for fixture compatibility */
+  firmwareRevisionId?: string;
   environment: string[];
   variables: string[];
   controls: string[];
@@ -117,14 +123,27 @@ export interface Measurement {
 
 export interface TimeSeriesPoint {
   t: number;
-  soc: number;
-  packTemp: number;
-  motorTemp: number;
-  power: number;
-  tractiveForce: number;
-  speed: number;
-  ptoLoad: number;
-  hydraulicLoad: number;
+  [metric: string]: number;
+}
+
+export interface TimeSeriesSeries {
+  key: string;
+  label: string;
+  unit: string;
+  stroke?: string;
+}
+
+export interface MeasurementCardDefinition {
+  label: string;
+  metric?: string;
+  fallback?: string;
+}
+
+export interface AcceptanceScenario {
+  title: string;
+  detail: string;
+  passTestIds: string[];
+  revisionSensitiveTestIds?: string[];
 }
 
 export interface TestEvent {
@@ -209,12 +228,26 @@ export interface EconomicAssumption {
 export interface ComparatorMetric {
   id: string;
   metric: string;
-  electricValue?: number;
-  dieselValue?: number;
+  candidateValue?: number;
+  referenceValue?: number;
   unit: string;
+  candidateEvidenceId?: string;
+  referenceEvidenceId?: string;
+  /** @deprecated tractor-campaign aliases retained for fixture compatibility */
+  electricValue?: number;
+  /** @deprecated tractor-campaign aliases retained for fixture compatibility */
+  dieselValue?: number;
+  /** @deprecated tractor-campaign aliases retained for fixture compatibility */
   electricEvidenceId?: string;
+  /** @deprecated tractor-campaign aliases retained for fixture compatibility */
   dieselEvidenceId?: string;
   state: 'MEASURED' | 'UNAVAILABLE' | 'FIXTURE';
+}
+
+export interface DutyPhaseMetric {
+  label: string;
+  value: string | number;
+  unit?: string;
 }
 
 export interface DutyPhase {
@@ -225,6 +258,7 @@ export interface DutyPhase {
   socLossPct?: number;
   maxTempC?: number;
   work?: string;
+  metrics?: DutyPhaseMetric[];
   faults: number;
   derating: boolean;
 }
@@ -238,7 +272,9 @@ export interface CampaignFixture {
   protocols: Protocol[];
   tests: TestRecord[];
   measurements: Measurement[];
+  measurementCards?: MeasurementCardDefinition[];
   timeSeries: TimeSeriesPoint[];
+  timeSeriesSeries?: TimeSeriesSeries[];
   testEvents: TestEvent[];
   evidence: Evidence[];
   failures: Failure[];
@@ -247,7 +283,11 @@ export interface CampaignFixture {
   timeline: TimelineEvent[];
   economicAssumptions: EconomicAssumption[];
   comparator: ComparatorMetric[];
+  candidateLabel?: string;
+  referenceLabel?: string;
   dutyCycle: DutyPhase[];
+  dutyCycleQuestion?: string;
+  acceptanceScenario?: AcceptanceScenario;
   decisionScope: string;
   currentRevisionId: string;
 }
