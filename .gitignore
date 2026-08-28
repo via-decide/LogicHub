@@ -11,3 +11,6 @@ playwright-report/
 .env.local
 .env.*.local
 .env.production
+
+# Local runtime state: _sovereignAuth.js's logRuntimeEvent() fallback log.
+data/

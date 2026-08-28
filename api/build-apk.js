@@ -5,6 +5,7 @@ import path from "path";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { fileURLToPath } from "url";
+import { applyCors } from "./_cors.js";
 
 const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -19,9 +20,7 @@ async function runCommand(cmd, args, cwd) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Ecosystem-Uid');
+  applyCors(req, res, { methods: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' });
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }

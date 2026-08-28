@@ -1,5 +1,4 @@
-import { Filter } from "firebase-admin/firestore";
-import { getAdminDb, jsonError, logRuntimeEvent } from "./_firebaseAdmin.js";
+import { getAdminDb, jsonError, logRuntimeEvent, Filter } from "./_sovereignAuth.js";
 import { withAppDefaults } from "./_appAnalytics.js";
 
 const ALLOWED_ORIGIN = "https://daxini.space";

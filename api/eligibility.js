@@ -1,3 +1,5 @@
+import { applyCors } from "./_cors.js";
+
 export default function handler(req, res) {
   // Extract country from Cloudflare/Vercel headers
   const country = req.headers['x-vercel-ip-country'] || req.headers['cf-ipcountry'] || 'US';
@@ -45,11 +47,8 @@ export default function handler(req, res) {
     ];
   }
 
-  // Handle CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  
+  applyCors(req, res, { methods: 'GET,OPTIONS,PATCH,DELETE,POST,PUT', credentials: true });
+
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
