@@ -13,12 +13,14 @@ const engineAliasWebpack = {
   '@logichub-engineering/product-graph': path.join(monorepoRoot, 'engineering/packages/product-graph/dist/index.js'),
   '@logichub-engineering/kit-matching': path.join(monorepoRoot, 'engineering/packages/kit-matching/dist/index.js'),
   '@logichub-engineering/shared': path.join(monorepoRoot, 'engineering/packages/shared/dist/index.js'),
+  '@logichub-engineering/contracts': path.join(monorepoRoot, 'engineering/packages/contracts/dist/index.js'),
 };
 
 const engineAliasTurbopack = {
   '@logichub-engineering/product-graph': '../../engineering/packages/product-graph/dist/index.js',
   '@logichub-engineering/kit-matching': '../../engineering/packages/kit-matching/dist/index.js',
   '@logichub-engineering/shared': '../../engineering/packages/shared/dist/index.js',
+  '@logichub-engineering/contracts': '../../engineering/packages/contracts/dist/index.js',
 };
 
 const isToolsBuild = process.env.BUILD_TOOLS === 'true';

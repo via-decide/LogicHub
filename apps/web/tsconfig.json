@@ -34,6 +34,9 @@
       ],
       "@logichub-engineering/shared": [
         "../../engineering/packages/shared/dist/index.d.ts"
+      ],
+      "@logichub-engineering/contracts": [
+        "../../engineering/packages/contracts/dist/index.d.ts"
       ]
     }
   },

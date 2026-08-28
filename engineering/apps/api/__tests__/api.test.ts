@@ -241,6 +241,24 @@ describe('apps/api golden path + invalid input + pagination', () => {
     expect(json(res).status).toBe('merged');
   });
 
+  it('POST /pull-requests/:id/close: refuses to close an already-merged pull request', async () => {
+    const res = await app.inject({ method: 'POST', url: `/pull-requests/${pullRequestId}/close` });
+    expect(res.statusCode).toBe(409);
+    expect(json(res).code).toBe('LH_STATE_TRANSITION_INVALID');
+  });
+
+  it('POST /pull-requests/:id/close: golden path closes an open pull request', async () => {
+    const openRes = await app.inject({
+      method: 'POST',
+      url: `/projects/${projectId}/pull-requests`,
+      payload: { title: 'throwaway', baseBranch: fixture.baseBranch, baseRevisionId, headBranch: fixture.headBranch, headRevisionId, author: 'tester' },
+    });
+    const throwawayId = json(openRes).id;
+    const closeRes = await app.inject({ method: 'POST', url: `/pull-requests/${throwawayId}/close` });
+    expect(closeRes.statusCode).toBe(200);
+    expect(json(closeRes).status).toBe('closed');
+  });
+
   it('GET /artifacts/:artifactId: fetches metadata, and raw content with ?content=1', async () => {
     const validations = json(await app.inject({ method: 'GET', url: `/revisions/${headRevisionId}/validations` }));
     const withArtifact = validations.items.find((v: { artifactIds: string[] }) => v.artifactIds.length > 0);

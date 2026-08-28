@@ -225,6 +225,11 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
     reply.status(201).send(pr);
   });
 
+  app.post('/pull-requests/:pullRequestId/close', async (request) => {
+    const { pullRequestId } = request.params as { pullRequestId: string };
+    return ctx.reviewService.closePullRequest(pullRequestId);
+  });
+
   app.post('/pull-requests/:pullRequestId/recalculate', async (request) => {
     const { pullRequestId } = request.params as { pullRequestId: string };
     const pr = await ctx.catalogService.getPullRequest(pullRequestId);

@@ -77,4 +77,36 @@ export class ReviewService {
     }
     return updated;
   }
+
+  /**
+   * Closes a pull request without merging it. Not one of the endpoints
+   * master spec section 12 names, but that list is explicitly a "minimum"
+   * and section 13 requires a Close action alongside Comment/Approve/Request
+   * changes/Recalculate/Merge -- PullRequestTransitions already allows
+   * 'closed' from every non-terminal status, so this is a real, needed path.
+   */
+  async closePullRequest(pullRequestId: string): Promise<EngineeringPullRequest> {
+    const now = this.deps.now ?? isoNow;
+    const pr = await this.deps.pullRequestRepo.findById(pullRequestId);
+    if (!pr) {
+      throw createLogicHubError('LH_REVISION_NOT_FOUND', `Pull request ${pullRequestId} does not exist`, {
+        entityIds: { pullRequestId },
+      });
+    }
+    if (pr.status === 'merged' || pr.status === 'closed' || pr.status === 'rejected') {
+      throw createLogicHubError('LH_STATE_TRANSITION_INVALID', `Pull request ${pullRequestId} is already ${pr.status}`, {
+        entityIds: { pullRequestId },
+      });
+    }
+    await this.deps.pullRequestRepo.updateStatus(pullRequestId, 'closed');
+    await this.deps.pullRequestRepo.updateComputedFields(pullRequestId, { updatedAt: now() });
+
+    const updated = await this.deps.pullRequestRepo.findById(pullRequestId);
+    if (!updated) {
+      throw createLogicHubError('LH_INTERNAL_ERROR', `Pull request ${pullRequestId} disappeared immediately after close`, {
+        entityIds: { pullRequestId },
+      });
+    }
+    return updated;
+  }
 }
