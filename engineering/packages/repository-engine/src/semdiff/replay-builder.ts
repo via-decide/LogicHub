@@ -121,8 +121,19 @@ export function applyReplay(
         break;
       }
       case 'replace': {
-        if (op.expectedOldHash && state.has(op.objectId)) {
-          if (state.get(op.objectId)?.semanticHash !== op.expectedOldHash) {
+        const current = state.get(op.objectId);
+        // A single semantic object that changes along more than one facet at
+        // once (e.g. both value and footprint) produces one DeltaRecord per
+        // facet, each carrying its own 'replace' op for the same objectId,
+        // all sharing the same base->target semanticHash transition. Once an
+        // earlier op in this sequence has already brought the object to the
+        // target hash, a later op replaying the same transition is
+        // idempotent, not a conflict — only flag a mismatch when the current
+        // state reflects neither the expected precondition nor the already
+        // reconciled target (a genuine conflicting/out-of-order operation).
+        const alreadyAtTarget = current && op.newObject && current.semanticHash === op.newObject.semanticHash;
+        if (op.expectedOldHash && current && !alreadyAtTarget) {
+          if (current.semanticHash !== op.expectedOldHash) {
             errors.push(`Replace: hash mismatch for ${op.objectId}`);
           }
         }

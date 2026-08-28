@@ -164,6 +164,48 @@ describe('applyReplay', () => {
     expect(state.objects.get('obj1')?.semanticHash).toBe('new_hash');
   });
 
+  it('applies two replace operations on the same object with matching hashes idempotently (multi-facet change, e.g. value + footprint)', () => {
+    // A single semantic object that changes along two facets at once (e.g.
+    // KiCad SYMBOL_VALUE_CHANGED + SYMBOL_FOOTPRINT_CHANGED) produces one
+    // DeltaRecord per facet, each carrying its own 'replace' op for the same
+    // objectId and the same base->target semanticHash transition.
+    const base = {
+      objects: new Map([['schematic::U1', { semanticHash: 'old_hash' }]]),
+    };
+    const ops: ReplayOperation[] = [
+      {
+        operation: 'replace', objectId: 'schematic::U1', expectedOldHash: 'old_hash',
+        newObject: { semanticId: 'schematic::U1', semanticHash: 'new_hash' },
+      },
+      {
+        operation: 'replace', objectId: 'schematic::U1', expectedOldHash: 'old_hash',
+        newObject: { semanticId: 'schematic::U1', semanticHash: 'new_hash' },
+      },
+    ];
+    const { state, errors } = applyReplay(base, ops);
+    expect(errors).toHaveLength(0);
+    expect(state.objects.get('schematic::U1')?.semanticHash).toBe('new_hash');
+  });
+
+  it('still reports a hash mismatch for a genuinely conflicting second replace targeting a different final value', () => {
+    const base = {
+      objects: new Map([['obj1', { semanticHash: 'old_hash' }]]),
+    };
+    const ops: ReplayOperation[] = [
+      {
+        operation: 'replace', objectId: 'obj1', expectedOldHash: 'old_hash',
+        newObject: { semanticId: 'obj1', semanticHash: 'new_hash_a' },
+      },
+      {
+        operation: 'replace', objectId: 'obj1', expectedOldHash: 'old_hash',
+        newObject: { semanticId: 'obj1', semanticHash: 'new_hash_b' },
+      },
+    ];
+    const { errors } = applyReplay(base, ops);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('hash mismatch');
+  });
+
   it('applies move operations', () => {
     const base = {
       objects: new Map([['old_id', { semanticHash: 'hash1' }]]),

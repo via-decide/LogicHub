@@ -9,6 +9,8 @@ export default defineWorkspace([
   'packages/kicad-adapter',
   'packages/repository-engine',
   'packages/validation-engine',
+  'packages/domain',
+  'packages/review-engine',
   'packages/product-graph',
   'packages/kit-matching',
   'packages/generated-surfaces',

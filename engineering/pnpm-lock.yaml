@@ -68,6 +68,43 @@ importers:
         specifier: ~4.21.0
         version: 4.21.1
 
+  packages/domain:
+    dependencies:
+      '@logichub-engineering/artifact-store':
+        specifier: workspace:*
+        version: link:../artifact-store
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/git-adapter':
+        specifier: workspace:*
+        version: link:../git-adapter
+      '@logichub-engineering/kicad-adapter':
+        specifier: workspace:*
+        version: link:../kicad-adapter
+      '@logichub-engineering/persistence':
+        specifier: workspace:*
+        version: link:../persistence
+      '@logichub-engineering/repository-engine':
+        specifier: workspace:*
+        version: link:../repository-engine
+      '@logichub-engineering/review-engine':
+        specifier: workspace:*
+        version: link:../review-engine
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ~3.24.0
+        version: 3.24.4
+    devDependencies:
+      '@types/better-sqlite3':
+        specifier: ~7.6.0
+        version: 7.6.13
+      better-sqlite3:
+        specifier: ~11.7.0
+        version: 11.7.2
+
   packages/generated-surfaces:
     dependencies:
       '@logichub-engineering/product-graph':
@@ -142,6 +179,9 @@ importers:
 
   packages/physical-ci:
     dependencies:
+      '@logichub-engineering/commerce':
+        specifier: workspace:*
+        version: link:../commerce
       '@logichub-engineering/project-capsule':
         specifier: workspace:*
         version: link:../project-capsule
@@ -241,6 +281,15 @@ importers:
       canonicalize:
         specifier: ~2.0.0
         version: 2.0.0
+
+  packages/review-engine:
+    dependencies:
+      '@logichub-engineering/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@logichub-engineering/shared':
+        specifier: workspace:*
+        version: link:../shared
 
   packages/shared:
     dependencies:

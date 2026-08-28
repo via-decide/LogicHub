@@ -261,7 +261,8 @@ function generatePcbDeltas(
   for (const [ref, proposedFoot] of proposedFp) {
     if (!baseFp.has(ref)) {
       deltas.push(makeDelta('FOOTPRINT_ADDED', 'pcb', null, proposedFoot.semanticId, null, null,
-        { operation: 'add', objectId: proposedFoot.semanticId, expectedOldHash: null, expectedAbsent: true }, []));
+        { operation: 'add', objectId: proposedFoot.semanticId, expectedOldHash: null, expectedAbsent: true,
+          newObject: { semanticId: proposedFoot.semanticId, semanticHash: proposedFoot.footprint } }, []));
     }
   }
 

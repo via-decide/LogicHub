@@ -1,0 +1,32 @@
+{
+  "name": "@logichub-engineering/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "lint": "tsc --build"
+  },
+  "dependencies": {
+    "@logichub-engineering/shared": "workspace:*",
+    "@logichub-engineering/contracts": "workspace:*",
+    "@logichub-engineering/persistence": "workspace:*",
+    "@logichub-engineering/artifact-store": "workspace:*",
+    "@logichub-engineering/git-adapter": "workspace:*",
+    "@logichub-engineering/kicad-adapter": "workspace:*",
+    "@logichub-engineering/repository-engine": "workspace:*",
+    "@logichub-engineering/review-engine": "workspace:*",
+    "zod": "~3.24.0"
+  },
+  "devDependencies": {
+    "better-sqlite3": "~11.7.0",
+    "@types/better-sqlite3": "~7.6.0"
+  }
+}

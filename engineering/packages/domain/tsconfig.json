@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../shared" },
+    { "path": "../contracts" },
+    { "path": "../persistence" },
+    { "path": "../artifact-store" },
+    { "path": "../git-adapter" },
+    { "path": "../kicad-adapter" },
+    { "path": "../repository-engine" },
+    { "path": "../review-engine" }
+  ]
+}

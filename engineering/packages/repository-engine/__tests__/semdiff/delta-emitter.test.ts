@@ -251,4 +251,50 @@ describe('generateDeltas', () => {
       expect(new Set(ids).size).toBe(ids.length);
     });
   });
+
+  describe('pcb deltas', () => {
+    function makePcbSurface(overrides: Partial<import('../../src/types.js').PcbSurface> = {}): import('../../src/types.js').PcbSurface {
+      return {
+        boardIdentity: 'board_hash',
+        footprints: [],
+        pads: [],
+        nets: [],
+        layers: [],
+        boardOutline: null,
+        trackCount: 0,
+        viaCount: 0,
+        zoneCount: 0,
+        differentialPairs: [],
+        designRuleClasses: [],
+        clearances: {},
+        stackUpMetadata: null,
+        testPoints: [],
+        mountingHoles: [],
+        pcbSemanticHash: 'pcb_hash',
+        ...overrides,
+      };
+    }
+
+    it('FOOTPRINT_ADDED carries a newObject on its replayOperation, like FOOTPRINT_CHANGED and SYMBOL_ADDED do', () => {
+      const base = makeFingerprint({ pcbSurface: makePcbSurface({ footprints: [] }) });
+      const proposed = makeFingerprint({
+        pcbSurface: makePcbSurface({ footprints: [makeFootprintSummary('D2', { footprint: 'splp:D_SMA' })] }),
+      });
+      const deltas = generateDeltas(base, proposed, null, null);
+      const added = deltas.find(d => d.deltaType === 'FOOTPRINT_ADDED');
+      expect(added).toBeDefined();
+      expect(added?.replayOperation.newObject).toEqual({ semanticId: 'pcb::D2', semanticHash: 'splp:D_SMA' });
+    });
+
+    it('FOOTPRINT_REMOVED has no newObject (nothing to replay into)', () => {
+      const base = makeFingerprint({
+        pcbSurface: makePcbSurface({ footprints: [makeFootprintSummary('R1', { footprint: 'splp:R_0603' })] }),
+      });
+      const proposed = makeFingerprint({ pcbSurface: makePcbSurface({ footprints: [] }) });
+      const deltas = generateDeltas(base, proposed, null, null);
+      const removed = deltas.find(d => d.deltaType === 'FOOTPRINT_REMOVED');
+      expect(removed).toBeDefined();
+      expect(removed?.replayOperation.newObject).toBeUndefined();
+    });
+  });
 });
