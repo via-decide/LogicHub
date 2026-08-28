@@ -1,5 +1,7 @@
 export { generateId, isoNow } from './id-generator.js';
 
+export { KicadAdapter } from '@logichub-engineering/kicad-adapter';
+
 export {
   ImportService,
   type ImportServiceDeps,
@@ -37,3 +39,14 @@ export {
 } from './merge-service.js';
 
 export { ReviewService, type ReviewServiceDeps } from './review-service.js';
+
+export { BranchService, type BranchServiceDeps } from './branch-service.js';
+
+export {
+  CatalogService,
+  type CatalogServiceDeps,
+  type CreateProjectInput,
+  type CreateChangeIntentInput,
+  type CreateModuleInput,
+  type CreatePullRequestInput,
+} from './catalog-service.js';

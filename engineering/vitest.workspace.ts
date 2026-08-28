@@ -11,6 +11,7 @@ export default defineWorkspace([
   'packages/validation-engine',
   'packages/domain',
   'packages/review-engine',
+  'apps/api',
   'packages/product-graph',
   'packages/kit-matching',
   'packages/generated-surfaces',
