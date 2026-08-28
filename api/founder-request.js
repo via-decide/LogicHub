@@ -1,4 +1,5 @@
 import admin, { getAdminDb, jsonError, logRuntimeEvent, verifyRequestUser } from "./_sovereignAuth.js";
+import { applyCors } from "./_cors.js";
 
 function shouldNotifyFounderReview(order) {
   return Number(order?.amount || 0) === 1717 && String(order?.currency || "INR").toUpperCase() === "INR";
@@ -91,9 +92,7 @@ async function sendFounderReviewEmail({ uid, decodedToken, order }) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Ecosystem-Uid');
+  applyCors(req, res, { methods: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' });
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }

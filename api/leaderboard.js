@@ -1,4 +1,4 @@
-import { getAdminDb, jsonError } from "./_firebaseAdmin.js";
+import { getAdminDb, jsonError } from "./_sovereignAuth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return jsonError(res, 405, "Method not allowed. Use GET.");

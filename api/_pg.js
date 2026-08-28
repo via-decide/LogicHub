@@ -265,7 +265,37 @@ function translateWhere(field, op, val) {
   // `sql.unsafe` interpolation of the operator is safe here — `sqlOp` only
   // ever comes from `translateWhere`'s own callers passing a literal
   // comparison operator string, never request input.
-  return { path, sqlOp, val, isNumeric };
+  return { kind: 'leaf', path, sqlOp, val, isNumeric };
+}
+
+/**
+ * Turn a `where()` argument into a condition tree: either a single
+ * `{field, op, val}` call, or the `Filter.or(...)`/`Filter.and(...)` compound
+ * shape below, which nests the same way.
+ */
+function translateCondition(fieldOrFilter, op, val) {
+  if (fieldOrFilter && typeof fieldOrFilter === 'object' && fieldOrFilter.isFilter) {
+    return {
+      kind: 'compound',
+      op: fieldOrFilter.op,
+      children: fieldOrFilter.filters.map((f) => translateCondition(f.field, f.op, f.val)),
+    };
+  }
+  return translateWhere(fieldOrFilter, op, val);
+}
+
+function buildConditionSql(sql, node) {
+  if (node.kind === 'compound') {
+    const joiner = node.op === 'OR' ? 'OR' : 'AND';
+    let joined = sql`(${buildConditionSql(sql, node.children[0])}`;
+    for (let i = 1; i < node.children.length; i += 1) {
+      joined = sql`${joined} ${sql.unsafe(joiner)} ${buildConditionSql(sql, node.children[i])}`;
+    }
+    return sql`${joined})`;
+  }
+  return node.isNumeric
+    ? sql`CAST(data->>${node.path} AS NUMERIC) ${sql.unsafe(node.sqlOp)} ${node.val}`
+    : sql`data->>${node.path} ${sql.unsafe(node.sqlOp)} ${String(node.val)}`;
 }
 
 class CollectionRef {
@@ -279,8 +309,16 @@ class CollectionRef {
     return new DocumentRef(this.sql, this.name, docId || randomDocId());
   }
 
-  where(field, op, val) {
-    const wheres = [...this.query.wheres, translateWhere(field, op, val)];
+  /** Firestore's auto-id create: a fresh doc, written immediately. */
+  async add(data) {
+    const ref = this.doc();
+    await ref.set(data);
+    return ref;
+  }
+
+  /** A plain `(field, op, val)` call, or a single `Filter.or/and(...)` compound. */
+  where(fieldOrFilter, op, val) {
+    const wheres = [...this.query.wheres, translateCondition(fieldOrFilter, op, val)];
     return new CollectionRef(this.sql, this.name, { ...this.query, wheres });
   }
 
@@ -296,12 +334,7 @@ class CollectionRef {
   /** Chainable `where()/orderBy()/limit()` query, terminated by `get()`. */
   async get() {
     const sql = this.sql;
-    const conditions = this.query.wheres.map((w) => {
-      const expr = w.isNumeric
-        ? sql`CAST(data->>${w.path} AS NUMERIC) ${sql.unsafe(w.sqlOp)} ${w.val}`
-        : sql`data->>${w.path} ${sql.unsafe(w.sqlOp)} ${String(w.val)}`;
-      return expr;
-    });
+    const conditions = this.query.wheres.map((node) => buildConditionSql(sql, node));
 
     let whereClause = sql`collection = ${this.name}`;
     for (const cond of conditions) {
@@ -358,11 +391,13 @@ class CollectionRef {
   }
 }
 
-/** Mirrors `_sovereignDb.js`'s `Filter.or/and/where` builder (unused by any
- * current `_sovereignAuth.js` caller — `public-feed.js` uses the real
- * `firebase-admin/firestore` package's `Filter` instead — kept for parity
- * so a future caller importing this mock's `Filter` doesn't silently get
- * an unsupported shape). */
+/**
+ * Mirrors `_sovereignDb.js`'s `Filter.or/and/where` builder. `public-feed.js`
+ * used to import the real `firebase-admin/firestore` package's `Filter`
+ * instead — a class instance `CollectionRef.where()` here never understood —
+ * so it now builds its compound query from this one, which `translateCondition`
+ * above unpacks into the same OR/AND tree `buildConditionSql` renders.
+ */
 export const Filter = {
   or: (...filters) => ({ isFilter: true, op: 'OR', filters }),
   and: (...filters) => ({ isFilter: true, op: 'AND', filters }),
