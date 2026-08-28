@@ -32,6 +32,9 @@
       "@logichub-engineering/kit-matching": [
         "../../engineering/packages/kit-matching/dist/index.d.ts"
       ],
+      "@logichub-engineering/generated-surfaces": [
+        "../../engineering/packages/generated-surfaces/dist/index.d.ts"
+      ],
       "@logichub-engineering/shared": [
         "../../engineering/packages/shared/dist/index.d.ts"
       ]

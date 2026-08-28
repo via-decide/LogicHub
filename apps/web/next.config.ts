@@ -12,12 +12,14 @@ const monorepoRoot = path.resolve(process.cwd(), '../..');
 const engineAliasWebpack = {
   '@logichub-engineering/product-graph': path.join(monorepoRoot, 'engineering/packages/product-graph/dist/index.js'),
   '@logichub-engineering/kit-matching': path.join(monorepoRoot, 'engineering/packages/kit-matching/dist/index.js'),
+  '@logichub-engineering/generated-surfaces': path.join(monorepoRoot, 'engineering/packages/generated-surfaces/dist/index.js'),
   '@logichub-engineering/shared': path.join(monorepoRoot, 'engineering/packages/shared/dist/index.js'),
 };
 
 const engineAliasTurbopack = {
   '@logichub-engineering/product-graph': '../../engineering/packages/product-graph/dist/index.js',
   '@logichub-engineering/kit-matching': '../../engineering/packages/kit-matching/dist/index.js',
+  '@logichub-engineering/generated-surfaces': '../../engineering/packages/generated-surfaces/dist/index.js',
   '@logichub-engineering/shared': '../../engineering/packages/shared/dist/index.js',
 };
 

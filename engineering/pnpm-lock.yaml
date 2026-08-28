@@ -142,6 +142,9 @@ importers:
 
   packages/physical-ci:
     dependencies:
+      '@logichub-engineering/commerce':
+        specifier: workspace:*
+        version: link:../commerce
       '@logichub-engineering/project-capsule':
         specifier: workspace:*
         version: link:../project-capsule
