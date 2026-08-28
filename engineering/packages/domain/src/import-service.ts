@@ -21,6 +21,7 @@ import { GitRepository } from '@logichub-engineering/git-adapter';
 import { KicadAdapter, type BomItem, type ExtractionContext } from '@logichub-engineering/kicad-adapter';
 import { buildFingerprint, type FingerprintResult } from '@logichub-engineering/repository-engine';
 import { generateId, isoNow } from './id-generator.js';
+import type { DomainEventSink } from './events.js';
 
 export interface ImportServiceDeps {
   projectRepo: ProjectRepository;
@@ -32,6 +33,8 @@ export interface ImportServiceDeps {
   kicad?: KicadAdapter;
   now?: () => string;
   generateId?: (prefix: string) => string;
+  /** Structured events per master spec section 19. No-op when omitted. */
+  events?: DomainEventSink;
 }
 
 export interface ImportRevisionInput {
@@ -74,6 +77,43 @@ export class ImportService {
   async importRevision(input: ImportRevisionInput): Promise<ImportRevisionResult> {
     const now = this.deps.now ?? isoNow;
     const genId = this.deps.generateId ?? generateId;
+    const emit = this.deps.events;
+    const startedAtMs = Date.now();
+
+    emit?.({ name: 'project.import.started', timestamp: now(), projectId: input.projectId, actor: input.author });
+
+    try {
+      const result = await this.doImportRevision(input, now, genId);
+      emit?.({
+        name: 'project.import.completed',
+        timestamp: now(),
+        projectId: input.projectId,
+        revisionId: result.revision.id,
+        actor: input.author,
+        durationMs: Date.now() - startedAtMs,
+        result: 'success',
+      });
+      return result;
+    } catch (err) {
+      emit?.({
+        name: 'project.import.failed',
+        timestamp: now(),
+        projectId: input.projectId,
+        actor: input.author,
+        durationMs: Date.now() - startedAtMs,
+        result: 'failure',
+        errorCode: err instanceof Error && 'code' in err ? String((err as { code: unknown }).code) : undefined,
+      });
+      throw err;
+    }
+  }
+
+  private async doImportRevision(
+    input: ImportRevisionInput,
+    now: () => string,
+    genId: (prefix: string) => string
+  ): Promise<ImportRevisionResult> {
+    const emit = this.deps.events;
 
     const project = await this.deps.projectRepo.findById(input.projectId);
     if (!project) {
@@ -154,6 +194,7 @@ export class ImportService {
         validationResults.push(
           this.checkResultToValidationResult(genId, input.projectId, revisionId, 'erc', erc, createdAt, now(), ercArtifacts)
         );
+        emit?.({ name: 'kicad.erc.completed', timestamp: now(), projectId: input.projectId, revisionId, result: erc.status === 'fail' || erc.status === 'error' ? 'failure' : 'success', metadata: { status: erc.status } });
 
         const drc = await this.kicad.runDrc(files);
         const drcArtifacts = await this.storeCheckReport(input.projectId, revisionId, 'drc_report', drc.report, now);
@@ -161,6 +202,7 @@ export class ImportService {
         validationResults.push(
           this.checkResultToValidationResult(genId, input.projectId, revisionId, 'drc', drc, createdAt, now(), drcArtifacts)
         );
+        emit?.({ name: 'kicad.drc.completed', timestamp: now(), projectId: input.projectId, revisionId, result: drc.status === 'fail' || drc.status === 'error' ? 'failure' : 'success', metadata: { status: drc.status } });
       }
     } finally {
       await git.removeWorkingTree(workDir).catch(() => undefined);
@@ -201,6 +243,9 @@ export class ImportService {
     for (const result of validationResults) {
       await this.deps.validationResultRepo.create(result);
     }
+
+    emit?.({ name: 'revision.imported', timestamp: now(), projectId: input.projectId, revisionId: revision.id, actor: input.author });
+    emit?.({ name: 'revision.snapshot.created', timestamp: now(), projectId: input.projectId, revisionId: revision.id, metadata: { snapshotHash: revision.snapshotHash } });
 
     return { revision, objects, bomItems, fingerprint, validationResults, artifacts };
   }

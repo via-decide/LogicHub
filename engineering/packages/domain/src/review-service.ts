@@ -3,10 +3,13 @@ import type { EngineeringPullRequest, ReviewRecord, PRStatus } from '@logichub-e
 import type { EngineeringPullRequestRepository } from '@logichub-engineering/persistence';
 import { applyReview, nextPrStatus } from '@logichub-engineering/review-engine';
 import { isoNow } from './id-generator.js';
+import type { DomainEventSink } from './events.js';
 
 export interface ReviewServiceDeps {
   pullRequestRepo: EngineeringPullRequestRepository;
   now?: () => string;
+  /** Structured events per master spec section 19. No-op when omitted. */
+  events?: DomainEventSink;
 }
 
 /**
@@ -45,6 +48,7 @@ export class ReviewService {
 
     const review: ReviewRecord = { reviewer, decision, comment, createdAt: now() };
     const updatedHistory = applyReview({ approvals: pr.approvals, changeRequests: pr.changeRequests }, review);
+    this.deps.events?.({ name: 'pull_request.reviewed', timestamp: now(), pullRequestId, actor: reviewer, metadata: { decision } });
 
     if (decision === 'approve') {
       await this.deps.pullRequestRepo.addApproval(pullRequestId, review);
@@ -63,6 +67,11 @@ export class ReviewService {
       const next = nextPrStatus(status, updatedHistory, pr.requiredApprovals);
       if (next === status) break;
       await this.deps.pullRequestRepo.updateStatus(pullRequestId, next);
+      if (next === 'changes_requested') {
+        this.deps.events?.({ name: 'pull_request.changes_requested', timestamp: now(), pullRequestId, actor: reviewer });
+      } else if (next === 'approved') {
+        this.deps.events?.({ name: 'pull_request.approved', timestamp: now(), pullRequestId, actor: reviewer });
+      }
       status = next;
     }
     if (status === pr.status) {

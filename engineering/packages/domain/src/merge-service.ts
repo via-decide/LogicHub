@@ -14,6 +14,7 @@ import { GitRepository } from '@logichub-engineering/git-adapter';
 import { evaluateMergeGates, summarizeReviewState, type MergeGateInput, type MergeGateResult } from '@logichub-engineering/review-engine';
 import { RevisionComparisonService } from './revision-comparison-service.js';
 import { generateId, isoNow } from './id-generator.js';
+import type { DomainEventSink } from './events.js';
 
 export interface MergeServiceDeps {
   revisionRepo: RevisionRepository;
@@ -26,6 +27,8 @@ export interface MergeServiceDeps {
   artifactStore: ArtifactStore;
   now?: () => string;
   generateId?: (prefix: string) => string;
+  /** Structured events per master spec section 19. No-op when omitted. */
+  events?: DomainEventSink;
 }
 
 export interface MergePullRequestResult {
@@ -74,6 +77,14 @@ export class MergeService {
       await this.deps.pullRequestRepo.updateComputedFields(pr.id, {
         mergeEligibility: { eligible: false, blockers: preCheck.blockers },
         updatedAt: now(),
+      });
+      this.deps.events?.({
+        name: 'pull_request.merge_blocked',
+        timestamp: now(),
+        pullRequestId,
+        actor: mergedBy,
+        result: 'failure',
+        metadata: { blockers: preCheck.blockers },
       });
       throw createLogicHubError('LH_MERGE_BLOCKED', `Pull request ${pullRequestId} does not satisfy merge gates`, {
         entityIds: { pullRequestId },
@@ -133,6 +144,14 @@ export class MergeService {
       updatedAt: mergedAt,
     });
     await this.deps.pullRequestRepo.updateStatus(pr.id, 'merged');
+    this.deps.events?.({
+      name: 'pull_request.merged',
+      timestamp: mergedAt,
+      pullRequestId,
+      revisionId: mergeRevision.id,
+      actor: mergedBy,
+      result: 'success',
+    });
 
     const updated = await this.deps.pullRequestRepo.findById(pr.id);
     if (!updated) {

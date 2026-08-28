@@ -37,7 +37,10 @@ describe('apps/api golden path + invalid input + pagination', () => {
   beforeAll(async () => {
     fixture = await createSmartPlantPotFixtureRepo();
     artifactDir = await mkdtemp(join(tmpdir(), 'logichub-api-artifacts-'));
-    ctx = createAppContext({ dbPath: ':memory:', artifactStoreRoot: artifactDir, kicad: new ToolchainAvailableKicadAdapter() });
+    ctx = createAppContext({
+      dbPath: ':memory:', artifactStoreRoot: artifactDir, kicad: new ToolchainAvailableKicadAdapter(),
+      events: () => undefined, // keep test output focused on assertions, not the structured event stream
+    });
     app = buildServer({ context: ctx });
     await app.ready();
   }, 60000);

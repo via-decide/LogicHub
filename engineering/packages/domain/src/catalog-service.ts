@@ -22,6 +22,7 @@ import type {
   EngineeringPullRequestRepository,
 } from '@logichub-engineering/persistence';
 import { generateId, isoNow } from './id-generator.js';
+import type { DomainEventSink } from './events.js';
 
 export interface CatalogServiceDeps {
   projectRepo: ProjectRepository;
@@ -34,6 +35,8 @@ export interface CatalogServiceDeps {
   pullRequestRepo: EngineeringPullRequestRepository;
   now?: () => string;
   generateId?: (prefix: string) => string;
+  /** Structured events per master spec section 19. No-op when omitted. */
+  events?: DomainEventSink;
 }
 
 export interface CreatePullRequestInput {
@@ -128,6 +131,7 @@ export class CatalogService {
       metadata: {},
     };
     await this.deps.projectRepo.create(project);
+    this.deps.events?.({ name: 'project.created', timestamp: now(), projectId: project.id, actor: input.createdBy });
     return project;
   }
 
@@ -285,6 +289,13 @@ export class CatalogService {
       metadata: {},
     };
     await this.deps.pullRequestRepo.create(pullRequest);
+    this.deps.events?.({
+      name: 'pull_request.created',
+      timestamp: now(),
+      projectId: input.projectId,
+      pullRequestId: pullRequest.id,
+      actor: input.author,
+    });
     return pullRequest;
   }
 

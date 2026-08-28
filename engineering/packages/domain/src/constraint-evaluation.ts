@@ -7,6 +7,15 @@ import type { DeltaRecord } from '@logichub-engineering/repository-engine';
  * validation-engine's SEC-* rules. It recognizes a fixed, documented set of
  * machine-checkable expression shapes; anything else honestly reports
  * `requires_validation` rather than fabricating a pass.
+ *
+ * `object_must_exist` / `object_must_not_exist` / `property_equals`
+ * `semanticKey` values must be `EngineeringObject.semanticKey` as
+ * kicad-adapter's extractors produce it (e.g. `component:D2`) -- this is a
+ * DIFFERENT namespace from the semantic ids repository-engine's diff uses in
+ * `DeltaRecord.oldSemanticId`/`newSemanticId` (e.g. `schematic::D2`), which
+ * is what `no_delta_type`'s `semanticKeys` filters against instead. Using
+ * the wrong namespace for a given expression kind makes the object/delta
+ * lookup silently miss, not throw -- getting this right matters.
  */
 export type ConstraintExpression =
   | { kind: 'object_must_exist'; semanticKey: string }

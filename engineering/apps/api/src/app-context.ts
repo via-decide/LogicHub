@@ -21,13 +21,22 @@ import {
   BranchService,
   CatalogService,
   type KicadAdapter,
+  type DomainEventSink,
 } from '@logichub-engineering/domain';
+
+/** Default sink: one structured JSON line per event (master spec section 19). Swap via AppContextOptions.events for a real log/metrics pipeline. */
+const consoleEventSink: DomainEventSink = (event) => {
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify(event));
+};
 
 export interface AppContextOptions {
   dbPath: string;
   artifactStoreRoot: string;
   /** Override the KicadAdapter ImportService uses -- for tests that simulate a toolchain-equipped environment. Defaults to a real KicadAdapter. */
   kicad?: KicadAdapter;
+  /** Structured event sink (master spec section 19). Defaults to one JSON line per event on stdout; pass a no-op or a real sink to override. */
+  events?: DomainEventSink;
 }
 
 /**
@@ -64,21 +73,22 @@ export function createAppContext(options: AppContextOptions): AppContext {
   const pullRequestRepo = new SqliteEngineeringPullRequestRepository(db);
 
   const artifactStore = new LocalArtifactStore(options.artifactStoreRoot);
+  const events = options.events ?? consoleEventSink;
 
   return {
     db,
     artifactStore,
     importService: new ImportService({
-      projectRepo, revisionRepo, objectRepo, artifactRepo, validationResultRepo, artifactStore, kicad: options.kicad,
+      projectRepo, revisionRepo, objectRepo, artifactRepo, validationResultRepo, artifactStore, kicad: options.kicad, events,
     }),
-    comparisonService: new RevisionComparisonService({ revisionRepo, objectRepo, constraintRepo, artifactRepo, artifactStore }),
-    reviewService: new ReviewService({ pullRequestRepo }),
+    comparisonService: new RevisionComparisonService({ revisionRepo, objectRepo, constraintRepo, artifactRepo, artifactStore, events }),
+    reviewService: new ReviewService({ pullRequestRepo, events }),
     mergeService: new MergeService({
-      revisionRepo, pullRequestRepo, validationResultRepo, constraintRepo, artifactRepo, decisionRepo, objectRepo, artifactStore,
+      revisionRepo, pullRequestRepo, validationResultRepo, constraintRepo, artifactRepo, decisionRepo, objectRepo, artifactStore, events,
     }),
     branchService: new BranchService({ projectRepo }),
     catalogService: new CatalogService({
-      projectRepo, revisionRepo, objectRepo, changeIntentRepo, validationResultRepo, artifactRepo, moduleRepo, pullRequestRepo,
+      projectRepo, revisionRepo, objectRepo, changeIntentRepo, validationResultRepo, artifactRepo, moduleRepo, pullRequestRepo, events,
     }),
   };
 }

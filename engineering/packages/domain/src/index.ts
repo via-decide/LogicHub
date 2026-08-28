@@ -3,6 +3,12 @@ export { generateId, isoNow } from './id-generator.js';
 export { KicadAdapter } from '@logichub-engineering/kicad-adapter';
 
 export {
+  type DomainEventName,
+  type DomainEvent,
+  type DomainEventSink,
+} from './events.js';
+
+export {
   ImportService,
   type ImportServiceDeps,
   type ImportRevisionInput,

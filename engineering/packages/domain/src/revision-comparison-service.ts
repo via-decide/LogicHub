@@ -19,6 +19,7 @@ import {
   hasBlockingConstraintViolation,
   type ConstraintEvaluationOutcome,
 } from './constraint-evaluation.js';
+import type { DomainEventSink } from './events.js';
 
 export interface RevisionComparisonDeps {
   revisionRepo: RevisionRepository;
@@ -28,6 +29,8 @@ export interface RevisionComparisonDeps {
   artifactStore: ArtifactStore;
   now?: () => string;
   generateId?: (prefix: string) => string;
+  /** Structured events per master spec section 19. No-op when omitted. */
+  events?: DomainEventSink;
 }
 
 export interface RevisionComparisonResult {
@@ -58,6 +61,32 @@ export class RevisionComparisonService {
     baseRevisionId: string,
     headRevisionId: string
   ): Promise<RevisionComparisonResult> {
+    const now = this.deps.now ?? isoNow;
+    const emit = this.deps.events;
+    emit?.({ name: 'diff.started', timestamp: now(), revisionId: headRevisionId, metadata: { baseRevisionId, headRevisionId } });
+    try {
+      const result = await this.doCompareRevisions(repoPath, baseRevisionId, headRevisionId);
+      emit?.({ name: 'diff.completed', timestamp: now(), revisionId: headRevisionId, result: 'success' });
+      return result;
+    } catch (err) {
+      emit?.({
+        name: 'diff.failed',
+        timestamp: now(),
+        revisionId: headRevisionId,
+        result: 'failure',
+        errorCode: err instanceof Error && 'code' in err ? String((err as { code: unknown }).code) : undefined,
+      });
+      throw err;
+    }
+  }
+
+  private async doCompareRevisions(
+    repoPath: string,
+    baseRevisionId: string,
+    headRevisionId: string
+  ): Promise<RevisionComparisonResult> {
+    const now = this.deps.now ?? isoNow;
+    const emit = this.deps.events;
     const [baseRevision, headRevision] = await Promise.all([
       this.deps.revisionRepo.findById(baseRevisionId),
       this.deps.revisionRepo.findById(headRevisionId),
@@ -94,6 +123,20 @@ export class RevisionComparisonService {
     const constraints = await this.deps.constraintRepo.findByRevisionId(headRevisionId);
     const constraintOutcomes = evaluateConstraints(constraints, targetObjects, semDiff.deltas);
     const blockingViolation = hasBlockingConstraintViolation(constraints, constraintOutcomes);
+
+    for (const outcome of constraintOutcomes) {
+      emit?.({
+        name: 'constraint.evaluated',
+        timestamp: now(),
+        revisionId: headRevisionId,
+        metadata: { constraintId: outcome.constraintId, evaluation: outcome.evaluation },
+      });
+      if (outcome.evaluation === 'violation') {
+        emit?.({ name: 'constraint.violated', timestamp: now(), revisionId: headRevisionId, metadata: { constraintId: outcome.constraintId } });
+      } else if (outcome.evaluation === 'unknown' || outcome.evaluation === 'requires_validation') {
+        emit?.({ name: 'constraint.unknown', timestamp: now(), revisionId: headRevisionId, metadata: { constraintId: outcome.constraintId } });
+      }
+    }
 
     return {
       baseRevision,
