@@ -8,6 +8,11 @@ import {
   CURRENT_SCHEMA_VERSION,
 } from '@logichub-engineering/shared';
 import { ChangeIntentStatusSchema } from './change-intent.enums.js';
+import {
+  RequestedOperationSchema,
+  ExpectedObjectChangeSchema,
+  ChangeIntentConstraintRefSchema,
+} from './change-intent-operation.schema.js';
 
 export const ApprovalPolicySchema = z.object({
   requiredApprovals: z.number().int().min(1),
@@ -24,11 +29,11 @@ export const ChangeIntentSchema = z.object({
   title: z.string().min(1),
   requestText: z.string().optional(),
   changeType: z.string().min(1),
-  requestedOperations: z.array(z.unknown()),
-  expectedObjectChanges: z.array(z.unknown()),
+  requestedOperations: z.array(RequestedOperationSchema),
+  expectedObjectChanges: z.array(ExpectedObjectChangeSchema),
   preserve: z.array(z.string()),
   optimize: z.array(z.string()),
-  constraints: z.array(z.unknown()),
+  constraints: z.array(ChangeIntentConstraintRefSchema),
   approvalPolicy: ApprovalPolicySchema,
   status: ChangeIntentStatusSchema.default('captured'),
   createdBy: z.string().min(1),

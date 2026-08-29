@@ -37,11 +37,103 @@
         },
         "requestedOperations": {
           "type": "array",
-          "items": {}
+          "items": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": [
+                  "add",
+                  "remove",
+                  "replace",
+                  "move"
+                ]
+              },
+              "objectId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expectedOldHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expectedAbsent": {
+                "type": "boolean"
+              },
+              "newObject": {
+                "type": "object",
+                "properties": {
+                  "semanticId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "semanticHash": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "semanticId",
+                  "semanticHash"
+                ],
+                "additionalProperties": false
+              },
+              "oldObjectId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "newObjectId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expectedBodyHash": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "objectId"
+            ],
+            "additionalProperties": false
+          }
         },
         "expectedObjectChanges": {
           "type": "array",
-          "items": {}
+          "items": {
+            "type": "object",
+            "properties": {
+              "deltaType": {
+                "type": "string",
+                "minLength": 1
+              },
+              "domain": {
+                "type": "string",
+                "minLength": 1
+              },
+              "oldSemanticId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "newSemanticId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "deltaType",
+              "domain"
+            ],
+            "additionalProperties": false
+          }
         },
         "preserve": {
           "type": "array",
@@ -57,7 +149,26 @@
         },
         "constraints": {
           "type": "array",
-          "items": {}
+          "items": {
+            "type": "object",
+            "properties": {
+              "constraintId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mustHold": {
+                "type": "boolean",
+                "default": true
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "constraintId"
+            ],
+            "additionalProperties": false
+          }
         },
         "approvalPolicy": {
           "type": "object",

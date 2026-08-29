@@ -14,6 +14,7 @@ const engineAliasWebpack = {
   '@logichub-engineering/kit-matching': path.join(monorepoRoot, 'engineering/packages/kit-matching/dist/index.js'),
   '@logichub-engineering/generated-surfaces': path.join(monorepoRoot, 'engineering/packages/generated-surfaces/dist/index.js'),
   '@logichub-engineering/shared': path.join(monorepoRoot, 'engineering/packages/shared/dist/index.js'),
+  '@logichub-engineering/contracts': path.join(monorepoRoot, 'engineering/packages/contracts/dist/index.js'),
 };
 
 const engineAliasTurbopack = {
@@ -21,6 +22,7 @@ const engineAliasTurbopack = {
   '@logichub-engineering/kit-matching': '../../engineering/packages/kit-matching/dist/index.js',
   '@logichub-engineering/generated-surfaces': '../../engineering/packages/generated-surfaces/dist/index.js',
   '@logichub-engineering/shared': '../../engineering/packages/shared/dist/index.js',
+  '@logichub-engineering/contracts': '../../engineering/packages/contracts/dist/index.js',
 };
 
 const isToolsBuild = process.env.BUILD_TOOLS === 'true';

@@ -18,6 +18,11 @@ const APP_URL = process.env.APP_BASE_URL || 'http://127.0.0.1:3001';
 // setup to verify against in this environment). Real api/marketplace/*
 // handlers, fake in-memory db.
 const MARKETPLACE_URL = process.env.MARKETPLACE_BASE_URL || 'http://127.0.0.1:5174';
+// engineering/apps/api's Fastify server (Phase 7), started via its
+// test-only e2e-server entrypoint (see that file's header) so the
+// engineering-pr-workflow spec can drive a real merge through the browser
+// without kicad-cli available in this sandbox.
+const ENGINEERING_API_URL = process.env.ENGINEERING_API_URL || 'http://127.0.0.1:3010';
 
 /**
  * Where this environment keeps Chromium.
@@ -80,6 +85,11 @@ export default defineConfig({
       use: { ...chromium, baseURL: MARKETPLACE_URL },
       testMatch: ['**/workspace.spec.ts'],
     },
+    {
+      name: 'engineering',
+      use: { ...chromium, baseURL: APP_URL },
+      testMatch: ['**/engineering-pr-workflow.spec.ts'],
+    },
   ],
 
   webServer: [
@@ -92,16 +102,58 @@ export default defineConfig({
     {
       // Built rather than dev-served: a production build is what ships, and dev
       // mode hides the errors that only appear after compilation.
-      command: 'pnpm --dir apps/web build && pnpm --dir apps/web start -p 3001',
+      //
+      // apps/web's next.config.ts sets output: 'standalone' (Docker/Vercel-style
+      // deployment), and Next.js itself warns "next start does not work with
+      // output: standalone configuration" -- confirmed: it serves the initial
+      // HTML fine but 500s on every client-side JS chunk (static assets are
+      // never copied into .next/standalone), so nothing ever hydrates and no
+      // client-side interaction works. Use the real standalone entrypoint
+      // instead, after copying static/public into it as Next's own docs
+      // require (https://nextjs.org/docs -- Output File Tracing / standalone).
+      command:
+        'pnpm --dir apps/web build && ' +
+        'cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && ' +
+        'cp -r apps/web/public apps/web/.next/standalone/apps/web/public && ' +
+        'node apps/web/.next/standalone/apps/web/server.js',
       url: APP_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 240_000,
+      // LOGICHUB_API_URL covers server-side fetches (Server Components).
+      // Client Components' browser-side fetches (the review/merge action
+      // buttons) need the NEXT_PUBLIC_ variant instead -- Next.js inlines
+      // only NEXT_PUBLIC_-prefixed vars into the client bundle, and only at
+      // build time, so it must be set before "build" runs here, not just
+      // "start". PORT/HOSTNAME control the standalone server.js directly
+      // (it doesn't take a -p flag like "next start" does).
+      env: {
+        LOGICHUB_API_URL: ENGINEERING_API_URL,
+        NEXT_PUBLIC_LOGICHUB_API_URL: ENGINEERING_API_URL,
+        PORT: '3001',
+        HOSTNAME: '127.0.0.1',
+      },
     },
     {
       command: 'node scripts/build-workspace.mjs && node scripts/dev-marketplace-server.mjs',
       url: MARKETPLACE_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
+    },
+    {
+      // engineering/apps/api's Fastify server (Phase 7). Built once (tsc
+      // --build, same as its own test suite) and started via the test-only
+      // e2e-server entrypoint -- never main.js, which has no toolchain
+      // simulation.
+      command:
+        'cd engineering && pnpm --filter @logichub-engineering/api... build && cd apps/api && node dist/e2e-server.js',
+      // Playwright's webServer readiness probe only accepts a 2xx/3xx
+      // response; the bare origin correctly 404s (no route registered at
+      // "/"), which reads as "not ready" forever. /projects is a real,
+      // always-200 route.
+      url: `${ENGINEERING_API_URL}/projects`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      env: { PORT: '3010', HOST: '127.0.0.1', LOGICHUB_DB_PATH: ':memory:', LOGICHUB_ARTIFACT_STORE: '/tmp/logichub-e2e-artifacts' },
     },
   ],
 });

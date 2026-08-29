@@ -1,0 +1,30 @@
+{
+  "name": "@logichub-engineering/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "lint": "tsc --build",
+    "start": "node --enable-source-maps dist/main.js",
+    "start:e2e": "node --enable-source-maps dist/e2e-server.js"
+  },
+  "dependencies": {
+    "@logichub-engineering/shared": "workspace:*",
+    "@logichub-engineering/contracts": "workspace:*",
+    "@logichub-engineering/persistence": "workspace:*",
+    "@logichub-engineering/artifact-store": "workspace:*",
+    "@logichub-engineering/domain": "workspace:*",
+    "@fastify/cors": "~10.0.0",
+    "fastify": "~5.2.0",
+    "zod": "~3.24.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "~7.6.0",
+    "@logichub-engineering/kicad-adapter": "workspace:*"
+  }
+}

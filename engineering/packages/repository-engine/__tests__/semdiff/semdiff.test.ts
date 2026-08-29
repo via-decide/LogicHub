@@ -208,4 +208,40 @@ describe('computeSemDiff (integration)', () => {
     expect(r1.replay.replayHash).toEqual(r2.replay.replayHash);
     expect(r1.prSummary).toEqual(r2.prSummary);
   });
+
+  it('replay verifies for a PCB footprint addition alongside a same-object multi-facet schematic change', () => {
+    const base = makeFingerprint({
+      schematicSurface: null,
+      pcbSurface: {
+        boardIdentity: 'board_hash',
+        footprints: [{ reference: 'U1', footprint: 'splp:SOT-223', layer: 'F.Cu', padCount: 3, semanticId: 'pcb::U1' }],
+        pads: [], nets: [], layers: [], boardOutline: null, trackCount: 0, viaCount: 0, zoneCount: 0,
+        differentialPairs: [], designRuleClasses: [], clearances: {}, stackUpMetadata: null,
+        testPoints: [], mountingHoles: [], pcbSemanticHash: 'pcb_hash_base',
+      },
+    });
+    const proposed = makeFingerprint({
+      schematicSurface: null,
+      pcbSurface: {
+        boardIdentity: 'board_hash',
+        footprints: [
+          { reference: 'U1', footprint: 'splp:SOT-23-5', layer: 'F.Cu', padCount: 5, semanticId: 'pcb::U1' },
+          { reference: 'D2', footprint: 'splp:D_SMA', layer: 'F.Cu', padCount: 2, semanticId: 'pcb::D2' },
+        ],
+        pads: [], nets: [], layers: [], boardOutline: null, trackCount: 0, viaCount: 0, zoneCount: 0,
+        differentialPairs: [], designRuleClasses: [], clearances: {}, stackUpMetadata: null,
+        testPoints: [], mountingHoles: [], pcbSemanticHash: 'pcb_hash_proposed',
+      },
+    });
+
+    const result = computeSemDiff({
+      base: { fingerprint: base, graphMap: null },
+      proposed: { fingerprint: proposed, graphMap: null },
+    });
+
+    expect(result.deltas.some(d => d.deltaType === 'FOOTPRINT_CHANGED' && d.oldSemanticId === 'pcb::U1')).toBe(true);
+    expect(result.deltas.some(d => d.deltaType === 'FOOTPRINT_ADDED' && d.newSemanticId === 'pcb::D2')).toBe(true);
+    expect(result.replayErrors).toEqual([]);
+    expect(result.replayVerified).toBe(true);
+  });
 });

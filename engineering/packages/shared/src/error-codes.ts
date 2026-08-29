@@ -7,6 +7,7 @@ export const LH_ERROR_CODES = {
   LH_REVISION_NOT_FOUND:         { code: 'LH_REVISION_NOT_FOUND',         retryable: false },
   LH_REVISION_IMMUTABLE:         { code: 'LH_REVISION_IMMUTABLE',         retryable: false },
   LH_REVISION_STALE:             { code: 'LH_REVISION_STALE',             retryable: true  },
+  LH_REVISION_ALREADY_IMPORTED:  { code: 'LH_REVISION_ALREADY_IMPORTED',  retryable: false },
   LH_SCHEMA_INVALID:             { code: 'LH_SCHEMA_INVALID',             retryable: false },
   LH_ENGINEERING_OBJECT_INVALID: { code: 'LH_ENGINEERING_OBJECT_INVALID', retryable: false },
   LH_KICAD_PROJECT_INVALID:      { code: 'LH_KICAD_PROJECT_INVALID',      retryable: false },
