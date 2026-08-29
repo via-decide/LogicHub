@@ -1,0 +1,8 @@
+{
+  "installCommand": "echo 'install handled in buildCommand'",
+  "buildCommand": "cd ../../engineering && pnpm install --no-frozen-lockfile && pnpm build && cd ../apps/web && pnpm install --no-frozen-lockfile && pnpm build",
+  "env": {
+    "LOGICHUB_API_URL": "https://logichub-api.vercel.app",
+    "NEXT_PUBLIC_LOGICHUB_API_URL": "https://logichub-api.vercel.app"
+  }
+}

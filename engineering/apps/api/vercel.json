@@ -1,0 +1,10 @@
+{
+  "framework": null,
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm --filter @logichub-engineering/api... build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
+  "env": {
+    "LOGICHUB_DB_PATH": "/tmp/logichub.db",
+    "LOGICHUB_ARTIFACT_STORE": "/tmp/artifacts"
+  }
+}
