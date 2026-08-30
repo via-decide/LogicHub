@@ -151,7 +151,13 @@ export default async function handler(req, res) {
       slug,
       appUrl: `https://daxini.space/apps/${slug}`,
       source: 'logichub',
-      publishedAt: new Date().toISOString()
+      publishedAt: new Date().toISOString(),
+      // Set when this publish follows a POST /api/remix.js call -- the
+      // appId of the app it was remixed from. Absent for an original
+      // publish. This is what makes "remix" a real lineage relationship
+      // instead of just a counter: remix.js counts the attempt, this
+      // records the actual result.
+      remixedFrom: incomingMetadata.remixedFrom ? String(incomingMetadata.remixedFrom) : null
     };
 
     const fileEntries = [
@@ -214,6 +220,7 @@ export default async function handler(req, res) {
         source: "logichub",
         blocks: projectBlocks,
         connections: projectConnections,
+        remixedFrom: metadata.remixedFrom,
         created_at: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
       await logRuntimeEvent("publish_attempt", { appId, slug, creatorId: metadata.creatorId, status: "success" });

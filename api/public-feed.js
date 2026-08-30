@@ -25,6 +25,8 @@ function toPublicApp(doc) {
     description: String(data.description || "No description provided yet.").trim(),
     launch_url: String(data.launch_url || "").trim(),
     installs: Number(data.install_count || 0),
+    remixes: Number(data.remix_count || 0),
+    remixedFrom: data.remixedFrom ? String(data.remixedFrom) : null,
     category: String(data.category || "general").trim()
   };
 }
