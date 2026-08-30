@@ -4,11 +4,6 @@
   "installCommand": "",
   "framework": null,
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/app", "destination": "/builder/" },
-    { "source": "/forge", "destination": "/builder/" },
-    { "source": "/builder", "destination": "/builder/" }
-  ],
   "headers": [
     { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" }] },
     { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" }] },
