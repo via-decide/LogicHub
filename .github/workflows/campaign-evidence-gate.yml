@@ -1,0 +1,71 @@
+name: Campaign Evidence Merge Gate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  campaign-evidence-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install root dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Install engineering dependencies
+        run: pnpm --dir engineering install --no-frozen-lockfile
+
+      - name: Build engineering workspace
+        run: pnpm --dir engineering build
+
+      - name: Install web dependencies
+        run: pnpm --dir apps/web install --no-frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Production Next build
+        run: pnpm --dir apps/web build
+
+      - name: Deterministic campaign unit tests
+        run: node --test tests/campaign-evidence.test.mjs
+
+      - name: Campaign evidence browser test
+        id: evidence
+        continue-on-error: true
+        run: npx playwright test --config=playwright.campaign.config.ts tests/e2e/campaign-evidence.spec.ts --reporter=line
+
+      - name: Campaign components browser test
+        id: components
+        continue-on-error: true
+        run: npx playwright test --config=playwright.campaign.config.ts tests/e2e/campaign-components.spec.ts --reporter=line
+
+      - name: Campaign accessibility Axe test
+        id: accessibility
+        continue-on-error: true
+        run: npx playwright test --config=playwright.campaign.config.ts tests/e2e/campaign-accessibility.spec.ts --reporter=line
+
+      - name: Enforce browser gate
+        if: always()
+        run: |
+          echo "evidence=${{ steps.evidence.outcome }}"
+          echo "components=${{ steps.components.outcome }}"
+          echo "accessibility=${{ steps.accessibility.outcome }}"
+          test "${{ steps.evidence.outcome }}" = success
+          test "${{ steps.components.outcome }}" = success
+          test "${{ steps.accessibility.outcome }}" = success
