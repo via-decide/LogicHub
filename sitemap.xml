@@ -1,122 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://logichub.app/</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/artifacts/deployment/before-googlebot</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/artifacts/deployment/before-root</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/artifacts/deployment/before-twitterbot</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/blueprints</loc>
+  </url>
+  <url>
     <loc>https://logichub.app/contact</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://logichub.app/cookies</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://logichub.app/how-it-works</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/</loc>
-    <lastmod>2026-07-31</lastmod>
-    <priority>1.0</priority>
   </url>
   <url>
     <loc>https://logichub.app/onboarding</loc>
-    <lastmod>2026-06-18</lastmod>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://logichub.app/privacy</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://logichub.app/product-builder</loc>
-    <lastmod>2026-04-24</lastmod>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://logichub.app/refund-policy</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://logichub.app/shipping-policy</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://logichub.app/site</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/site/how-it-works</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/src/studio</loc>
   </url>
   <url>
     <loc>https://logichub.app/terms</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-01-power-standardization-protection</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-02-tactile-determinism-input-fsm</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-04-poka-yoke-interface-geometry</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-05-fault-tolerance-fallbacks</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-06-source-manifest-bom-cad-intake</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-07-storage-integrity-transactional-updates</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-08-sensor-calibration-health-evidence</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-09-actuator-motor-heater-safety</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-10-thermal-current-power-derating</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-11-local-api-edge-service-interface</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-12-manufacturing-qa-fixture-receipts</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-13-enclosure-environmental-dfm</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/html/tool-14-compliance-safety-risk-ledger</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-01-power-standardization-protection/tool-01-power-standardization-protection</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-02-tactile-determinism-input-fsm/tool-02-tactile-determinism-input-fsm</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-04-poka-yoke-interface-geometry/tool-04-poka-yoke-interface-geometry</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-05-fault-tolerance-fallbacks/tool-05-fault-tolerance-fallbacks</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-06-source-manifest-bom-cad-intake/tool-06-source-manifest-bom-cad-intake</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-07-storage-integrity-transactional-updates/tool-07-storage-integrity-transactional-updates</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-08-sensor-calibration-health-evidence/tool-08-sensor-calibration-health-evidence</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-09-actuator-motor-heater-safety/tool-09-actuator-motor-heater-safety</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-09-actuator-motor-heater-safety/tool-09-actuator-motor-heater-safety/tool-09-actuator-motor-heater-safety</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-10-thermal-current-power-derating/tool-10-thermal-current-power-derating</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-10-thermal-current-power-derating/tool-10-thermal-current-power-derating/tool-10-thermal-current-power-derating</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-11-local-api-edge-service-interface/tool-11-local-api-edge-service-interface</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-11-local-api-edge-service-interface/tool-11-local-api-edge-service-interface/tool-11-local-api-edge-service-interface</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-12-manufacturing-qa-fixture-receipts/tool-12-manufacturing-qa-fixture-receipts/tool-12-manufacturing-qa-fixture-receipts</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-13-enclosure-environmental-dfm/tool-13-enclosure-environmental-dfm</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-13-enclosure-environmental-dfm/tool-13-enclosure-environmental-dfm/tool-13-enclosure-environmental-dfm</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-14-compliance-safety-risk-ledger/tool-14-compliance-safety-risk-ledger</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_production_tools/hardware_production_tools_merged/tools_extracted/tool-14-compliance-safety-risk-ledger/tool-14-compliance-safety-risk-ledger/tool-14-compliance-safety-risk-ledger</loc>
+  </url>
+  <url>
+    <loc>https://logichub.app/tmp_tools/hardware_research/hardware_research_progress_archive</loc>
   </url>
   <url>
     <loc>https://logichub.app/waitlist</loc>
-    <lastmod>2026-07-30</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://logichub.app/workspace</loc>
-    <lastmod>2026-07-31</lastmod>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-01-power-standardization-protection</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-02-tactile-determinism-input-fsm</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-03-state-visibility-offline-telemetry</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-04-poka-yoke-interface-geometry</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-05-fault-tolerance-fallbacks</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-06-source-manifest-bom-cad-intake</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-07-storage-integrity-transactional-updates</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-08-sensor-calibration-health-evidence</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-09-actuator-motor-heater-safety</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-10-thermal-current-power-derating</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-11-local-api-edge-service-interface</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-12-manufacturing-qa-fixture-receipts</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-13-enclosure-environmental-dfm</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://logichub.app/tools/tool-14-compliance-safety-risk-ledger</loc>
-    <priority>0.5</priority>
   </url>
 </urlset>
