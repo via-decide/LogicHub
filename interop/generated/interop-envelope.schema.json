@@ -1,0 +1,115 @@
+{
+  "$ref": "#/definitions/KupInteropEnvelope",
+  "definitions": {
+    "KupInteropEnvelope": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "envelopeId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "ENGINEERING_REVISION_RELEASED",
+            "PROPERTY_REQUIREMENT_RAISED",
+            "CANDIDATE_SYSTEM_PROPOSED",
+            "SIMULATION_RUN_COMPLETED",
+            "EVIDENCE_ACCEPTED",
+            "DECISION_CASE_CREATED",
+            "DECISION_RESOLVED",
+            "ENGINEERING_REQUIREMENT_CREATED",
+            "PROPERTY_REVISION_FROZEN",
+            "MODEL_REVISION_SUPERSEDED"
+          ]
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "system": {
+              "type": "string",
+              "enum": [
+                "KUP",
+                "LOGICHUB",
+                "ORCHADE",
+                "VIADECIDE"
+              ]
+            },
+            "entityType": {
+              "type": "string",
+              "minLength": 1
+            },
+            "entityId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revisionId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "schemaVersion": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "system",
+            "entityType",
+            "entityId",
+            "schemaVersion"
+          ],
+          "additionalProperties": false
+        },
+        "producedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "causationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRef": {
+          "$ref": "#/definitions/KupInteropEnvelope/properties/producer"
+        },
+        "targetSystem": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload": {},
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KupInteropEnvelope/properties/producer"
+          }
+        },
+        "contentHash": {
+          "$ref": "#/definitions/KupInteropEnvelope/properties/producer/properties/contentHash"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "envelopeId",
+        "eventType",
+        "producer",
+        "producedAt",
+        "sourceRef",
+        "evidenceRefs",
+        "contentHash"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

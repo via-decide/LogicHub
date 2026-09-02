@@ -1,0 +1,9 @@
+{
+  "contract": "KUP_INTEROP_V1",
+  "sourceRepo": "via-decide/kup-program",
+  "sourceCommit": "5f77a5c0eb65aa476a3a28e8e16dcd4324426def",
+  "schemaHashes": {
+    "canonical-ref": "sha256:89901c34f200e5d00d1f7a323fca1962f78c7ca0e1dab7ade5507bf3855b5d37",
+    "interop-envelope": "sha256:f595347307501aad81fb1a60d806156d9081dce4f8c569d63631a8949a2d6e88"
+  }
+}
