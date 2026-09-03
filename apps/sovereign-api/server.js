@@ -27,13 +27,21 @@ const wrap = (handler) => async (req, res) => {
 import accessStatus from '../../api/access-status.js';
 import buildApk from '../../api/build-apk.js';
 import founderRequest from '../../api/founder-request.js';
-import publishApp from '../../api/publish-app.js';
-import { verifyRequestUser, getAdminAuth, getAdminDb } from '../../api/_firebaseAdmin.js';
+// publish-app.js (and the rest of the publish/discover/remix backend) was
+// deliberately removed 2026-08-30, confirmed with the repo owner -- retired
+// when the site repositioned around hardware verification. This route is
+// gone with it, not re-added.
+// Was _firebaseAdmin.js -- renamed to _sovereignAuth.js on 2026-07-31 when
+// this moved off Firebase Admin to the Postgres-backed compat layer (see
+// that file's own header). This import was never updated, so the whole
+// server failed to start (module not found) -- nothing in
+// access-status.js/build-apk.js/founder-request.js was ever reachable,
+// regardless of any other configuration.
+import { verifyRequestUser, getAdminAuth, getAdminDb } from '../../api/_sovereignAuth.js';
 
 app.post('/api/access-status', wrap(accessStatus));
 app.post('/api/build-apk', wrap(buildApk));
 app.post('/api/founder-request', wrap(founderRequest));
-app.post('/api/publish-app', wrap(publishApp));
 
 // --- SERVER-SIDE IP RATE LIMITER FOR GUEST USERS ---
 const ipUsage = new Map(); // ip -> Array of timestamps
