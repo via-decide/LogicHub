@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Modern Web Application</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <!-- Preconnect to Google Fonts for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="images/logo.svg" alt="App Logo" width="120" height="40">
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <a href="/login" class="btn btn-secondary">Sign In</a>
+                <a href="/register" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <section id="hero" class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Innovate. Collaborate. Succeed.</h1>
+                    <p>Unlock your team's full potential with our cutting-edge platform designed for modern workflows.</p>
+                    <a href="#get-started" class="btn btn-cta">Request a Demo</a>
+                </div>
+                <div class="hero-image">
+                    <img src="images/hero-dashboard.webp" alt="Application Dashboard" width="600" height="400">
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <h2>Powerful Features at Your Fingertips</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <img src="images/icon-analytics.svg" alt="Analytics Icon" width="48" height="48">
+                        <h3>Advanced Analytics</h3>
+                        <p>Gain deep insights into your data with intuitive dashboards and real-time reports.</p>
+                    </div>
+                    <div class="feature-item">
+                        <img src="images/icon-collaboration.svg" alt="Collaboration Icon" width="48" height="48">
+                        <h3>Seamless Collaboration</h3>
+                        <p>Work together effortlessly, share files, and communicate across teams.</p>
+                    </div>
+                    <div class="feature-item">
+                        <img src="images/icon-security.svg" alt="Security Icon" width="48" height="48">
+                        <h3>Enterprise-Grade Security</h3>
+                        <p>Protect your sensitive information with robust encryption and compliance.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials" class="testimonials-section bg-light">
+            <div class="container">
+                <h2>What Our Clients Say</h2>
+                <div class="testimonial-carousel">
+                    <blockquote class="testimonial-card">
+                        <p>"This platform transformed our operations. The efficiency gains are incredible!"</p>
+                        <cite>— Jane Doe, CEO of Tech Solutions Inc.</cite>
+                    </blockquote>
+                    <blockquote class="testimonial-card">
+                        <p>"The support team is amazing, and the product itself is a game-changer for our workflow."</p>
+                        <cite>— John Smith, Project Manager at Global Innovations</cite>
+                    </blockquote>
+                </div>
+            </div>
+        </section>
+
+        <section id="cta" class="call-to-action-section">
+            <div class="container">
+                <h2>Ready to Elevate Your Business?</h2>
+                <p>Join thousands of successful companies already thriving with our solution.</p>
+                <a href="#get-started" class="btn btn-cta">Start Your Free Trial</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="/" class="footer-logo">
+                        <img src="images/logo-white.svg" alt="App Logo" width="100" height="34">
+                    </a>
+                    <p>Building the future of work, one solution at a time.</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#careers">Careers</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#support">Support Center</a></li>
+                        <li><a href="#docs">Documentation</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#cookies">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 MyModernWebApp. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><img src="images/icon-facebook.svg" alt="Facebook" width="24" height="24"></a>
+                    <a href="#" aria-label="Twitter"><img src="images/icon-twitter.svg" alt="Twitter" width="24" height="24"></a>
+                    <a href="#" aria-label="LinkedIn"><img src="images/icon-linkedin.svg" alt="LinkedIn" width="24" height="24"></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js" defer></script>
+</body>
+</html>
